@@ -5,7 +5,7 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "@workspace/ui/components/dropdown-menu"
-import { locales, localeLabels, type Locale } from "@avuny/i18n"
+import { locales, localeLabels, type Locale, defaultLocale } from "@avuny/i18n"
 
 export type LanguageSwitcherProps = {
   locale: Locale
@@ -23,9 +23,11 @@ export default function LanguageSwitcher({
         className={buttonVariants({ size: "icon", variant: "outline" })}
       >
         <div className="h-[1.2rem] w-[1.2rem]" lang={locale}>
-          {localeLabels[locale]}
+          {localeLabels[locale] ?? localeLabels[defaultLocale]}
         </div>
-        <span className="sr-only">{localeLabels[locale]}</span>
+        <span className="sr-only">
+          {localeLabels[locale] ?? localeLabels[defaultLocale]}
+        </span>
       </DropdownMenuTrigger>
 
       <DropdownMenuContent align="end">
