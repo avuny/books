@@ -2,7 +2,7 @@
 // Single source of truth for supported locales. No dependencies, no Node/DOM APIs.
 export const localeLabels: Record<Locale, string> = {
   en: "En",
-  ar: "عربي",
+  ar: "Ar",
 }
 export const locales = ["en", "ar"] as const
 export type Locale = (typeof locales)[number]
