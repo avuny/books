@@ -3,5 +3,7 @@ packages:
   - "packages/*"
 
 allowBuilds:
+  '@scarf/scarf': false
   esbuild: true
   msw: false
+  workerd: false
