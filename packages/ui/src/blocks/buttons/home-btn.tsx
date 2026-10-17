@@ -1,6 +1,6 @@
 "use client"
 
-import { AppRouter } from "@workspace/ui/blocks/types"
+import type { AppRouter } from "@workspace/ui/blocks/types"
 import { Button } from "@workspace/ui/components/button"
 import { HomeIcon } from "lucide-react"
 

@@ -1,11 +1,9 @@
-import React from "react";
-
 const Loading = ({ width = 40, height = 40 }) => {
   return (
     <div role="status">
       <svg
         aria-hidden="true"
-        className="inline mr-2 text-gray-200 animate-spin dark:text-primary-foreground/30 fill-primary-foreground"
+        className="mr-2 inline animate-spin fill-primary-foreground text-gray-200 dark:text-primary-foreground/30"
         width={width}
         height={height}
         viewBox="0 0 100 101"
@@ -22,7 +20,7 @@ const Loading = ({ width = 40, height = 40 }) => {
         />
       </svg>
     </div>
-  );
-};
+  )
+}
 
-export default Loading;
+export default Loading

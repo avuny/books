@@ -1,7 +1,7 @@
 "use client"
 
 import { BadgeCheck, Bell, CreditCard, LogOut, Sparkles } from "lucide-react"
-import React, { ReactNode } from "react"
+import React from "react"
 
 import {
   DropdownMenu,

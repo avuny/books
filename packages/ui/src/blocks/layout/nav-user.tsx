@@ -1,23 +1,23 @@
-"use client";
+"use client"
 
-import { ChevronsUpDown, UserIcon } from "lucide-react";
+import { ChevronsUpDown, UserIcon } from "lucide-react"
 
 import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-} from "@workspace/ui/components/sidebar";
+} from "@workspace/ui/components/sidebar"
 import {
   Avatar,
   AvatarFallback,
   AvatarImage,
-} from "@workspace/ui/components/avatar";
+} from "@workspace/ui/components/avatar"
 
-import { Button } from "@workspace/ui/components/button";
+import { Button } from "@workspace/ui/components/button"
 import {
   UserDropdownMenu,
-  UserDropdownMenuProps,
-} from "@workspace/ui/blocks/layout/user-dropdown";
+  type UserDropdownMenuProps,
+} from "@workspace/ui/blocks/layout/user-dropdown"
 
 // type MenuSection = {
 //   enabled?: boolean;
@@ -26,8 +26,8 @@ import {
 // };
 
 type NavUserProps = {
-  iconOnly?: boolean;
-} & Omit<UserDropdownMenuProps, "dropdownMenuTrigger">;
+  iconOnly?: boolean
+} & Omit<UserDropdownMenuProps, "dropdownMenuTrigger">
 
 export function UserNav({ iconOnly, ...props }: NavUserProps) {
   return iconOnly ? (
@@ -49,7 +49,7 @@ export function UserNav({ iconOnly, ...props }: NavUserProps) {
               size="lg"
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
-              <Avatar className="inline-flex items-center justify-center rounded-md border h-10 w-10">
+              <Avatar className="inline-flex h-10 w-10 items-center justify-center rounded-md border">
                 <AvatarImage src={props.user.avatar} alt={props.user.name} />
                 <AvatarFallback className="rounded-lg">
                   <UserIcon />
@@ -71,5 +71,5 @@ export function UserNav({ iconOnly, ...props }: NavUserProps) {
         />
       </SidebarMenuItem>
     </SidebarMenu>
-  );
+  )
 }
