@@ -1,9 +1,8 @@
 "use client"
 
-import type { User } from "@/components/types"
-
 import { UserNav } from "@workspace/ui/blocks/layout/nav-user"
 import Loading from "@workspace/ui/blocks/loading/loading"
+import { User } from "@workspace/ui/blocks/types"
 import { Button } from "@workspace/ui/components/button"
 
 import { LogInIcon } from "lucide-react"
