@@ -31,3 +31,7 @@ dist-ssr
 
 # typescript
 *.tsbuildinfo
+
+
+# Cloudflare Wrangler
+.wrangler/
