@@ -1,0 +1,3 @@
+{
+  "extends": "@avuny/typescript-config/base.json"
+}
