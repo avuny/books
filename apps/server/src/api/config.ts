@@ -196,4 +196,11 @@ export type AppConfig = ReturnType<typeof loadConfig>
  *
  * Requires process.env to be populated by the current runtime.
  */
-export const config = loadConfig(process.env)
+let cached: AppConfig | undefined
+export const getConfig = (env: unknown = process.env) =>
+  (cached ??= loadConfig(env))
+
+// keeps existing `import { config }` working
+export const config = new Proxy({} as AppConfig, {
+  get: (_, key) => getConfig()[key as keyof AppConfig],
+})
