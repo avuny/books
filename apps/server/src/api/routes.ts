@@ -14,14 +14,18 @@ import { otpRoutes } from "./modules/otp/index.js"
 import { authRoutes } from "./modules/auth/index.js"
 import { usersRoutes } from "./modules/users/index.js"
 import { adminRoutes } from "./modules/admin/index.js"
-import { config } from "./config.js"
+
+
+const APP_NAME = "hono-worker-api"
+const APP_VERSION = "1.0.0"
+const API_BASE_PATH = "/api"
 
 // Initialize server i18n once at startup. Must be called before any request
 // uses trans(). Never call i18n.changeLanguage() after this — it is global and
 // races between concurrent requests.
 installRequestLanguage()
 
-export const app = createOpenAPIRouter().basePath(config.API_BASE_PATH)
+export const app = createOpenAPIRouter().basePath(API_BASE_PATH)
 
 // ── Middleware ────────────────────────────────────────────────────────────────
 app.use(resolveRequestLanguageMiddleware)
@@ -52,7 +56,7 @@ app.onError(onError)
 // ── OpenAPI docs ──────────────────────────────────────────────────────────────
 app.doc("/openapi.json", {
   openapi: "3.0.0",
-  info: { title: "Hono Worker API", version: config.APP_VERSION },
+  info: { title: APP_NAME, version: APP_VERSION },
 })
 
-app.get("/docs", swaggerUI({ url: `${config.API_BASE_PATH}/openapi.json` }))
+app.get("/docs", swaggerUI({ url: `${API_BASE_PATH}/openapi.json` }))
