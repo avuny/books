@@ -1,0 +1,12 @@
+{
+  "errors": {
+    "IDENTIFIER_ALREADY_EXISTS": "This identifier is already in use.",
+    "IDENTIFIER_LIMIT_REACHED": "You have reached the maximum number of sign-in methods.",
+    "IDENTIFIER_NOT_FOUND": "Identifier not found.",
+    "IDENTIFIER_TYPE_MISMATCH": "The identifier type does not match.",
+    "CANNOT_DELETE_PRIMARY_IDENTIFIER": "You cannot delete your primary identifier. Change your primary identifier first.",
+    "CANNOT_DELETE_LAST_RECOVERY_IDENTIFIER": "You must keep at least one verified email or phone for account recovery.",
+    "AVATAR_TOO_LARGE": "The photo is too large. Please use a file under 2 MB.",
+    "AVATAR_INVALID_TYPE": "The photo format is not supported. Please use JPEG, PNG or WebP."
+  }
+}

@@ -11,7 +11,7 @@
     "deploy": "wrangler deploy --minify",
     "deploy:dry": "wrangler deploy --dry-run --minify --outdir dist",
     "typecheck": "tsc --noEmit",
-    "dev": "tsc -p tsconfig.build.json --watch --preserveWatchOutput",
+    "dev": "concurrently \"tsc -p tsconfig.build.json --watch --preserveWatchOutput\" \"tsx watch src/node-server.ts\"",
     "build": "tsc -p tsconfig.build.json",
     "lint": "eslint .",
     "test": "vitest run",
@@ -26,10 +26,15 @@
     "openapi:generate": "tsx ./scripts/generate-openapi.ts"
   },
   "dependencies": {
-    "@hono/swagger-ui": "^0.5.0",
+    "@avuny/contracts": "workspace:*",
+    "@avuny/db": "workspace:*",
+    "@avuny/hono": "workspace:*",
     "@avuny/logger": "workspace:*",
+    "@avuny/utils": "workspace:*",
     "@avuny/zod": "workspace:*",
+    "@hono/node-server": "^2.1.5",
     "@hono/structured-logger": "^0.1.0",
+    "@hono/swagger-ui": "^0.5.0",
     "@hono/zod-openapi": "^1.1.5",
     "axios": "^1.13.2",
     "bcryptjs": "^3.0.3",
@@ -46,19 +51,20 @@
   },
   "devDependencies": {
     "@changesets/cli": "^2.29.7",
+    "@cloudflare/workers-types": "^4.20250101.0",
     "@microsoft/api-documenter": "^7.26.29",
     "@microsoft/api-extractor": "^7.52.8",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/qs": "^6.14.0",
     "@vitest/coverage-v8": "3.2.4",
     "@vitest/ui": "^3.2.3",
+    "concurrently": "^10.0.5",
     "eslint": "^9.28.0",
     "ts-node": "^10.9.2",
     "tsx": "^4.21.0",
-    "vitest": "^3.2.3",
-    "zod": "^4.0.5",
-    "@cloudflare/workers-types": "^4.20250101.0",
     "typescript": "^5.9.0",
-    "wrangler": "^4.0.0"
+    "vitest": "^3.2.3",
+    "wrangler": "^4.0.0",
+    "zod": "^4.0.5"
   }
 }

@@ -1,0 +1,9 @@
+{
+  "errors": {
+    "CANNOT_SUSPEND_SELF": "لا يمكنك تعليق حسابك الخاص.",
+    "CANNOT_SUSPEND_ADMIN": "لا يمكنك تعليق حساب مسؤول آخر.",
+    "USER_ALREADY_SUSPENDED": "هذا المستخدم موقوف بالفعل.",
+    "USER_NOT_SUSPENDED": "هذا المستخدم ليس موقوفًا.",
+    "USER_NOT_FOUND": "المستخدم غير موجود."
+  }
+}

@@ -1,5 +1,5 @@
+import { logHttpRequest } from "@avuny/hono"
 import type { ErrorHandler } from "hono"
-import { logHttpRequest } from "./create-log.js"
 
 export const onError: ErrorHandler = (err, c) => {
   logHttpRequest({

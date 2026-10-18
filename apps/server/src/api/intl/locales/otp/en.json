@@ -1,0 +1,11 @@
+{
+  "errors": {
+    "OTP_INVALID": "The code is incorrect. Please try again.",
+    "OTP_EXPIRED": "This code has expired. Please request a new one.",
+    "OTP_ATTEMPTS_EXCEEDED": "Too many incorrect attempts. The code is no longer valid.",
+    "OTP_RESEND_TOO_SOON": "Please wait before requesting a new code.",
+    "OTP_RATE_LIMITED": "Too many codes requested. Please try again later.",
+    "OTP_DELIVERY_FAILED": "The code could not be sent. Please try again.",
+    "VERIFICATION_TOKEN_INVALID": "The verification link is invalid or has expired. Please start again."
+  }
+}

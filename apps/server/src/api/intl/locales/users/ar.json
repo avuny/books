@@ -1,0 +1,12 @@
+{
+  "errors": {
+    "IDENTIFIER_ALREADY_EXISTS": "هذا المعرّف مستخدم بالفعل.",
+    "IDENTIFIER_LIMIT_REACHED": "لقد وصلت إلى الحد الأقصى لعدد طرق تسجيل الدخول.",
+    "IDENTIFIER_NOT_FOUND": "المعرّف غير موجود.",
+    "IDENTIFIER_TYPE_MISMATCH": "نوع المعرّف غير متطابق.",
+    "CANNOT_DELETE_PRIMARY_IDENTIFIER": "لا يمكنك حذف معرّفك الأساسي. غيّر معرّفك الأساسي أولًا.",
+    "CANNOT_DELETE_LAST_RECOVERY_IDENTIFIER": "يجب الاحتفاظ بعنوان بريد إلكتروني أو رقم هاتف محقق واحد على الأقل لاستعادة الحساب.",
+    "AVATAR_TOO_LARGE": "الصورة كبيرة جدًا. يرجى استخدام ملف أقل من 2 ميغابايت.",
+    "AVATAR_INVALID_TYPE": "صيغة الصورة غير مدعومة. يرجى استخدام JPEG أو PNG أو WebP."
+  }
+}

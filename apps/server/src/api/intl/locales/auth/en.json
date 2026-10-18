@@ -1,0 +1,13 @@
+{
+  "errors": {
+    "INVALID_CREDENTIALS": "The identifier or password is incorrect.",
+    "ACCOUNT_SUSPENDED": "This account has been suspended.",
+    "TOO_MANY_ATTEMPTS": "Too many failed attempts. Please try again later.",
+    "REFRESH_TOKEN_INVALID": "Your session has expired. Please sign in again.",
+    "REFRESH_TOKEN_REUSED": "A security issue was detected. Please sign in again.",
+    "SESSION_NOT_FOUND": "Session not found.",
+    "WEAK_PASSWORD": "The password does not meet the minimum requirements.",
+    "INVALID_CURRENT_PASSWORD": "The current password is incorrect.",
+    "INVALID_IDENTIFIER_TYPE": "This sign-in method is not supported."
+  }
+}

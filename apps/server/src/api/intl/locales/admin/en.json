@@ -1,0 +1,9 @@
+{
+  "errors": {
+    "CANNOT_SUSPEND_SELF": "You cannot suspend your own account.",
+    "CANNOT_SUSPEND_ADMIN": "You cannot suspend another administrator.",
+    "USER_ALREADY_SUSPENDED": "This user is already suspended.",
+    "USER_NOT_SUSPENDED": "This user is not suspended.",
+    "USER_NOT_FOUND": "User not found."
+  }
+}
