@@ -51,17 +51,21 @@
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
       "outputs": ["dist/**"]
     },
-    "deploy": { "dependsOn": ["^build"], "cache": false },
+    "deploy": {
+      "dependsOn": ["^build"],
+      "cache": false
+    },
     "lint": {
-      "dependsOn": ["^lint"]
+      "dependsOn": ["^build"]
     },
     "format": {
       "dependsOn": ["^format"]
     },
     "typecheck": {
-      "dependsOn": ["^typecheck"]
+      "dependsOn": ["^build"]
     },
     "dev": {
+      "dependsOn": ["^build"],
       "cache": false,
       "persistent": true
     }
