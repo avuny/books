@@ -4,7 +4,11 @@ import { useTranslation } from "react-i18next"
 import type { AppRouter } from "@workspace/ui/blocks/types"
 import type { Locale } from "@avuny/i18n"
 import NavbarContainer from "@workspace/ui/blocks/layout/navbar-container"
-
+import { useGetMe } from "@/api"
+// import("@/api").catch((e) => {
+//   console.error(e)
+//   document.body.textContent = String(e?.stack ?? e)
+// })
 export function App() {
   const { t, i18n } = useTranslation()
   const navigate = useNavigate()
@@ -21,6 +25,8 @@ export function App() {
   const changeLanguage = (locale: Locale) => {
     void i18n.changeLanguage(locale)
   }
+  const { data: me } = useGetMe()
+  console.log("me", me?.data)
 
   return (
     <NavbarContainer

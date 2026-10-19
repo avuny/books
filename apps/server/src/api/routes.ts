@@ -14,7 +14,8 @@ import { otpRoutes } from "./modules/otp/index.js"
 import { authRoutes } from "./modules/auth/index.js"
 import { usersRoutes } from "./modules/users/index.js"
 import { adminRoutes } from "./modules/admin/index.js"
-
+import { cors } from "hono/cors"
+import { config } from "./index.js"
 
 const APP_NAME = "hono-worker-api"
 const APP_VERSION = "1.0.0"
@@ -28,6 +29,41 @@ installRequestLanguage()
 export const app = createOpenAPIRouter().basePath(API_BASE_PATH)
 
 // ── Middleware ────────────────────────────────────────────────────────────────
+app.use(
+  "*",
+  cors({
+    origin: (origin) => {
+      // Allow any port on localhost during development only.
+      if (config.NODE_ENV === "development") {
+        try {
+          const url = new URL(origin)
+
+          if (
+            url.protocol === "http:" &&
+            ["localhost", "127.0.0.1", "[::1]"].includes(url.hostname)
+          ) {
+            return origin
+          }
+        } catch {
+          // Invalid origin: continue to the configured allowlist.
+        }
+      }
+
+      // Production: require an exact match.
+      return config.CORS_ORIGINS.includes(origin) ? origin : ""
+    },
+    credentials: true,
+    allowMethods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowHeaders: [
+      "Content-Type",
+      "Authorization",
+      "X-Organization-Id",
+      "X-Requested-With",
+    ],
+    maxAge: 600,
+  })
+)
+
 app.use(resolveRequestLanguageMiddleware)
 app.use(requestId())
 app.use(requestLogger())

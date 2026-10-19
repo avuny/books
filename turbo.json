@@ -68,6 +68,15 @@
       "dependsOn": ["^build"],
       "cache": false,
       "persistent": true
+    },
+    "db:generate": {
+      "dependsOn": ["^build"]
+    },
+    "openapi:generate": {
+      "dependsOn": ["db:generate", "^build"]
+    },
+    "api:generate": {
+      "dependsOn": ["openapi:generate", "^build"]
     }
   }
 }

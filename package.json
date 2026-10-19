@@ -7,7 +7,9 @@
     "dev": "turbo dev",
     "lint": "turbo lint",
     "format": "turbo format",
-    "typecheck": "turbo typecheck"
+    "typecheck": "turbo typecheck",
+    "openapi:generate": "turbo api:generate",
+    "api:generate": "turbo api:generate"
   },
   "devDependencies": {
     "prettier": "^3.9.9",

@@ -24,7 +24,7 @@ export const requireAuth = createMiddleware<AuthContextEnv>(async (c, next) => {
     return c.json(
       {
         success: false,
-        code: "INVALID_CREDENTIALS",
+        code: "UNAUTHENTICATED",
         message: "Authentication required",
         type: "domain",
       },
@@ -38,7 +38,7 @@ export const requireAuth = createMiddleware<AuthContextEnv>(async (c, next) => {
     return c.json(
       {
         success: false,
-        code: "INVALID_CREDENTIALS",
+        code: "UNAUTHENTICATED",
         message: "Invalid or expired access token",
         type: "domain",
       },
@@ -51,7 +51,7 @@ export const requireAuth = createMiddleware<AuthContextEnv>(async (c, next) => {
     return c.json(
       {
         success: false,
-        code: "INVALID_CREDENTIALS",
+        code: "UNAUTHENTICATED",
         message: "Session is inactive or revoked",
         type: "domain",
       },
