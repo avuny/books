@@ -1,6 +1,7 @@
 "use client"
 
 import { UserNav } from "@workspace/ui/blocks/layout/nav-user"
+import { AppRouter } from "@workspace/ui/blocks/layout/types"
 import Loading from "@workspace/ui/blocks/loading/loading"
 import type { User } from "@workspace/ui/blocks/types"
 import { Button } from "@workspace/ui/components/button"
@@ -11,7 +12,7 @@ export type UserButtonProps = {
   user: User | undefined
   isLoading: boolean
   href: string
-  onNavigate: (href: string) => void
+  router: AppRouter
   useSignOutHandler(): {
     submit: () => Promise<void>
     isPending: boolean
@@ -22,7 +23,7 @@ export default function UserButton({
   user,
   isLoading,
   href,
-  onNavigate,
+  router,
   useSignOutHandler,
 }: UserButtonProps) {
   const { submit } = useSignOutHandler()
@@ -38,7 +39,7 @@ export default function UserButton({
   if (!user) {
     return (
       <Button
-        onClick={() => onNavigate(href)}
+        onClick={() => router.push(href)}
         variant="outline"
         size="icon"
         className="cursor-pointer"

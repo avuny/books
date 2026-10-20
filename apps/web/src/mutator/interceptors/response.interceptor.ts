@@ -9,9 +9,7 @@ type RetryableRequest = AxiosError["config"] & {
   _retry?: boolean
 }
 
-export async function responseErrorInterceptor(
-  error: AxiosError<any>
-) {
+export async function responseErrorInterceptor(error: AxiosError<any>) {
   const originalRequest = error.config as RetryableRequest
 
   const shouldRefresh = canRefreshToken(error)
@@ -34,8 +32,7 @@ export async function responseErrorInterceptor(
     refreshQueue.process(null, newAccessToken)
 
     if (originalRequest.headers) {
-      originalRequest.headers.Authorization =
-        `Bearer ${newAccessToken}`
+      originalRequest.headers.Authorization = `Bearer ${newAccessToken}`
     }
 
     return retryRequest(originalRequest)
@@ -51,10 +48,9 @@ export async function responseErrorInterceptor(
 }
 
 function canRefreshToken(error: AxiosError<any>) {
-  const status = error.response?.data?.status
+  const status = error.response?.status
 
-  const code = error.response?.data?.body?.code
-
+  const code = error.response?.data?.code
   return (
     status === API_CONFIG.auth.refreshStatusCode &&
     API_CONFIG.auth.refreshErrorCodes.includes(code)
@@ -66,8 +62,7 @@ function enqueueRequest(originalRequest: RetryableRequest) {
     refreshQueue.enqueue({
       resolve: (token: string) => {
         if (originalRequest.headers) {
-          originalRequest.headers.Authorization =
-            `Bearer ${token}`
+          originalRequest.headers.Authorization = `Bearer ${token}`
         }
 
         resolve(retryRequest(originalRequest))
@@ -78,9 +73,7 @@ function enqueueRequest(originalRequest: RetryableRequest) {
   })
 }
 
-async function retryRequest(
-  request: RetryableRequest
-) {
+async function retryRequest(request: RetryableRequest) {
   const { AXIOS_INSTANCE } = await import("../axios-instance")
 
   return AXIOS_INSTANCE(request)

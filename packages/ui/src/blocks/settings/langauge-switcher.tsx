@@ -10,7 +10,7 @@ import { locales, localeLabels, type Locale, defaultLocale } from "@avuny/i18n"
 export type LanguageSwitcherProps = {
   locale: Locale
   updateLocale: (locale: Locale) => void
-  label?: string // translated text for screen readers
+  label?: string | null // translated text for screen readers
 }
 
 export default function LanguageSwitcher({

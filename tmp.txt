@@ -1,0 +1,15 @@
+diff --git a/.gitignore b/.gitignore
+index bca4577..fd3e1ce 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -34,4 +34,7 @@ dist-ssr
+ 
+ 
+ # Cloudflare Wrangler
+-.wrangler/
+\ No newline at end of file
++.wrangler/
++
++
++tmp.txt
+\ No newline at end of file

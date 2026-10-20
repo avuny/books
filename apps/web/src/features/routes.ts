@@ -1,5 +1,6 @@
 export const ROUTES = {
   app: {
+    main: "/organization",
     index: (organizationId?: string) =>
       `/organization${organizationId ? `/${organizationId}` : ""}`,
     create_org: "/organization/create",

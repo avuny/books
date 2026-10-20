@@ -7,7 +7,7 @@ if (!baseURL) {
 export const API_CONFIG = {
   baseURL,
 
-  refreshTokenUrl: `${baseURL}/api/auth/token/refresh`,
+  refreshTokenUrl: `${baseURL}/api/auth/refresh`,
 
   auth: {
     refreshStatusCode: 401,

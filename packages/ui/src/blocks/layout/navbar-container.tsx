@@ -15,7 +15,7 @@ import React from "react"
 type NavbarContainerProps = {
   children: React.ReactNode
   router: AppRouter
-  userButton?: UserButtonProps
+  userButton?: Omit<UserButtonProps, "router">
 } & LanguageSwitcherProps
 
 const NavbarContainer = ({
@@ -40,7 +40,7 @@ const NavbarContainer = ({
               updateLocale={updateLocale}
             />
 
-            {userButton && <UserButton {...userButton} />}
+            {userButton && <UserButton {...userButton} router={router} />}
           </>
         }
       />
