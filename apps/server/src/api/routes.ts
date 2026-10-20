@@ -59,6 +59,7 @@ app.use(
       "Authorization",
       "X-Organization-Id",
       "X-Requested-With",
+      "X-Lang",
     ],
     maxAge: 600,
   })
