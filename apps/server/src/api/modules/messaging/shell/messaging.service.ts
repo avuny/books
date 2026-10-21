@@ -1,5 +1,6 @@
 import { logger } from "@avuny/logger"
-
+import { Resend } from "resend"
+import { config } from "../../../config.js"
 /* -------------------------------------------------------------------------- */
 /*                                  Contracts                                 */
 /* -------------------------------------------------------------------------- */
@@ -85,9 +86,14 @@ interface ResendConfig {
 }
 
 export class ResendEmailSender implements MessageSender {
-  constructor(private readonly config: ResendConfig) {}
+  private readonly resend: Resend
+
+  constructor(private readonly config: ResendConfig) {
+    this.resend = new Resend(config.apiKey)
+  }
 
   async sendOtp({ to, code, purpose }: SendOtpMessageInput): Promise<void> {
+    console.log("resend is called!!!!!!!!!!!!!!")
     await this.send({
       to,
       subject: "Your verification code",
@@ -120,20 +126,16 @@ export class ResendEmailSender implements MessageSender {
     subject: string
     html: string
   }): Promise<void> {
-    const res = await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${this.config.apiKey}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        from: this.config.from,
-        to: [msg.to],
-        subject: msg.subject,
-        html: msg.html,
-      }),
+    const { error } = await this.resend.emails.send({
+      from: this.config.from,
+      to: [msg.to],
+      subject: msg.subject,
+      html: msg.html,
     })
-    await assertOk(res, "Resend")
+
+    if (error) {
+      throw new Error(`Resend email failed: ${error.message}`)
+    }
   }
 }
 
@@ -234,27 +236,29 @@ let instance: MessageSender | undefined
  * - Default: "live" in production, "console" everywhere else.
  */
 export function getMessageSender(): MessageSender {
+  console.log("getMessageSender called", instance)
   if (instance) return instance
 
-  const mode =
-    process.env.MESSAGE_SENDER_MODE ??
-    (process.env.NODE_ENV === "production" ? "live" : "console")
+  // const mode =
+  //   process.env.MESSAGE_SENDER_MODE ??
+  //   (process.env.NODE_ENV === "production" ? "live" : "console")
 
-  if (mode === "console") {
-    return (instance = new ConsoleMessageSender())
-  }
+  // if (mode === "console") {
+  //   return (instance = new ConsoleMessageSender())
+  // }
 
   return (instance = new ChannelMessageSender({
     email: new ResendEmailSender({
-      apiKey: requireEnv("RESEND_API_KEY"),
-      from: requireEnv("EMAIL_FROM"),
+      apiKey: config.RESEND_API_KEY,
+      from: config.EMAIL_FROM,
     }),
+    // TODO
     phone: new WhatsAppMessageSender({
-      accessToken: requireEnv("WHATSAPP_ACCESS_TOKEN"),
-      phoneNumberId: requireEnv("WHATSAPP_PHONE_NUMBER_ID"),
-      otpTemplateName: requireEnv("WHATSAPP_OTP_TEMPLATE_NAME"),
-      apiVersion: process.env.WHATSAPP_API_VERSION ?? "v23.0",
-      defaultLang: process.env.WHATSAPP_DEFAULT_LANG ?? "en",
+      accessToken: config.WHATSAPP_API_TOKEN || "",
+      phoneNumberId: config.WHATSAPP_PHONE_NUMBER_ID || "",
+      otpTemplateName: config.WHATSAPP_OTP_TEMPLATE_NAME || "",
+      apiVersion: config.WHATSAPP_API_VERSION ?? "v23.0",
+      defaultLang: config.WHATSAPP_DEFAULT_LANG ?? "en",
     }),
   }))
 }

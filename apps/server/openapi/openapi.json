@@ -1969,43 +1969,8 @@
                             "admin"
                           ]
                         },
-                        "identifiers": {
-                          "type": "array",
-                          "items": {
-                            "type": "object",
-                            "properties": {
-                              "id": {
-                                "type": "string",
-                                "format": "uuid"
-                              },
-                              "type": {
-                                "type": "string",
-                                "enum": [
-                                  "email",
-                                  "phone",
-                                  "username"
-                                ]
-                              },
-                              "value": {
-                                "type": "string"
-                              },
-                              "isPrimary": {
-                                "type": "boolean"
-                              },
-                              "verifiedAt": {
-                                "type": "string",
-                                "nullable": true,
-                                "format": "date-time"
-                              }
-                            },
-                            "required": [
-                              "id",
-                              "type",
-                              "value",
-                              "isPrimary",
-                              "verifiedAt"
-                            ]
-                          }
+                        "identifier": {
+                          "type": "string"
                         }
                       },
                       "required": [
@@ -2013,7 +1978,7 @@
                         "name",
                         "avatarUrl",
                         "platformRole",
-                        "identifiers"
+                        "identifier"
                       ]
                     },
                     "success": {
@@ -2163,43 +2128,8 @@
                             "admin"
                           ]
                         },
-                        "identifiers": {
-                          "type": "array",
-                          "items": {
-                            "type": "object",
-                            "properties": {
-                              "id": {
-                                "type": "string",
-                                "format": "uuid"
-                              },
-                              "type": {
-                                "type": "string",
-                                "enum": [
-                                  "email",
-                                  "phone",
-                                  "username"
-                                ]
-                              },
-                              "value": {
-                                "type": "string"
-                              },
-                              "isPrimary": {
-                                "type": "boolean"
-                              },
-                              "verifiedAt": {
-                                "type": "string",
-                                "nullable": true,
-                                "format": "date-time"
-                              }
-                            },
-                            "required": [
-                              "id",
-                              "type",
-                              "value",
-                              "isPrimary",
-                              "verifiedAt"
-                            ]
-                          }
+                        "identifier": {
+                          "type": "string"
                         }
                       },
                       "required": [
@@ -2207,7 +2137,7 @@
                         "name",
                         "avatarUrl",
                         "platformRole",
-                        "identifiers"
+                        "identifier"
                       ]
                     },
                     "success": {

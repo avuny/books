@@ -107,13 +107,7 @@ export async function getUserProfile(
       name: user.name,
       avatarUrl: null, // Avatar derived in later slices (D11)
       platformRole: user.platformRole,
-      identifiers: identifiers.map((i) => ({
-        id: i.id,
-        type: i.type,
-        value: i.value,
-        isPrimary: i.isPrimary,
-        verifiedAt: i.verifiedAt ? i.verifiedAt.toISOString() : null,
-      })),
+      identifier: identifiers.find((i) => i.isPrimary)?.value!,
     },
     msg: "User profile retrieved successfully",
   })
@@ -177,13 +171,7 @@ export async function updateUserProfile(
       name: profile.user.name,
       avatarUrl: null, // Avatar derived in Slice 4b
       platformRole: profile.user.platformRole,
-      identifiers: profile.identifiers.map((i) => ({
-        id: i.id,
-        type: i.type,
-        value: i.value,
-        isPrimary: i.isPrimary,
-        verifiedAt: i.verifiedAt ? i.verifiedAt.toISOString() : null,
-      })),
+      identifier: profile.identifiers.find((i) => i.isPrimary)?.value!,
     },
     msg: "Profile updated successfully",
   })
