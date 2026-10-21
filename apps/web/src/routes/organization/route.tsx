@@ -10,8 +10,11 @@ export const Route = createFileRoute("/organization")({
 
 function OrganizationLayout() {
   const { data, isLoading } = useAuthenticatedHandler()
+
   if (isLoading) return <LoadingPage />
-  if (!data?.data.success) return <Navigate to={ROUTES.auth.index} replace />
+  if (!data?.success) return <Navigate to={ROUTES.auth.index} replace />
+  // now i can log
+
   return (
     <div className="flex h-screen flex-col bg-muted">
       <Outlet />

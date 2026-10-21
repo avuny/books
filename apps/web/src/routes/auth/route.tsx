@@ -13,7 +13,7 @@ function AuthLayout() {
   const { data, isLoading } = useAuthenticatedHandler()
   if (isLoading) return <LoadingPage />
   // Already signed in: skip the auth pages.
-  if (data?.data.success) return <Navigate to={ROUTES.app.main} replace />
+  if (data?.success) return <Navigate to={ROUTES.app.main} replace />
 
   return (
     <div className="flex h-screen flex-col">

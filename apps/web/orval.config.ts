@@ -9,6 +9,7 @@ export default defineConfig({
       target: `${target}/index.ts`,
       schemas: `${target}/model`,
       client: "react-query",
+      httpClient: "axios",
       mode: "single",
       override: {
         mutator: {

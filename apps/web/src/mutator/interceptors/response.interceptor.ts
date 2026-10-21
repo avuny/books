@@ -48,6 +48,10 @@ export async function responseErrorInterceptor(error: AxiosError<any>) {
 }
 
 function canRefreshToken(error: AxiosError<any>) {
+  // those was when using fetch instead of axios, the error response structure is different
+  // const status = error.response?.status
+
+  // const code = error.response?.data?.code
   const status = error.response?.status
 
   const code = error.response?.data?.code
