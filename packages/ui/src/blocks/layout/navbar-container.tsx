@@ -9,18 +9,17 @@ import { Navbar } from "@workspace/ui/blocks/layout/navbar"
 import LanguageSwitcher, {
   type LanguageSwitcherProps,
 } from "@workspace/ui/blocks/settings/langauge-switcher"
-import type { AppRouter } from "@workspace/ui/blocks/types"
 import React from "react"
 
 type NavbarContainerProps = {
   children: React.ReactNode
-  router: AppRouter
-  userButton?: Omit<UserButtonProps, "router">
+  onHomeClick: () => void
+  userButton?: UserButtonProps
 } & LanguageSwitcherProps
 
 const NavbarContainer = ({
   children,
-  router,
+  onHomeClick,
   locale,
   label,
   updateLocale,
@@ -29,7 +28,7 @@ const NavbarContainer = ({
   return (
     <>
       <Navbar
-        start={<HomeButton router={router} />}
+        start={<HomeButton onClick={onHomeClick} />}
         end={
           <>
             <ModeSwitcherBtn />
@@ -40,7 +39,7 @@ const NavbarContainer = ({
               updateLocale={updateLocale}
             />
 
-            {userButton && <UserButton {...userButton} router={router} />}
+            {userButton && <UserButton {...userButton} />}
           </>
         }
       />

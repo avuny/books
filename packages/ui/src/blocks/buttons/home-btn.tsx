@@ -1,18 +1,16 @@
 "use client"
 
-import type { AppRouter } from "@workspace/ui/blocks/types"
 import { Button } from "@workspace/ui/components/button"
 import { HomeIcon } from "lucide-react"
 
 export type HomeButtonProps = {
-  router: AppRouter
-  href?: string
+  onClick: () => void
 }
 
-export default function HomeButton({ router, href }: HomeButtonProps) {
+export default function HomeButton({ onClick }: HomeButtonProps) {
   return (
     <Button
-      onClick={() => router.replace(href || "/")}
+      onClick={onClick}
       variant="outline"
       size="icon"
       className="cursor-pointer"

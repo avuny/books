@@ -7,17 +7,13 @@ import { BriefcaseBusinessIcon } from "lucide-react"
 type DashboardButtonProps = {
   user: unknown | undefined
   isLoading: boolean
-  router: {
-    replace: (href: string) => void
-  }
-  href: string
+  onClick: () => void
 }
 
 export default function DashboardButton({
   isLoading,
   user,
-  router,
-  href,
+  onClick,
 }: DashboardButtonProps) {
   if (isLoading) {
     return (
@@ -33,7 +29,7 @@ export default function DashboardButton({
 
   return (
     <Button
-      onClick={() => router.replace(href)}
+      onClick={onClick}
       variant="outline"
       size="icon"
       className="cursor-pointer"

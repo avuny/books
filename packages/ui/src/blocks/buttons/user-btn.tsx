@@ -1,18 +1,15 @@
 "use client"
 
 import { UserNav } from "@workspace/ui/blocks/layout/nav-user"
-import { AppRouter } from "@workspace/ui/blocks/layout/types"
 import Loading from "@workspace/ui/blocks/loading/loading"
 import type { User } from "@workspace/ui/blocks/types"
 import { Button } from "@workspace/ui/components/button"
-
 import { LogInIcon } from "lucide-react"
 
 export type UserButtonProps = {
   user: User | undefined
   isLoading: boolean
-  href: string
-  router: AppRouter
+  onClick: () => void
   useSignOutHandler(): {
     submit: () => Promise<void>
     isPending: boolean
@@ -22,8 +19,7 @@ export type UserButtonProps = {
 export default function UserButton({
   user,
   isLoading,
-  href,
-  router,
+  onClick,
   useSignOutHandler,
 }: UserButtonProps) {
   const { submit } = useSignOutHandler()
@@ -39,7 +35,7 @@ export default function UserButton({
   if (!user) {
     return (
       <Button
-        onClick={() => router.push(href)}
+        onClick={onClick}
         variant="outline"
         size="icon"
         className="cursor-pointer"
