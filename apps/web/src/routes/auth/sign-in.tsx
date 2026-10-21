@@ -1,25 +1,35 @@
-import { Link, createFileRoute, useNavigate } from "@tanstack/react-router"
-// import { fakeSignIn } from '@/features/auth'
+import { useMemo } from "react"
+import { createFileRoute, useRouter } from "@tanstack/react-router"
+import type { AppRouter } from "@workspace/ui/blocks/types"
+import {
+  SignIn,
+  signInCopy,
+  signInErrors,
+  useAuthSuccessHandler,
+} from "@/features/auth"
 
-export const Route = createFileRoute("/auth/sign-in")({ component: SignIn })
+export const Route = createFileRoute("/auth/sign-in")({ component: SignInPage })
 
-function SignIn() {
-  const navigate = useNavigate()
+function SignInPage() {
+  const tsRouter = useRouter()
+  const handleAuthSuccess = useAuthSuccessHandler()
+
+  const router = useMemo<AppRouter>(
+    () => ({
+      push: (href) => void tsRouter.navigate({ to: href }),
+      replace: (href) => void tsRouter.navigate({ to: href, replace: true }),
+    }),
+    [tsRouter]
+  )
+
   return (
-    <>
-      <h1 className="text-lg font-semibold">Sign in</h1>
-      <button
-        className="w-full rounded bg-neutral-900 px-3 py-2 text-white"
-        onClick={() => {
-          // fakeSignIn()
-          navigate({ to: "/organization" })
-        }}
-      >
-        Sign in
-      </button>
-      <Link to="/auth/sign-up" className="block text-sm underline">
-        Create an account
-      </Link>
-    </>
+    <SignIn
+      router={router}
+      copy={signInCopy}
+      errorMessages={signInErrors}
+      redirectTo="/"
+      signUpHref="/auth/sign-up"
+      onSuccess={(data) => handleAuthSuccess(data, { redirectTo: "/" })}
+    />
   )
 }

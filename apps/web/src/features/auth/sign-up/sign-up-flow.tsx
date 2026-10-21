@@ -28,6 +28,8 @@ export type SignUpFlowProps = {
   maxResends?: number
   /** Store the access token / hydrate the session here. */
   onAuthenticated?: (auth: AuthResponse) => void
+  /** Handle successful authentication. */
+  onSuccess?: (data: { data: AuthResponse }) => void
 }
 
 const STEP_INDEX = { identifier: 1, verify: 2, register: 3 } as const
@@ -172,6 +174,7 @@ function RegisterStep(
     passwordMismatchMessage: p.copy.register.passwordMismatchMessage,
     errorMessages: p.errorMessages,
     onAuthenticated: p.onAuthenticated,
+    onSuccess: p.onSuccess,
     onProofInvalid: p.onProofInvalid,
   })
   return (

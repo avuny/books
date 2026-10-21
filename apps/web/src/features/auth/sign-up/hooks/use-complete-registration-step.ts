@@ -6,13 +6,13 @@ import {
   AuthErrorCode,
   SignUpBodySchema,
   validatePasswordBytes,
-  type AuthResponseSchema,
-} from "@avuny/contracts"
+  type AuthResponse,
+} from "@avuny/contracts/user"
 import { useSignUp } from "@/api"
 import { parseApiError, resolveErrorMessage, unwrap, type ApiError } from "../lib/api-error"
 import type { AppRouter, ErrorMessages } from "../types"
 
-export type AuthResponse = z.infer<typeof AuthResponseSchema>
+export type { AuthResponse }
 
 function createSchema(mismatchMessage: string) {
   return SignUpBodySchema.pick({ name: true, password: true })
@@ -36,6 +36,7 @@ type Options = {
   passwordMismatchMessage: string
   errorMessages: ErrorMessages
   onAuthenticated?: (auth: AuthResponse) => void
+  onSuccess?: (data: { data: AuthResponse }) => void
   /** Proof rejected/expired: the flow should restart from step one. */
   onProofInvalid: () => void
 }
@@ -61,8 +62,12 @@ export function useCompleteRegistrationStep(o: Options) {
           verificationToken: o.verificationToken,
         },
       })
-      o.onAuthenticated?.(unwrap<AuthResponse>(res))
-      o.router.replace(o.redirectTo)
+      if (o.onSuccess) {
+        o.onSuccess(res as { data: AuthResponse })
+      } else {
+        o.onAuthenticated?.(unwrap<AuthResponse>(res))
+        o.router.replace(o.redirectTo)
+      }
     } catch (e) {
       const err = parseApiError(e)
       if (err.code === AuthErrorCode.INVALID_CREDENTIALS) return o.onProofInvalid()

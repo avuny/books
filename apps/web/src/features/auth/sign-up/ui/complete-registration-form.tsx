@@ -10,8 +10,7 @@ import {
 import { Input } from "@workspace/ui/components/input"
 
 import type { SignUpCopy } from "../types"
-import { FormShell } from "./form-shell"
-import { SubmitButton } from "./submit-button"
+import { FormShell, SubmitButton } from "@workspace/ui/blocks/form"
 
 type Values = {
   name: string

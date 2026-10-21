@@ -1,19 +1,19 @@
+import {
+  commonTranslationsEn,
+  commonTranslationsAr,
+} from "@avuny/contracts/common"
+import { userTranslationsAr, userTranslationsEn } from "@avuny/contracts/user"
+
 export const resources = {
   en: {
-    common: {
-      welcome: "Welcome",
-    },
-    auth: {
-      login: "Login",
-    },
+    common: commonTranslationsEn,
+    user: userTranslationsEn,
   },
-
   ar: {
-    common: {
-      welcome: "مرحباً",
-    },
-    auth: {
-      login: "تسجيل الدخول",
-    },
+    common: commonTranslationsAr,
+    user: userTranslationsAr,
   },
-} as const
+}
+
+export type Messages = (typeof resources)["en"]
+export type Locale = keyof typeof resources

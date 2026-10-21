@@ -20,13 +20,9 @@ i18n
     interpolation: {
       escapeValue: false,
     },
-    ns: ["common", "auth"],
+    ns: ["common", "user"],
 
     returnNull: false,
-    // Set dot as the namespace separator
-    nsSeparator: ".",
-    //  different character for nested sub-keys (or set to false if flat)
-    keySeparator: "/",
     //  Configure the detector to save to localStorage
     detection: {
       order: ["localStorage", "cookie", "navigator"],
