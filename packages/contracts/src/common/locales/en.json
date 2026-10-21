@@ -1,0 +1,79 @@
+{
+  "headers": {
+    "home": "Home"
+  },
+  "errors": {
+    "MODULE_NAME_CONFLICT": " Name is already in use",
+    "MODULE_CREATION_LIMIT_EXCEEDED": "You have reached the maximum number of creating more {thing} allowed in your plan. Please upgrade your plan to create more {thing}s."
+  },
+  "msgs": {
+    "add": "The {thing} has been added successfully",
+    "create": "The {thing} has been created successfully",
+
+    "update": "The {thing} has been updated successfully",
+    "remove": "The {thing} has been removed successfully",
+    "save": "The {thing} has been saved successfully",
+    "delete": "The {thing} has been deleted successfully",
+    "send": "The {thing} has been sent successfully",
+    "welcome": "Welcome {thing}!",
+    "actionThingTitle": "{action} {thing}",
+    "actionThingDescription": "Use this form to {action} {thing}. You can modify these details later if needed.",
+    "successToastMsg": "The {thing} has been {action} successfully",
+    "confirmTitle": "Are you absolutely sure?",
+    "confirmDeleteDescription": "This action cannot be undone. This will permanently delete this item."
+  },
+  "alertMsgs": {
+    "unknownError": "An unknown error occurred. Please try again later."
+  },
+  "deleteRowMsgs": {
+    "confirmTitle": "Are you absolutely sure?",
+    "confirmDeleteDescription": "This action cannot be undone. This will permanently delete this item after submitting the form."
+  },
+  "actions": {
+    "create": "Create",
+    "save": "Save",
+    "add": "Add",
+    "update": "Update",
+    "send": "Send",
+    "delete": "Delete",
+    "confirm": "Confirm",
+    "cancel": "Cancel",
+    "edit": "Edit",
+    "search": "Search",
+    "submit": "Submit",
+    "reset": "Reset"
+  },
+  "entities": {
+    "role": "Role",
+    "organization": "Organization",
+    "organizationUser": "Organization User",
+    "account": "Account",
+    "item": "Item",
+    "warehouse": "Warehouse",
+    "unit": "Unit",
+    "unitCollection": "Unit Collection",
+    "invoice": "Invoice",
+    "user": "User",
+    "product": "Product",
+    "category": "Category"
+  },
+  "placeholders": {
+    "loading": "Loading...",
+    "search": "Search...",
+    "select": "Select...",
+    "typeHere": "Type here..."
+  },
+  "status": {
+    "success": "Success",
+    "error": "Error",
+    "warning": "Warning",
+    "info": "Information",
+    "loading": "Loading"
+  },
+  "validation": {
+    "required": "This field is required",
+    "invalidEmail": "Please enter a valid email address",
+    "minLength": "Must be at least {{min}} characters",
+    "maxLength": "Must be less than {{max}} characters"
+  }
+}

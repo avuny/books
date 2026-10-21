@@ -5,7 +5,7 @@ import {
   NAME_MIN_LENGTH,
   NAME_MAX_LENGTH,
   OTP_CODE_LENGTH,
-} from "./user-module.constants.js"
+} from "./constants.js"
 
 // ── Identifier ─────────────────────────────────────────────────────────────
 
@@ -53,15 +53,20 @@ export const SignUpBodySchema = z.object({
   name: z.string().min(NAME_MIN_LENGTH).max(NAME_MAX_LENGTH).trim(),
   password: z
     .string()
-    .min(PASSWORD_MIN_LENGTH, `Password must be at least ${PASSWORD_MIN_LENGTH} characters`),
+    .min(
+      PASSWORD_MIN_LENGTH,
+      `Password must be at least ${PASSWORD_MIN_LENGTH} characters`
+    ),
   verificationToken: z.string(),
 })
+export type SignUpBody = z.infer<typeof SignUpBodySchema>
 
 export const SignInBodySchema = z.object({
   /** Any identifier type: email, phone or username. */
   identifier: IdentifierValueSchema,
   password: z.string().min(1),
 })
+export type SignInBody = z.infer<typeof SignInBodySchema>
 
 export const RefreshBodySchema = z
   .object({
@@ -70,6 +75,7 @@ export const RefreshBodySchema = z
   })
   .optional()
   .default({})
+export type RefreshBody = z.infer<typeof RefreshBodySchema>
 
 export const TokensSchema = z.object({
   accessToken: z.string(),
@@ -77,6 +83,7 @@ export const TokensSchema = z.object({
   /** Mobile only: refresh token in body. Web gets it in HttpOnly cookie. */
   refreshToken: z.string().optional(),
 })
+export type Tokens = z.infer<typeof TokensSchema>
 
 /** Minimal user profile returned with auth responses. */
 export const AuthUserSchema = z.object({
@@ -88,15 +95,18 @@ export const AuthUserSchema = z.object({
   avatarUrl: z.string().nullable(),
   platformRole: z.enum(["user", "support", "admin"]),
 })
+export type AuthUser = z.infer<typeof AuthUserSchema>
 
 export const AuthResponseSchema = z.object({
   user: AuthUserSchema,
   tokens: TokensSchema,
 })
+export type AuthResponse = z.infer<typeof AuthResponseSchema>
 
 export const RefreshResponseSchema = z.object({
   tokens: TokensSchema,
 })
+export type RefreshResponse = z.infer<typeof RefreshResponseSchema>
 
 export const ChangePasswordBodySchema = z.object({
   currentPassword: z.string().min(1),
@@ -154,7 +164,7 @@ export const MeResponseSchema = z.object({
   name: z.string(),
   avatarUrl: z.string().nullable(),
   platformRole: z.enum(["user", "support", "admin"]),
-  identifiers: z.array(IdentifierSchema),
+  identifier: z.string(),
 })
 
 // ── Slice 4a — Update profile name ────────────────────────────────────────
@@ -190,10 +200,12 @@ export const AdminUserSummarySchema = z.object({
   status: z.enum(["active", "suspended"]),
   platformRole: z.enum(["user", "support", "admin"]),
   avatarUrl: z.string().nullable(),
-  primaryIdentifier: z.object({
-    type: z.enum(["email", "phone", "username"]),
-    value: z.string(),
-  }).nullable(),
+  primaryIdentifier: z
+    .object({
+      type: z.enum(["email", "phone", "username"]),
+      value: z.string(),
+    })
+    .nullable(),
   lastSignInAt: z.string().datetime().nullable(),
   lastActiveAt: z.string().datetime().nullable(),
   createdAt: z.string().datetime(),

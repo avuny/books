@@ -1,0 +1,51 @@
+{
+  "errors": {
+    "SERVER_ERROR": "حطأ في النظام. برجاء المحاولة لاحقا.",
+    "AUTH_LOGIN_INCORRECT_CREDENTIALS": "البريد الإلكتروني أو كلمة المرور غير صحيحة.",
+    "AUTH_LOGIN_USER_PASSWORD_NOT_SET": "لم يتم تعيين كلمة مرور لهذا الحساب.",
+    "AUTH_USED_EMAIL": "هذا البريد الإلكتروني مسجل بالفعل.",
+    "AUTH_USED_IDENTIFIER": "هذا البريد الإلكتروني مستخدم بالفعل.",
+    "AUTH_SIGN_UP_USER_EXIST": "هذا البريد الإلكتروني مستخدم بالفعل.",
+    "AUTH_UNVERIFIED_EMAIL": "لم يتم التحقق من بريدك الإلكتروني.",
+    "INCORRECT_CREDENTIALS": "البريد الإلكتروني أو كلمة المرور غير صحيحة.",
+    "USER_NOT_LOCAL": "هذا المستخدم مسجل عبر مزود خارجي.",
+    "REFRESH_TOKEN_INVALID": "رمز التحديث غير صالح.",
+    "MISSING_OR_MALFORMED_AUTHORIZATION_HEADER": "الترويسة الخاصة بالتفويض مفقودة أو غير صحيحة.",
+    "INVALID_ACCESS_TOKEN": "رمز الوصول غير صالح.",
+    "EXPIRED_ACCESS_TOKEN": "انتهت صلاحية رمز الوصول.",
+    "MISSING_ACCESS_TOKEN": "رمز الوصول مفقود.",
+    "MISSING_REFRESH_TOKEN": "رمز التحديث مفقود.",
+    "USER_IS_NOT_EXIST": "هذا البريد الإلكتروني غير موجود.",
+
+    "OTP_INVALID": "رمز التحقق (OTP) غير صالح.",
+    "OTP_EXPIRED": "انتهت صلاحية رمز التحقق (OTP).",
+    "TOKEN_EXPIRED": "انتهت صلاحية الرمز.",
+    "FINDING_USER_FAILED": "حدث خطأ غير متوقع أثناء البحث عن المستخدم.",
+    "AUTH_USER_CREATION_FAILED": "فشل إنشاء المستخدم.",
+    "ISSUE_TOKEN_FAILED": "فشل إصدار الرمز.",
+    "PASSWORD_RESET_FAILED": "فشل في إعادة تعيين كلمة المرور.",
+    "REFRESHTOKEN_REVOKE_FAILED": "فشل في إلغاء رمز التحديث.",
+    "REFRESHTOKEN_CREATE_FAILED": "فشل في إنشاء رمز التحديث.",
+    "REFRESHTOKEN_VERIFY_FAILED": "فشل في التحقق من رمز التحديث.",
+    "LOGIN_FAILED": "فشل تسجيل الدخول.",
+    "OTP_CREATION_FAILED": "فشل في إنشاء رمز التحقق (OTP).",
+    "OTP_VERIFICATION_FAILED": "فشل في التحقق من رمز التحقق (OTP).",
+    "OTP_TOKEN_INVALID": "يرجى طلب رمز تحقق جديد (OTP)."
+  },
+  "labels": {
+    "identifier": "البريد الإلكتروني",
+    "name": "الاسم",
+    "password": "كلمة المرور",
+    "confirmPassword": "تأكيد كلمة المرور"
+  },
+  "headers": {
+    "signIn": "تسجيل الدخول",
+    "signUp": "إنشاء حساب",
+    "forgotPassword": "نسيت كلمة المرور",
+    "resetPassword": "إعادة تعيين كلمة المرور"
+  },
+  "msgs": {
+    "orAlreadyHaveAnAccountSignIn": "أو لديك حساب بالفعل؟  ",
+    "orHaveNotAnAccountSignUp": "أو ليس لديك حساب؟  "
+  }
+}

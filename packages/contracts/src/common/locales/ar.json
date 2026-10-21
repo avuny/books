@@ -1,0 +1,78 @@
+{
+  "headers": {
+    "home": "الرئيسية"
+  },
+  "errors": {
+    "MODULE_NAME_CONFLICT": "الاسم مستخدم بالفعل",
+    "MODULE_CREATION_LIMIT_EXCEEDED": "لقد وصلت إلى الحد الأقصى المسموح به لإنشاء المزين من {thing}  ضمن خطتك الحالية."
+  },
+  "msgs": {
+    "add": "تمت إضافة {thing} بنجاح",
+    "create": "تم إنشاء {thing} بنجاح",
+    "update": "تم تحديث {thing} بنجاح",
+    "remove": "تمت إزالة {thing} بنجاح",
+    "save": "تم حفظ {thing} بنجاح",
+    "delete": "تم حذف {thing} بنجاح",
+    "send": "تم إرسال {thing} بنجاح",
+    "welcome": "مرحبا {thing}!",
+    "actionThingTitle": "{action} {thing}",
+    "actionThingDescription": "استخدم هذا النموذج من أجل {action} {thing}. يمكنك تعديل هذه التفاصيل لاحقًا إذا لزم الأمر.",
+    "successToastMsg": "تم {action} {thing} بنجاح",
+    "confirmTitle": "هل أنت متأكد تمامًا؟",
+    "confirmDeleteDescription": "لا يمكن التراجع عن هذا الإجراء. سيتم حذف هذا العنصر نهائيًا."
+  },
+  "alertMsgs": {
+    "unknownError": "حدث خطأ غير معروف. يرجى المحاولة مرة أخرى لاحقًا."
+  },
+  "deleteRowMsgs": {
+    "confirmTitle": "هل أنت متأكد من حذف هذا العنصر؟",
+    "confirmDeleteDescription": "لا يمكن التراجع عن هذا الإجراء. سيتم حذف العنصر نهائيًا بعد إرسال النموذج."
+  },
+  "actions": {
+    "create": "إنشاء",
+    "save": "حفظ",
+    "add": "إضافة",
+    "update": "تحديث",
+    "send": "إرسال",
+    "delete": "حذف",
+    "confirm": "تأكيد",
+    "cancel": "إلغاء",
+    "edit": "تعديل",
+    "search": "بحث",
+    "submit": "إرسال",
+    "reset": "إعادة تعيين"
+  },
+  "entities": {
+    "account": "الحساب",
+    "organization": "المؤسسة",
+    "organizationUser": "مستخدم المؤسسة",
+    "role": "الدور",
+    "item": "الصنف",
+    "warehouse": "المستودع",
+    "unit": "الوحدة",
+    "unitCollection": "مجموعة الوحدات",
+    "invoice": "الفاتورة",
+    "user": "المستخدم",
+    "product": "المنتج",
+    "category": "الفئة"
+  },
+  "placeholders": {
+    "loading": "جارٍ التحميل...",
+    "search": "ابحث...",
+    "select": "اختر...",
+    "typeHere": "اكتب هنا..."
+  },
+  "status": {
+    "success": "نجاح",
+    "error": "خطأ",
+    "warning": "تحذير",
+    "info": "معلومة",
+    "loading": "جارٍ التحميل"
+  },
+  "validation": {
+    "required": "هذا الحقل مطلوب",
+    "invalidEmail": "يرجى إدخال بريد إلكتروني صالح",
+    "minLength": "يجب أن يكون على الأقل {{min}} حروفًا",
+    "maxLength": "يجب أن يكون أقل من {{max}} حروفًا"
+  }
+}

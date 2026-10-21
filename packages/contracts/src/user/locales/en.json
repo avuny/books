@@ -1,0 +1,50 @@
+{
+  "errors": {
+    "SERVER_ERROR": "Server Error, Please Try again later",
+    "AUTH_LOGIN_INCORRECT_CREDENTIALS": "Incorrect email or password.",
+    "AUTH_LOGIN_USER_PASSWORD_NOT_SET": "Password is not set for this account.",
+    "AUTH_USED_EMAIL": "This email is already registered.",
+    "AUTH_SIGN_UP_USER_EXIST": "This Email is already in use.",
+    "AUTH_USED_IDENTIFIER": "This Email is already in use.",
+    "AUTH_UNVERIFIED_EMAIL": "Your email address is not verified.",
+    "INCORRECT_CREDENTIALS": "Incorrect email or password.",
+    "USER_NOT_LOCAL": "This user is registered with an external provider.",
+    "REFRESH_TOKEN_INVALID": "Invalid refresh token.",
+    "MISSING_OR_MALFORMED_AUTHORIZATION_HEADER": "Missing or malformed authorization header.",
+    "INVALID_ACCESS_TOKEN": "Invalid access token.",
+    "EXPIRED_ACCESS_TOKEN": "Access token has expired.",
+    "MISSING_ACCESS_TOKEN": "Missing access token.",
+    "MISSING_REFRESH_TOKEN": "Missing refresh token.",
+    "USER_IS_NOT_EXIST": "This email does not exist.",
+    "OTP_INVALID": "Invalid OTP.",
+    "OTP_EXPIRED": "OTP has expired.",
+    "TOKEN_EXPIRED": "Token has expired.",
+    "FINDING_USER_FAILED": "Unexpected error occurred while finding the user.",
+    "AUTH_USER_CREATION_FAILED": "User creation failed.",
+    "ISSUE_TOKEN_FAILED": "Failed to issue token.",
+    "PASSWORD_RESET_FAILED": "Password reset failed.",
+    "REFRESHTOKEN_REVOKE_FAILED": "Failed to revoke refresh token.",
+    "REFRESHTOKEN_CREATE_FAILED": "Failed to create refresh token.",
+    "REFRESHTOKEN_VERIFY_FAILED": "Failed to verify refresh token.",
+    "LOGIN_FAILED": "Login failed.",
+    "OTP_CREATION_FAILED": "Failed to create OTP.",
+    "OTP_VERIFICATION_FAILED": "Failed to verify OTP.",
+    "OTP_TOKEN_INVALID": "Please request a new OTP."
+  },
+  "labels": {
+    "identifier": "Email",
+    "name": "Name",
+    "password": "Password",
+    "confirmPassword": "Confirm Password"
+  },
+  "headers": {
+    "signIn": "Sign In",
+    "signUp": "Sign Up",
+    "forgotPassword": "Forgot Password",
+    "resetPassword": "Reset Password"
+  },
+  "msgs": {
+    "orAlreadyHaveAnAccountSignIn": "Or already have an account? ",
+    "orHaveNotAnAccountSignUp": "Or don’t have an account? "
+  }
+}
