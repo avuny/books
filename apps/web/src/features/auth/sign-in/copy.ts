@@ -1,19 +1,32 @@
+import { useTranslation } from "react-i18next"
 import type { ErrorMessages } from "@workspace/ui/blocks/types"
 import type { SignInCopy } from "./types"
 
-export const signInCopy: SignInCopy = {
-  title: "Welcome back",
-  description: "Sign in with your email, phone number or username.",
-  identifier: { label: "Email, phone or username", placeholder: "name@example.com" },
-  password: { label: "Password", placeholder: "Your password" },
-  submitLabel: "Sign in",
-  submittingLabel: "Signing in...",
-  signUpPrompt: "Don't have an account?",
-  signUpLabel: "Sign up",
+export function useSignInCopy(): SignInCopy {
+  const { t } = useTranslation("user")
+  return {
+    title: t("auth.signIn.title"),
+    description: t("auth.signIn.description"),
+    identifier: {
+      label: t("auth.signIn.identifier.label"),
+      placeholder: t("auth.signIn.identifier.placeholder"),
+    },
+    password: {
+      label: t("auth.signIn.password.label"),
+      placeholder: t("auth.signIn.password.placeholder"),
+    },
+    submitLabel: t("auth.signIn.submitLabel"),
+    submittingLabel: t("auth.signIn.submittingLabel"),
+    signUpPrompt: t("auth.signIn.signUpPrompt"),
+    signUpLabel: t("auth.signIn.signUpLabel"),
+  }
 }
 
 /** Keys are API error codes from @avuny/contracts. */
-export const signInErrors: ErrorMessages = {
-  fallback: "Something went wrong. Please try again.",
-  INVALID_CREDENTIALS: "Incorrect identifier or password.",
+export function useSignInErrors(): ErrorMessages {
+  const { t } = useTranslation("user")
+  return {
+    fallback: t("auth.errors.fallback"),
+    INVALID_CREDENTIALS: t("auth.errors.INVALID_CREDENTIALS"),
+  }
 }

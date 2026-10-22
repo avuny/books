@@ -1,55 +1,67 @@
+import { useTranslation } from "react-i18next"
 import type { ErrorMessages, SignUpCopy } from "./types"
 
-/**
- * Default English strings. You write these yourself: the feature never owns its text.
- * With i18next, build the same objects from `t()` inside a hook (see note below)
- * and memoize them.
- */
-export const signUpCopy: SignUpCopy = {
-  stepLabel: "Step {current} of {total}",
-  identifier: {
-    title: "Create your account",
-    description: "Enter your email or phone number and we will send you a verification code.",
-    field: {
-      label: "Email or phone number",
-      placeholder: "name@example.com",
+export function useSignUpCopy(): SignUpCopy {
+  const { t } = useTranslation("user")
+  return {
+    stepLabel: t("auth.signUp.stepLabel"),
+    identifier: {
+      title: t("auth.signUp.identifier.title"),
+      description: t("auth.signUp.identifier.description"),
+      field: {
+        label: t("auth.signUp.identifier.field.label"),
+        placeholder: t("auth.signUp.identifier.field.placeholder"),
+      },
+      submitLabel: t("auth.signUp.identifier.submitLabel"),
+      submittingLabel: t("auth.signUp.identifier.submittingLabel"),
     },
-    submitLabel: "Send code",
-    submittingLabel: "Sending code...",
-  },
-  verify: {
-    title: "Verify your identity",
-    description: "Enter the code we sent to {identifier}.",
-    codeLabel: "Verification code",
-    submitLabel: "Verify",
-    submittingLabel: "Verifying...",
-    resendCountdownLabel: "You can request a new code in {seconds}s",
-    resendLabel: "Resend code",
-    resendingLabel: "Sending...",
-    resendCounterLabel: "Codes resent: {count} of {max}",
-    changeIdentifierLabel: "Use a different email or phone",
-  },
-  register: {
-    title: "Finish setting up",
-    description: "Tell us your name and choose a password.",
-    name: { label: "Full name", placeholder: "Jane Doe" },
-    password: { label: "Password", placeholder: "At least 8 characters" },
-    confirmPassword: { label: "Confirm password", placeholder: "Repeat your password" },
-    passwordMismatchMessage: "Passwords do not match.",
-    submitLabel: "Create account",
-    submittingLabel: "Creating account...",
-  },
+    verify: {
+      title: t("auth.signUp.verify.title"),
+      description: t("auth.signUp.verify.description"),
+      codeLabel: t("auth.signUp.verify.codeLabel"),
+      submitLabel: t("auth.signUp.verify.submitLabel"),
+      submittingLabel: t("auth.signUp.verify.submittingLabel"),
+      resendCountdownLabel: t("auth.signUp.verify.resendCountdownLabel"),
+      resendLabel: t("auth.signUp.verify.resendLabel"),
+      resendingLabel: t("auth.signUp.verify.resendingLabel"),
+      resendCounterLabel: t("auth.signUp.verify.resendCounterLabel"),
+      changeIdentifierLabel: t("auth.signUp.verify.changeIdentifierLabel"),
+    },
+    register: {
+      title: t("auth.signUp.register.title"),
+      description: t("auth.signUp.register.description"),
+      name: {
+        label: t("auth.signUp.register.name.label"),
+        placeholder: t("auth.signUp.register.name.placeholder"),
+      },
+      password: {
+        label: t("auth.signUp.register.password.label"),
+        placeholder: t("auth.signUp.register.password.placeholder"),
+      },
+      confirmPassword: {
+        label: t("auth.signUp.register.confirmPassword.label"),
+        placeholder: t("auth.signUp.register.confirmPassword.placeholder"),
+      },
+      passwordMismatchMessage: t("auth.signUp.register.passwordMismatchMessage"),
+      submitLabel: t("auth.signUp.register.submitLabel"),
+      submittingLabel: t("auth.signUp.register.submittingLabel"),
+    },
+  }
 }
 
 /** Keys are the API error codes from @avuny/contracts. */
-export const signUpErrors: ErrorMessages = {
-  fallback: "Something went wrong. Please try again.",
-  OTP_INVALID: "That code or identifier is not valid.",
-  OTP_EXPIRED: "This code has expired. Request a new one.",
-  OTP_ATTEMPTS_EXCEEDED: "Too many incorrect attempts. Request a new code.",
-  OTP_RATE_LIMITED: "Too many requests. Please wait a while and try again.",
-  OTP_RESEND_TOO_SOON: "Please wait a moment before requesting another code.",
-  VERIFICATION_TOKEN_INVALID: "Verification failed. Please start again.",
-  WEAK_PASSWORD: "This password is too weak. Choose a stronger one.",
-  INVALID_IDENTIFIER_TYPE: "Use a valid email or phone number.",
+export function useSignUpErrors(): ErrorMessages {
+  const { t } = useTranslation("user")
+  return {
+    fallback: t("auth.errors.fallback"),
+    OTP_INVALID: t("auth.errors.OTP_INVALID"),
+    OTP_EXPIRED: t("auth.errors.OTP_EXPIRED"),
+    OTP_ATTEMPTS_EXCEEDED: t("auth.errors.OTP_ATTEMPTS_EXCEEDED"),
+    OTP_RATE_LIMITED: t("auth.errors.OTP_RATE_LIMITED"),
+    OTP_RESEND_TOO_SOON: t("auth.errors.OTP_RESEND_TOO_SOON"),
+    VERIFICATION_TOKEN_INVALID: t("auth.errors.VERIFICATION_TOKEN_INVALID"),
+    WEAK_PASSWORD: t("auth.errors.WEAK_PASSWORD"),
+    INVALID_IDENTIFIER_TYPE: t("auth.errors.INVALID_IDENTIFIER_TYPE"),
+    proofExpired: t("auth.errors.proofExpired"),
+  }
 }

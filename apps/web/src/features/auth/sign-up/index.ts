@@ -1,3 +1,3 @@
 export { SignUpFlow, type SignUpFlowProps } from "./sign-up-flow"
-export { signUpCopy, signUpErrors } from "./copy"
+export { useSignUpCopy, useSignUpErrors } from "./copy"
 export type { AppRouter, SignUpCopy, ErrorMessages, OtpChallenge } from "./types"

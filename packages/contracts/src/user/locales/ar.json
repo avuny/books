@@ -16,7 +16,6 @@
     "MISSING_ACCESS_TOKEN": "رمز الوصول مفقود.",
     "MISSING_REFRESH_TOKEN": "رمز التحديث مفقود.",
     "USER_IS_NOT_EXIST": "هذا البريد الإلكتروني غير موجود.",
-
     "OTP_INVALID": "رمز التحقق (OTP) غير صالح.",
     "OTP_EXPIRED": "انتهت صلاحية رمز التحقق (OTP).",
     "TOKEN_EXPIRED": "انتهت صلاحية الرمز.",
@@ -47,5 +46,80 @@
   "msgs": {
     "orAlreadyHaveAnAccountSignIn": "أو لديك حساب بالفعل؟  ",
     "orHaveNotAnAccountSignUp": "أو ليس لديك حساب؟  "
+  },
+  "auth": {
+    "signIn": {
+      "title": "مرحباً بعودتك",
+      "description": "سجّل دخولك بالبريد الإلكتروني أو رقم الهاتف أو اسم المستخدم.",
+      "identifier": {
+        "label": "البريد الإلكتروني أو الهاتف أو اسم المستخدم",
+        "placeholder": "name@example.com"
+      },
+      "password": {
+        "label": "كلمة المرور",
+        "placeholder": "كلمة المرور الخاصة بك"
+      },
+      "submitLabel": "تسجيل الدخول",
+      "submittingLabel": "جارٍ تسجيل الدخول…",
+      "signUpPrompt": "ليس لديك حساب؟",
+      "signUpLabel": "إنشاء حساب"
+    },
+    "signUp": {
+      "stepLabel": "الخطوة {current} من {total}",
+      "identifier": {
+        "title": "إنشاء حساب جديد",
+        "description": "أدخل بريدك الإلكتروني أو رقم هاتفك وسنرسل لك رمز التحقق.",
+        "field": {
+          "label": "البريد الإلكتروني أو رقم الهاتف",
+          "placeholder": "name@example.com"
+        },
+        "submitLabel": "إرسال الرمز",
+        "submittingLabel": "جارٍ الإرسال…"
+      },
+      "verify": {
+        "title": "تحقق من هويتك",
+        "description": "أدخل الرمز الذي أرسلناه إلى {identifier}.",
+        "codeLabel": "رمز التحقق",
+        "submitLabel": "تحقق",
+        "submittingLabel": "جارٍ التحقق…",
+        "resendCountdownLabel": "يمكنك طلب رمز جديد خلال {seconds} ث",
+        "resendLabel": "إعادة إرسال الرمز",
+        "resendingLabel": "جارٍ الإرسال…",
+        "resendCounterLabel": "الرموز المُعادة: {count} من {max}",
+        "changeIdentifierLabel": "استخدام بريد إلكتروني أو هاتف مختلف"
+      },
+      "register": {
+        "title": "إتمام إعداد الحساب",
+        "description": "أخبرنا باسمك واختر كلمة مرور.",
+        "name": {
+          "label": "الاسم الكامل",
+          "placeholder": "محمد أحمد"
+        },
+        "password": {
+          "label": "كلمة المرور",
+          "placeholder": "٨ أحرف على الأقل"
+        },
+        "confirmPassword": {
+          "label": "تأكيد كلمة المرور",
+          "placeholder": "أعد كتابة كلمة المرور"
+        },
+        "passwordMismatchMessage": "كلمتا المرور غير متطابقتين.",
+        "submitLabel": "إنشاء الحساب",
+        "submittingLabel": "جارٍ إنشاء الحساب…"
+      }
+    },
+    "errors": {
+      "fallback": "حدث خطأ ما. يرجى المحاولة مرة أخرى.",
+      "INVALID_CREDENTIALS": "المعرّف أو كلمة المرور غير صحيحة.",
+      "OTP_INVALID": "الرمز أو المعرّف غير صالح.",
+      "OTP_EXPIRED": "انتهت صلاحية هذا الرمز. اطلب رمزاً جديداً.",
+      "OTP_ATTEMPTS_EXCEEDED": "عدد كبير من المحاولات الخاطئة. اطلب رمزاً جديداً.",
+      "OTP_RATE_LIMITED": "طلبات كثيرة جداً. يرجى الانتظار ثم المحاولة مجدداً.",
+      "OTP_RESEND_TOO_SOON": "يرجى الانتظار لحظة قبل طلب رمز آخر.",
+      "VERIFICATION_TOKEN_INVALID": "فشل التحقق. يرجى البدء من جديد.",
+      "WEAK_PASSWORD": "كلمة المرور ضعيفة جداً. اختر كلمة مرور أقوى.",
+      "INVALID_IDENTIFIER_TYPE": "استخدم بريداً إلكترونياً أو رقم هاتف صالحاً.",
+      "proofExpired": "انتهت صلاحية الجلسة. يرجى البدء من جديد."
+    }
   }
 }

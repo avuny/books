@@ -22,7 +22,7 @@ export function useAuthSuccessHandler() {
     toast.success(
       options?.toastTitle
         ? options.toastTitle(user)
-        : t("msgs.welcome", { thing: user.name, defaultValue: t("welcome", { thing: user.name }) }),
+        : t("msgs.welcome", { thing: user.name }),
       {
         description: options?.toastDescription?.(user),
       },

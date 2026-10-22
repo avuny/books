@@ -1,16 +1,8 @@
 import type { FormEventHandler } from "react"
-import { Controller, type UseFormReturn } from "react-hook-form"
+import type { UseFormReturn } from "react-hook-form"
 
 import { Button } from "@workspace/ui/components/button"
-import {
-  Field,
-  FieldDescription,
-  FieldError,
-  FieldLabel,
-} from "@workspace/ui/components/field"
-import { Input } from "@workspace/ui/components/input"
-
-import { FormShell, SubmitButton } from "@workspace/ui/blocks/form"
+import { FormShell, InputField, SubmitButton } from "@workspace/ui/blocks/form"
 import type { SignInCopy } from "../types"
 
 type Values = {
@@ -58,34 +50,15 @@ export function SignInForm({
     >
       <form onSubmit={onSubmit} noValidate className="space-y-6">
         {fields.map((f, i) => (
-          <Controller
+          <InputField
             key={f.name}
             control={form.control}
             name={f.name}
-            render={({ field, fieldState }) => (
-              <Field data-invalid={fieldState.invalid}>
-                <FieldLabel htmlFor={field.name}>{f.copy.label}</FieldLabel>
-
-                <Input
-                  {...field}
-                  id={field.name}
-                  type={f.type}
-                  autoComplete={f.autoComplete}
-                  autoFocus={i === 0}
-                  placeholder={f.copy.placeholder}
-                  disabled={isSubmitting}
-                  aria-invalid={fieldState.invalid}
-                />
-
-                {f.copy.description && (
-                  <FieldDescription>{f.copy.description}</FieldDescription>
-                )}
-
-                {fieldState.invalid && (
-                  <FieldError errors={[fieldState.error]} />
-                )}
-              </Field>
-            )}
+            copy={f.copy}
+            type={f.type}
+            autoComplete={f.autoComplete}
+            autoFocus={i === 0}
+            disabled={isSubmitting}
           />
         ))}
 

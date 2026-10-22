@@ -3,8 +3,8 @@ import { createFileRoute, useRouter } from "@tanstack/react-router"
 import type { AppRouter } from "@workspace/ui/blocks/types"
 import {
   SignUpFlow,
-  signUpCopy,
-  signUpErrors,
+  useSignUpCopy,
+  useSignUpErrors,
   useAuthSuccessHandler,
 } from "@/features/auth"
 
@@ -13,6 +13,8 @@ export const Route = createFileRoute("/auth/sign-up")({ component: SignUp })
 function SignUp() {
   const tsRouter = useRouter()
   const handleAuthSuccess = useAuthSuccessHandler()
+  const copy = useSignUpCopy()
+  const errorMessages = useSignUpErrors()
 
   // Adapter: the feature only knows AppRouter, never TanStack.
   const router = useMemo<AppRouter>(
@@ -26,10 +28,10 @@ function SignUp() {
   return (
     <SignUpFlow
       router={router}
-      copy={signUpCopy}
-      errorMessages={signUpErrors}
+      copy={copy}
+      errorMessages={errorMessages}
       redirectTo="/"
-      proofExpiredMessage="Your verification expired. Please start again."
+      proofExpiredMessage={errorMessages.proofExpired ?? errorMessages.fallback}
       maxResends={5}
       onSuccess={(data) => handleAuthSuccess(data, { redirectTo: "/" })}
     />

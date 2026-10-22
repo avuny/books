@@ -3,8 +3,8 @@ import { createFileRoute, useRouter } from "@tanstack/react-router"
 import type { AppRouter } from "@workspace/ui/blocks/types"
 import {
   SignIn,
-  signInCopy,
-  signInErrors,
+  useSignInCopy,
+  useSignInErrors,
   useAuthSuccessHandler,
 } from "@/features/auth"
 
@@ -13,6 +13,8 @@ export const Route = createFileRoute("/auth/sign-in")({ component: SignInPage })
 function SignInPage() {
   const tsRouter = useRouter()
   const handleAuthSuccess = useAuthSuccessHandler()
+  const copy = useSignInCopy()
+  const errorMessages = useSignInErrors()
 
   const router = useMemo<AppRouter>(
     () => ({
@@ -25,8 +27,8 @@ function SignInPage() {
   return (
     <SignIn
       router={router}
-      copy={signInCopy}
-      errorMessages={signInErrors}
+      copy={copy}
+      errorMessages={errorMessages}
       redirectTo="/"
       signUpHref="/auth/sign-up"
       onSuccess={(data) => handleAuthSuccess(data, { redirectTo: "/" })}

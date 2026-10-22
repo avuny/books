@@ -1,19 +1,11 @@
 import { useRef, type FormEventHandler } from "react"
 import type { UseFormReturn } from "react-hook-form"
-import { REGEXP_ONLY_DIGITS } from "input-otp"
 
 import { OTP_CODE_LENGTH } from "@avuny/contracts"
-import { Controller, type FieldError as RHFFieldError } from "react-hook-form"
-import { Field, FieldError, FieldLabel } from "@workspace/ui/components/field"
-import {
-  InputOTP,
-  InputOTPGroup,
-  InputOTPSlot,
-} from "@workspace/ui/components/input-otp"
+import { FormShell, OtpField, SubmitButton } from "@workspace/ui/blocks/form"
 
 import { fill } from "../lib/api-error"
 import type { SignUpCopy } from "../types"
-import { FormShell, SubmitButton } from "@workspace/ui/blocks/form"
 
 type Props = {
   form: UseFormReturn<{ code: string }>
@@ -51,46 +43,14 @@ export function VerifyOtpForm(p: Props) {
         noValidate
         className="space-y-6"
       >
-        <Controller
+        <OtpField
           control={p.form.control}
           name="code"
-          render={({ field, fieldState }) => (
-            <Field
-              data-invalid={fieldState.invalid}
-              className="flex flex-col items-center"
-            >
-              <FieldLabel htmlFor="otp-code" className="sr-only">
-                {copy.codeLabel}
-              </FieldLabel>
-
-              <InputOTP
-                {...field}
-                id="otp-code"
-                autoFocus
-                maxLength={OTP_CODE_LENGTH}
-                pattern={REGEXP_ONLY_DIGITS}
-                inputMode="numeric"
-                autoComplete="one-time-code"
-                disabled={busy || p.locked}
-                aria-invalid={fieldState.invalid}
-                onComplete={() => formRef.current?.requestSubmit()}
-              >
-                <InputOTPGroup>
-                  {Array.from({ length: OTP_CODE_LENGTH }, (_, i) => (
-                    <InputOTPSlot key={i} index={i} />
-                  ))}
-                </InputOTPGroup>
-              </InputOTP>
-
-              {fieldState.invalid && (
-                <FieldError
-                  errors={
-                    fieldState.error ? [fieldState.error as RHFFieldError] : []
-                  }
-                />
-              )}
-            </Field>
-          )}
+          label={copy.codeLabel}
+          length={OTP_CODE_LENGTH}
+          autoFocus
+          disabled={busy || p.locked}
+          onComplete={() => formRef.current?.requestSubmit()}
         />
 
         <SubmitButton

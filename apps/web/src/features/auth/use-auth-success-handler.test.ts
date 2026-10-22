@@ -4,7 +4,7 @@ import type { AuthResponse } from "@avuny/contracts/user"
 
 vi.mock("react-i18next", () => ({
   useTranslation: () => ({
-    t: (key: string, opts?: { thing?: string }) => `Welcome ${opts?.thing ?? ""}`,
+    t: (_key: string, opts?: { thing?: string }) => `Welcome ${opts?.thing ?? ""}`,
   }),
 }))
 

@@ -46,5 +46,80 @@
   "msgs": {
     "orAlreadyHaveAnAccountSignIn": "Or already have an account? ",
     "orHaveNotAnAccountSignUp": "Or don’t have an account? "
+  },
+  "auth": {
+    "signIn": {
+      "title": "Welcome back",
+      "description": "Sign in with your email, phone number or username.",
+      "identifier": {
+        "label": "Email, phone or username",
+        "placeholder": "name@example.com"
+      },
+      "password": {
+        "label": "Password",
+        "placeholder": "Your password"
+      },
+      "submitLabel": "Sign in",
+      "submittingLabel": "Signing in…",
+      "signUpPrompt": "Don’t have an account?",
+      "signUpLabel": "Sign up"
+    },
+    "signUp": {
+      "stepLabel": "Step {current} of {total}",
+      "identifier": {
+        "title": "Create your account",
+        "description": "Enter your email or phone number and we will send you a verification code.",
+        "field": {
+          "label": "Email or phone number",
+          "placeholder": "name@example.com"
+        },
+        "submitLabel": "Send code",
+        "submittingLabel": "Sending code…"
+      },
+      "verify": {
+        "title": "Verify your identity",
+        "description": "Enter the code we sent to {identifier}.",
+        "codeLabel": "Verification code",
+        "submitLabel": "Verify",
+        "submittingLabel": "Verifying…",
+        "resendCountdownLabel": "You can request a new code in {seconds}s",
+        "resendLabel": "Resend code",
+        "resendingLabel": "Sending…",
+        "resendCounterLabel": "Codes resent: {count} of {max}",
+        "changeIdentifierLabel": "Use a different email or phone"
+      },
+      "register": {
+        "title": "Finish setting up",
+        "description": "Tell us your name and choose a password.",
+        "name": {
+          "label": "Full name",
+          "placeholder": "Jane Doe"
+        },
+        "password": {
+          "label": "Password",
+          "placeholder": "At least 8 characters"
+        },
+        "confirmPassword": {
+          "label": "Confirm password",
+          "placeholder": "Repeat your password"
+        },
+        "passwordMismatchMessage": "Passwords do not match.",
+        "submitLabel": "Create account",
+        "submittingLabel": "Creating account…"
+      }
+    },
+    "errors": {
+      "fallback": "Something went wrong. Please try again.",
+      "INVALID_CREDENTIALS": "Incorrect identifier or password.",
+      "OTP_INVALID": "That code or identifier is not valid.",
+      "OTP_EXPIRED": "This code has expired. Request a new one.",
+      "OTP_ATTEMPTS_EXCEEDED": "Too many incorrect attempts. Request a new code.",
+      "OTP_RATE_LIMITED": "Too many requests. Please wait a while and try again.",
+      "OTP_RESEND_TOO_SOON": "Please wait a moment before requesting another code.",
+      "VERIFICATION_TOKEN_INVALID": "Verification failed. Please start again.",
+      "WEAK_PASSWORD": "This password is too weak. Choose a stronger one.",
+      "INVALID_IDENTIFIER_TYPE": "Use a valid email or phone number.",
+      "proofExpired": "Your session has expired. Please start over."
+    }
   }
 }

@@ -1,16 +1,8 @@
 import type { FormEventHandler } from "react"
-import { Controller, type UseFormReturn } from "react-hook-form"
+import type { UseFormReturn } from "react-hook-form"
 
-import {
-  Field,
-  FieldDescription,
-  FieldError,
-  FieldLabel,
-} from "@workspace/ui/components/field"
-import { Input } from "@workspace/ui/components/input"
-
+import { FormShell, InputField, SubmitButton } from "@workspace/ui/blocks/form"
 import type { SignUpCopy } from "../types"
-import { FormShell, SubmitButton } from "@workspace/ui/blocks/form"
 
 type Props = {
   form: UseFormReturn<{ identifier: string }>
@@ -34,32 +26,15 @@ export function SendOtpForm({
       errorMessage={errorMessage}
     >
       <form onSubmit={onSubmit} noValidate className="space-y-6">
-        <Controller
+        <InputField
           control={form.control}
           name="identifier"
-          render={({ field, fieldState }) => (
-            <Field data-invalid={fieldState.invalid}>
-              <FieldLabel htmlFor={field.name}>{copy.field.label}</FieldLabel>
-
-              <Input
-                {...field}
-                id={field.name}
-                type="text"
-                inputMode="email"
-                autoComplete="username"
-                autoFocus
-                placeholder={copy.field.placeholder}
-                disabled={isSubmitting}
-                aria-invalid={fieldState.invalid}
-              />
-
-              {copy.field.description && (
-                <FieldDescription>{copy.field.description}</FieldDescription>
-              )}
-
-              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-            </Field>
-          )}
+          copy={copy.field}
+          type="text"
+          inputMode="email"
+          autoComplete="username"
+          autoFocus
+          disabled={isSubmitting}
         />
 
         <SubmitButton
