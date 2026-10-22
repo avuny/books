@@ -26,12 +26,13 @@
     "dev": "tsc -p tsconfig.build.json --watch --preserveWatchOutput"
   },
   "dependencies": {
+    "@neondatabase/serverless": "^0.10.4",
     "drizzle-orm": "^0.38.0",
     "postgres": "^3.4.5"
   },
   "devDependencies": {
-    "@types/node": "^26.6.3",
     "@avuny/typescript-config": "workspace:*",
+    "@types/node": "^26.6.3",
     "dotenv": "^17.4.2",
     "drizzle-kit": "^0.30.0",
     "typescript": "^5.7.0"
