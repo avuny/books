@@ -4,9 +4,9 @@ export type User = {
   avatar?: string | undefined
 }
 
-export type AppRouter = {
-  push: (href: string) => void
-  replace: (href: string) => void
+export type AppRouter<TPath extends string = string> = {
+  push: (href: TPath) => void
+  replace: (href: TPath) => void
 }
 
 export type FieldCopy = {
@@ -15,4 +15,6 @@ export type FieldCopy = {
   description?: string
 }
 
-export type ErrorMessages = Partial<Record<string, string>> & { fallback: string }
+export type ErrorMessages = Partial<Record<string, string>> & {
+  fallback: string
+}
