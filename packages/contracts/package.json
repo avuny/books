@@ -21,6 +21,10 @@
     "./common": {
       "import": "./dist/common/index.js",
       "types": "./dist/common/index.d.ts"
+    },
+    "./errors": {
+      "import": "./dist/errors/index.js",
+      "types": "./dist/errors/index.d.ts"
     }
   },
   "scripts": {
