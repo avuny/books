@@ -15,21 +15,21 @@ import type { AppRouter, ErrorMessages } from "@workspace/ui/blocks/types"
 export type SignInValues = z.infer<typeof SignInBodySchema>
 export type { AuthResponse }
 
-type Options = {
-  router: AppRouter
-  redirectTo: string
+type Options<TPath extends string> = {
+  router: AppRouter<TPath>
+  redirectTo: TPath
   errorMessages: ErrorMessages
   onAuthenticated?: (auth: AuthResponse) => void
   onSuccess?: (data: { data: AuthResponse }) => void
 }
 
-export function useSignInForm({
+export function useSignInForm<TPath extends string>({
   router,
   redirectTo,
   errorMessages,
   onAuthenticated,
   onSuccess,
-}: Options) {
+}: Options<TPath>) {
   const form = useForm<SignInValues>({
     resolver: zodResolver(SignInBodySchema),
     defaultValues: { identifier: "", password: "" },

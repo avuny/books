@@ -378,6 +378,9 @@ importers:
 
   packages/hono:
     dependencies:
+      '@avuny/contracts':
+        specifier: workspace:*
+        version: link:../contracts
       '@avuny/i18n':
         specifier: workspace:*
         version: link:../i18n
