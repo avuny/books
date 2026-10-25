@@ -1,3 +1,4 @@
+import { MultiStepFlow } from "@workspace/ui/blocks/multi-step"
 import { fill } from "./lib/api-error"
 import { useSignUpFlow } from "./hooks/use-sign-up-flow"
 import { useSendOtpStep } from "./hooks/use-send-otp-step"
@@ -32,68 +33,49 @@ export type SignUpFlowProps = {
   onSuccess?: (data: { data: AuthResponse }) => void
 }
 
-const STEP_INDEX = { identifier: 1, verify: 2, register: 3 } as const
+const SIGN_UP_STEPS = ["identifier", "verify", "register"] as const
 
 export function SignUpFlow(props: SignUpFlowProps) {
   const flow = useSignUpFlow()
   const { state } = flow
 
   return (
-    <div className="mx-auto w-full max-w-sm space-y-6">
-      <StepIndicator
-        current={STEP_INDEX[state.step]}
-        label={fill(props.copy.stepLabel, {
-          current: STEP_INDEX[state.step],
-          total: 3,
-        })}
-      />
-
-      {state.step === "identifier" && (
-        <IdentifierStep
-          {...props}
-          defaultIdentifier={state.identifier}
-          notice={state.notice}
-          onSent={flow.sent}
-        />
-      )}
-
-      {state.step === "verify" && state.challenge && (
-        <VerifyStep
-          {...props}
-          identifier={state.identifier}
-          challenge={state.challenge}
-          resendCount={state.resendCount}
-          onVerified={flow.verified}
-          onResent={flow.resent}
-          onChangeIdentifier={() => flow.restart()}
-        />
-      )}
-
-      {state.step === "register" && state.verificationToken && (
-        <RegisterStep
-          {...props}
-          identifier={state.identifier}
-          verificationToken={state.verificationToken}
-          onProofInvalid={() => flow.restart(props.proofExpiredMessage)}
-        />
-      )}
-    </div>
-  )
-}
-
-function StepIndicator({ current, label }: { current: number; label: string }) {
-  return (
-    <div className="space-y-2">
-      <div className="flex gap-1.5" aria-hidden>
-        {[1, 2, 3].map((n) => (
-          <span
-            key={n}
-            className={`h-1 flex-1 rounded-full ${n <= current ? "bg-primary" : "bg-muted"}`}
+    <MultiStepFlow
+      steps={SIGN_UP_STEPS}
+      current={state.step}
+      formatLabel={(position) => fill(props.copy.stepLabel, position)}
+      views={{
+        identifier: () => (
+          <IdentifierStep
+            {...props}
+            defaultIdentifier={state.identifier}
+            notice={state.notice}
+            onSent={flow.sent}
           />
-        ))}
-      </div>
-      <p className="text-xs text-muted-foreground">{label}</p>
-    </div>
+        ),
+        verify: () =>
+          state.challenge ? (
+            <VerifyStep
+              {...props}
+              identifier={state.identifier}
+              challenge={state.challenge}
+              resendCount={state.resendCount}
+              onVerified={flow.verified}
+              onResent={flow.resent}
+              onChangeIdentifier={() => flow.restart()}
+            />
+          ) : null,
+        register: () =>
+          state.verificationToken ? (
+            <RegisterStep
+              {...props}
+              identifier={state.identifier}
+              verificationToken={state.verificationToken}
+              onProofInvalid={() => flow.restart(props.proofExpiredMessage)}
+            />
+          ) : null,
+      }}
+    />
   )
 }
 
