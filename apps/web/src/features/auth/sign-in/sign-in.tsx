@@ -1,46 +1,65 @@
-import type { ErrorMessages } from "@workspace/ui/blocks/types"
-import { useSignInForm, type AuthResponse } from "./hooks/use-sign-in"
-import { SignInForm } from "./ui/sign-in-form"
-import type { SignInCopy } from "./types"
-import { useAppRouter } from "@workspace/ui/providers/router-provider"
-export type SignInProps<TPath extends string> = {
-  copy: SignInCopy
-  errorMessages: ErrorMessages
-  /** Where to go after a successful sign in. */
-  redirectTo: TPath
-  /** Where the "Sign up" link goes. */
-  signUpHref: TPath
-  /** Store the access token / hydrate the session here. */
-  onAuthenticated?: (auth: AuthResponse) => void
-  onSuccess?: (data: { data: AuthResponse }) => void
+import { useState } from "react"
+import { useAuthSuccessHandler } from "@/features/auth"
+import { SignInForm, type SignInFormValues } from "./sign-in-form"
+import { useSignIn, } from "@/api"
+import { useTranslation } from "react-i18next"
+import { parseApiError } from "../lib/api-error"
+import type { AuthResponse } from "@avuny/contracts"
+
+type SignInProps = {
+  /** Where the "Sign up" link goes. The route decides how to navigate. */
+  onClickOnSignUpButton: () => void
+  onSuccess?: (data: AuthResponse) => void
 }
 
-export function SignIn<TPath extends string>({
-  copy,
-  errorMessages,
-  redirectTo,
-  signUpHref,
-  onAuthenticated,
-  onSuccess,
-}: SignInProps<TPath>) {
-  const _router = useAppRouter<TPath>()
-  const step = useSignInForm<TPath>({
-    router: _router,
-    redirectTo,
-    errorMessages,
-    onAuthenticated,
-    onSuccess,
-  })
+// Composition only: strings + API behavior wired into the pure form.
+export function SignIn({ onClickOnSignUpButton, onSuccess }: SignInProps) {
+  const handleAuthSuccess = useAuthSuccessHandler()
+  const [serverError, setServerError] = useState<string | null>(null)
+
+  const signInMutation = useSignIn()
+  const { t } = useTranslation("user")
+
+
+
+  const copy = {
+    title: t("auth.signIn.title"),
+    description: t("auth.signIn.description"),
+    identifier: {
+      label: t("auth.signIn.identifier.label"),
+      placeholder: t("auth.signIn.identifier.placeholder"),
+    },
+    password: {
+      label: t("auth.signIn.password.label"),
+      placeholder: t("auth.signIn.password.placeholder"),
+    },
+    submitLabel: t("auth.signIn.submitLabel"),
+    submittingLabel: t("auth.signIn.submittingLabel"),
+    signUpPrompt: t("auth.signIn.signUpPrompt"),
+    signUpLabel: t("auth.signIn.signUpLabel"),
+  }
+
+  // Called only when Zod validation passes (react-hook-form guards the fields).
+  const handleSubmit = async (values: SignInFormValues) => {
+    setServerError(null)
+    try {
+      const data = await signInMutation.mutateAsync({ data: values })
+      handleAuthSuccess(data)
+      onSuccess?.(data.data)
+    } catch (e) {
+      const parsed = parseApiError(e)
+      setServerError(parsed.message || null)
+    }
+  }
 
   return (
     <div className="mx-auto w-full max-w-sm">
       <SignInForm
-        form={step.form}
-        onSubmit={step.onSubmit}
-        onSignUp={() => _router.push(signUpHref)}
-        isSubmitting={step.isSubmitting}
-        errorMessage={step.errorMessage}
         copy={copy}
+        onSubmit={handleSubmit}
+        onClickOnSignUpButton={onClickOnSignUpButton}
+        isPending={signInMutation.isPending}
+        errorMessage={serverError}
       />
     </div>
   )
