@@ -3,6 +3,8 @@ import type { InternalAxiosRequestConfig } from "axios"
 
 import { tokenStorage } from "../auth/token-storage"
 import { API_CONFIG } from "../config"
+import i18n from "@/i18n"
+import { defaultLocale, isLocale } from "@avuny/i18n"
 
 export function requestInterceptor(config: InternalAxiosRequestConfig) {
   attachAccessToken(config)
@@ -40,8 +42,16 @@ function attachOrganizationId(config: InternalAxiosRequestConfig) {
   config.headers[API_CONFIG.headers.organizationId] = organizationId
 }
 
-function attachLanguage(config: InternalAxiosRequestConfig) {
-  const language = Cookies.get("locale") || "en"
+export function attachLanguage(
+  config: InternalAxiosRequestConfig,
+): InternalAxiosRequestConfig {
+  const currentLocale = i18n.resolvedLanguage ?? i18n.language
 
-  config.headers[API_CONFIG.headers.language] = language
+  const locale = isLocale(currentLocale)
+    ? currentLocale
+    : defaultLocale
+
+  config.headers.set(API_CONFIG.headers.language, locale)
+
+  return config
 }

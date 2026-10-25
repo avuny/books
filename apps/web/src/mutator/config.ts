@@ -16,6 +16,6 @@ export const API_CONFIG = {
 
   headers: {
     organizationId: "x-organization-id",
-    language: "x-lang",
+    language: "accept-language",
   },
 }
