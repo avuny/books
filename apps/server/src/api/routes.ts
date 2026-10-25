@@ -60,6 +60,7 @@ app.use(
       "X-Organization-Id",
       "X-Requested-With",
       "X-Lang",
+      "accept-language"
     ],
     maxAge: 600,
   })

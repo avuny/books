@@ -7,6 +7,7 @@ import usersEn from "./locales/users/en.json" with { type: "json" }
 import usersAr from "./locales/users/ar.json" with { type: "json" }
 import adminEn from "./locales/admin/en.json" with { type: "json" }
 import adminAr from "./locales/admin/ar.json" with { type: "json" }
+import { Locale } from "@avuny/i18n"
 
 /**
  * Call once at startup. Never call i18n.changeLanguage() on the server: it is global and races
@@ -44,6 +45,6 @@ export function installRequestLanguage(): void {
  *   const errorTrans = trans({ lang })
  *   // then pass errorTrans to handleResult
  */
-export function trans({ lang }: { lang: string }) {
+export function trans({ lang }: { lang: Locale }) {
   return (key: string): string => i18next.t(key, { lng: lang })
 }

@@ -32,6 +32,7 @@
     "@avuny/logger": "workspace:*",
     "@avuny/utils": "workspace:*",
     "@avuny/zod": "workspace:*",
+    "@avuny/i18n": "workspace:*",
     "@hono/node-server": "^2.1.5",
     "@hono/structured-logger": "^0.1.0",
     "@hono/swagger-ui": "^0.5.0",
