@@ -8,11 +8,11 @@
     "skipLibCheck": true,
     "strict": true,
     "noEmit": true,
+    "types": ["vitest/globals", "@testing-library/jest-dom"],
     "paths": {
       "@workspace/ui/*": ["./src/*"]
     }
   },
   "include": ["."],
-  "exclude": ["node_modules", "dist"],
-  "types": ["vitest", "@testing-library/jest-dom"]
+  "exclude": ["node_modules", "dist"]
 }
