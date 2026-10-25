@@ -6,7 +6,8 @@
   "scripts": {
     "lint": "eslint",
     "format": "prettier --write \"**/*.{ts,tsx}\"",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
   },
   "dependencies": {
     "@avuny/i18n": "workspace:*",
@@ -59,10 +60,8 @@
     "./lib/*": "./src/lib/*.ts",
     "./components/*": "./src/components/*.tsx",
     "./hooks/*": "./src/hooks/*.ts",
-    "./blocks/form": "./src/blocks/form/index.tsx",
-    "./blocks/form/*": "./src/blocks/form/*.tsx",
-    "./blocks/*": "./src/blocks/*.tsx",
-    "./blocks/*/*": "./src/blocks/*/*.tsx",
+    "./blocks/*": "./src/blocks/*",
+    "./blocks/*/*": "./src/blocks/*/*",
     "./providers/*": "./src/providers/*.tsx",
     "./providers/*/*": "./src/providers/*/*.tsx",
     "./types/*": "./src/types/*.ts"
