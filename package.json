@@ -9,7 +9,8 @@
     "format": "turbo format",
     "typecheck": "turbo typecheck",
     "openapi:generate": "turbo api:generate",
-    "api:generate": "turbo api:generate"
+    "api:generate": "turbo api:generate",
+    "print-files": "node ./scripts/print-files.js"
   },
   "devDependencies": {
     "prettier": "^3.9.9",
