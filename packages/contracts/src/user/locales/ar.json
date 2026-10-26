@@ -167,5 +167,39 @@
       "INVALID_IDENTIFIER_TYPE": "استخدم بريداً إلكترونياً أو رقم هاتف صالحاً.",
       "proofExpired": "انتهت صلاحية الجلسة. يرجى البدء من جديد."
     }
+  },
+  "menu": {
+    "account": "الحساب",
+    "settings": "الإعدادات",
+    "notifications": "الإشعارات",
+    "logout": "تسجيل الخروج"
+  },
+  "settings": {
+    "header": "الإعدادات",
+    "sidebarLabel": "قائمة الإعدادات",
+    "sections": {
+      "settings": "الإعدادات"
+    },
+    "nav": {
+      "personalInfo": "المعلومات الشخصية"
+    },
+    "personalInfo": {
+      "title": "المعلومات الشخصية",
+      "description": "حدّث بيانات ملفك الشخصي ومعلوماتك الشخصية.",
+      "name": {
+        "label": "الاسم الكامل",
+        "placeholder": "أدخل اسمك"
+      },
+      "identifier": {
+        "label": "البريد الإلكتروني / المعرّف"
+      },
+      "submitLabel": "حفظ التغييرات",
+      "submittingLabel": "جارٍ الحفظ…",
+      "successMessage": "تم تحديث ملفك الشخصي بنجاح.",
+      "errors": {
+        "fallback": "فشل تحديث الملف الشخصي. يرجى المحاولة مرة أخرى.",
+        "IDENTIFIER_NOT_FOUND": "المستخدم غير موجود."
+      }
+    }
   }
 }

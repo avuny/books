@@ -167,5 +167,39 @@
       "INVALID_IDENTIFIER_TYPE": "Use a valid email or phone number.",
       "proofExpired": "Your session has expired. Please start over."
     }
+  },
+  "menu": {
+    "account": "Account",
+    "settings": "Settings",
+    "notifications": "Notifications",
+    "logout": "Log out"
+  },
+  "settings": {
+    "header": "Settings",
+    "sidebarLabel": "Settings navigation",
+    "sections": {
+      "settings": "Settings"
+    },
+    "nav": {
+      "personalInfo": "Personal Information"
+    },
+    "personalInfo": {
+      "title": "Personal Information",
+      "description": "Update your profile details and personal information.",
+      "name": {
+        "label": "Full name",
+        "placeholder": "Enter your name"
+      },
+      "identifier": {
+        "label": "Email / Identifier"
+      },
+      "submitLabel": "Save changes",
+      "submittingLabel": "Saving…",
+      "successMessage": "Your profile has been updated successfully.",
+      "errors": {
+        "fallback": "Failed to update profile. Please try again.",
+        "IDENTIFIER_NOT_FOUND": "User not found."
+      }
+    }
   }
 }
