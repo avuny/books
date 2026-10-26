@@ -9,6 +9,10 @@ export const ROUTES = {
     index: "/auth",
     forget_password: "/auth/forget-password",
   },
+  user: {
+    index: "/user",
+    settings: "/user/settings",
+  },
 
   home: "/",
 }

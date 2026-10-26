@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next"
 
 import { Navbar } from "@workspace/ui/blocks/layout/navbar"
 import ModeSwitcherBtn from "@workspace/ui/blocks/buttons/mode-switcher-btn"
-import UserButton from "@workspace/ui/blocks/buttons/user-btn"
+import UserButton from "@/components/buttons/user-button"
 
 import { useSignOut } from "@/api"
 import { HomeButton } from "@/components/buttons/home-button"
