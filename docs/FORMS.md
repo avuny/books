@@ -75,12 +75,14 @@ export type SignInCopy = {
   submittingLabel: string
   signUpPrompt: string
   signUpLabel: string
+  forgotPasswordLabel: string
 }
 
 type SignInFormProps = {
   copy: SignInCopy
   onSubmit: (values: SignInFormValues) => void
   onClickOnSignUpButton: () => void
+  onClickOnForgotPasswordButton: () => void
   isPending: boolean
   /** Already localized. Shown in the form-level alert. */
   errorMessage?: string | null
@@ -179,11 +181,17 @@ import { SignInForm, type SignInFormValues } from "./sign-in-form"
 type SignInProps = {
   /** Where the "Sign up" link goes. The route decides how to navigate. */
   onClickOnSignUpButton: () => void
+  /** Where the "Forgot password" link goes. The route decides how to navigate. */
+  onClickOnForgotPasswordButton: () => void
   onSuccess?: (data: AuthResponse) => void
 }
 
 // Composition only: strings + API behavior wired into the pure form.
-export function SignIn({ onClickOnSignUpButton, onSuccess }: SignInProps) {
+export function SignIn({
+  onClickOnSignUpButton,
+  onClickOnForgotPasswordButton,
+  onSuccess,
+}: SignInProps) {
   const handleAuthSuccess = useAuthSuccessHandler()
   const { t } = useTranslation("user")
   const signInMutation = useSignIn()
@@ -204,6 +212,7 @@ export function SignIn({ onClickOnSignUpButton, onSuccess }: SignInProps) {
     submittingLabel: t("auth.signIn.submittingLabel"),
     signUpPrompt: t("auth.signIn.signUpPrompt"),
     signUpLabel: t("auth.signIn.signUpLabel"),
+    forgotPasswordLabel: t("auth.signIn.forgotPasswordLabel"),
   }
 
   // Called only when Zod validation passes.
@@ -224,6 +233,7 @@ export function SignIn({ onClickOnSignUpButton, onSuccess }: SignInProps) {
         copy={copy}
         onSubmit={handleSubmit}
         onClickOnSignUpButton={onClickOnSignUpButton}
+        onClickOnForgotPasswordButton={onClickOnForgotPasswordButton}
         isPending={signInMutation.isPending}
         errorMessage={serverError}
       />
@@ -252,6 +262,9 @@ function SignInPage() {
   return (
     <SignIn
       onClickOnSignUpButton={() => navigate({ to: "/auth/sign-up" })}
+      onClickOnForgotPasswordButton={() =>
+        navigate({ to: "/auth/forgot-password" })
+      }
       onSuccess={() => navigate({ to: "/" })}
     />
   )

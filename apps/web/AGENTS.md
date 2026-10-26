@@ -1,0 +1,111 @@
+# AGENTS.md (@avuny/books-web)
+
+Client SPA built with React 19, Vite, TanStack Router & Query, Tailwind CSS 4, and i18next.
+
+---
+
+## Quick Reference Commands
+
+Run these targeted commands from repo root to verify web app changes fast without running full monorepo tasks:
+
+```bash
+# Typecheck web app (fast, isolated)
+pnpm --filter @avuny/books-web typecheck
+
+# Run web app unit tests
+pnpm --filter @avuny/books-web test
+
+# Re-generate Orval API client & React Query hooks (when backend contracts change)
+pnpm --filter @avuny/books-web api:generate
+
+# Verify i18n keys for a feature (checks en.json & ar.json consistency)
+node - packages/contracts/src/user/locales apps/web/src/features/auth <<'EOF'
+const fs = require("fs"), path = require("path");
+const [localesDir, ...srcDirs] = process.argv.slice(2);
+const flat = (o, p = "") => Object.entries(o).flatMap(([k, v]) => v && typeof v === "object" ? flat(v, `${p}${k}.`) : [`${p}${k}`]);
+const locales = Object.fromEntries(fs.readdirSync(localesDir).filter(f => f.endsWith(".json")).map(f => [f, new Set(flat(JSON.parse(fs.readFileSync(path.join(localesDir, f), "utf8"))))]));
+const walk = d => fs.readdirSync(d, { withFileTypes: true }).flatMap(e => { const p = path.join(d, e.name); return e.isDirectory() ? walk(p) : (/\.tsx?$/.test(e.name) && !/\.(test|spec)\./.test(e.name) ? [p] : []); });
+const used = srcDirs.flatMap(walk).flatMap(f => [...fs.readFileSync(f, "utf8").matchAll(/\bt\(\s*["'`]([^"'`$]+)["'`]/g)].map(m => m[1]));
+const wanted = new Set([...used, ...Object.values(locales).flatMap(k => [...k])]);
+let missing = 0;
+for (const [f, k] of Object.entries(locales)) for (const w of wanted) if (!k.has(w)) { console.log(`${f}: missing ${w}`); missing++; }
+process.exit(missing ? 1 : 0);
+EOF
+```
+
+---
+
+## Architecture: The 3-Layer Pattern
+
+Every screen / form MUST follow the strict 3-layer pattern:
+
+```
+Route (routes/**)
+  └── Container (features/<feature>/<name>/<name>.tsx)
+        └── Form / UI (features/<feature>/<name>/<name>-form.tsx)
+```
+
+| Layer | Responsibility | What It CAN Do | What It MUST NOT Do |
+| --- | --- | --- | --- |
+| **1. Route** (`routes/**`) | Routing & navigation only | `createFileRoute`, `useNavigate()`, pass callbacks | Never import i18n, never call API, no hardcoded strings |
+| **2. Container** (`<name>.tsx`) | Logic, API mutations, copy wiring | `useTranslation()`, `useSignIn()` (API), build `copy` object, `parseApiError()` | Never render raw HTML form markup, never navigate directly |
+| **3. Form** (`<name>-form.tsx`) | Pure presentation & local validation | `useForm` with `zodResolver`, render UI with theme tokens | Never import `react-i18next`, `@/api`, or `@tanstack/react-router` |
+
+### Rules for Secondary Actions & Callbacks
+- Secondary navigation links (e.g. "Forgot password?", "Sign up", "Sign in") must be passed as callbacks: `onClickOn<Target>Button: () => void`.
+- The Form renders a `<Button variant="link" onClick={onClickOn<Target>Button}>{copy.<target>Label}</Button>`.
+- The Container forwards the callback prop.
+- The Route provides the navigation: `onClickOnForgotPasswordButton={() => navigate({ to: "/auth/forgot-password" })}`.
+
+---
+
+## Copy & Internationalization (`i18n`)
+
+**ZERO hardcoded user-facing strings anywhere in `apps/web`.**
+
+1. **Where Copy Lives**:
+   - Copy is located in the contracts package: `packages/contracts/src/<module>/locales/{en,ar}.json`.
+   - Never write strings directly in TSX.
+2. **Synchronized Locales**:
+   - Every single key MUST exist in both `en.json` and `ar.json` with the exact same path and placeholders (`{identifier}`, `{seconds}`, etc.).
+   - Never translate English placeholders or copy English text directly into `ar.json`.
+3. **How Copy is Injected**:
+   - Container calls `const { t } = useTranslation("<module>")`.
+   - Container builds a typed `copy` object and passes it to the Form component as a prop.
+   - Form receives `copy: <Name>Copy` containing already-translated strings.
+
+---
+
+## UI Components & Design System
+
+1. **Shared Form Blocks (`@workspace/ui/blocks/form`)**:
+   - Always use `FormShell`, `InputField`, `OtpField`, and `SubmitButton`.
+   - Do NOT hand-roll form fields, inputs, or submit buttons.
+   - `InputField` supports an optional `action` prop for label-aligned actions (e.g., "Forgot password?").
+2. **Multi-Step Flows (`@workspace/ui/blocks/multi-step`)**:
+   - Use `MultiStepFlow` with state managed via a dedicated reducer hook (`use-<flow>-flow.ts`).
+3. **Strict Semantic Styling**:
+   - Use Tailwind semantic tokens only: `bg-background`, `text-foreground`, `text-muted-foreground`, `border-border`.
+   - Never use raw color values (e.g., `text-gray-500`, `#333`).
+   - Fully support both light and dark modes as well as RTL layouts (e.g., use `justify-between` and flex layouts rather than left/right margins).
+
+---
+
+## API Integration & Error Handling
+
+1. **Codegen Client**:
+   - All API hooks are generated by Orval into `@/api` (e.g., `useSignIn`, `useSignUpSendOtp`).
+   - Never use manual `fetch()` or `axios` instances directly inside features.
+2. **Schemas**:
+   - Derive form types directly from contract schemas: `z.infer<typeof SignInBodySchema>`. Never manually duplicate schema definitions.
+3. **Error Parsing**:
+   - Use `parseApiError(error)` from `@/features/auth/lib/api-error` to safely extract localized server messages or error codes.
+   - Match error codes against contract enums (`AuthErrorCode`, etc.), never against error message strings.
+
+---
+
+## Directory Conventions
+
+- `apps/web/src/features/<feature>/`: Feature modules (e.g., `auth`, `organization`).
+- `apps/web/src/features/<feature>/index.ts`: Public feature barrel export. Routes must **only** import from `@/features/<feature>`, never deep into inner step files.
+- `apps/web/src/routes/`: TanStack file-based routes (`__root.tsx`, `auth/route.tsx`, etc.).
