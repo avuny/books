@@ -44,6 +44,7 @@
     "resetPassword": "إعادة تعيين كلمة المرور"
   },
   "msgs": {
+    "welcome": "مرحباً بك، {thing}!",
     "orAlreadyHaveAnAccountSignIn": "أو لديك حساب بالفعل؟  ",
     "orHaveNotAnAccountSignUp": "أو ليس لديك حساب؟  "
   },
@@ -62,7 +63,8 @@
       "submitLabel": "تسجيل الدخول",
       "submittingLabel": "جارٍ تسجيل الدخول…",
       "signUpPrompt": "ليس لديك حساب؟",
-      "signUpLabel": "إنشاء حساب"
+      "signUpLabel": "إنشاء حساب",
+      "forgotPasswordLabel": "نسيت كلمة المرور؟"
     },
     "signUp": {
       "stepLabel": "الخطوة {current} من {total}",
@@ -75,7 +77,9 @@
           "placeholder": "name@example.com"
         },
         "submitLabel": "إرسال الرمز",
-        "submittingLabel": "جارٍ الإرسال…"
+        "submittingLabel": "جارٍ الإرسال…",
+        "signInPrompt": "لديك حساب بالفعل؟",
+        "signInLabel": "تسجيل الدخول"
       },
       "verifyOtp": {
         "title": "تحقق من هويتك",

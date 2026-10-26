@@ -10,6 +10,7 @@ function SignUpPage() {
   return (
     <SignUpFlow
       maxResends={5}
+      onClickOnSignInButton={() => navigate({ to: "/auth/sign-in" })}
       onSuccess={() => navigate({ to: "/", replace: true })}
     />
   )

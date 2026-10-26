@@ -23,6 +23,7 @@ export type InputFieldProps<
   autoFocus?: boolean
   disabled?: boolean
   className?: string
+  action?: React.ReactNode
 }
 
 export function InputField<
@@ -38,6 +39,7 @@ export function InputField<
   autoFocus = false,
   disabled = false,
   className,
+  action,
 }: InputFieldProps<TFieldValues, TName>) {
   return (
     <Controller
@@ -45,7 +47,14 @@ export function InputField<
       name={name}
       render={({ field, fieldState }) => (
         <Field data-invalid={fieldState.invalid} className={className}>
-          <FieldLabel htmlFor={field.name}>{copy.label}</FieldLabel>
+          {action ? (
+            <div className="flex items-center justify-between">
+              <FieldLabel htmlFor={field.name}>{copy.label}</FieldLabel>
+              {action}
+            </div>
+          ) : (
+            <FieldLabel htmlFor={field.name}>{copy.label}</FieldLabel>
+          )}
 
           <Input
             {...field}

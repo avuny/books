@@ -11,13 +11,18 @@ import { useSignUpFlow } from "./use-sign-up-flow"
 type SignUpFlowProps = {
   /** Optional client-side cap on resends (the server enforces its own). */
   maxResends?: number
+  onClickOnSignInButton?: () => void
   onSuccess?: (data: AuthResponse) => void
 }
 
 const SIGN_UP_STEPS = ["identifier", "verify", "register"] as const
 
 // Composition only: owns the step state, wires each step container together.
-export function SignUpFlow({ maxResends, onSuccess }: SignUpFlowProps) {
+export function SignUpFlow({
+  maxResends,
+  onClickOnSignInButton,
+  onSuccess,
+}: SignUpFlowProps) {
   const { t } = useTranslation("user")
   const flow = useSignUpFlow()
   const { state } = flow
@@ -33,6 +38,7 @@ export function SignUpFlow({ maxResends, onSuccess }: SignUpFlowProps) {
             defaultIdentifier={state.identifier}
             notice={state.notice}
             onSent={flow.sent}
+            onClickOnSignInButton={onClickOnSignInButton}
           />
         ),
         verify: () =>

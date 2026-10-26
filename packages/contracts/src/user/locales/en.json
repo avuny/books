@@ -44,6 +44,7 @@
     "resetPassword": "Reset Password"
   },
   "msgs": {
+    "welcome": "Welcome, {thing}!",
     "orAlreadyHaveAnAccountSignIn": "Or already have an account? ",
     "orHaveNotAnAccountSignUp": "Or don’t have an account? "
   },
@@ -62,7 +63,8 @@
       "submitLabel": "Sign in",
       "submittingLabel": "Signing in…",
       "signUpPrompt": "Don’t have an account?",
-      "signUpLabel": "Sign up"
+      "signUpLabel": "Sign up",
+      "forgotPasswordLabel": "Forgot password?"
     },
     "signUp": {
       "stepLabel": "Step {current} of {total}",
@@ -75,7 +77,9 @@
           "placeholder": "name@example.com"
         },
         "submitLabel": "Send code",
-        "submittingLabel": "Sending code…"
+        "submittingLabel": "Sending code…",
+        "signInPrompt": "Already have an account?",
+        "signInLabel": "Sign in"
       },
       "verifyOtp": {
         "title": "Verify your identity",

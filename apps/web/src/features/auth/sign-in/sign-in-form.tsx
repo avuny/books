@@ -19,12 +19,14 @@ export type SignInCopy = {
   submittingLabel: string
   signUpPrompt: string
   signUpLabel: string
+  forgotPasswordLabel: string
 }
 
 type SignInFormProps = {
   copy: SignInCopy
   onSubmit: (values: SignInFormValues) => void
   onClickOnSignUpButton: () => void
+  onClickOnForgotPasswordButton: () => void
   isPending: boolean
   /** Already localized. Shown in the form-level alert. */
   errorMessage?: string | null
@@ -35,6 +37,7 @@ export function SignInForm({
   copy,
   onSubmit,
   onClickOnSignUpButton,
+  onClickOnForgotPasswordButton,
   isPending,
   errorMessage,
 }: SignInFormProps) {
@@ -42,21 +45,6 @@ export function SignInForm({
     resolver: zodResolver(SignInBodySchema),
     defaultValues: { identifier: "", password: "" },
   })
-
-  const fields = [
-    {
-      name: "identifier",
-      copy: copy.identifier,
-      type: "text",
-      autoComplete: "username",
-    },
-    {
-      name: "password",
-      copy: copy.password,
-      type: "password",
-      autoComplete: "current-password",
-    },
-  ] as const
 
   return (
     <FormShell
@@ -69,18 +57,36 @@ export function SignInForm({
         noValidate
         className="space-y-6"
       >
-        {fields.map((f, i) => (
-          <InputField
-            key={f.name}
-            control={form.control}
-            name={f.name}
-            copy={f.copy}
-            type={f.type}
-            autoComplete={f.autoComplete}
-            autoFocus={i === 0}
-            disabled={isPending}
-          />
-        ))}
+        <InputField
+          control={form.control}
+          name="identifier"
+          copy={copy.identifier}
+          type="text"
+          autoComplete="username"
+          autoFocus
+          disabled={isPending}
+        />
+
+        <InputField
+          control={form.control}
+          name="password"
+          copy={copy.password}
+          type="password"
+          autoComplete="current-password"
+          disabled={isPending}
+          action={
+            <Button
+              type="button"
+              variant="link"
+              size="sm"
+              className="h-auto p-0 text-xs text-muted-foreground hover:text-foreground"
+              disabled={isPending}
+              onClick={onClickOnForgotPasswordButton}
+            >
+              {copy.forgotPasswordLabel}
+            </Button>
+          }
+        />
 
         <SubmitButton
           className="w-full"

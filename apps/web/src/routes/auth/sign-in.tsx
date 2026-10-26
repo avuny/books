@@ -10,6 +10,9 @@ function SignInPage() {
   return (
     <SignIn
       onClickOnSignUpButton={() => navigate({ to: "/auth/sign-up" })}
+      onClickOnForgotPasswordButton={() =>
+        navigate({ to: "/auth/forgot-password" })
+      }
       onSuccess={() => navigate({ to: "/" })}
     />
   )

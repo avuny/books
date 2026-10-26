@@ -9,18 +9,22 @@ import type { AuthResponse } from "@avuny/contracts"
 type SignInProps = {
   /** Where the "Sign up" link goes. The route decides how to navigate. */
   onClickOnSignUpButton: () => void
+  /** Where the "Forgot password" link goes. The route decides how to navigate. */
+  onClickOnForgotPasswordButton: () => void
   onSuccess?: (data: AuthResponse) => void
 }
 
 // Composition only: strings + API behavior wired into the pure form.
-export function SignIn({ onClickOnSignUpButton, onSuccess }: SignInProps) {
+export function SignIn({
+  onClickOnSignUpButton,
+  onClickOnForgotPasswordButton,
+  onSuccess,
+}: SignInProps) {
   const handleAuthSuccess = useAuthSuccessHandler()
   const [serverError, setServerError] = useState<string | null>(null)
 
   const signInMutation = useSignIn()
   const { t } = useTranslation("user")
-
-
 
   const copy = {
     title: t("auth.signIn.title"),
@@ -37,6 +41,7 @@ export function SignIn({ onClickOnSignUpButton, onSuccess }: SignInProps) {
     submittingLabel: t("auth.signIn.submittingLabel"),
     signUpPrompt: t("auth.signIn.signUpPrompt"),
     signUpLabel: t("auth.signIn.signUpLabel"),
+    forgotPasswordLabel: t("auth.signIn.forgotPasswordLabel"),
   }
 
   // Called only when Zod validation passes (react-hook-form guards the fields).
@@ -58,6 +63,7 @@ export function SignIn({ onClickOnSignUpButton, onSuccess }: SignInProps) {
         copy={copy}
         onSubmit={handleSubmit}
         onClickOnSignUpButton={onClickOnSignUpButton}
+        onClickOnForgotPasswordButton={onClickOnForgotPasswordButton}
         isPending={signInMutation.isPending}
         errorMessage={serverError}
       />

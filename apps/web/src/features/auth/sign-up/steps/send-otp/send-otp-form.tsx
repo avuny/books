@@ -3,6 +3,7 @@ import { useForm } from "react-hook-form"
 import type { z } from "@avuny/zod"
 import { SignUpSendOtpBodySchema } from "@avuny/contracts/user"
 
+import { Button } from "@workspace/ui/components/button"
 import { FormShell, InputField, SubmitButton } from "@workspace/ui/blocks/form"
 import type { FieldCopy } from "@workspace/ui/blocks/types"
 
@@ -15,6 +16,8 @@ export type SendOtpCopy = {
   identifier: FieldCopy
   submitLabel: string
   submittingLabel: string
+  signInPrompt: string
+  signInLabel: string
 }
 
 type SendOtpFormProps = {
@@ -22,6 +25,7 @@ type SendOtpFormProps = {
   /** Pre-fills the field when the user comes back to this step. */
   defaultIdentifier?: string
   onSubmit: (values: SendOtpFormValues) => void
+  onClickOnSignInButton?: () => void
   isPending: boolean
   /** Already localized. Shown in the form-level alert. */
   errorMessage?: string | null
@@ -32,6 +36,7 @@ export function SendOtpForm({
   copy,
   defaultIdentifier = "",
   onSubmit,
+  onClickOnSignInButton,
   isPending,
   errorMessage,
 }: SendOtpFormProps) {
@@ -69,6 +74,22 @@ export function SendOtpForm({
           loadingLabel={copy.submittingLabel}
         />
       </form>
+
+      {onClickOnSignInButton && (
+        <div className="flex items-center justify-center gap-1 text-sm text-muted-foreground">
+          <span>{copy.signInPrompt}</span>
+          <Button
+            type="button"
+            variant="link"
+            size="sm"
+            className="px-0"
+            disabled={isPending}
+            onClick={onClickOnSignInButton}
+          >
+            {copy.signInLabel}
+          </Button>
+        </div>
+      )}
     </FormShell>
   )
 }

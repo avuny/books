@@ -11,11 +11,17 @@ type SendOtpProps = {
   defaultIdentifier: string
   /** One-off, already localized message from the flow (e.g. proof expired). */
   notice?: string | null
+  onClickOnSignInButton?: () => void
   onSent: (identifier: string, challenge: OtpChallenge) => void
 }
 
 // Composition only: strings + API behavior wired into the pure form.
-export function SendOtp({ defaultIdentifier, notice, onSent }: SendOtpProps) {
+export function SendOtp({
+  defaultIdentifier,
+  notice,
+  onClickOnSignInButton,
+  onSent,
+}: SendOtpProps) {
   const { t } = useTranslation("user")
   const sendOtpMutation = useSignUpSendOtp()
   const [serverError, setServerError] = useState<string | null>(null)
@@ -29,6 +35,8 @@ export function SendOtp({ defaultIdentifier, notice, onSent }: SendOtpProps) {
     },
     submitLabel: t("auth.signUp.sendOtp.submitLabel"),
     submittingLabel: t("auth.signUp.sendOtp.submittingLabel"),
+    signInPrompt: t("auth.signUp.sendOtp.signInPrompt"),
+    signInLabel: t("auth.signUp.sendOtp.signInLabel"),
   }
 
   // Called only when Zod validation passes.
@@ -47,6 +55,7 @@ export function SendOtp({ defaultIdentifier, notice, onSent }: SendOtpProps) {
       copy={copy}
       defaultIdentifier={defaultIdentifier}
       onSubmit={handleSubmit}
+      onClickOnSignInButton={onClickOnSignInButton}
       isPending={sendOtpMutation.isPending}
       errorMessage={serverError ?? notice}
     />
