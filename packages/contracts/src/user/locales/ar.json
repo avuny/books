@@ -66,29 +66,30 @@
     },
     "signUp": {
       "stepLabel": "الخطوة {current} من {total}",
-      "identifier": {
+      "proofExpired": "انتهت صلاحية الجلسة. يرجى البدء من جديد.",
+      "sendOtp": {
         "title": "إنشاء حساب جديد",
         "description": "أدخل بريدك الإلكتروني أو رقم هاتفك وسنرسل لك رمز التحقق.",
-        "field": {
+        "identifier": {
           "label": "البريد الإلكتروني أو رقم الهاتف",
           "placeholder": "name@example.com"
         },
         "submitLabel": "إرسال الرمز",
         "submittingLabel": "جارٍ الإرسال…"
       },
-      "verify": {
+      "verifyOtp": {
         "title": "تحقق من هويتك",
         "description": "أدخل الرمز الذي أرسلناه إلى {identifier}.",
         "codeLabel": "رمز التحقق",
         "submitLabel": "تحقق",
         "submittingLabel": "جارٍ التحقق…",
-        "resendCountdownLabel": "يمكنك طلب رمز جديد خلال {seconds} ث",
+        "resendPrompt": "لم يصلك الرمز؟",
         "resendLabel": "إعادة إرسال الرمز",
-        "resendingLabel": "جارٍ الإرسال…",
-        "resendCounterLabel": "الرموز المُعادة: {count} من {max}",
+        "resendIn": "إعادة الإرسال خلال {seconds} ث",
+        "resendLimitReached": "لقد وصلت إلى الحد الأقصى لإعادة الإرسال.",
         "changeIdentifierLabel": "استخدام بريد إلكتروني أو هاتف مختلف"
       },
-      "register": {
+      "completeSignUp": {
         "title": "إتمام إعداد الحساب",
         "description": "أخبرنا باسمك واختر كلمة مرور.",
         "name": {
@@ -103,7 +104,7 @@
           "label": "تأكيد كلمة المرور",
           "placeholder": "أعد كتابة كلمة المرور"
         },
-        "passwordMismatchMessage": "كلمتا المرور غير متطابقتين.",
+        "passwordMismatch": "كلمتا المرور غير متطابقتين.",
         "submitLabel": "إنشاء الحساب",
         "submittingLabel": "جارٍ إنشاء الحساب…"
       }

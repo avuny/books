@@ -66,29 +66,30 @@
     },
     "signUp": {
       "stepLabel": "Step {current} of {total}",
-      "identifier": {
+      "proofExpired": "Your session has expired. Please start over.",
+      "sendOtp": {
         "title": "Create your account",
         "description": "Enter your email or phone number and we will send you a verification code.",
-        "field": {
+        "identifier": {
           "label": "Email or phone number",
           "placeholder": "name@example.com"
         },
         "submitLabel": "Send code",
         "submittingLabel": "Sending code…"
       },
-      "verify": {
+      "verifyOtp": {
         "title": "Verify your identity",
         "description": "Enter the code we sent to {identifier}.",
         "codeLabel": "Verification code",
         "submitLabel": "Verify",
         "submittingLabel": "Verifying…",
-        "resendCountdownLabel": "You can request a new code in {seconds}s",
+        "resendPrompt": "Didn’t get the code?",
         "resendLabel": "Resend code",
-        "resendingLabel": "Sending…",
-        "resendCounterLabel": "Codes resent: {count} of {max}",
+        "resendIn": "Resend in {seconds}s",
+        "resendLimitReached": "You’ve reached the maximum number of resends.",
         "changeIdentifierLabel": "Use a different email or phone"
       },
-      "register": {
+      "completeSignUp": {
         "title": "Finish setting up",
         "description": "Tell us your name and choose a password.",
         "name": {
@@ -103,7 +104,7 @@
           "label": "Confirm password",
           "placeholder": "Repeat your password"
         },
-        "passwordMismatchMessage": "Passwords do not match.",
+        "passwordMismatch": "Passwords do not match.",
         "submitLabel": "Create account",
         "submittingLabel": "Creating account…"
       }
