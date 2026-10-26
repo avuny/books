@@ -109,6 +109,47 @@
         "submittingLabel": "جارٍ إنشاء الحساب…"
       }
     },
+    "forgotPassword": {
+      "stepLabel": "الخطوة {current} من {total}",
+      "proofExpired": "انتهت صلاحية الجلسة. يرجى البدء من جديد.",
+      "sendOtp": {
+        "title": "نسيت كلمة المرور؟",
+        "description": "أدخل بريدك الإلكتروني أو رقم هاتفك أو اسم المستخدم وسنرسل لك رمز التحقق.",
+        "identifier": {
+          "label": "البريد الإلكتروني أو الهاتف أو اسم المستخدم",
+          "placeholder": "name@example.com"
+        },
+        "submitLabel": "إرسال الرمز",
+        "submittingLabel": "جارٍ الإرسال…"
+      },
+      "verifyOtp": {
+        "title": "أدخل رمز التحقق",
+        "description": "إذا كان {identifier} مرتبطاً بحساب، فقد أرسلنا إليه رمز التحقق. أدخله أدناه.",
+        "codeLabel": "رمز التحقق",
+        "submitLabel": "تحقق",
+        "submittingLabel": "جارٍ التحقق…",
+        "resendPrompt": "لم يصلك الرمز؟",
+        "resendLabel": "إعادة إرسال الرمز",
+        "resendIn": "إعادة الإرسال خلال {seconds} ث",
+        "resendLimitReached": "لقد وصلت إلى الحد الأقصى لإعادة الإرسال. يرجى المحاولة لاحقاً.",
+        "changeIdentifierLabel": "استخدام حساب مختلف"
+      },
+      "resetPassword": {
+        "title": "اختر كلمة مرور جديدة",
+        "description": "أدخل كلمة مرور جديدة لحسابك.",
+        "newPassword": {
+          "label": "كلمة المرور الجديدة",
+          "placeholder": "كلمة المرور الجديدة"
+        },
+        "confirmPassword": {
+          "label": "تأكيد كلمة المرور الجديدة",
+          "placeholder": "أعد كتابة كلمة المرور الجديدة"
+        },
+        "passwordMismatch": "كلمتا المرور غير متطابقتين.",
+        "submitLabel": "إعادة تعيين كلمة المرور",
+        "submittingLabel": "جارٍ إعادة التعيين…"
+      }
+    },
     "errors": {
       "fallback": "حدث خطأ ما. يرجى المحاولة مرة أخرى.",
       "INVALID_CREDENTIALS": "المعرّف أو كلمة المرور غير صحيحة.",

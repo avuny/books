@@ -109,6 +109,47 @@
         "submittingLabel": "Creating account…"
       }
     },
+    "forgotPassword": {
+      "stepLabel": "Step {current} of {total}",
+      "proofExpired": "Your session has expired. Please start over.",
+      "sendOtp": {
+        "title": "Forgot your password?",
+        "description": "Enter your email, phone number or username and we will send you a verification code.",
+        "identifier": {
+          "label": "Email, phone or username",
+          "placeholder": "name@example.com"
+        },
+        "submitLabel": "Send code",
+        "submittingLabel": "Sending code…"
+      },
+      "verifyOtp": {
+        "title": "Enter your code",
+        "description": "If {identifier} matches an account, we have sent a verification code. Enter it below.",
+        "codeLabel": "Verification code",
+        "submitLabel": "Verify",
+        "submittingLabel": "Verifying…",
+        "resendPrompt": "Didn’t get the code?",
+        "resendLabel": "Resend code",
+        "resendIn": "Resend in {seconds}s",
+        "resendLimitReached": "You’ve reached the resend limit. Please try again later.",
+        "changeIdentifierLabel": "Use a different account"
+      },
+      "resetPassword": {
+        "title": "Choose a new password",
+        "description": "Enter a new password for your account.",
+        "newPassword": {
+          "label": "New password",
+          "placeholder": "Your new password"
+        },
+        "confirmPassword": {
+          "label": "Confirm new password",
+          "placeholder": "Repeat your new password"
+        },
+        "passwordMismatch": "Passwords do not match.",
+        "submitLabel": "Reset password",
+        "submittingLabel": "Resetting…"
+      }
+    },
     "errors": {
       "fallback": "Something went wrong. Please try again.",
       "INVALID_CREDENTIALS": "Incorrect identifier or password.",

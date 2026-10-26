@@ -21,7 +21,6 @@ import {
 } from "../../users/index.js"
 import { writeAuditEvent, computeIdentifierHmac } from "../../audit/index.js"
 import { getMessageSender } from "../../messaging/index.js"
-import { scheduleBackground } from "../../../background-runner.js"
 
 const router = createOpenAPIRouter()
 
@@ -145,7 +144,9 @@ router.openapi(forgotPasswordSendOtpRoute, async (c) => {
   const result = await issueOtp(db, {
     purpose: "FORGET_PASSWORD",
     identifier: normalized,
-    userId: targetUserId,
+    // userId intentionally omitted: FORGET_PASSWORD is a public purpose.
+    // The DB constraint otps_user_binding_chk requires user_id IS NULL for
+    // SIGN_UP and FORGET_PASSWORD; only ADD_IDENTIFIER / UPDATE_IDENTIFIER bind a user.
     ipAddress,
     userAgent,
     requestId,
@@ -169,29 +170,27 @@ router.openapi(forgotPasswordSendOtpRoute, async (c) => {
 
   if (result.success && !isSuppressed && deliveryTarget) {
     const sender = getMessageSender()
-    scheduleBackground(async () => {
-      await sender.sendOtp({
-        to: deliveryTarget.value,
-        type: deliveryTarget.type,
-        code: result.data.code,
-        purpose: "FORGET_PASSWORD",
-        lang,
-      })
-    }, c)
+    await sender.sendOtp({
+      to: deliveryTarget.value,
+      type: deliveryTarget.type,
+      code: result.data.code,
+      purpose: "FORGET_PASSWORD",
+      lang,
+    })
   }
 
   // Map result data to SendOtpResponseSchema (omit internal code)
   const publicResult = result.success
     ? {
-        success: true as const,
-        data: {
-          challengeId: result.data.challengeId,
-          expiresAt: result.data.expiresAt,
-          resendAvailableAt: result.data.resendAvailableAt,
-        },
-        msg: result.msg,
-        meta: result.meta,
-      }
+      success: true as const,
+      data: {
+        challengeId: result.data.challengeId,
+        expiresAt: result.data.expiresAt,
+        resendAvailableAt: result.data.resendAvailableAt,
+      },
+      msg: result.msg,
+      meta: result.meta,
+    }
     : result
 
   return handleResult({
