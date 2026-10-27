@@ -6,6 +6,7 @@ import ModeSwitcherBtn from "@workspace/ui/blocks/buttons/mode-switcher-btn"
 import UserButton from "@/components/buttons/user-button"
 
 import { useSignOut } from "@/api"
+import DashboardButton from "@/components/buttons/dashboard-button"
 import { HomeButton } from "@/components/buttons/home-button"
 import { LanguageSwitcherButton } from "@/components/buttons/language-button"
 import { useAuthenticatedHandler } from "@/features/auth"
@@ -30,7 +31,12 @@ function Index() {
   return (
     <>
       <Navbar
-        start={<HomeButton />}
+        start={
+          <>
+            <HomeButton />
+            <DashboardButton />
+          </>
+        }
         end={
           <>
             <UserButton

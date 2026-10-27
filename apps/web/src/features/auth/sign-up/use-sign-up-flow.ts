@@ -29,13 +29,26 @@ const initial: FlowState = {
 function reducer(state: FlowState, a: Action): FlowState {
   switch (a.type) {
     case "sent":
-      return { ...initial, step: "verify", identifier: a.identifier, challenge: a.challenge }
+      return {
+        ...initial,
+        step: "verify",
+        identifier: a.identifier,
+        challenge: a.challenge,
+      }
     case "resent":
-      return { ...state, challenge: a.challenge, resendCount: state.resendCount + 1 }
+      return {
+        ...state,
+        challenge: a.challenge,
+        resendCount: state.resendCount + 1,
+      }
     case "verified":
       return { ...state, step: "register", verificationToken: a.token }
     case "restart":
-      return { ...initial, identifier: state.identifier, notice: a.notice ?? null }
+      return {
+        ...initial,
+        identifier: state.identifier,
+        notice: a.notice ?? null,
+      }
   }
 }
 
@@ -43,8 +56,10 @@ export function useSignUpFlow() {
   const [state, dispatch] = useReducer(reducer, initial)
   return {
     state,
-    sent: (identifier: string, challenge: OtpChallenge) => dispatch({ type: "sent", identifier, challenge }),
-    resent: (challenge: OtpChallenge) => dispatch({ type: "resent", challenge }),
+    sent: (identifier: string, challenge: OtpChallenge) =>
+      dispatch({ type: "sent", identifier, challenge }),
+    resent: (challenge: OtpChallenge) =>
+      dispatch({ type: "resent", challenge }),
     verified: (token: string) => dispatch({ type: "verified", token }),
     restart: (notice?: string) => dispatch({ type: "restart", notice }),
   }

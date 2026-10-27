@@ -1,6 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router"
 
 import { SignIn } from "@/features/auth"
+import { ROUTES } from "@/features/routes"
 
 export const Route = createFileRoute("/auth/sign-in")({ component: SignInPage })
 
@@ -13,7 +14,7 @@ function SignInPage() {
       onClickOnForgotPasswordButton={() =>
         navigate({ to: "/auth/forgot-password" })
       }
-      onSuccess={() => navigate({ to: "/" })}
+      onSuccess={() => navigate({ to: ROUTES.app.main })}
     />
   )
 }

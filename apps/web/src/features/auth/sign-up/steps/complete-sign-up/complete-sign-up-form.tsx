@@ -13,7 +13,11 @@ function createSchema(passwordMismatchMessage: string) {
     .superRefine((v, ctx) => {
       const bytesError = validatePasswordBytes(v.password)
       if (bytesError) {
-        ctx.addIssue({ code: "custom", path: ["password"], message: bytesError })
+        ctx.addIssue({
+          code: "custom",
+          path: ["password"],
+          message: bytesError,
+        })
       }
       if (v.password !== v.confirmPassword) {
         ctx.addIssue({

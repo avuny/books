@@ -58,9 +58,7 @@ export function SignUpFlow({
             <CompleteSignUp
               identifier={state.identifier}
               verificationToken={state.verificationToken}
-              onProofInvalid={() =>
-                flow.restart(t("auth.signUp.proofExpired"))
-              }
+              onProofInvalid={() => flow.restart(t("auth.signUp.proofExpired"))}
               onSuccess={onSuccess}
             />
           ) : null,

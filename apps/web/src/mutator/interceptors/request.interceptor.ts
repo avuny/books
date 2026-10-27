@@ -43,13 +43,11 @@ function attachOrganizationId(config: InternalAxiosRequestConfig) {
 }
 
 export function attachLanguage(
-  config: InternalAxiosRequestConfig,
+  config: InternalAxiosRequestConfig
 ): InternalAxiosRequestConfig {
   const currentLocale = i18n.resolvedLanguage ?? i18n.language
 
-  const locale = isLocale(currentLocale)
-    ? currentLocale
-    : defaultLocale
+  const locale = isLocale(currentLocale) ? currentLocale : defaultLocale
 
   config.headers.set(API_CONFIG.headers.language, locale)
 

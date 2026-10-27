@@ -21,7 +21,12 @@ export function parseApiError(error: unknown): ApiError {
  */
 export function unwrap<T>(res: unknown): T {
   let body = res
-  if (isRecord(body) && "status" in body && isRecord(body.data) && "success" in body.data) {
+  if (
+    isRecord(body) &&
+    "status" in body &&
+    isRecord(body.data) &&
+    "success" in body.data
+  ) {
     body = body.data
   }
   if (isRecord(body) && "data" in body) return body.data as T
@@ -33,8 +38,15 @@ export function resolveErrorMessage(
   messages: { fallback: string } & Partial<Record<string, string>>
 ): string | null {
   if (!error) return null
-  return (error.code && messages[error.code]) || error.message || messages.fallback
+  return (
+    (error.code && messages[error.code]) || error.message || messages.fallback
+  )
 }
 
-export const fill = (template: string, values: Record<string, string | number>) =>
-  template.replace(/\{(\w+)\}/g, (_, k: string) => String(values[k] ?? `{${k}}`))
+export const fill = (
+  template: string,
+  values: Record<string, string | number>
+) =>
+  template.replace(/\{(\w+)\}/g, (_, k: string) =>
+    String(values[k] ?? `{${k}}`)
+  )

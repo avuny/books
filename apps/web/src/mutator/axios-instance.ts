@@ -10,9 +10,7 @@ export const AXIOS_INSTANCE = Axios.create({
   withCredentials: true,
 })
 
-AXIOS_INSTANCE.interceptors.request.use(
-  requestInterceptor
-)
+AXIOS_INSTANCE.interceptors.request.use(requestInterceptor)
 
 AXIOS_INSTANCE.interceptors.response.use(
   (response) => response,

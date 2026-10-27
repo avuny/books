@@ -11,10 +11,7 @@ export type AuthSuccessOptions = {
 export function useAuthSuccessHandler() {
   const { t } = useTranslation()
 
-  return (
-    data: { data: AuthResponse },
-    options?: AuthSuccessOptions,
-  ) => {
+  return (data: { data: AuthResponse }, options?: AuthSuccessOptions) => {
     const { tokens, user } = data.data
 
     localStorage.setItem("accessToken", tokens.accessToken)
@@ -25,7 +22,7 @@ export function useAuthSuccessHandler() {
         : t("msgs.welcome", { thing: user.name }),
       {
         description: options?.toastDescription?.(user),
-      },
+      }
     )
 
     window.setTimeout(() => {

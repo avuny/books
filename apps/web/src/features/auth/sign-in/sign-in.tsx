@@ -1,7 +1,7 @@
 import { useState } from "react"
 import { useAuthSuccessHandler } from "@/features/auth"
 import { SignInForm, type SignInFormValues } from "./sign-in-form"
-import { useSignIn, } from "@/api"
+import { useSignIn } from "@/api"
 import { useTranslation } from "react-i18next"
 import { parseApiError } from "../lib/api-error"
 import type { AuthResponse } from "@avuny/contracts"
