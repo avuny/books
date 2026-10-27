@@ -75,7 +75,7 @@ pnpm dlx shadcn@latest add <component-name> -c apps/web
    - Backend services return `Result<T, E>` (`ok(data)` or `fail(code, message)`) from `@avuny/utils`.
    - Server endpoints map `Result` objects using `handleResult(c, result)` from `@avuny/hono`.
 4. **Package-Specific AGENTS.md**:
-   - Check subpackage `AGENTS.md` files (e.g. in `apps/web/`, `packages/contracts/`, `packages/db/`, `packages/hono/`) for localized package constraints.
+   - Check subpackage `AGENTS.md` files (e.g. in `apps/server/`, `apps/web/`, `packages/contracts/`, `packages/db/`, `packages/hono/`) for localized package constraints.
 
 ---
 

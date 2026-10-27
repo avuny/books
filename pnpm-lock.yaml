@@ -71,6 +71,9 @@ importers:
       dotenv:
         specifier: ^17.4.2
         version: 17.4.2
+      drizzle-orm:
+        specifier: ^0.38.4
+        version: 0.38.4(@cloudflare/workers-types@4.20260702.1)(@neondatabase/serverless@0.10.4)(@types/pg@8.11.6)(@types/react@19.3.0)(postgres@3.4.9)(react@19.3.0)
       hono:
         specifier: ^4.10.7
         version: 4.13.13
@@ -333,6 +336,9 @@ importers:
       drizzle-kit:
         specifier: ^0.30.0
         version: 0.30.6(supports-color@10.2.2)
+      tsx:
+        specifier: ^4.23.15
+        version: 4.23.15
       typescript:
         specifier: ^5.7.0
         version: 5.9.3
@@ -547,6 +553,9 @@ importers:
       react:
         specifier: ^19.3.0
         version: 19.3.0
+      react-cookie:
+        specifier: ^8.1.2
+        version: 8.1.2(@types/react@19.3.0)(react@19.3.0)
       react-day-picker:
         specifier: ^10.0.2
         version: 10.0.2(@types/react@19.3.0)(react@19.3.0)
@@ -3473,6 +3482,11 @@ packages:
   '@types/hast@3.0.5':
     resolution: {integrity: sha512-rp/ezSWaD1m44dPKICGhiskI13nVr7qTloFwDa/IYkhhf5nzwP+zIQcIJh3WIFSBOy/H1PzB40jPjMDksN4F+g==}
 
+  '@types/hoist-non-react-statics@3.3.7':
+    resolution: {integrity: sha512-PQTyIulDkIDro8P+IHbKCsw7U2xxBYflVzW/FgWdCAePD9xGSidgA76/GeJ6lBKoblyhf9pBY763gbrN+1dI8g==}
+    peerDependencies:
+      '@types/react': '*'
+
   '@types/js-cookie@3.0.6':
     resolution: {integrity: sha512-wkw9yd1kEXOPnvEeEV1Go1MmxtBJL0RR79aOTAApecWFVu7w0NNXNqhcWgvw2YgZDYadliXkl14pa3WXw5jlCQ==}
 
@@ -5034,6 +5048,9 @@ packages:
   hermes-parser@0.25.1:
     resolution: {integrity: sha512-6pEjquH3rqaI6cYAXYPcz9MS4rY6R4ngRgrgfDshRptUZIc3lw0MCIJIGDj9++mfySOuPTHB4nrSW99BCvOPIA==}
 
+  hoist-non-react-statics@3.3.2:
+    resolution: {integrity: sha512-/gGivxi8JPKWNm/W0jSmzcMPpfpPLc3dY/6GxhX2hQ9iGj3aDfklV4ET7NjKpSinLpJ5vafa9iiGIEZg10SfBw==}
+
   hono@4.13.13:
     resolution: {integrity: sha512-CQ46U0ZkAGmbT/4UxdzzGJpacP2IeKgY4a5/tOI9AABbpOMfK739wfDXmv1usCk+3RkKj1hQy4/fjhiwa2xlrA==}
     engines: {node: '>=16.9.0'}
@@ -6447,6 +6464,11 @@ packages:
     resolution: {integrity: sha512-K5zQjDllxWkf7Z5xJdV0/B0WTNqx6vxG70zJE4N0kBs4LovmEYWJzQGxC9bS9RAKu3bgM40lrd5zoLJ12MQ5BA==}
     engines: {node: '>= 0.10'}
 
+  react-cookie@8.1.2:
+    resolution: {integrity: sha512-S45Z1y1dHyYfLEI4bFKQICuP+SwJqTPWbdc2ZpE6aQSdjSVJAjUDfwTPq8B7BWieIsgyyEWMb/QOrudtwJMjXA==}
+    peerDependencies:
+      react: '>= 16.3.0'
+
   react-day-picker@10.0.2:
     resolution: {integrity: sha512-QetiKtZWE9Uaw/pM/SYNv6WPYOTRnSJ2puL0GgwkmUFMIwiY0dtjH1W4B7DOVXVNQM0ZOClGpH/heOfBSzWeiA==}
     engines: {node: '>=18'}
@@ -7294,6 +7316,9 @@ packages:
 
   unist-util-visit@5.1.0:
     resolution: {integrity: sha512-m+vIdyeCOpdr/QeQCu2EzxX/ohgS8KbnPDgFni4dQsfSCtpz8UqDyY5GjRru8PDKuYn7Fq19j1CQ+nJSsGKOzg==}
+
+  universal-cookie@8.1.2:
+    resolution: {integrity: sha512-kcKzTGNsxVytujrYOvQbvh//QyFrA53HrzCGyzh6i9ujCww5gfPrLK0tG+jJD40SIIldiEjBNPPSR8fBMS21GA==}
 
   universalify@0.1.2:
     resolution: {integrity: sha512-rBJeI5CXAlmy1pV+617WB9J63U6XcazHHF2f2dbJix4XzpUF0RS3Zbj0FGIOCAva5P/d/GBOYaACQ1w+0azUkg==}
@@ -10504,6 +10529,11 @@ snapshots:
     dependencies:
       '@types/unist': 3.0.3
 
+  '@types/hoist-non-react-statics@3.3.7(@types/react@19.3.0)':
+    dependencies:
+      '@types/react': 19.3.0
+      hoist-non-react-statics: 3.3.2
+
   '@types/js-cookie@3.0.6': {}
 
   '@types/json-schema@7.0.15': {}
@@ -12399,6 +12429,10 @@ snapshots:
     dependencies:
       hermes-estree: 0.25.1
 
+  hoist-non-react-statics@3.3.2:
+    dependencies:
+      react-is: 16.13.1
+
   hono@4.13.13: {}
 
   hookified@1.15.1: {}
@@ -13730,6 +13764,15 @@ snapshots:
       iconv-lite: 0.7.3
       unpipe: 1.0.0
 
+  react-cookie@8.1.2(@types/react@19.3.0)(react@19.3.0):
+    dependencies:
+      '@types/hoist-non-react-statics': 3.3.7(@types/react@19.3.0)
+      hoist-non-react-statics: 3.3.2
+      react: 19.3.0
+      universal-cookie: 8.1.2
+    transitivePeerDependencies:
+      - '@types/react'
+
   react-day-picker@10.0.2(@types/react@19.3.0)(react@19.3.0):
     dependencies:
       '@date-fns/tz': 1.5.0
@@ -14777,6 +14820,10 @@ snapshots:
       '@types/unist': 3.0.3
       unist-util-is: 6.0.1
       unist-util-visit-parents: 6.0.2
+
+  universal-cookie@8.1.2:
+    dependencies:
+      cookie: 1.1.1
 
   universalify@0.1.2: {}
 
