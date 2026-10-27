@@ -1,6 +1,8 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute } from "@tanstack/react-router"
 
-export const Route = createFileRoute('/organization/$orgId/role')({ component: RolePage })
+export const Route = createFileRoute("/organization/$orgId/role")({
+  component: RolePage,
+})
 
 function RolePage() {
   const { orgId } = Route.useParams()

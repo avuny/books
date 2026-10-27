@@ -60,7 +60,7 @@ export function PersonalInfo({ onSuccess }: PersonalInfoProps) {
         queryClient.invalidateQueries({ queryKey: ["getAuthenticatedUser"] }),
         queryClient.invalidateQueries({ queryKey: getGetMeQueryKey() }),
       ])
-      setSuccessMessage(copy.successMessage)
+      setSuccessMessage(copy.successMessage ?? null)
       onSuccess?.()
     } catch (e) {
       const parsed = parseApiError(e)

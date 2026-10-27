@@ -7,6 +7,7 @@ import {
 import { Navbar } from "@workspace/ui/blocks/layout/navbar"
 import ModeSwitcherBtn from "@workspace/ui/blocks/buttons/mode-switcher-btn"
 
+import DashboardButton from "@/components/buttons/dashboard-button"
 import { HomeButton } from "@/components/buttons/home-button"
 import { LanguageSwitcherButton } from "@/components/buttons/language-button"
 import UserButton from "@/components/buttons/user-button"
@@ -26,6 +27,7 @@ export function SettingsLayout({ children }: SettingsLayoutProps) {
             <>
               <SidebarTrigger className="-ml-1" />
               <HomeButton />
+              <DashboardButton />
             </>
           }
           end={

@@ -1,8 +1,32 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, useNavigate } from "@tanstack/react-router"
+import { OrganizationDetails } from "@/features/organization"
 
-export const Route = createFileRoute('/organization/$orgId/')({ component: OrgPage })
+export const Route = createFileRoute("/organization/$orgId/")({
+  component: OrgPage,
+})
 
 function OrgPage() {
   const { orgId } = Route.useParams()
-  return <h1 className="text-xl font-semibold">Organization: {orgId}</h1>
+  const navigate = useNavigate()
+
+  return (
+    <OrganizationDetails
+      orgId={orgId}
+      onSelectOrganization={(newOrgId) => {
+        void navigate({
+          to: "/organization/$orgId",
+          params: { orgId: newOrgId },
+        })
+      }}
+      onNavigateToAll={() => {
+        void navigate({
+          to: "/organization",
+          search: { all: true },
+        })
+      }}
+      onNavigateToCreate={() => {
+        void navigate({ to: "/organization/create" })
+      }}
+    />
+  )
 }

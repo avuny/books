@@ -10,6 +10,7 @@ import { ThemeProvider } from "@workspace/ui/providers/theme-provider"
 import { AppRouterProvider } from "@workspace/ui/providers/router-provider"
 import type { AppRouter } from "@workspace/ui/blocks/types"
 
+import { SelectedOrganizationContextProvider } from "@workspace/ui/providers/selected-org-provider"
 import { Toaster } from "@workspace/ui/components/sonner"
 
 // Create the TanStack Router instance once.
@@ -51,11 +52,13 @@ export function AppProviders() {
     <QueryClientProvider client={queryClient}>
       <LanguageProvider>
         <ThemeProvider>
-          <AppRouterProvider router={appRouter}>
-            <RouterProvider router={router} />
-          </AppRouterProvider>
+          <SelectedOrganizationContextProvider>
+            <AppRouterProvider router={appRouter}>
+              <RouterProvider router={router} />
+            </AppRouterProvider>
 
-          <Toaster />
+            <Toaster />
+          </SelectedOrganizationContextProvider>
         </ThemeProvider>
       </LanguageProvider>
     </QueryClientProvider>
