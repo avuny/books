@@ -1,0 +1,152 @@
+{
+  "errors": {
+    "ORGANIZATION_NOT_FOUND": "Organization not found.",
+    "ORGANIZATION_FORBIDDEN": "You are not allowed to perform this action.",
+    "ORGANIZATION_LIMIT_REACHED": "Organization limit reached.",
+    "ORGANIZATION_NAME_TAKEN": "You already have an organization with this name.",
+    "ORGANIZATION_CODE_TAKEN": "Organization code is already taken.",
+    "ORGANIZATION_CODE_RESERVED": "This organization code is reserved.",
+    "fallback": "An unexpected error occurred while processing the organization request."
+  },
+  "labels": {
+    "name": "Organization Name",
+    "code": "Organization Code",
+    "countryCode": "Country",
+    "stateId": "State / Province",
+    "defaultCurrency": "Default Currency",
+    "timezone": "Timezone",
+    "ownerUsername": "Owner Username",
+    "status": "Status"
+  },
+  "headers": {
+    "organizations": "Organizations",
+    "createOrganization": "Create Organization",
+    "updateOrganization": "Update Organization",
+    "deleteOrganization": "Delete Organization"
+  },
+  "msgs": {
+    "created": "Organization created successfully",
+    "updated": "Organization updated successfully",
+    "deleted": "Organization deleted successfully",
+    "retrieved": "Organization retrieved successfully",
+    "listRetrieved": "Organizations retrieved successfully",
+    "counted": "Organizations counted successfully"
+  },
+  "actions": {
+    "create": "Create Organization",
+    "update": "Update Organization",
+    "delete": "Delete Organization",
+    "switch": "Switch Organization"
+  },
+  "create": {
+    "title": "Create Organization",
+    "description": "Set up a new organization to manage your books, members, and transactions.",
+    "name": {
+      "label": "Organization Name",
+      "placeholder": "e.g. Acme Corp"
+    },
+    "code": {
+      "label": "Organization Slug / Code",
+      "placeholder": "e.g. acme-corp",
+      "description": "Unique identifier used in URLs"
+    },
+    "countryCode": {
+      "label": "Country",
+      "placeholder": "Select a country"
+    },
+    "stateId": {
+      "label": "State / Province",
+      "placeholder": "Select a state"
+    },
+    "stateDisabledPlaceholder": "Select a country first",
+    "defaultCurrency": {
+      "label": "Default Currency",
+      "placeholder": "Select currency"
+    },
+    "timezone": {
+      "label": "Timezone",
+      "placeholder": "Select timezone"
+    },
+    "ownerUsername": {
+      "label": "Owner Username",
+      "placeholder": "e.g. johndoe",
+      "description": "Your handle as owner inside this organization"
+    },
+    "submitLabel": "Create Organization",
+    "submittingLabel": "Creating Organization…",
+    "cancelLabel": "Cancel"
+  },
+  "list": {
+    "title": "Your Organizations",
+    "description": "Select an organization to manage or create a new one.",
+    "emptyTitle": "No organizations found",
+    "emptyDescription": "You are not a member of any organization yet. Create your first organization to get started.",
+    "createButton": "Create Organization",
+    "comboboxPlaceholder": "Select organization…",
+    "searchPlaceholder": "Search organizations…",
+    "noResults": "No organization found.",
+    "createAction": "Create Organization"
+  },
+  "details": {
+    "title": "Organization Details",
+    "description": "Overview and configuration of your organization.",
+    "id": "Organization ID",
+    "code": "Organization Code",
+    "name": "Organization Name",
+    "status": "Status",
+    "currency": "Default Currency",
+    "timezone": "Timezone",
+    "country": "Country",
+    "state": "State / Province",
+    "allOrganizations": "All Organizations",
+    "switchOrganization": "Switch Organization",
+    "none": "Not specified"
+  },
+  "update": {
+    "title": "Organization Information",
+    "description": "Update your organization profile, currency and regional settings.",
+    "code": {
+      "label": "Organization Slug / Code",
+      "description": "Unique identifier used in URLs (cannot be changed)"
+    },
+    "name": {
+      "label": "Organization Name",
+      "placeholder": "e.g. Acme Corp"
+    },
+    "countryCode": {
+      "label": "Country",
+      "placeholder": "Select a country"
+    },
+    "stateId": {
+      "label": "State / Province",
+      "placeholder": "Select a state"
+    },
+    "stateDisabledPlaceholder": "Select a country first",
+    "defaultCurrency": {
+      "label": "Default Currency",
+      "placeholder": "Select currency"
+    },
+    "timezone": {
+      "label": "Timezone",
+      "placeholder": "Select timezone"
+    },
+    "status": {
+      "label": "Status"
+    },
+    "submitLabel": "Save Changes",
+    "submittingLabel": "Saving Changes…",
+    "successMessage": "Organization information updated successfully."
+  },
+  "settings": {
+    "header": "Organization Settings",
+    "sidebarLabel": "Organization settings navigation",
+    "sections": {
+      "settings": "Settings"
+    },
+    "nav": {
+      "information": "Organization Information"
+    }
+  }
+}
+
+

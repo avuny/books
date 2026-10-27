@@ -1,0 +1,21 @@
+{
+  "errors": {
+    "COUNTRY_NOT_FOUND": "الدولة غير موجودة.",
+    "STATE_NOT_FOUND": "المحافظة أو الولاية غير موجودة.",
+    "CURRENCY_NOT_FOUND": "العملة غير موجودة.",
+    "TIMEZONE_NOT_FOUND": "المنطقة الزمنية غير موجودة."
+  },
+  "labels": {
+    "country": "الدولة",
+    "state": "المحافظة / الولاية",
+    "currency": "العملة",
+    "timezone": "المنطقة الزمنية"
+  },
+  "msgs": {
+    "countriesRetrieved": "تم استرجاع الدول بنجاح",
+    "countryRetrieved": "تم استرجاع بيانات الدولة بنجاح",
+    "statesRetrieved": "تم استرجاع المحافظات والولايات بنجاح",
+    "currenciesRetrieved": "تم استرجاع العملات بنجاح",
+    "timezonesRetrieved": "تم استرجاع المناطق الزمنية بنجاح"
+  }
+}

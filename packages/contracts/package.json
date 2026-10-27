@@ -18,6 +18,10 @@
       "import": "./dist/user/index.js",
       "types": "./dist/user/index.d.ts"
     },
+    "./organization": {
+      "import": "./dist/organization/index.js",
+      "types": "./dist/organization/index.d.ts"
+    },
     "./common": {
       "import": "./dist/common/index.js",
       "types": "./dist/common/index.d.ts"

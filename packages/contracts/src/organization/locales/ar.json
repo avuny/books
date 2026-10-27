@@ -1,0 +1,152 @@
+{
+  "errors": {
+    "ORGANIZATION_NOT_FOUND": "المؤسسة غير موجودة.",
+    "ORGANIZATION_FORBIDDEN": "غير مصرح لك بالقيام بهذا الإجراء.",
+    "ORGANIZATION_LIMIT_REACHED": "تم الوصول للحد الأقصى لعدد المؤسسات.",
+    "ORGANIZATION_NAME_TAKEN": "لديك بالفعل مؤسسة بهذا الاسم.",
+    "ORGANIZATION_CODE_TAKEN": "رمز المؤسسة مستخدم بالفعل.",
+    "ORGANIZATION_CODE_RESERVED": "رمز المؤسسة هذا محجوز.",
+    "fallback": "حدث خطأ غير متوقع أثناء معالجة طلب المؤسسة."
+  },
+  "labels": {
+    "name": "اسم المؤسسة",
+    "code": "رمز المؤسسة",
+    "countryCode": "الدولة",
+    "stateId": "المحافظة / الولاية",
+    "defaultCurrency": "العملة الافتراضية",
+    "timezone": "المنطقة الزمنية",
+    "ownerUsername": "اسم مستخدم المالك",
+    "status": "الحالة"
+  },
+  "headers": {
+    "organizations": "المؤسسات",
+    "createOrganization": "إنشاء مؤسسة",
+    "updateOrganization": "تعديل المؤسسة",
+    "deleteOrganization": "حذف المؤسسة"
+  },
+  "msgs": {
+    "created": "تم إنشاء المؤسسة بنجاح",
+    "updated": "تم تحديث المؤسسة بنجاح",
+    "deleted": "تم حذف المؤسسة بنجاح",
+    "retrieved": "تم استرجاع بيانات المؤسسة بنجاح",
+    "listRetrieved": "تم استرجاع قائمة المؤسسات بنجاح",
+    "counted": "تم حساب عدد المؤسسات بنجاح"
+  },
+  "actions": {
+    "create": "إنشاء مؤسسة",
+    "update": "تعديل المؤسسة",
+    "delete": "حذف المؤسسة",
+    "switch": "تبديل المؤسسة"
+  },
+  "create": {
+    "title": "إنشاء مؤسسة",
+    "description": "قم بإعداد مؤسسة جديدة لإدارة السجلات والأعضاء والمعاملات.",
+    "name": {
+      "label": "اسم المؤسسة",
+      "placeholder": "مثال: شركة النور"
+    },
+    "code": {
+      "label": "رمز المؤسسة",
+      "placeholder": "مثال: alnour-corp",
+      "description": "المعرّف الفريد المستخدم في الروابط"
+    },
+    "countryCode": {
+      "label": "الدولة",
+      "placeholder": "اختر الدولة"
+    },
+    "stateId": {
+      "label": "المحافظة / الولاية",
+      "placeholder": "اختر المحافظة أو الولاية"
+    },
+    "stateDisabledPlaceholder": "يرجى اختيار الدولة أولاً",
+    "defaultCurrency": {
+      "label": "العملة الافتراضية",
+      "placeholder": "اختر العملة"
+    },
+    "timezone": {
+      "label": "المنطقة الزمنية",
+      "placeholder": "اختر المنطقة الزمنية"
+    },
+    "ownerUsername": {
+      "label": "اسم مستخدم المالك",
+      "placeholder": "مثال: johndoe",
+      "description": "معرّفك بصفتك مالك المؤسسة"
+    },
+    "submitLabel": "إنشاء مؤسسة",
+    "submittingLabel": "جارٍ إنشاء المؤسسة…",
+    "cancelLabel": "إلغاء"
+  },
+  "list": {
+    "title": "مؤسساتك",
+    "description": "اختر مؤسسة لإدارتها أو أنشئ مؤسسة جديدة.",
+    "emptyTitle": "لا توجد مؤسسات",
+    "emptyDescription": "لست عضواً في أي مؤسسة بعد. أنشئ مؤسستك الأولى للبدء.",
+    "createButton": "إنشاء مؤسسة",
+    "comboboxPlaceholder": "اختر مؤسسة…",
+    "searchPlaceholder": "بحث في المؤسسات…",
+    "noResults": "لم يتم العثور على أي مؤسسة.",
+    "createAction": "إنشاء مؤسسة"
+  },
+  "details": {
+    "title": "تفاصيل المؤسسة",
+    "description": "نظرة عامة وإعدادات مؤسستك.",
+    "id": "معرّف المؤسسة",
+    "code": "رمز المؤسسة",
+    "name": "اسم المؤسسة",
+    "status": "الحالة",
+    "currency": "العملة الافتراضية",
+    "timezone": "المنطقة الزمنية",
+    "country": "الدولة",
+    "state": "المحافظة / الولاية",
+    "allOrganizations": "جميع المؤسسات",
+    "switchOrganization": "تبديل المؤسسة",
+    "none": "غير محدد"
+  },
+  "update": {
+    "title": "معلومات المؤسسة",
+    "description": "تحديث الملف التعريفي لمؤسستك والعملة والإعدادات الإقليمية.",
+    "code": {
+      "label": "رمز المؤسسة",
+      "description": "المعرّف الفريد المستخدم في الروابط (لا يمكن تغييره)"
+    },
+    "name": {
+      "label": "اسم المؤسسة",
+      "placeholder": "مثال: شركة النور"
+    },
+    "countryCode": {
+      "label": "الدولة",
+      "placeholder": "اختر الدولة"
+    },
+    "stateId": {
+      "label": "المحافظة / الولاية",
+      "placeholder": "اختر المحافظة أو الولاية"
+    },
+    "stateDisabledPlaceholder": "يرجى اختيار الدولة أولاً",
+    "defaultCurrency": {
+      "label": "العملة الافتراضية",
+      "placeholder": "اختر العملة"
+    },
+    "timezone": {
+      "label": "المنطقة الزمنية",
+      "placeholder": "اختر المنطقة الزمنية"
+    },
+    "status": {
+      "label": "الحالة"
+    },
+    "submitLabel": "حفظ التغييرات",
+    "submittingLabel": "جارٍ حفظ التغييرات…",
+    "successMessage": "تم تحديث معلومات المؤسسة بنجاح."
+  },
+  "settings": {
+    "header": "إعدادات المؤسسة",
+    "sidebarLabel": "التنقل في إعدادات المؤسسة",
+    "sections": {
+      "settings": "الإعدادات"
+    },
+    "nav": {
+      "information": "معلومات المؤسسة"
+    }
+  }
+}
+
+

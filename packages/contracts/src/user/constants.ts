@@ -62,6 +62,9 @@ export const AUDIT_EVENT_TYPES = {
   ADMIN_USER_SUSPENDED: "admin.user_suspended",
   ADMIN_USER_REACTIVATED: "admin.user_reactivated",
   ADMIN_SESSIONS_REVOKED: "admin.sessions_revoked",
+  ORGANIZATION_CREATED: "ORGANIZATION_CREATED",
+  ORGANIZATION_UPDATED: "ORGANIZATION_UPDATED",
+  ORGANIZATION_DELETED: "ORGANIZATION_DELETED",
 } as const
 
 export type AuditEventType =
