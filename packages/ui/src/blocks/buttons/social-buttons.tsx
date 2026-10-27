@@ -1,21 +1,21 @@
-"use client";
+"use client"
 
-import { Button, buttonVariants } from "@workspace/ui/components/button";
-import React, { JSX } from "react";
+import { Button, buttonVariants } from "@workspace/ui/components/button"
+import React, { JSX } from "react"
 
-type ProviderKey = "google" | "facebook";
+type ProviderKey = "google" | "facebook"
 
 type ProviderConfig = {
-  url: string;
-};
+  url: string
+}
 
 type Providers = {
-  [K in ProviderKey]?: ProviderConfig;
-};
+  [K in ProviderKey]?: ProviderConfig
+}
 
 interface SocialLoginProps {
-  providers: Providers;
-  onSelect?: (provider: ProviderKey, url: string) => void;
+  providers: Providers
+  onSelect?: (provider: ProviderKey, url: string) => void
 }
 
 const icons: Record<ProviderKey, JSX.Element> = {
@@ -35,17 +35,17 @@ const icons: Record<ProviderKey, JSX.Element> = {
       />
     </svg>
   ),
-};
+}
 
 export const SocialButtons: React.FC<SocialLoginProps> = ({
   providers,
   onSelect,
 }) => {
   return (
-    <div className="flex items-center justify-center   gap-4">
+    <div className="flex items-center justify-center gap-4">
       {Object.entries(providers).map(([key, config]) => {
-        const providerKey = key as ProviderKey;
-        if (!config) return null;
+        const providerKey = key as ProviderKey
+        if (!config) return null
 
         return (
           <a
@@ -53,7 +53,7 @@ export const SocialButtons: React.FC<SocialLoginProps> = ({
             href={config.url}
             className={buttonVariants({
               variant: "outline",
-              className: "cursor-pointer ",
+              className: "cursor-pointer",
             })}
           >
             {icons[providerKey]}
@@ -62,8 +62,8 @@ export const SocialButtons: React.FC<SocialLoginProps> = ({
               {providerKey.charAt(0).toUpperCase() + providerKey.slice(1)}
             </span>
           </a>
-        );
+        )
       })}
     </div>
-  );
-};
+  )
+}

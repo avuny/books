@@ -1,4 +1,10 @@
-import { Controller, type Control, type FieldPath, type FieldValues, type FieldError as RHFFieldError } from "react-hook-form"
+import {
+  Controller,
+  type Control,
+  type FieldPath,
+  type FieldValues,
+  type FieldError as RHFFieldError,
+} from "react-hook-form"
 import { REGEXP_ONLY_DIGITS } from "input-otp"
 
 import { Field, FieldError, FieldLabel } from "@workspace/ui/components/field"

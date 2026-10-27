@@ -2,7 +2,10 @@ import type { ComponentProps } from "react"
 import { Button } from "@workspace/ui/components/button"
 import { Loader2Icon } from "lucide-react"
 
-export type SubmitButtonProps = Omit<ComponentProps<typeof Button>, "children"> & {
+export type SubmitButtonProps = Omit<
+  ComponentProps<typeof Button>,
+  "children"
+> & {
   loading?: boolean
   label: string
   loadingLabel?: string

@@ -1,5 +1,10 @@
 import type { HTMLInputTypeAttribute } from "react"
-import { Controller, type Control, type FieldPath, type FieldValues } from "react-hook-form"
+import {
+  Controller,
+  type Control,
+  type FieldPath,
+  type FieldValues,
+} from "react-hook-form"
 
 import {
   Field,
@@ -72,9 +77,7 @@ export function InputField<
             <FieldDescription>{copy.description}</FieldDescription>
           )}
 
-          {fieldState.invalid && (
-            <FieldError errors={[fieldState.error]} />
-          )}
+          {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
         </Field>
       )}
     />

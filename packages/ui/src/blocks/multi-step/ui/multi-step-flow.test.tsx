@@ -27,7 +27,9 @@ describe("MultiStepFlow", () => {
   })
 
   it("follows the step as it changes", () => {
-    const { rerender } = render(<MultiStepFlow {...base} current="identifier" />)
+    const { rerender } = render(
+      <MultiStepFlow {...base} current="identifier" />
+    )
 
     rerender(<MultiStepFlow {...base} current="register" />)
 

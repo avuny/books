@@ -28,18 +28,24 @@ describe("resolveErrorMessage", () => {
   })
 
   it("prefers the localized message for a known code", () => {
-    expect(resolveErrorMessage({ code: "KNOWN", message: "raw" }, messages)).toBe("known")
+    expect(
+      resolveErrorMessage({ code: "KNOWN", message: "raw" }, messages)
+    ).toBe("known")
   })
 
   it("falls back to the server message, then the fallback", () => {
-    expect(resolveErrorMessage({ code: "OTHER", message: "raw" }, messages)).toBe("raw")
+    expect(
+      resolveErrorMessage({ code: "OTHER", message: "raw" }, messages)
+    ).toBe("raw")
     expect(resolveErrorMessage({}, messages)).toBe("fallback")
   })
 })
 
 describe("unwrap", () => {
   it("unwraps a body returned directly", () => {
-    expect(unwrap<{ id: number }>({ success: true, data: { id: 1 } })).toEqual({ id: 1 })
+    expect(unwrap<{ id: number }>({ success: true, data: { id: 1 } })).toEqual({
+      id: 1,
+    })
   })
 
   it("unwraps a { data, status } mutator result", () => {

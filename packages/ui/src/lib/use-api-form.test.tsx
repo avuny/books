@@ -44,7 +44,9 @@ describe("useApiForm", () => {
   })
 
   it("shows the localized message for a known code as a root error", async () => {
-    const { result, onSuccess } = setup(() => Promise.reject(apiError("INVALID_CREDENTIALS")))
+    const { result, onSuccess } = setup(() =>
+      Promise.reject(apiError("INVALID_CREDENTIALS"))
+    )
     await submit(result)
     expect(onSuccess).not.toHaveBeenCalled()
     expect(result.current.errorMessage).toBe("Wrong credentials")
@@ -61,14 +63,19 @@ describe("useApiForm", () => {
       fieldErrors: { USERNAME_TAKEN: "username" },
     })
     await submit(result)
-    expect(result.current.form.formState.errors.username?.message).toBe("Username already taken")
+    expect(result.current.form.formState.errors.username?.message).toBe(
+      "Username already taken"
+    )
     expect(result.current.errorMessage).toBeNull()
   })
 
   it("resets fields only for configured codes", async () => {
-    const { result } = setup(() => Promise.reject(apiError("INVALID_CREDENTIALS")), {
-      resetOnCode: { INVALID_CREDENTIALS: ["password"] },
-    })
+    const { result } = setup(
+      () => Promise.reject(apiError("INVALID_CREDENTIALS")),
+      {
+        resetOnCode: { INVALID_CREDENTIALS: ["password"] },
+      }
+    )
     act(() => result.current.form.setValue("password", "secret"))
     await submit(result)
     expect(result.current.form.getValues("password")).toBe("")
