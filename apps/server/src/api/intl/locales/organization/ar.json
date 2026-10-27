@@ -1,0 +1,10 @@
+{
+  "errors": {
+    "ORGANIZATION_NOT_FOUND": "المؤسسة غير موجودة.",
+    "ORGANIZATION_FORBIDDEN": "غير مصرح لك بالقيام بهذا الإجراء.",
+    "ORGANIZATION_LIMIT_REACHED": "تم الوصول للحد الأقصى لعدد المؤسسات.",
+    "ORGANIZATION_NAME_TAKEN": "لديك بالفعل مؤسسة بهذا الاسم.",
+    "ORGANIZATION_CODE_TAKEN": "رمز المؤسسة مستخدم بالفعل.",
+    "ORGANIZATION_CODE_RESERVED": "رمز المؤسسة هذا محجوز."
+  }
+}

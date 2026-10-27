@@ -7,6 +7,10 @@ import usersEn from "./locales/users/en.json" with { type: "json" }
 import usersAr from "./locales/users/ar.json" with { type: "json" }
 import adminEn from "./locales/admin/en.json" with { type: "json" }
 import adminAr from "./locales/admin/ar.json" with { type: "json" }
+import organizationEn from "./locales/organization/en.json" with { type: "json" }
+import organizationAr from "./locales/organization/ar.json" with { type: "json" }
+import geoEn from "./locales/geo/en.json" with { type: "json" }
+import geoAr from "./locales/geo/ar.json" with { type: "json" }
 import { Locale } from "@avuny/i18n"
 
 /**
@@ -17,7 +21,7 @@ export function installRequestLanguage(): void {
   i18next.init({
     lng: "en",
     fallbackLng: "en",
-    ns: ["otp", "auth", "users", "admin"],
+    ns: ["otp", "auth", "users", "admin", "organization", "geo"],
     defaultNS: "otp",
     resources: {
       en: {
@@ -25,12 +29,16 @@ export function installRequestLanguage(): void {
         auth: authEn,
         users: usersEn,
         admin: adminEn,
+        organization: organizationEn,
+        geo: geoEn,
       },
       ar: {
         otp: otpAr,
         auth: authAr,
         users: usersAr,
         admin: adminAr,
+        organization: organizationAr,
+        geo: geoAr,
       },
     },
     interpolation: { escapeValue: false },

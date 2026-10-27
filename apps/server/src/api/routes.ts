@@ -14,6 +14,8 @@ import { otpRoutes } from "./modules/otp/index.js"
 import { authRoutes } from "./modules/auth/index.js"
 import { usersRoutes } from "./modules/users/index.js"
 import { adminRoutes } from "./modules/admin/index.js"
+import { organizationRoutes } from "./modules/organization/index.js"
+import { geoRoutes } from "./modules/geo/index.js"
 import { cors } from "hono/cors"
 import { config } from "./index.js"
 
@@ -76,6 +78,8 @@ app.route("/otp", otpRoutes)
 app.route("/auth", authRoutes)
 app.route("/users", usersRoutes)
 app.route("/admin", adminRoutes)
+app.route("/organizations", organizationRoutes)
+app.route("/geo", geoRoutes)
 
 app.notFound((c) =>
   c.json(
