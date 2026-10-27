@@ -4,14 +4,14 @@ import Loading from "@workspace/ui/blocks/loading/loading"
 import { Button } from "@workspace/ui/components/button"
 import { BriefcaseBusinessIcon } from "lucide-react"
 
-type DashboardButtonProps = {
-  user: unknown | undefined
-  isLoading: boolean
-  onClick: () => void
+export type DashboardButtonProps = {
+  user?: unknown | undefined
+  isLoading?: boolean
+  onClick?: () => void
 }
 
 export default function DashboardButton({
-  isLoading,
+  isLoading = false,
   user,
   onClick,
 }: DashboardButtonProps) {
