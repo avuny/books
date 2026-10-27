@@ -9,7 +9,7 @@ import {
   uniqueIndex,
   uuid,
 } from "drizzle-orm/pg-core"
-import { pk, timestamps, timestamptz } from "./_helpers.js"
+import { pk, timestamps, timestamptz } from "../_helpers.js"
 import { users } from "./users.js"
 
 export const sessionPlatformEnum = pgEnum("session_platform", ["web", "mobile"])

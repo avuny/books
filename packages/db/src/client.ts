@@ -1,6 +1,6 @@
 import { drizzle } from "drizzle-orm/neon-http"
 import { neon } from "@neondatabase/serverless"
-import type { PgDatabase } from "drizzle-orm/pg-core"
+import type { PgDatabase, PgTransaction } from "drizzle-orm/pg-core"
 import * as schema from "./schema/index.js"
 
 /**
@@ -15,6 +15,9 @@ import * as schema from "./schema/index.js"
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type Database = PgDatabase<any, typeof schema>
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type Tx = PgTransaction<any, typeof schema, any>
 
 export const createDbClient = (connectionString: string): Database => {
   const sql = neon(connectionString)
