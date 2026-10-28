@@ -1,0 +1,14 @@
+{
+  "errors": {
+    "ROLE_NOT_FOUND": "الدور غير موجود.",
+    "ROLE_PERMISSION_DENIED": "ليست لديك صلاحية لتنفيذ هذا الإجراء.",
+    "ROLE_NAME_TAKEN": "يوجد دور بهذا الاسم بالفعل.",
+    "ROLE_SYSTEM_READONLY": "لا يمكن تعديل أدوار النظام أو حذفها.",
+    "ROLE_IN_USE": "هذا الدور لا يزال مُسندًا لأعضاء. ألغِ إسناده أولًا.",
+    "ROLE_FEATURE_NOT_AVAILABLE": "الأدوار المخصصة غير متاحة في باقتك.",
+    "ROLE_INVALID_PERMISSION": "إحدى الصلاحيات غير صالحة.",
+    "ROLE_MEMBER_NOT_FOUND": "العضو غير موجود.",
+    "ROLE_MEMBER_NOT_ASSIGNABLE": "يمكن إسناد الأدوار فقط للأعضاء المُدارين النشطين.",
+    "ROLE_ESCALATION_NOT_ALLOWED": "يمكنك فقط إسناد أدوار صلاحياتها لديك بالفعل."
+  }
+}

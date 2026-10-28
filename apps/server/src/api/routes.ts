@@ -10,13 +10,19 @@ import { requestId } from "hono/request-id"
 
 import healthRoute from "./health.route.js"
 import { installRequestLanguage } from "./intl/i18next.js"
-import { otpRoutes } from "./modules/otp/index.js"
-import { authRoutes } from "./modules/auth/index.js"
-import { usersRoutes } from "./modules/users/index.js"
-import { adminRoutes } from "./modules/admin/index.js"
-import { organizationRoutes } from "./modules/organization/index.js"
-import { geoRoutes } from "./modules/geo/index.js"
 import { cors } from "hono/cors"
+// [codegen:imports:start]
+import { adminRoutes } from "./modules/admin/index.js"
+import { authRoutes } from "./modules/auth/index.js"
+import { geoRoutes } from "./modules/geo/index.js"
+import { organizationRoutes } from "./modules/organization/index.js"
+import { organizationInvitationRoutes } from "./modules/organization-invitation/index.js"
+import { organizationUserRoutes } from "./modules/organization-user/index.js"
+import { otpRoutes } from "./modules/otp/index.js"
+import { roleRoutes } from "./modules/role/index.js"
+import { sidebarRoutes } from "./modules/sidebar/index.js"
+import { usersRoutes } from "./modules/users/index.js"
+// [codegen:imports:end]
 import { config } from "./index.js"
 
 const APP_NAME = "hono-worker-api"
@@ -74,12 +80,18 @@ app.use(requestLogger())
 
 // ── Routes ────────────────────────────────────────────────────────────────────
 app.route("/", healthRoute)
-app.route("/otp", otpRoutes)
-app.route("/auth", authRoutes)
-app.route("/users", usersRoutes)
+// [codegen:routes:start]
 app.route("/admin", adminRoutes)
-app.route("/organizations", organizationRoutes)
+app.route("/auth", authRoutes)
 app.route("/geo", geoRoutes)
+app.route("/organizations", organizationRoutes)
+app.route("/organization-invitations", organizationInvitationRoutes)
+app.route("/organization-users", organizationUserRoutes)
+app.route("/otp", otpRoutes)
+app.route("/roles", roleRoutes)
+app.route("/sidebar", sidebarRoutes)
+app.route("/users", usersRoutes)
+// [codegen:routes:end]
 
 app.notFound((c) =>
   c.json(

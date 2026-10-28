@@ -1,0 +1,12 @@
+{
+  "errors": {
+    "ORGANIZATION_USER_NOT_FOUND": "Member not found.",
+    "ORGANIZATION_USER_FORBIDDEN": "You are not allowed to perform this action.",
+    "ORGANIZATION_USER_USERNAME_TAKEN": "This username is already used in the organization.",
+    "ORGANIZATION_USER_OWNER_PROTECTED": "The owner cannot be changed this way. Use ownership transfer.",
+    "ORGANIZATION_USER_SELF_ACTION_NOT_ALLOWED": "You cannot do this to your own membership.",
+    "ORGANIZATION_USER_LIMIT_REACHED": "Your plan's user limit for this member type has been reached.",
+    "ORGANIZATION_USER_INVALID_OWNER_TARGET": "The new owner must be an active managed member.",
+    "ORGANIZATION_USER_CONFIRMATION_MISMATCH": "The confirmation code does not match the organization code."
+  }
+}
