@@ -1,0 +1,47 @@
+{
+  "errors": {
+    "ROLE_NOT_FOUND": "الدور غير موجود.",
+    "ROLE_PERMISSION_DENIED": "ليست لديك صلاحية لتنفيذ هذا الإجراء.",
+    "ROLE_NAME_TAKEN": "يوجد دور بهذا الاسم بالفعل.",
+    "ROLE_SYSTEM_READONLY": "لا يمكن تعديل أدوار النظام أو حذفها.",
+    "ROLE_IN_USE": "هذا الدور لا يزال مُسندًا لأعضاء. ألغِ إسناده أولًا.",
+    "ROLE_FEATURE_NOT_AVAILABLE": "الأدوار المخصصة غير متاحة في باقتك.",
+    "ROLE_INVALID_PERMISSION": "إحدى الصلاحيات غير صالحة.",
+    "ROLE_MEMBER_NOT_FOUND": "العضو غير موجود.",
+    "ROLE_MEMBER_NOT_ASSIGNABLE": "يمكن إسناد الأدوار فقط للأعضاء المُدارين النشطين.",
+    "ROLE_ESCALATION_NOT_ALLOWED": "يمكنك فقط إسناد أدوار صلاحياتها لديك بالفعل."
+  },
+  "labels": {
+    "resources": {
+      "organization": "المؤسسة",
+      "organization_user": "الأعضاء",
+      "organization_invitation": "الدعوات",
+      "role": "الأدوار",
+      "*": "كل شيء"
+    },
+    "actions": {
+      "create": "إنشاء",
+      "read": "عرض",
+      "update": "تعديل",
+      "delete": "حذف",
+      "deactivate": "تعطيل / إعادة تفعيل",
+      "assign": "إسناد للأعضاء",
+      "*": "كل الإجراءات"
+    },
+    "effects": { "allow": "السماح", "deny": "المنع" },
+    "systemRoles": {
+      "Administrator": "مدير النظام",
+      "Team manager": "مدير الفريق",
+      "Viewer": "مشاهد"
+    }
+  },
+  "msgs": {
+    "ROLES_LISTED": "تم جلب الأدوار بنجاح.",
+    "ROLE_CREATED": "تم إنشاء الدور.",
+    "ROLE_UPDATED": "تم تحديث الدور.",
+    "ROLE_DELETED": "تم حذف الدور.",
+    "MEMBER_ROLES_UPDATED": "تم تحديث أدوار العضو.",
+    "CATALOG_RETRIEVED": "تم جلب قائمة الصلاحيات بنجاح.",
+    "MY_PERMISSIONS_RETRIEVED": "تم جلب الصلاحيات بنجاح."
+  }
+}

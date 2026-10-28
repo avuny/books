@@ -146,6 +146,19 @@
     "nav": {
       "information": "معلومات المؤسسة"
     }
+  },
+  "dashboard": {
+    "header": "المؤسسة",
+    "sidebarLabel": "التنقل في المؤسسة",
+    "sections": {
+      "main": "الرئيسية",
+      "management": "الإدارة"
+    },
+    "nav": {
+      "overview": "نظرة عامة",
+      "users": "المستخدمون",
+      "roles": "الأدوار"
+    }
   }
 }
 

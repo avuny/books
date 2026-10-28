@@ -1,0 +1,30 @@
+{
+  "errors": {
+    "ORGANIZATION_USER_NOT_FOUND": "العضو غير موجود.",
+    "ORGANIZATION_USER_FORBIDDEN": "غير مسموح لك بتنفيذ هذا الإجراء.",
+    "ORGANIZATION_USER_USERNAME_TAKEN": "اسم المستخدم مستخدم بالفعل في المؤسسة.",
+    "ORGANIZATION_USER_OWNER_PROTECTED": "لا يمكن تغيير المالك بهذه الطريقة. استخدم نقل الملكية.",
+    "ORGANIZATION_USER_SELF_ACTION_NOT_ALLOWED": "لا يمكنك تنفيذ هذا الإجراء على عضويتك.",
+    "ORGANIZATION_USER_LIMIT_REACHED": "تم الوصول إلى حد المستخدمين في باقتك لهذا النوع.",
+    "ORGANIZATION_USER_INVALID_OWNER_TARGET": "يجب أن يكون المالك الجديد عضوًا مُدارًا نشطًا.",
+    "ORGANIZATION_USER_CONFIRMATION_MISMATCH": "رمز التأكيد لا يطابق رمز المؤسسة."
+  },
+  "labels": {
+    "owner": "المالك",
+    "managed": "عضو فريق",
+    "portal": "مستخدم البوابة",
+    "username": "اسم المستخدم",
+    "status": "الحالة",
+    "active": "نشط",
+    "inactive": "غير نشط"
+  },
+  "msgs": {
+    "MEMBERS_LISTED": "تم جلب الأعضاء بنجاح.",
+    "USERNAME_UPDATED": "تم تحديث اسم المستخدم.",
+    "MEMBER_ACTIVATED": "تمت إعادة تفعيل العضو.",
+    "MEMBER_DEACTIVATED": "تم تعطيل العضو.",
+    "OWNERSHIP_TRANSFERRED": "تم نقل الملكية.",
+    "MY_ORGANIZATIONS_LISTED": "تم جلب المؤسسات بنجاح.",
+    "MEMBERSHIP_TOUCHED": "تم تحديث العضوية."
+  }
+}

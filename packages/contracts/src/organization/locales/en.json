@@ -146,6 +146,19 @@
     "nav": {
       "information": "Organization Information"
     }
+  },
+  "dashboard": {
+    "header": "Organization",
+    "sidebarLabel": "Organization navigation",
+    "sections": {
+      "main": "Main",
+      "management": "Management"
+    },
+    "nav": {
+      "overview": "Overview",
+      "users": "Users",
+      "roles": "Roles"
+    }
   }
 }
 

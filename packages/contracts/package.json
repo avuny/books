@@ -44,7 +44,9 @@
     "api:docs": "api-documenter markdown -i temp -o docs",
     "clean:build": "rm -rf dist tsconfig.build.tsbuildinfo .turbo",
     "clean:modules": "rm -rf node_modules",
-    "clean:all": "pnpm clean:modules && pnpm clean:build"
+    "clean:all": "pnpm clean:modules && pnpm clean:build",
+    "barrel:generate": "tsx ./scripts/generate-barrel.ts",
+    "barrel:watch": "tsx ./scripts/generate-barrel.ts --watch"
   },
   "devDependencies": {
     "@changesets/cli": "^2.29.7",
@@ -53,6 +55,7 @@
     "@vitest/coverage-v8": "3.2.4",
     "@vitest/ui": "^3.2.3",
     "eslint": "^9.28.0",
+    "tsx": "^4.19.0",
     "typescript": "~5.8.3",
     "vitest": "^3.2.3"
   },

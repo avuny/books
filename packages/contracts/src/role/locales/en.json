@@ -1,0 +1,47 @@
+{
+  "errors": {
+    "ROLE_NOT_FOUND": "Role not found.",
+    "ROLE_PERMISSION_DENIED": "You do not have permission to perform this action.",
+    "ROLE_NAME_TAKEN": "A role with this name already exists.",
+    "ROLE_SYSTEM_READONLY": "System roles cannot be changed or deleted.",
+    "ROLE_IN_USE": "This role is still assigned to members. Unassign it first.",
+    "ROLE_FEATURE_NOT_AVAILABLE": "Custom roles are not available on your plan.",
+    "ROLE_INVALID_PERMISSION": "One of the permissions is not valid.",
+    "ROLE_MEMBER_NOT_FOUND": "Member not found.",
+    "ROLE_MEMBER_NOT_ASSIGNABLE": "Roles can only be assigned to active managed members.",
+    "ROLE_ESCALATION_NOT_ALLOWED": "You can only assign roles whose permissions you already have."
+  },
+  "labels": {
+    "resources": {
+      "organization": "Organization",
+      "organization_user": "Members",
+      "organization_invitation": "Invitations",
+      "role": "Roles",
+      "*": "Everything"
+    },
+    "actions": {
+      "create": "Create",
+      "read": "View",
+      "update": "Edit",
+      "delete": "Delete",
+      "deactivate": "Deactivate / reactivate",
+      "assign": "Assign to members",
+      "*": "All actions"
+    },
+    "effects": { "allow": "Allow", "deny": "Deny" },
+    "systemRoles": {
+      "Administrator": "Administrator",
+      "Team manager": "Team manager",
+      "Viewer": "Viewer"
+    }
+  },
+  "msgs": {
+    "ROLES_LISTED": "Roles retrieved successfully.",
+    "ROLE_CREATED": "Role created.",
+    "ROLE_UPDATED": "Role updated.",
+    "ROLE_DELETED": "Role deleted.",
+    "MEMBER_ROLES_UPDATED": "Member roles updated.",
+    "CATALOG_RETRIEVED": "Permission catalog retrieved successfully.",
+    "MY_PERMISSIONS_RETRIEVED": "Permissions retrieved successfully."
+  }
+}
