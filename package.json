@@ -8,8 +8,14 @@
     "lint": "turbo lint",
     "format": "turbo format",
     "typecheck": "turbo typecheck",
+    "intl:generate": "turbo intl:generate",
     "openapi:generate": "turbo api:generate",
     "api:generate": "turbo api:generate",
+    "routes:generate": "turbo routes:generate",
+    "barrel:generate": "turbo barrel:generate",
+    "schema:generate": "turbo schema:generate",
+    "codegen": "turbo routes:generate barrel:generate schema:generate",
+    "seed:sidebar": "pnpm --filter @avuny/books-server seed:sidebar",
     "print-files": "node ./scripts/print-files.js"
   },
   "devDependencies": {

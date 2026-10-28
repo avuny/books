@@ -1,0 +1,12 @@
+{
+  "admin": "/admin",
+  "auth": "/auth",
+  "geo": "/geo",
+  "organization": "/organizations",
+  "organization-invitation": "/organization-invitations",
+  "organization-user": "/organization-users",
+  "otp": "/otp",
+  "role": "/roles",
+  "sidebar": "/sidebar",
+  "users": "/users"
+}

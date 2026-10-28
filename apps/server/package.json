@@ -10,9 +10,9 @@
     "dev": "wrangler dev",
     "deploy": "wrangler deploy --minify",
     "deploy:dry": "wrangler deploy --dry-run --minify --outdir dist",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsx ./scripts/generate-intl.ts && tsc --noEmit",
     "dev:node": "concurrently \"tsc -p tsconfig.build.json --watch --preserveWatchOutput\" \"tsx watch src/node-server.ts\"",
-    "build": "tsc -p tsconfig.build.json",
+    "build": "tsx ./scripts/generate-intl.ts && tsc -p tsconfig.build.json",
     "lint": "eslint .",
     "test": "vitest run",
     "test:watch": "vitest",
@@ -23,7 +23,12 @@
     "clean:build": "rm -rf dist tsconfig.build.tsbuildinfo .turbo",
     "clean:modules": "rm -rf node_modules",
     "clean:all": "pnpm clean:modules && pnpm clean:build",
-    "openapi:generate": "tsx ./scripts/generate-openapi.ts"
+    "intl:generate": "tsx ./scripts/generate-intl.ts",
+    "intl:watch": "tsx ./scripts/generate-intl.ts --watch",
+    "openapi:generate": "tsx ./scripts/generate-openapi.ts",
+    "routes:generate": "tsx ./scripts/generate-routes.ts",
+    "routes:watch": "tsx ./scripts/generate-routes.ts --watch",
+    "seed:sidebar": "tsx src/api/modules/sidebar/sidebar.seed.ts"
   },
   "dependencies": {
     "@avuny/contracts": "workspace:*",

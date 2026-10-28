@@ -77,6 +77,18 @@
     },
     "api:generate": {
       "dependsOn": ["openapi:generate", "^build"]
+    },
+    "intl:generate": {
+      "cache": false
+    },
+    "routes:generate": {
+      "cache": false
+    },
+    "barrel:generate": {
+      "cache": false
+    },
+    "schema:generate": {
+      "cache": false
     }
   }
 }
