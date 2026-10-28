@@ -4,6 +4,12 @@ export const ROUTES = {
     index: (organizationId?: string) =>
       `/organization${organizationId ? `/${organizationId}` : ""}`,
     create_org: "/organization/create",
+    overview: (organizationId: string) =>
+      `/organization/${organizationId}` as const,
+    users: (organizationId: string) =>
+      `/organization/${organizationId}/users` as const,
+    roles: (organizationId: string) =>
+      `/organization/${organizationId}/role` as const,
     settings: (organizationId: string) =>
       `/organization/${organizationId}/settings`,
   },
