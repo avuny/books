@@ -25,7 +25,10 @@
     "db:studio": "drizzle-kit studio",
     "db:seed:geo": "tsx seed/geo-seed.ts",
     "seed:geo": "tsx seed/geo-seed.ts",
-    "dev": "tsc -p tsconfig.build.json --watch --preserveWatchOutput"
+    "dev": "tsc -p tsconfig.build.json --watch --preserveWatchOutput",
+    "schema:generate": "tsx ./scripts/generate-schema-barrel.ts",
+    "schema:watch": "tsx ./scripts/generate-schema-barrel.ts --watch",
+    "seed:permissions": "tsx ./seed/permissions.seed.ts"
   },
   "dependencies": {
     "@neondatabase/serverless": "^0.10.4",

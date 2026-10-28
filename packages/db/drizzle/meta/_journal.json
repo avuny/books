@@ -15,6 +15,20 @@
       "when": 1793087518103,
       "tag": "0001_spooky_argent",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1793173936532,
+      "tag": "0002_parched_exodus",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1793195343482,
+      "tag": "0003_boring_jazinda",
+      "breakpoints": true
     }
   ]
 }

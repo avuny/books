@@ -2,6 +2,7 @@ import { relations } from "drizzle-orm"
 import { organizationUsers, organizations, organizationInvitations } from "./organizations.js"
 
 import { users } from "../user/users.js"
+import { organizationUserRoles, roles } from "../access-control/role.js"
 
 
 
@@ -12,7 +13,7 @@ export const organizationsRelations = relations(
   ({ one, many }) => ({
     members: many(organizationUsers),
     invitations: many(organizationInvitations),
-    // roles: many(roles),
+    roles: many(roles),
     // billingAccount: one(billingAccounts),
     // subscriptions: many(subscriptions),
     // invoices: many(invoices),
@@ -32,7 +33,7 @@ export const organizationUsersRelations = relations(
       fields: [organizationUsers.userId],
       references: [users.id],
     }),
-    // roleAssignments: many(organizationUserRoles),
+    roleAssignments: many(organizationUserRoles),
   })
 )
 
@@ -57,4 +58,3 @@ export const organizationInvitationsRelations = relations(
     }),
   })
 )
-
