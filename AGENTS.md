@@ -52,6 +52,7 @@ pnpm lint             # Run ESLint across all projects
 pnpm format           # Format with Prettier
 
 # API & Schema Generation Pipeline
+pnpm intl:generate    # Re-generate server i18next registration & typing from locales/
 pnpm openapi:generate # Generate OpenAPI spec from backend route definitions
 pnpm api:generate     # Re-generate Orval TypeScript client & React Query hooks in apps/web
 

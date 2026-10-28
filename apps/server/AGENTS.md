@@ -19,6 +19,7 @@ pnpm --filter @avuny/books-server test
 pnpm --filter @avuny/books-server test <filename>.spec.ts
 
 # OpenAPI Spec & Client Generation Pipeline
+pnpm intl:generate      # Generates i18next.ts and i18next.d.ts from locales/
 pnpm openapi:generate   # Generates apps/server/openapi/openapi.json
 pnpm api:generate       # Re-generates Orval client hooks in apps/web
 
@@ -136,10 +137,14 @@ export const organizationErrorsHttpMap = {
   Implement dummy fallback classes for ports so routes can run out-of-the-box before full infrastructure is wired:
   ```ts
   export class DummyPermissionChecker implements PermissionChecker {
-    async check(): Promise<boolean> { return true }
+    async check(): Promise<boolean> {
+      return true
+    }
   }
   export class DummyCache implements Cache {
-    async get<T>(): Promise<T | null> { return null }
+    async get<T>(): Promise<T | null> {
+      return null
+    }
     async set(): Promise<void> {}
     async del(): Promise<void> {}
   }
@@ -164,6 +169,7 @@ export const organizationErrorsHttpMap = {
 ### Step 6: OpenAPI HTTP Routes (`hono-routes/`)
 
 Create dedicated route files under `src/api/modules/<module>/hono-routes/`:
+
 - `create-<entity>.route.ts` (POST `/`)
 - `get-<entity>.route.ts` (GET `/{id}`)
 - `update-<entity>.route.ts` (PATCH `/{id}`)
@@ -175,11 +181,12 @@ Create dedicated route files under `src/api/modules/<module>/hono-routes/`:
 ```ts
 import { createRoute } from "@hono/zod-openapi"
 import { z } from "@avuny/zod"
-import { createOpenAPIRouter, handleResult, getRequestLocale } from "@avuny/hono"
 import {
-  OrganizationDtoSchema,
-  OrganizationErrorCode,
-} from "@avuny/contracts"
+  createOpenAPIRouter,
+  handleResult,
+  getRequestLocale,
+} from "@avuny/hono"
+import { OrganizationDtoSchema, OrganizationErrorCode } from "@avuny/contracts"
 import {
   createResponseSchema,
   createDomainErrorResponseSchema,
@@ -322,8 +329,8 @@ export { organizationRoutes } from "./hono-routes/index.js"
      }
    }
    ```
-2. **Register in `apps/server/src/api/intl/i18next.ts`**:
-   Import JSON files and add `<module>` to `ns` and `resources`.
+2. **Register in `apps/server/src/api/intl/i18next.ts` & `i18next.d.ts`**:
+   Run `pnpm intl:generate` (or `pnpm --filter @avuny/books-server intl:generate`) to automatically scan `apps/server/src/api/intl/locales/` and regenerate `i18next.ts` and `i18next.d.ts`. This is also automatically executed before `typecheck` and `build`.
 3. **Mount in `apps/server/src/api/routes.ts`**:
    ```ts
    import { organizationRoutes } from "./modules/organization/index.js"
@@ -354,3 +361,8 @@ export { organizationRoutes } from "./hono-routes/index.js"
 3. **Authentication & Context**:
    - Protected routes must define `middleware: [requireAuth] as const` on `createRoute` and call `router.use(..., requireAuth)`.
    - Access current user using `c.get("user")` or `c.var.user`.
+4. **Database Seed Scripts & Full State Synchronization**:
+   - Seed scripts (e.g. `sidebar.seed.ts`, `role.seed.ts`) must be declarative, idempotent, and fully synchronizing.
+   - **Never only insert or upsert**: When seed arrays are edited and items/options/headings are removed, the database MUST reflect that removal.
+   - Always delete stale rows using `delete(...).where(notInArray(table.key, targetKeys))` inside the seed transaction so removed items are cleaned up.
+   - Running the seed script must guarantee that the database strictly matches the seed definition array and contains no leftover or orphaned rows.
