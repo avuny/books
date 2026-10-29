@@ -51,6 +51,9 @@ Usage:
 
 Recursively prints the contents of every text file under a directory, each one
 preceded by a header with its path, with a directory tree at the top.
+Paths are shown relative to the project root: the git root if there is one,
+otherwise the current directory (when scanning inside it), otherwise the
+scanned directory itself.
 Output goes to stdout unless --out or --copy is used. Status and the summary
 always go to stderr, so piped output stays clean.
 
@@ -272,7 +275,7 @@ function globToRegexSource(glob) {
 
 /**
  * Compiles an --include / --exclude pattern into a matcher function.
- * Matchers receive { rel, name, isDir } where rel is the posix path from the root.
+ * Matchers receive { rel, name, isDir } where rel is the posix path from the scanned root.
  */
 function compileCliPattern(raw) {
     let p = raw.replace(/\\/g, "/").replace(/^\.\//, "")
@@ -352,6 +355,22 @@ function findGitRoot(start) {
     }
 }
 
+/**
+ * The folder that displayed paths are relative to:
+ * the git root if there is one, else the current directory (when the scanned
+ * folder is inside it), else the scanned folder itself.
+ */
+function findProjectBase(root) {
+    const gitRoot = findGitRoot(root)
+    if (gitRoot) return gitRoot
+
+    const cwd = process.cwd()
+    const rel = path.relative(cwd, root)
+    if (!rel.startsWith("..") && !path.isAbsolute(rel)) return cwd
+
+    return root
+}
+
 /** Rules from .gitignore files in folders above the scanned root, up to the git root. */
 function loadAncestorRules(root) {
     const gitRoot = findGitRoot(root)
@@ -404,8 +423,12 @@ function formatBytes(n) {
 
 /**
  * Walks the directory tree and returns the files to print plus everything skipped.
+ *
+ * Each file has two paths:
+ *   rel     - relative to the scanned folder (used for include/exclude matching)
+ *   display - relative to the project base (shown in headers and the tree)
  */
-function collectFiles(root, opts, outputAbs) {
+function collectFiles(root, opts, outputAbs, base) {
     const includeMatchers = opts.include.map(compileCliPattern)
     const excludeMatchers = opts.exclude.map(compileCliPattern)
     const files = []
@@ -440,7 +463,14 @@ function collectFiles(root, opts, outputAbs) {
 
         const content = buffer.toString("utf8")
         const lines = content === "" ? 0 : content.replace(/\r?\n$/, "").split(/\r?\n/).length
-        files.push({ rel, size, content, lines, tokens: estimateTokens(content) })
+        files.push({
+            rel,
+            display: toPosix(path.relative(base, abs)),
+            size,
+            content,
+            lines,
+            tokens: estimateTokens(content),
+        })
     }
 
     function walk(dir, depth, inheritedRules) {
@@ -492,7 +522,7 @@ function renderTree(rootName, files) {
     const root = { children: new Map(), isFile: false }
     for (const file of files) {
         let node = root
-        const parts = file.rel.split("/")
+        const parts = file.display.split("/")
         parts.forEach((part, i) => {
             if (!node.children.has(part)) {
                 node.children.set(part, { children: new Map(), isFile: i === parts.length - 1 })
@@ -527,14 +557,15 @@ function renderFile(file, opts) {
             .join("\n")
     }
     const meta = opts.tokens ? `  [${fmtNum(file.lines)} lines, ~${fmtNum(file.tokens)} tokens]` : ""
-    return `${SEPARATOR}\nFile: ${file.rel}${meta}\n${SEPARATOR}\n\n${body}\n`
+    return `${SEPARATOR}\nFile: ${file.display}${meta}\n${SEPARATOR}\n\n${body}\n`
 }
 
-function buildOutput(root, files, opts) {
+function buildOutput(base, files, opts) {
     const parts = []
     if (opts.tree) {
         const label = `file${files.length === 1 ? "" : "s"}`
-        parts.push(`Directory tree (${files.length} ${label}):\n${renderTree(path.basename(root) || root, files)}\n`)
+        const rootName = path.basename(base) || base
+        parts.push(`Directory tree (${files.length} ${label}):\n${renderTree(rootName, files)}\n`)
     }
     for (const file of files) parts.push(renderFile(file, opts))
     return parts.join("\n")
@@ -628,19 +659,21 @@ function main() {
     }
 
     const outputAbs = opts.out ? path.resolve(opts.out) : null
+    const base = findProjectBase(root)
 
     console.error(`Scanning: ${root}`)
+    if (base !== root) console.error(`Paths relative to: ${base}`)
     if (opts.include.length) console.error(`Including: ${opts.include.join(", ")}`)
     if (opts.exclude.length) console.error(`Excluding: ${opts.exclude.join(", ")}`)
 
-    const { files, skipped } = collectFiles(root, opts, outputAbs)
+    const { files, skipped } = collectFiles(root, opts, outputAbs, base)
 
     if (files.length === 0) {
         console.error("\nNo files matched.")
         return
     }
 
-    const output = buildOutput(root, files, opts)
+    const output = buildOutput(base, files, opts)
     const destinations = []
 
     if (opts.out) {

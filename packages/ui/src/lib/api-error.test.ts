@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest"
-import { fill, parseApiError, resolveErrorMessage, unwrap } from "./api-error"
 
+import {
+  fill,
+  parseApiError,
+  resolveErrorMessage,
+  unwrap,
+} from "@workspace/ui/lib/api-error"
 describe("parseApiError", () => {
   it("reads axios-style errors", () => {
     const error = { response: { data: { code: "X", message: "boom" } } }
