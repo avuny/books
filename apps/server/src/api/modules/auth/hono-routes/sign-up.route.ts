@@ -103,11 +103,11 @@ router.openapi(signUpRoute, async (c) => {
   // Format result to match AuthResponseSchema (stripping rawRefreshToken)
   const publicResult = result.success
     ? {
-        success: true as const,
-        data: result.data.authResponse,
-        msg: result.msg,
-        meta: result.meta,
-      }
+      success: true as const,
+      data: result.data.authResponse,
+      msg: result.msg,
+      meta: result.meta,
+    }
     : result
 
   return handleResult({
