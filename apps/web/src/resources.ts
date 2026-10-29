@@ -7,17 +7,20 @@ import {
   organizationTranslationsAr,
   organizationTranslationsEn,
 } from "@avuny/contracts/organization"
+import { roleTranslationsAr, roleTranslationsEn } from "@avuny/contracts"
 
 export const resources = {
   en: {
     common: commonTranslationsEn,
     user: userTranslationsEn,
     organization: organizationTranslationsEn,
+    role: roleTranslationsEn,
   },
   ar: {
     common: commonTranslationsAr,
     user: userTranslationsAr,
     organization: organizationTranslationsAr,
+    role: roleTranslationsAr,
   },
 }
 

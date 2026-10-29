@@ -26,6 +26,8 @@ import { Route as OrganizationOrgIdIndexRouteImport } from './routes/organizatio
 import { Route as OrganizationOrgIdRoleRouteImport } from './routes/organization/$orgId/role'
 import { Route as OrganizationOrgIdSettingsRouteRouteImport } from './routes/organization/$orgId/settings/route'
 import { Route as OrganizationOrgIdUsersRouteImport } from './routes/organization/$orgId/users'
+import { Route as OrganizationOrgIdRolesIndexRouteImport } from './routes/organization/$orgId/roles/index'
+import { Route as OrganizationOrgIdRolesRoleIdRouteImport } from './routes/organization/$orgId/roles/$roleId'
 import { Route as OrganizationOrgIdSettingsIndexRouteImport } from './routes/organization/$orgId/settings/index'
 
 const IndexRoute = IndexRouteImport.update({
@@ -114,6 +116,18 @@ const OrganizationOrgIdUsersRoute = OrganizationOrgIdUsersRouteImport.update({
   path: '/users',
   getParentRoute: () => OrganizationOrgIdRouteRoute,
 } as any)
+const OrganizationOrgIdRolesIndexRoute =
+  OrganizationOrgIdRolesIndexRouteImport.update({
+    id: '/roles/',
+    path: '/roles/',
+    getParentRoute: () => OrganizationOrgIdRouteRoute,
+  } as any)
+const OrganizationOrgIdRolesRoleIdRoute =
+  OrganizationOrgIdRolesRoleIdRouteImport.update({
+    id: '/roles/$roleId',
+    path: '/roles/$roleId',
+    getParentRoute: () => OrganizationOrgIdRouteRoute,
+  } as any)
 const OrganizationOrgIdSettingsIndexRoute =
   OrganizationOrgIdSettingsIndexRouteImport.update({
     id: '/',
@@ -139,6 +153,8 @@ export interface FileRoutesByFullPath {
   '/organization/$orgId/role': typeof OrganizationOrgIdRoleRoute
   '/organization/$orgId/users': typeof OrganizationOrgIdUsersRoute
   '/organization/$orgId/': typeof OrganizationOrgIdIndexRoute
+  '/organization/$orgId/roles/$roleId': typeof OrganizationOrgIdRolesRoleIdRoute
+  '/organization/$orgId/roles/': typeof OrganizationOrgIdRolesIndexRoute
   '/organization/$orgId/settings/': typeof OrganizationOrgIdSettingsIndexRoute
 }
 export interface FileRoutesByTo {
@@ -154,6 +170,8 @@ export interface FileRoutesByTo {
   '/organization/$orgId/role': typeof OrganizationOrgIdRoleRoute
   '/organization/$orgId/users': typeof OrganizationOrgIdUsersRoute
   '/organization/$orgId': typeof OrganizationOrgIdIndexRoute
+  '/organization/$orgId/roles/$roleId': typeof OrganizationOrgIdRolesRoleIdRoute
+  '/organization/$orgId/roles': typeof OrganizationOrgIdRolesIndexRoute
   '/organization/$orgId/settings': typeof OrganizationOrgIdSettingsIndexRoute
 }
 export interface FileRoutesById {
@@ -175,6 +193,8 @@ export interface FileRoutesById {
   '/organization/$orgId/role': typeof OrganizationOrgIdRoleRoute
   '/organization/$orgId/users': typeof OrganizationOrgIdUsersRoute
   '/organization/$orgId/': typeof OrganizationOrgIdIndexRoute
+  '/organization/$orgId/roles/$roleId': typeof OrganizationOrgIdRolesRoleIdRoute
+  '/organization/$orgId/roles/': typeof OrganizationOrgIdRolesIndexRoute
   '/organization/$orgId/settings/': typeof OrganizationOrgIdSettingsIndexRoute
 }
 export interface FileRouteTypes {
@@ -197,6 +217,8 @@ export interface FileRouteTypes {
     | '/organization/$orgId/role'
     | '/organization/$orgId/users'
     | '/organization/$orgId/'
+    | '/organization/$orgId/roles/$roleId'
+    | '/organization/$orgId/roles/'
     | '/organization/$orgId/settings/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -212,6 +234,8 @@ export interface FileRouteTypes {
     | '/organization/$orgId/role'
     | '/organization/$orgId/users'
     | '/organization/$orgId'
+    | '/organization/$orgId/roles/$roleId'
+    | '/organization/$orgId/roles'
     | '/organization/$orgId/settings'
   id:
     | '__root__'
@@ -232,6 +256,8 @@ export interface FileRouteTypes {
     | '/organization/$orgId/role'
     | '/organization/$orgId/users'
     | '/organization/$orgId/'
+    | '/organization/$orgId/roles/$roleId'
+    | '/organization/$orgId/roles/'
     | '/organization/$orgId/settings/'
   fileRoutesById: FileRoutesById
 }
@@ -363,6 +389,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OrganizationOrgIdUsersRouteImport
       parentRoute: typeof OrganizationOrgIdRouteRoute
     }
+    '/organization/$orgId/roles/': {
+      id: '/organization/$orgId/roles/'
+      path: '/roles'
+      fullPath: '/organization/$orgId/roles/'
+      preLoaderRoute: typeof OrganizationOrgIdRolesIndexRouteImport
+      parentRoute: typeof OrganizationOrgIdRouteRoute
+    }
+    '/organization/$orgId/roles/$roleId': {
+      id: '/organization/$orgId/roles/$roleId'
+      path: '/roles/$roleId'
+      fullPath: '/organization/$orgId/roles/$roleId'
+      preLoaderRoute: typeof OrganizationOrgIdRolesRoleIdRouteImport
+      parentRoute: typeof OrganizationOrgIdRouteRoute
+    }
     '/organization/$orgId/settings/': {
       id: '/organization/$orgId/settings/'
       path: '/'
@@ -410,6 +450,8 @@ interface OrganizationOrgIdRouteRouteChildren {
   OrganizationOrgIdRoleRoute: typeof OrganizationOrgIdRoleRoute
   OrganizationOrgIdUsersRoute: typeof OrganizationOrgIdUsersRoute
   OrganizationOrgIdIndexRoute: typeof OrganizationOrgIdIndexRoute
+  OrganizationOrgIdRolesRoleIdRoute: typeof OrganizationOrgIdRolesRoleIdRoute
+  OrganizationOrgIdRolesIndexRoute: typeof OrganizationOrgIdRolesIndexRoute
 }
 
 const OrganizationOrgIdRouteRouteChildren: OrganizationOrgIdRouteRouteChildren =
@@ -419,6 +461,8 @@ const OrganizationOrgIdRouteRouteChildren: OrganizationOrgIdRouteRouteChildren =
     OrganizationOrgIdRoleRoute: OrganizationOrgIdRoleRoute,
     OrganizationOrgIdUsersRoute: OrganizationOrgIdUsersRoute,
     OrganizationOrgIdIndexRoute: OrganizationOrgIdIndexRoute,
+    OrganizationOrgIdRolesRoleIdRoute: OrganizationOrgIdRolesRoleIdRoute,
+    OrganizationOrgIdRolesIndexRoute: OrganizationOrgIdRolesIndexRoute,
   }
 
 const OrganizationOrgIdRouteRouteWithChildren =
