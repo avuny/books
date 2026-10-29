@@ -22,7 +22,7 @@ export const SIDEBAR_SEED: readonly SidebarSeedHeading[] = [
     name: "users",
     icon: "users",
     options: [
-      { name: "role", icon: "shield-check", path: "/role" },
+      { name: "role", icon: "shield-check", path: "/roles" },
       { name: "organizationUser", icon: "users-round", path: "/users" },
     ],
   },
