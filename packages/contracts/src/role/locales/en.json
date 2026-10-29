@@ -28,7 +28,10 @@
       "assign": "Assign to members",
       "*": "All actions"
     },
-    "effects": { "allow": "Allow", "deny": "Deny" },
+    "effects": {
+      "allow": "Allow",
+      "deny": "Deny"
+    },
     "systemRoles": {
       "Administrator": "Administrator",
       "Team manager": "Team manager",
@@ -43,5 +46,92 @@
     "MEMBER_ROLES_UPDATED": "Member roles updated.",
     "CATALOG_RETRIEVED": "Permission catalog retrieved successfully.",
     "MY_PERMISSIONS_RETRIEVED": "Permissions retrieved successfully."
+  },
+  "list": {
+    "title": "Roles",
+    "description": "Control what each member of your organization can do.",
+    "tabs": {
+      "aria": "Role type",
+      "all": "All",
+      "system": "System",
+      "custom": "Custom"
+    },
+    "search": {
+      "placeholder": "Search roles",
+      "clear": "Clear search"
+    }
+  },
+  "create": {
+    "title": "Create role",
+    "description": "Name the role and choose what it can do.",
+    "submitLabel": "Create role",
+    "submittingLabel": "Creating…"
+  },
+  "update": {
+    "title": "Edit role",
+    "description": "Rename the role or change its permissions.",
+    "submitLabel": "Save changes",
+    "submittingLabel": "Saving…"
+  },
+  "fields": {
+    "name": {
+      "label": "Name",
+      "placeholder": "e.g. Billing manager"
+    },
+    "description": {
+      "label": "Description",
+      "placeholder": "What is this role for? (optional)"
+    },
+    "permissions": {
+      "label": "Permissions",
+      "description": "Select a resource to grant every action on it, or pick actions one by one.",
+      "empty": "No permissions are available to grant.",
+      "advancedNote": "{count, plural, one {This role also has # advanced statement (wildcard, deny or record-specific). It is kept as is.} other {This role also has # advanced statements (wildcard, deny or record-specific). They are kept as is.}}"
+    }
+  },
+  "actions": {
+    "create": "Create role",
+    "edit": "Edit",
+    "view": "View",
+    "delete": "Delete",
+    "cancel": "Cancel"
+  },
+  "type": {
+    "system": "System",
+    "custom": "Custom"
+  },
+  "table": {
+    "name": "Role",
+    "type": "Type",
+    "members": "Members",
+    "permissions": "Permissions",
+    "actions": "Actions",
+    "actionsFor": "Actions for {name}"
+  },
+  "empty": {
+    "title": "No roles found",
+    "description": "Try a different search or role type."
+  },
+  "delete": {
+    "title": "Delete role?",
+    "description": "“{name}” will be permanently deleted. This can’t be undone."
+  },
+  "details": {
+    "back": "Back to roles",
+    "systemHint": "System roles are managed by the platform and can’t be edited or deleted.",
+    "members": "Members",
+    "createdAt": "Created",
+    "updatedAt": "Last updated",
+    "permissionsTitle": "Permissions",
+    "emptyPermissions": "This role has no permissions."
+  },
+  "pagination": {
+    "nav": "Roles pagination",
+    "previous": "Previous",
+    "next": "Next",
+    "rowsPerPage": "Rows per page",
+    "summary": "{from}–{to} of {total}",
+    "pageOf": "Page {page} of {pageCount}",
+    "goTo": "Go to page {page}"
   }
 }

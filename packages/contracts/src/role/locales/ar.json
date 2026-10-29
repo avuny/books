@@ -28,7 +28,10 @@
       "assign": "إسناد للأعضاء",
       "*": "كل الإجراءات"
     },
-    "effects": { "allow": "السماح", "deny": "المنع" },
+    "effects": {
+      "allow": "السماح",
+      "deny": "المنع"
+    },
     "systemRoles": {
       "Administrator": "مدير النظام",
       "Team manager": "مدير الفريق",
@@ -43,5 +46,92 @@
     "MEMBER_ROLES_UPDATED": "تم تحديث أدوار العضو.",
     "CATALOG_RETRIEVED": "تم جلب قائمة الصلاحيات بنجاح.",
     "MY_PERMISSIONS_RETRIEVED": "تم جلب الصلاحيات بنجاح."
+  },
+  "list": {
+    "title": "الأدوار",
+    "description": "تحكّم فيما يمكن لكل عضو في مؤسستك فعله.",
+    "tabs": {
+      "aria": "نوع الدور",
+      "all": "الكل",
+      "system": "النظام",
+      "custom": "مخصص"
+    },
+    "search": {
+      "placeholder": "ابحث في الأدوار",
+      "clear": "مسح البحث"
+    }
+  },
+  "create": {
+    "title": "إنشاء دور",
+    "description": "سمِّ الدور واختر ما يمكنه فعله.",
+    "submitLabel": "إنشاء الدور",
+    "submittingLabel": "جارٍ الإنشاء…"
+  },
+  "update": {
+    "title": "تعديل الدور",
+    "description": "غيّر اسم الدور أو صلاحياته.",
+    "submitLabel": "حفظ التغييرات",
+    "submittingLabel": "جارٍ الحفظ…"
+  },
+  "fields": {
+    "name": {
+      "label": "الاسم",
+      "placeholder": "مثال: مسؤول الفواتير"
+    },
+    "description": {
+      "label": "الوصف",
+      "placeholder": "ما الغرض من هذا الدور؟ (اختياري)"
+    },
+    "permissions": {
+      "label": "الصلاحيات",
+      "description": "اختر مورداً لمنح كل إجراءاته، أو حدّد الإجراءات واحداً واحداً.",
+      "empty": "لا توجد صلاحيات متاحة للمنح.",
+      "advancedNote": "{count, plural, =1 {لدى هذا الدور أيضاً قاعدة متقدمة واحدة (شاملة أو منع أو خاصة بسجل). تبقى كما هي.} other {لدى هذا الدور أيضاً # قواعد متقدمة (شاملة أو منع أو خاصة بسجل). تبقى كما هي.}}"
+    }
+  },
+  "actions": {
+    "create": "إنشاء دور",
+    "edit": "تعديل",
+    "view": "عرض",
+    "delete": "حذف",
+    "cancel": "إلغاء"
+  },
+  "type": {
+    "system": "النظام",
+    "custom": "مخصص"
+  },
+  "table": {
+    "name": "الدور",
+    "type": "النوع",
+    "members": "الأعضاء",
+    "permissions": "الصلاحيات",
+    "actions": "الإجراءات",
+    "actionsFor": "إجراءات {name}"
+  },
+  "empty": {
+    "title": "لا توجد أدوار",
+    "description": "جرّب بحثاً أو نوع دور مختلفاً."
+  },
+  "delete": {
+    "title": "حذف الدور؟",
+    "description": "سيتم حذف «{name}» نهائياً. لا يمكن التراجع عن ذلك."
+  },
+  "details": {
+    "back": "العودة إلى الأدوار",
+    "systemHint": "أدوار النظام تُدار من المنصة ولا يمكن تعديلها أو حذفها.",
+    "members": "الأعضاء",
+    "createdAt": "تاريخ الإنشاء",
+    "updatedAt": "آخر تحديث",
+    "permissionsTitle": "الصلاحيات",
+    "emptyPermissions": "ليس لهذا الدور أي صلاحيات."
+  },
+  "pagination": {
+    "nav": "ترقيم صفحات الأدوار",
+    "previous": "السابق",
+    "next": "التالي",
+    "rowsPerPage": "عدد الصفوف في الصفحة",
+    "summary": "{from}–{to} من {total}",
+    "pageOf": "الصفحة {page} من {pageCount}",
+    "goTo": "الانتقال إلى الصفحة {page}"
   }
 }
