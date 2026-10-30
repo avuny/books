@@ -29,6 +29,10 @@
     "./errors": {
       "import": "./dist/errors/index.js",
       "types": "./dist/errors/index.d.ts"
+    },
+    "./organization-invitation": {
+      "import": "./dist/organization-invitation/index.js",
+      "types": "./dist/organization-invitation/index.d.ts"
     }
   },
   "scripts": {
