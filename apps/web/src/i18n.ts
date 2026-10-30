@@ -20,7 +20,7 @@ i18n
     interpolation: {
       escapeValue: false,
     },
-    ns: ["common", "user", "organization", "role"],
+    ns: ["common", "user", "organization", "role", "organization-invitation"],
 
     returnNull: false,
     //  Configure the detector to save to localStorage

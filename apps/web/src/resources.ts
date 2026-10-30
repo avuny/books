@@ -8,6 +8,7 @@ import {
   organizationTranslationsEn,
 } from "@avuny/contracts/organization"
 import { roleTranslationsAr, roleTranslationsEn } from "@avuny/contracts"
+import { organizationInvitationTranslationsAr, organizationInvitationTranslationsEn } from "@avuny/contracts/organization-invitation"
 
 export const resources = {
   en: {
@@ -15,12 +16,14 @@ export const resources = {
     user: userTranslationsEn,
     organization: organizationTranslationsEn,
     role: roleTranslationsEn,
+    "organization-invitation": organizationInvitationTranslationsEn,
   },
   ar: {
     common: commonTranslationsAr,
     user: userTranslationsAr,
     organization: organizationTranslationsAr,
     role: roleTranslationsAr,
+    "organization-invitation": organizationInvitationTranslationsAr,
   },
 }
 
