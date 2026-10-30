@@ -36,5 +36,124 @@
     "INVITATION_ACCEPTED": "You joined the organization.",
     "INVITATION_DECLINED": "Invitation declined.",
     "INVITATION_PREVIEWED": "Invitation retrieved successfully."
+  },
+  "actions": {
+    "create": "Invite",
+    "resend": "Resend",
+    "revoke": "Revoke",
+    "cancel": "Cancel",
+    "accept": "Accept",
+    "decline": "Decline"
+  },
+  "types": {
+    "managed": "Team member",
+    "portal": "Portal user"
+  },
+  "list": {
+    "title": "Invitations",
+    "description": "Invite people to this organization and follow the status of each invitation.",
+    "tabs": {
+      "aria": "Filter invitations by status",
+      "all": "All"
+    }
+  },
+  "table": {
+    "invitee": "Invitee",
+    "type": "Type",
+    "channel": "Sent via",
+    "status": "Status",
+    "sent": "Last sent",
+    "expires": "Expires",
+    "actions": "Actions",
+    "actionsFor": "Actions for {{name}}",
+    "existingUser": "Existing user"
+  },
+  "empty": {
+    "title": "No invitations",
+    "description": "Invitations you send will appear here."
+  },
+  "pagination": {
+    "nav": "Pagination",
+    "previous": "Previous",
+    "next": "Next",
+    "rowsPerPage": "Rows per page",
+    "summary": "{{from}}–{{to}} of {{total}}",
+    "pageOf": "Page {{page}} of {{pageCount}}",
+    "goTo": "Go to page {{page}}"
+  },
+  "create": {
+    "title": "Invite someone",
+    "description": "Send an invitation by email or WhatsApp.",
+    "submitLabel": "Send invitation",
+    "submittingLabel": "Sending…"
+  },
+  "fields": {
+    "type": {
+      "legend": "Member type",
+      "descriptions": {
+        "managed": "Works inside the organization. Access is controlled by roles.",
+        "portal": "External user. Has no role-based permissions."
+      }
+    },
+    "channel": {
+      "legend": "Send via"
+    },
+    "email": {
+      "label": "Email address",
+      "placeholder": "name@example.com"
+    },
+    "phone": {
+      "label": "WhatsApp number",
+      "placeholder": "+201001234567"
+    },
+    "username": {
+      "label": "Username (optional)",
+      "placeholder": "Choose a username for them"
+    },
+    "acceptUsername": {
+      "label": "Username",
+      "placeholder": "Choose your username in this organization"
+    }
+  },
+  "revoke": {
+    "title": "Revoke invitation?",
+    "description": "{{name}} will no longer be able to use this invitation."
+  },
+  "resend": {
+    "title": "Resend invitation?",
+    "description": "{{name}} will get a new link and the expiry date is extended. The previous link stops working."
+  },
+  "inbox": {
+    "title": "My invitations",
+    "description": "Organizations that invited you to join them.",
+    "empty": {
+      "title": "No open invitations",
+      "description": "When an organization invites you, it will show up here."
+    },
+    "via": "Via {{channel}}",
+    "expires": "Expires {{date}}",
+    "username": "Username: {{username}}"
+  },
+  "accept": {
+    "title": "Join {{name}}",
+    "description": "Accept to become a member of this organization.",
+    "submitLabel": "Accept invitation",
+    "submittingLabel": "Joining…"
+  },
+  "decline": {
+    "title": "Decline invitation?",
+    "description": "You will not join {{name}}. You can ask them to invite you again later."
+  },
+  "join": {
+    "title": "Join {{name}}",
+    "description": "You have been invited to join this organization.",
+    "organization": "Organization",
+    "type": "Joining as",
+    "sentTo": "Sent to ({{channel}})",
+    "username": "Username",
+    "expires": "Expires",
+    "signInPrompt": "Sign in, or create an account, with the invited email address or phone number to accept this invitation.",
+    "signIn": "Sign in to continue",
+    "missingToken": "This invitation link is incomplete. Ask for a new invitation."
   }
 }
