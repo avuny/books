@@ -31,6 +31,7 @@
     "seed:permissions": "tsx ./seed/permissions.seed.ts"
   },
   "dependencies": {
+    "@avuny/contracts": "workspace:*",
     "@neondatabase/serverless": "^0.10.4",
     "drizzle-orm": "^0.38.0",
     "postgres": "^3.4.5"

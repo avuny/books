@@ -2,6 +2,11 @@ import {
   PERMISSION_CONCRETE_TOKEN_PATTERN,
   PERMISSION_WILDCARD,
 } from "./constants.js"
+import type {
+  PermissionAction,
+  PermissionKey,
+  PermissionResource,
+} from "./permission-catalog.js"
 
 /**
  * Pure RBAC rules (no I/O), shared by the server and the web app (sidebar visibility).
@@ -14,10 +19,11 @@ import {
  */
 export type PermissionEffect = "allow" | "deny"
 
+/** Typed against the catalog, so it matches the database enum columns. */
 export interface PermissionStatement {
   effect: PermissionEffect
-  resource: string
-  action: string
+  resource: PermissionResource | typeof PERMISSION_WILDCARD
+  action: PermissionAction | typeof PERMISSION_WILDCARD
   resourceId: string
 }
 
@@ -57,8 +63,14 @@ export function evaluate(
 
 /**
  * "update:organization-user" -> { action: "update", resource: "organization_user" }.
- * Throws on malformed keys: a typo in a route should fail loudly, not silently deny.
+ * A catalog-typed key returns catalog-typed tokens (usable directly in a PermissionStatement);
+ * a plain string returns plain strings. Throws on malformed keys: a typo in a route should
+ * fail loudly, not silently deny.
  */
+export function parsePermissionKey(
+  key: PermissionKey
+): { action: PermissionAction; resource: PermissionResource }
+export function parsePermissionKey(key: string): { action: string; resource: string }
 export function parsePermissionKey(key: string): { action: string; resource: string } {
   const parts = key.split(":")
   const action = parts[0]

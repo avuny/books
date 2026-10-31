@@ -64,13 +64,13 @@ const MSG = {
   memberNotFound: "Member not found",
 } as const
 
-const keyOf = (s: PermissionStatement) =>
+const keyOf = (s: { effect: string; resource: string; action: string; resourceId: string }) =>
   `${s.effect}|${s.resource}|${s.action}|${s.resourceId}`
-const dedupe = (list: readonly PermissionStatement[]): PermissionStatement[] => [
-  ...new Map(list.map((s) => [keyOf(s), s])).values(),
-]
+const dedupe = <T extends { effect: string; resource: string; action: string; resourceId: string }>(
+  list: readonly T[]
+): T[] => [...new Map(list.map((s) => [keyOf(s), s])).values()]
 
-function invalidPermission(list: readonly PermissionStatement[]) {
+function invalidPermission(list: readonly { resource: string; action: string; resourceId: string }[]) {
   const bad = findInvalidStatement(list)
   if (!bad) return null
   const s = list[bad.index]!
@@ -150,9 +150,10 @@ export function createRoleService(deps: RoleServiceDeps) {
           error: Err.ROLE_FEATURE_NOT_AVAILABLE,
           msg: "Custom roles are not available on your plan",
         })
-      const statements = dedupe(input.permissions)
-      const invalid = invalidPermission(statements)
+      const rawStatements = dedupe(input.permissions)
+      const invalid = invalidPermission(rawStatements)
       if (invalid) return invalid
+      const statements = rawStatements as PermissionStatement[]
 
       const outcome = await repo.transaction(async (tx) => {
         await repo.lockOrgRoles(orgId, tx)
@@ -189,11 +190,12 @@ export function createRoleService(deps: RoleServiceDeps) {
           error: Err.ROLE_FEATURE_NOT_AVAILABLE,
           msg: "Custom roles are not available on your plan",
         })
-      const statements = input.permissions ? dedupe(input.permissions) : undefined
-      if (statements) {
-        const invalid = invalidPermission(statements)
+      const rawStatements = input.permissions ? dedupe(input.permissions) : undefined
+      if (rawStatements) {
+        const invalid = invalidPermission(rawStatements)
         if (invalid) return invalid
       }
+      const statements = rawStatements as PermissionStatement[] | undefined
 
       const outcome = await repo.transaction(async (tx) => {
         await repo.lockOrgRoles(orgId, tx)

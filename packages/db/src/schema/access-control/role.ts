@@ -11,6 +11,11 @@ import {
     uniqueIndex,
     uuid,
 } from "drizzle-orm/pg-core"
+import {
+    PERMISSION_ACTIONS,
+    PERMISSION_RESOURCES,
+    PERMISSION_WILDCARD,
+} from "@avuny/contracts"
 import { pk, timestamps, createdAt } from "../_helpers.js"
 import { organizations, orgRef, organizationUsers } from "../organization/organizations.js"
 import { users } from "../user/users.js"
@@ -22,6 +27,21 @@ export const permissionEffectEnum = pgEnum("permission_effect", [
     "deny",
 ])
 export type PermissionEffect = (typeof permissionEffectEnum.enumValues)[number]
+
+/**
+ * Resources / actions a statement can reference. DERIVED from PERMISSION_CATALOG in
+ * @avuny/contracts, so the catalog and the database cannot drift apart. '*' is the wildcard.
+ * Only each value is enforced here; the (resource, action) pairing is validated by
+ * findInvalidStatement.
+ */
+export const permissionResourceEnum = pgEnum("permission_resource", [
+    PERMISSION_WILDCARD,
+    ...PERMISSION_RESOURCES,
+])
+export const permissionActionEnum = pgEnum("permission_action", [
+    PERMISSION_WILDCARD,
+    ...PERMISSION_ACTIONS,
+])
 
 /**
  * ROLES: a named bundle of permissions, like an AWS IAM role/policy.
@@ -63,13 +83,13 @@ export const roles = pgTable(
  * ROLE_PERMISSIONS: policy statements of a role: "ALLOW|DENY <action> on <resource> [<id>]".
  *
  * Examples (effect, action, resource, resource_id):
- *   allow  update  user       *        -> may update any user
- *   allow  read    invoice    *        -> may view all invoices
- *   allow  update  warehouse  8f3c..   -> may update only this warehouse
- *   deny   delete  *          *        -> may never delete anything
+ *   allow  update  organization_user  *        -> may update any member
+ *   allow  read    role               *        -> may view all roles
+ *   allow  update  organization       8f3c..   -> may update only this organization
+ *   deny   delete  *                  *        -> may never delete anything
  *
- * Rules (implemented in ./rbac.ts):
- *  - `resource` / `action` are lowercase tokens; '*' is a wildcard.
+ * Rules (implemented in ./rbac.ts and PermissionChecker):
+ *  - `resource` / `action` are enums derived from PERMISSION_CATALOG; '*' is a wildcard.
  *  - `resource_id` defaults to '*' (all records). A specific id narrows the statement to
  *    one record. It is text, so it can hold UUIDs or any other key.
  *  - Explicit DENY beats any ALLOW; no match = implicit deny.
@@ -84,8 +104,8 @@ export const rolePermissions = pgTable(
             .notNull()
             .references(() => roles.id, { onDelete: "cascade" }),
         effect: permissionEffectEnum("effect").notNull().default("allow"),
-        resource: text("resource").notNull(),
-        action: text("action").notNull(),
+        resource: permissionResourceEnum("resource").notNull(),
+        action: permissionActionEnum("action").notNull(),
         resourceId: text("resource_id").notNull().default("*"),
         createdAt: createdAt(),
     },
@@ -98,14 +118,6 @@ export const rolePermissions = pgTable(
             t.resourceId
         ),
         index("ix_role_permission_role").on(t.roleId),
-        check(
-            "ck_role_permission_resource",
-            sql`${t.resource} ~ '^([a-z][a-z0-9_]*|\\*)$'`
-        ),
-        check(
-            "ck_role_permission_action",
-            sql`${t.action} ~ '^([a-z][a-z0-9_]*|\\*)$'`
-        ),
     ]
 )
 

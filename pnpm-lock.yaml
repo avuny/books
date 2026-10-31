@@ -320,6 +320,9 @@ importers:
 
   packages/db:
     dependencies:
+      '@avuny/contracts':
+        specifier: workspace:*
+        version: link:../contracts
       '@neondatabase/serverless':
         specifier: ^0.10.4
         version: 0.10.4

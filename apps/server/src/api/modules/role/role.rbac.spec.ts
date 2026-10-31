@@ -14,7 +14,12 @@ const s = (
   resource: string,
   action: string,
   resourceId = "*"
-): PermissionStatement => ({ effect, resource, action, resourceId })
+): PermissionStatement => ({
+  effect,
+  resource: resource as PermissionStatement["resource"],
+  action: action as PermissionStatement["action"],
+  resourceId,
+})
 
 describe("evaluate", () => {
   it("denies by default (no matching statement)", () => {

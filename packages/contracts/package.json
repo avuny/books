@@ -12,26 +12,32 @@
   "exports": {
     ".": {
       "import": "./dist/index.js",
+      "default": "./dist/index.js",
       "types": "./dist/index.d.ts"
     },
     "./user": {
       "import": "./dist/user/index.js",
+      "default": "./dist/user/index.js",
       "types": "./dist/user/index.d.ts"
     },
     "./organization": {
       "import": "./dist/organization/index.js",
+      "default": "./dist/organization/index.js",
       "types": "./dist/organization/index.d.ts"
     },
     "./common": {
       "import": "./dist/common/index.js",
+      "default": "./dist/common/index.js",
       "types": "./dist/common/index.d.ts"
     },
     "./errors": {
       "import": "./dist/errors/index.js",
+      "default": "./dist/errors/index.js",
       "types": "./dist/errors/index.d.ts"
     },
     "./organization-invitation": {
       "import": "./dist/organization-invitation/index.js",
+      "default": "./dist/organization-invitation/index.js",
       "types": "./dist/organization-invitation/index.d.ts"
     }
   },

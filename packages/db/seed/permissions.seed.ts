@@ -1,3 +1,5 @@
+import { join } from "node:path"
+import dotenv from "dotenv"
 import {
   and,
   eq,
@@ -7,113 +9,37 @@ import {
   notInArray,
   or,
 } from "drizzle-orm"
-import type { PostgresJsDatabase } from "drizzle-orm/postgres-js"
-import { rolePermissions, roles } from "../dist/index.js"
+import type { PgDatabase } from "drizzle-orm/pg-core"
+import {
+  PERMISSION_ACTIONS,
+  PERMISSION_RESOURCES,
+  PERMISSION_WILDCARD,
+  SYSTEM_ROLES,
+  findInvalidStatement,
+  type PermissionAction,
+  type PermissionEffect,
+  type PermissionResource,
+  type PermissionStatement,
+  type SystemRoleDefinition,
+} from "@avuny/contracts"
+import {
+  createDbClient,
+  rolePermissions,
+  roles,
+  type Database,
+} from "../src/index.js"
 
-
-
-/**
- * The application-owned permission vocabulary.
- *
- * `role_permissions` is the only table in the supplied schema that stores resource/action
- * names, so these arrays are the source of truth for valid tokens. Keep tokens lowercase
- * and use snake_case for multi-word resources.
- *
- * When a resource/action is removed here, seedPermissions() removes statements using that
- * token from every role, including custom roles. `*` is a supported RBAC wildcard and is
- * intentionally preserved.
- */
-export const PERMISSION_RESOURCES = [
-  "user",
-  "role",
-  "rule",
-  "organization",
-  "organization_user",
-  "item",
-  "unit",
-  "unit_collection",
-  "invoice",
-  "customer",
-  "supplier",
-  "purchase_order",
-  "sales_order",
-  "warehouse",
-  "report",
-  "receipt",
-  "asset",
-  "cash_flow",
-] as const
-
-export const PERMISSION_ACTIONS = [
-  "create",
-  "read",
-  "update",
-  "delete",
-] as const
-
-export type PermissionResource = (typeof PERMISSION_RESOURCES)[number]
-export type PermissionAction = (typeof PERMISSION_ACTIONS)[number]
-
-type SeedPermission = {
-  effect: "allow" | "deny"
-  resource: string
-  action: string
-  resourceId: string
+export {
+  PERMISSION_ACTIONS,
+  PERMISSION_RESOURCES,
+  PERMISSION_WILDCARD,
+  SYSTEM_ROLES,
+  type PermissionAction,
+  type PermissionEffect,
+  type PermissionResource,
+  type PermissionStatement,
+  type SystemRoleDefinition,
 }
-
-type PermissionGroup = {
-  resource: string
-  actions: readonly string[]
-}
-
-type SystemRoleDefinition = {
-  name: string
-  description: string
-  permissions: readonly PermissionGroup[]
-}
-
-const ALL_ACTIONS: readonly string[] = PERMISSION_ACTIONS
-
-const groupsForAllResources = (actions: readonly string[]): PermissionGroup[] =>
-  PERMISSION_RESOURCES.map((resource) => ({ resource, actions }))
-
-/**
- * Definitions for platform-managed roles (org_id IS NULL).
- *
- * Administrator receives every action/resource combination in the catalog.
- * Viewer receives read access across the catalog.
- * Cashier receives the listed sales-related permissions.
- *
- * Custom organization roles are not overwritten; their only changes during seeding are
- * cleanup of resource/action tokens removed from the canonical catalog above.
- */
-const SYSTEM_ROLE_DEFINITIONS: readonly SystemRoleDefinition[] = [
-  {
-    name: "Administrator",
-    description: "Full access to all resources and actions.",
-    permissions: groupsForAllResources(ALL_ACTIONS),
-  },
-  {
-    name: "Viewer",
-    description: "Read-only access to all resources.",
-    permissions: groupsForAllResources(["read"]),
-  },
-  {
-    name: "Cashier",
-    description: "Access to the day-to-day sales and checkout workflow.",
-    permissions: [
-      { resource: "item", actions: ["read"] },
-      { resource: "unit", actions: ["read"] },
-      { resource: "unit_collection", actions: ["read"] },
-      { resource: "warehouse", actions: ["read"] },
-      { resource: "customer", actions: ["create", "read", "update"] },
-      { resource: "sales_order", actions: ["create", "read", "update"] },
-      { resource: "invoice", actions: ["create", "read", "update"] },
-      { resource: "receipt", actions: ["create", "read"] },
-      { resource: "report", actions: ["read"] },
-    ],
-  },
-]
 
 const permissionKey = (permission: {
   effect: string
@@ -128,33 +54,6 @@ const permissionKey = (permission: {
     permission.resourceId,
   ].join("\u0000")
 
-function expandPermissions(
-  groups: readonly PermissionGroup[],
-): SeedPermission[] {
-  const validResources = new Set<string>(PERMISSION_RESOURCES)
-  const validActions = new Set<string>(PERMISSION_ACTIONS)
-  const unique = new Map<string, SeedPermission>()
-
-  for (const group of groups) {
-    // Filtering also makes catalog removal safe if a role definition still mentions a token.
-    if (!validResources.has(group.resource)) continue
-
-    for (const action of group.actions) {
-      if (!validActions.has(action)) continue
-
-      const permission: SeedPermission = {
-        effect: "allow",
-        resource: group.resource,
-        action,
-        resourceId: "*",
-      }
-      unique.set(permissionKey(permission), permission)
-    }
-  }
-
-  return [...unique.values()]
-}
-
 export type SeedPermissionsResult = {
   systemRoles: number
   insertedPermissions: number
@@ -163,15 +62,26 @@ export type SeedPermissionsResult = {
 }
 
 /**
- * Reconcile the database with this file's permission catalog and system-role definitions.
+ * Reconcile the database with the contracts permission catalog and system-role definitions.
  * Safe to run repeatedly: unchanged permission rows are left untouched.
  *
- * Pass the application's Drizzle Postgres.js database instance, for example:
+ * Pass the application's Drizzle database instance, for example:
  *   await seedPermissions(db)
  */
-export async function seedPermissions<TSchema extends Record<string, unknown>>(
-  db: PostgresJsDatabase<TSchema>,
+export async function seedPermissions(
+  db: PgDatabase<any, any>,
+  definitions: readonly SystemRoleDefinition[] = SYSTEM_ROLES
 ): Promise<SeedPermissionsResult> {
+  for (const def of definitions) {
+    const bad = findInvalidStatement(def.statements)
+    if (bad) {
+      throw new Error(
+        `System role "${def.name}": statement #${bad.index} is invalid (${bad.reason}). ` +
+          `Add it to PERMISSION_CATALOG or fix the definition.`
+      )
+    }
+  }
+
   return db.transaction(async (tx) => {
     let insertedPermissions = 0
     let deletedPermissions = 0
@@ -183,11 +93,11 @@ export async function seedPermissions<TSchema extends Record<string, unknown>>(
       .where(
         or(
           and(
-            ne(rolePermissions.resource, "*"),
+            ne(rolePermissions.resource, PERMISSION_WILDCARD),
             notInArray(rolePermissions.resource, [...PERMISSION_RESOURCES]),
           ),
           and(
-            ne(rolePermissions.action, "*"),
+            ne(rolePermissions.action, PERMISSION_WILDCARD),
             notInArray(rolePermissions.action, [...PERMISSION_ACTIONS]),
           ),
         ),
@@ -197,7 +107,7 @@ export async function seedPermissions<TSchema extends Record<string, unknown>>(
     const removedInvalidCatalogPermissions = invalidCatalogRows.length
     deletedPermissions += removedInvalidCatalogPermissions
 
-    for (const definition of SYSTEM_ROLE_DEFINITIONS) {
+    for (const definition of definitions) {
       const [existingRole] = await tx
         .select({ id: roles.id })
         .from(roles)
@@ -210,7 +120,7 @@ export async function seedPermissions<TSchema extends Record<string, unknown>>(
         roleId = existingRole.id
         await tx
           .update(roles)
-          .set({ description: definition.description })
+          .set({ description: definition.description, updatedAt: new Date() })
           .where(eq(roles.id, roleId))
       } else {
         const [createdRole] = await tx
@@ -225,7 +135,7 @@ export async function seedPermissions<TSchema extends Record<string, unknown>>(
         roleId = createdRole!.id
       }
 
-      const desiredPermissions = expandPermissions(definition.permissions)
+      const desiredPermissions = definition.statements
       const desiredByKey = new Map(
         desiredPermissions.map((permission) => [permissionKey(permission), permission]),
       )
@@ -277,10 +187,40 @@ export async function seedPermissions<TSchema extends Record<string, unknown>>(
     }
 
     return {
-      systemRoles: SYSTEM_ROLE_DEFINITIONS.length,
+      systemRoles: definitions.length,
       insertedPermissions,
       deletedPermissions,
       removedInvalidCatalogPermissions,
     }
   })
+}
+
+if (
+  import.meta.url === `file://${process.argv[1]}` ||
+  process.argv[1]?.endsWith("permissions.seed.ts")
+) {
+  dotenv.config()
+  if (!process.env.DATABASE_URL) {
+    dotenv.config({ path: join(import.meta.dirname, "../.env") })
+  }
+  if (!process.env.DATABASE_URL) {
+    dotenv.config({ path: join(import.meta.dirname, "../../.env") })
+  }
+
+  const databaseUrl = process.env.DATABASE_URL
+  if (!databaseUrl) {
+    throw new Error(
+      "DATABASE_URL environment variable is required to run the permissions seed script."
+    )
+  }
+
+  const db = createDbClient(databaseUrl)
+  console.log("Seeding system roles and permissions...")
+  const result = await seedPermissions(db)
+  console.log(
+    `Seeded ${result.systemRoles} system roles. ` +
+      `Inserted: ${result.insertedPermissions}, ` +
+      `Deleted: ${result.deletedPermissions} (including ${result.removedInvalidCatalogPermissions} invalid catalog permissions).`
+  )
+  process.exit(0)
 }

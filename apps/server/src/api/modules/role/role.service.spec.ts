@@ -10,8 +10,8 @@ vi.mock("../../db.js", () => ({ db: {} }))
 const NOW = new Date("2026-10-28T09:00:00Z")
 const allow = (resource: string, action: string): PermissionStatement => ({
   effect: "allow",
-  resource,
-  action,
+  resource: resource as PermissionStatement["resource"],
+  action: action as PermissionStatement["action"],
   resourceId: "*",
 })
 

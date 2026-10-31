@@ -6,13 +6,19 @@ export interface SystemRoleDefinition {
   statements: readonly PermissionStatement[]
 }
 
-const allow = (resource: string, action: string): PermissionStatement => ({
+const allow = (
+  resource: PermissionStatement["resource"],
+  action: PermissionStatement["action"]
+): PermissionStatement => ({
   effect: "allow",
   resource,
   action,
   resourceId: "*",
 })
-const deny = (resource: string, action: string): PermissionStatement => ({
+const deny = (
+  resource: PermissionStatement["resource"],
+  action: PermissionStatement["action"]
+): PermissionStatement => ({
   ...allow(resource, action),
   effect: "deny",
 })
