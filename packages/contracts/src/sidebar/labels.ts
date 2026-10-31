@@ -33,6 +33,7 @@ export const SIDEBAR_LABELS: Record<SidebarLocale, SidebarLabelSet> = {
       organizationUser: "Members",
       report: "Reports",
       receipt: "Receipts",
+      organizationInvitation: "Organization invitations",
     },
   },
   ar: {
@@ -58,6 +59,7 @@ export const SIDEBAR_LABELS: Record<SidebarLocale, SidebarLabelSet> = {
       organizationUser: "أعضاء المنظمة",
       report: "التقارير",
       receipt: "الإيصالات",
+      organizationInvitation: "دعوات المنظمة",
     },
   },
 }

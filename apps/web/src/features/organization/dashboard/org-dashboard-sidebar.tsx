@@ -12,6 +12,7 @@ import {
   ContactIcon,
   FileTextIcon,
   LayersIcon,
+  MailIcon,
   PackageIcon,
   ReceiptIcon,
   RulerIcon,
@@ -73,6 +74,8 @@ const ICON_MAP: Record<string, ComponentType<{ className?: string }>> = {
   warehouse: WarehouseIcon,
   "badge-dollar-sign": BadgeDollarSignIcon,
   boxes: BoxesIcon,
+  mail: MailIcon,
+  organizationInvitation: MailIcon,
 }
 
 function renderSidebarIcon(iconKey?: string | null) {

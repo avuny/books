@@ -23,5 +23,6 @@ export const SidebarOptionName = [
   "organizationUser",
   "report",
   "receipt",
+  "organizationInvitation"
 ] as const
 export type SidebarOptionName = (typeof SidebarOptionName)[number]

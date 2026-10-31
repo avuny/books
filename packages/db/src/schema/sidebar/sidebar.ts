@@ -32,6 +32,7 @@ export const sidebarOptionNameEnum = pgEnum("sidebar_option_name", [
   "organizationUser",
   "report",
   "receipt",
+  "organizationInvitation",
 ]);
 
 // Sidebar headings

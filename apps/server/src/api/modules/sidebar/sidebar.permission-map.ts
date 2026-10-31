@@ -28,6 +28,7 @@ export const sidebarOptionResources = {
   organizationUser: "organization-user",
   report: "report",
   receipt: "receipt",
+  organizationInvitation: "organization-invitation",
 } as const satisfies Record<SidebarOptionName, string>
 
 export interface SidebarPermissionMapper {
