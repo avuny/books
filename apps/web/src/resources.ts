@@ -8,7 +8,14 @@ import {
   organizationTranslationsEn,
 } from "@avuny/contracts/organization"
 import { roleTranslationsAr, roleTranslationsEn } from "@avuny/contracts"
-import { organizationInvitationTranslationsAr, organizationInvitationTranslationsEn } from "@avuny/contracts/organization-invitation"
+import {
+  organizationInvitationTranslationsAr,
+  organizationInvitationTranslationsEn,
+} from "@avuny/contracts/organization-invitation"
+import {
+  organizationUserTranslationsAr,
+  organizationUserTranslationsEn,
+} from "@avuny/contracts/organization-user"
 
 export const resources = {
   en: {
@@ -17,6 +24,7 @@ export const resources = {
     organization: organizationTranslationsEn,
     role: roleTranslationsEn,
     "organization-invitation": organizationInvitationTranslationsEn,
+    "organization-user": organizationUserTranslationsEn,
   },
   ar: {
     common: commonTranslationsAr,
@@ -24,6 +32,7 @@ export const resources = {
     organization: organizationTranslationsAr,
     role: roleTranslationsAr,
     "organization-invitation": organizationInvitationTranslationsAr,
+    "organization-user": organizationUserTranslationsAr,
   },
 }
 
