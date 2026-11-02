@@ -26,5 +26,78 @@
     "OWNERSHIP_TRANSFERRED": "تم نقل الملكية.",
     "MY_ORGANIZATIONS_LISTED": "تم جلب المؤسسات بنجاح.",
     "MEMBERSHIP_TOUCHED": "تم تحديث العضوية."
+  },
+  "actions": {
+    "edit": "تعديل اسم المستخدم",
+    "activate": "إعادة التفعيل",
+    "deactivate": "تعطيل",
+    "transferOwnership": "نقل الملكية",
+    "cancel": "تراجع"
+  },
+  "list": {
+    "title": "الأعضاء",
+    "description": "الأشخاص المنتمون إلى هذه المؤسسة. أدر أسماء المستخدمين والوصول والملكية.",
+    "search": {
+      "label": "ابحث في الأعضاء",
+      "placeholder": "ابحث باسم المستخدم"
+    },
+    "tabs": {
+      "typeAria": "تصفية الأعضاء حسب النوع",
+      "statusAria": "تصفية الأعضاء حسب الحالة",
+      "all": "الكل"
+    }
+  },
+  "table": {
+    "member": "العضو",
+    "type": "النوع",
+    "status": "الحالة",
+    "joined": "تاريخ الانضمام",
+    "lastAccessed": "آخر نشاط",
+    "never": "لا يوجد",
+    "actions": "الإجراءات",
+    "actionsFor": "إجراءات {{name}}"
+  },
+  "empty": {
+    "title": "لا يوجد أعضاء",
+    "description": "جرّب تغيير البحث أو عوامل التصفية."
+  },
+  "pagination": {
+    "nav": "التنقل بين الصفحات",
+    "previous": "السابق",
+    "next": "التالي",
+    "rowsPerPage": "عدد الصفوف في الصفحة",
+    "summary": "{{from}}–{{to}} من {{total}}",
+    "pageOf": "الصفحة {{page}} من {{pageCount}}",
+    "goTo": "اذهب إلى الصفحة {{page}}"
+  },
+  "fields": {
+    "username": {
+      "label": "اسم المستخدم",
+      "placeholder": "اختر اسم مستخدم"
+    },
+    "confirmCode": {
+      "label": "رمز المؤسسة",
+      "placeholder": "اكتب رمز المؤسسة للتأكيد"
+    }
+  },
+  "edit": {
+    "title": "تعديل اسم المستخدم",
+    "description": "غيّر الطريقة التي يظهر بها {{name}} في هذه المؤسسة.",
+    "submitLabel": "حفظ التغييرات",
+    "submittingLabel": "جارٍ الحفظ…"
+  },
+  "deactivate": {
+    "title": "تعطيل العضو؟",
+    "description": "سيفقد {{name}} إمكانية الوصول إلى هذه المؤسسة حتى تتم إعادة تفعيله."
+  },
+  "activate": {
+    "title": "إعادة تفعيل العضو؟",
+    "description": "سيتمكن {{name}} من الوصول إلى هذه المؤسسة مجددًا."
+  },
+  "transfer": {
+    "title": "نقل الملكية إلى {{name}}؟",
+    "description": "سيصبح {{name}} مالك المؤسسة ولن تكون أنت المالك بعد الآن. اكتب رمز المؤسسة للتأكيد.",
+    "submitLabel": "نقل الملكية",
+    "submittingLabel": "جارٍ النقل…"
   }
 }

@@ -39,6 +39,11 @@
       "import": "./dist/organization-invitation/index.js",
       "default": "./dist/organization-invitation/index.js",
       "types": "./dist/organization-invitation/index.d.ts"
+    },
+    "./organization-user": {
+      "import": "./dist/organization-user/index.js",
+      "default": "./dist/organization-user/index.js",
+      "types": "./dist/organization-user/index.d.ts"
     }
   },
   "scripts": {

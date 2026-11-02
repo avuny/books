@@ -26,5 +26,78 @@
     "OWNERSHIP_TRANSFERRED": "Ownership transferred.",
     "MY_ORGANIZATIONS_LISTED": "Organizations retrieved successfully.",
     "MEMBERSHIP_TOUCHED": "Membership updated."
+  },
+  "actions": {
+    "edit": "Edit username",
+    "activate": "Reactivate",
+    "deactivate": "Deactivate",
+    "transferOwnership": "Transfer ownership",
+    "cancel": "Cancel"
+  },
+  "list": {
+    "title": "Members",
+    "description": "People who belong to this organization. Manage their usernames, access and ownership.",
+    "search": {
+      "label": "Search members",
+      "placeholder": "Search by username"
+    },
+    "tabs": {
+      "typeAria": "Filter members by type",
+      "statusAria": "Filter members by status",
+      "all": "All"
+    }
+  },
+  "table": {
+    "member": "Member",
+    "type": "Type",
+    "status": "Status",
+    "joined": "Joined",
+    "lastAccessed": "Last active",
+    "never": "Never",
+    "actions": "Actions",
+    "actionsFor": "Actions for {{name}}"
+  },
+  "empty": {
+    "title": "No members found",
+    "description": "Try changing the search or the filters."
+  },
+  "pagination": {
+    "nav": "Pagination",
+    "previous": "Previous",
+    "next": "Next",
+    "rowsPerPage": "Rows per page",
+    "summary": "{{from}}–{{to}} of {{total}}",
+    "pageOf": "Page {{page}} of {{pageCount}}",
+    "goTo": "Go to page {{page}}"
+  },
+  "fields": {
+    "username": {
+      "label": "Username",
+      "placeholder": "Choose a username"
+    },
+    "confirmCode": {
+      "label": "Organization code",
+      "placeholder": "Type the organization code to confirm"
+    }
+  },
+  "edit": {
+    "title": "Edit username",
+    "description": "Change how {{name}} appears in this organization.",
+    "submitLabel": "Save changes",
+    "submittingLabel": "Saving…"
+  },
+  "deactivate": {
+    "title": "Deactivate member?",
+    "description": "{{name}} will lose access to this organization until they are reactivated."
+  },
+  "activate": {
+    "title": "Reactivate member?",
+    "description": "{{name}} will be able to access this organization again."
+  },
+  "transfer": {
+    "title": "Transfer ownership to {{name}}?",
+    "description": "{{name}} will become the owner and you will no longer be the owner. Type the organization code to confirm.",
+    "submitLabel": "Transfer ownership",
+    "submittingLabel": "Transferring…"
   }
 }
