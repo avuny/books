@@ -19,7 +19,7 @@ export type InputFieldProps<
   TFieldValues extends FieldValues = FieldValues,
   TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
 > = {
-  control: Control<TFieldValues>
+  control: Control<TFieldValues, any, any>
   name: TName
   copy: FieldCopy
   type?: HTMLInputTypeAttribute

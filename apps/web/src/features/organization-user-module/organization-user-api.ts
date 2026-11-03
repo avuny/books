@@ -8,7 +8,11 @@
  */
 import { useMemo } from "react"
 import { keepPreviousData, useQueryClient } from "@tanstack/react-query"
-import { hasPermission, type PermissionSnapshot } from "@avuny/contracts"
+import {
+  hasPermission,
+  type PermissionSnapshot,
+  type PermissionStatement,
+} from "@avuny/contracts"
 
 import {
   getGetMyPermissionsQueryKey,
@@ -91,8 +95,8 @@ export function useMemberAbilities(orgId: string) {
       isOwner: snapshot.isOwner,
       statements: snapshot.statements.map((statement) => ({
         effect: statement.effect === "deny" ? "deny" : "allow",
-        resource: statement.resource,
-        action: statement.action,
+        resource: statement.resource as PermissionStatement["resource"],
+        action: statement.action as PermissionStatement["action"],
         resourceId: statement.resourceId ?? "*",
       })),
     }

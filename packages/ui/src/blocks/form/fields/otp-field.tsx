@@ -18,7 +18,7 @@ export type OtpFieldProps<
   TFieldValues extends FieldValues = FieldValues,
   TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
 > = {
-  control: Control<TFieldValues>
+  control: Control<TFieldValues, any, any>
   name: TName
   label: string
   /** Defaults to true — visually hides the label (screen-reader only). */

@@ -5,7 +5,11 @@
  */
 import { useMemo } from "react"
 import { keepPreviousData, useQueryClient } from "@tanstack/react-query"
-import { hasPermission, type PermissionSnapshot } from "@avuny/contracts"
+import {
+  hasPermission,
+  type PermissionSnapshot,
+  type PermissionStatement,
+} from "@avuny/contracts"
 
 import {
   getGetRoleQueryKey,
@@ -21,7 +25,6 @@ import {
 
 import type {
   PermissionGroup,
-  PermissionStatementDto,
   RoleDto,
   RoleListItemDto,
   RoleScope,
@@ -35,11 +38,11 @@ export function normalizeStatement(s: {
   resource: string
   action: string
   resourceId?: string
-}): PermissionStatementDto {
+}): PermissionStatement {
   return {
     effect: s.effect === "deny" ? "deny" : "allow",
-    resource: s.resource,
-    action: s.action,
+    resource: s.resource as PermissionStatement["resource"],
+    action: s.action as PermissionStatement["action"],
     resourceId: s.resourceId ?? "*",
   }
 }
