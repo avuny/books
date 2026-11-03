@@ -24,11 +24,7 @@ import {
   useUpdateOrganizationUser,
 } from "@/api"
 
-import type {
-  MemberStatusFilter,
-  MemberTypeFilter,
-  OrganizationUserDto,
-} from "./types"
+import type { MemberStatusFilter, OrganizationUserDto } from "./types"
 
 const NO_MEMBERS: OrganizationUserDto[] = []
 
@@ -38,7 +34,6 @@ export type MemberListParams = {
   /** 1-based. */
   page: number
   pageSize: number
-  type: MemberTypeFilter
   status: MemberStatusFilter
   /** Already debounced; empty means no search. */
   search: string
@@ -47,14 +42,13 @@ export type MemberListParams = {
 /** Members of one organization. */
 export function useMemberList(
   orgId: string,
-  { page, pageSize, type, status, search }: MemberListParams
+  { page, pageSize, status, search }: MemberListParams
 ) {
   const query = useListOrganizationUsers(
     orgId,
     {
       page,
       pageSize,
-      type: type === "all" ? undefined : type,
       // The query schema takes "true" | "false" strings.
       isActive:
         status === "all" ? undefined : status === "active" ? "true" : "false",

@@ -6,13 +6,12 @@ import {
 
 import { MemberStatusBadge } from "../components"
 import { getMemberStatus } from "../lib"
-import type { MemberStatus, OrganizationUserDto, OrgMemberType } from "../types"
+import type { MemberStatus, OrganizationUserDto } from "../types"
 
 export type MemberMobileCardCopy = {
   never: string
   joinedLabel: string
   lastAccessedLabel: string
-  getTypeLabel: (type: OrgMemberType) => string
   getStatusLabel: (status: MemberStatus) => string
   formatDate: (iso: string) => string
 }
@@ -37,7 +36,6 @@ export function MemberMobileCard({
   return (
     <DataTableMobileCard
       title={member.username}
-      subtitle={copy.getTypeLabel(member.type)}
       badge={
         <MemberStatusBadge
           status={status}

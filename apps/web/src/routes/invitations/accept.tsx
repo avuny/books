@@ -16,7 +16,9 @@ type AcceptInvitationSearch = {
 // PUBLIC page (outside the /organization auth guard): the invitee may not have an
 // account yet, and the invitation preview does not need one. Accepting does.
 export const Route = createFileRoute("/invitations/accept")({
-  validateSearch: (search: Record<string, unknown>): AcceptInvitationSearch => ({
+  validateSearch: (
+    search: Record<string, unknown>
+  ): AcceptInvitationSearch => ({
     token: typeof search.token === "string" ? search.token : undefined,
   }),
   component: AcceptInvitationRoute,

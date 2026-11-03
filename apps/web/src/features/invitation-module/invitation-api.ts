@@ -122,7 +122,12 @@ export function useInvitationAbilities(orgId: string) {
 
   return useMemo(() => {
     if (!snapshot) {
-      return { canRead: false, canCreate: false, canResend: false, canRevoke: false }
+      return {
+        canRead: false,
+        canCreate: false,
+        canResend: false,
+        canRevoke: false,
+      }
     }
     // The generated type marks `effect` and `resourceId` optional (zod defaults).
     const permissions: PermissionSnapshot = {

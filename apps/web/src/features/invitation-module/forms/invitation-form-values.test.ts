@@ -1,61 +1,38 @@
 import { describe, expect, it } from "vitest"
 
 import {
-  CREATE_INVITATION_DEFAULTS,
   toAcceptInvitationInput,
   toCreateInvitationInput,
 } from "./invitation-form-values"
 
 describe("toCreateInvitationInput", () => {
-  it("sends only the email for the email channel", () => {
+  it("normalizes identifier and roleId", () => {
     expect(
       toCreateInvitationInput({
-        ...CREATE_INVITATION_DEFAULTS,
-        email: " Sam@Example.com ",
-        phone: "+201001234567", // left over from switching channels
+        identifier: " Sam@Example.com ",
+        roleId: " 123e4567-e89b-12d3-a456-426614174000 ",
       })
     ).toEqual({
-      type: "managed",
-      channel: "email",
-      email: "Sam@Example.com",
-      phone: undefined,
-      username: undefined,
+      identifier: "sam@example.com",
+      roleId: "123e4567-e89b-12d3-a456-426614174000",
     })
   })
 
-  it("sends only a normalized phone for the WhatsApp channel", () => {
+  it("treats empty roleId as undefined", () => {
     expect(
       toCreateInvitationInput({
-        ...CREATE_INVITATION_DEFAULTS,
-        type: "portal",
-        channel: "whatsapp",
-        email: "left-over@example.com",
-        phone: "+20 100 123-4567",
-        username: " sam ",
+        identifier: "sam@example.com",
+        roleId: "",
       })
     ).toEqual({
-      type: "portal",
-      channel: "whatsapp",
-      email: undefined,
-      phone: "+201001234567",
-      username: "sam",
+      identifier: "sam@example.com",
+      roleId: undefined,
     })
-  })
-
-  it("treats an empty contact as missing so the schema can report it", () => {
-    const input = toCreateInvitationInput(CREATE_INVITATION_DEFAULTS)
-    expect(input.email).toBeUndefined()
-    expect(input.phone).toBeUndefined()
   })
 })
 
 describe("toAcceptInvitationInput", () => {
-  it("drops a blank username", () => {
-    expect(toAcceptInvitationInput({ username: "  " })).toEqual({
-      username: undefined,
-    })
-    expect(toAcceptInvitationInput({ username: "sam" })).toEqual({
-      username: "sam",
-    })
+  it("returns empty input object", () => {
+    expect(toAcceptInvitationInput({})).toEqual({})
   })
 })

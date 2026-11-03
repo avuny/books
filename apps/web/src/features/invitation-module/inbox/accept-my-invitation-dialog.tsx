@@ -10,10 +10,7 @@ import {
 } from "@workspace/ui/components/dialog"
 import { parseApiError } from "@workspace/ui/lib/api-error"
 
-import {
-  AcceptInvitationForm,
-  useAcceptInvitationFormCopy,
-} from "../forms"
+import { AcceptInvitationForm, useAcceptInvitationFormCopy } from "../forms"
 import { useAcceptMyInvitationMutation } from "../invitation-api"
 import type { AcceptMyInvitationInput, MyInvitationDto } from "../types"
 
@@ -71,8 +68,7 @@ export function AcceptMyInvitationDialog({
           <AcceptInvitationForm
             key={invitation.id}
             copy={copy}
-            // The inviter may have chosen a username already; otherwise ask for one.
-            showUsername={invitation.username === null}
+            showUsername={false}
             onSubmit={handleSubmit}
             isPending={acceptMutation.isPending}
             errorMessage={serverError}

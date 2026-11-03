@@ -7,8 +7,8 @@ export type MyInvitationItem = {
   id: string
   /** The organization's name. */
   title: string
-  /** The member type, e.g. "Team member". */
-  badge: string
+  /** The member type, e.g. "Team member". Optional now that type field is removed. */
+  badge?: string
   /** Secondary facts, joined with " · ": code, channel, expiry, username. */
   details: string[]
 }

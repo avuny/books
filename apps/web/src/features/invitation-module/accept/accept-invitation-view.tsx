@@ -51,7 +51,9 @@ export function AcceptInvitationView({
           <dl className="grid gap-3 text-sm">
             {details.map((detail) => (
               <div key={detail.label}>
-                <dt className="text-xs text-muted-foreground">{detail.label}</dt>
+                <dt className="text-xs text-muted-foreground">
+                  {detail.label}
+                </dt>
                 <dd className="break-words text-foreground">{detail.value}</dd>
               </div>
             ))}

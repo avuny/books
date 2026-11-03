@@ -29,7 +29,10 @@ import {
   useFormatDate,
   useInvitationLabels,
 } from "../lib"
-import type { InvitationStatusFilter, OrganizationInvitationDto } from "../types"
+import type {
+  InvitationStatusFilter,
+  OrganizationInvitationDto,
+} from "../types"
 import { createInvitationColumns } from "./invitation-columns"
 import { InvitationMobileCard } from "./invitation-mobile-card"
 
@@ -70,7 +73,7 @@ export function InvitationList({ orgId }: InvitationListProps) {
     status,
   })
   const abilities = useInvitationAbilities(orgId)
-  const { getStatusLabel, getChannelLabel, getTypeLabel } = useInvitationLabels()
+  const { getStatusLabel } = useInvitationLabels()
   const formatDate = useFormatDate()
   const revokeMutation = useRevokeInvitationMutation(orgId)
   const resendMutation = useResendInvitationMutation(orgId)
@@ -120,22 +123,17 @@ export function InvitationList({ orgId }: InvitationListProps) {
       createInvitationColumns({
         copy: {
           invitee: t("table.invitee"),
-          type: t("table.type"),
-          channel: t("table.channel"),
           status: t("table.status"),
           sent: t("table.sent"),
           expires: t("table.expires"),
           actions: t("table.actions"),
-          existingUser: t("table.existingUser"),
           actionsFor: (invitee) => t("table.actionsFor", { name: invitee }),
-          getTypeLabel,
-          getChannelLabel,
           getStatusLabel,
           formatDate,
         },
         getActions,
       }),
-    [t, getActions, getTypeLabel, getChannelLabel, getStatusLabel, formatDate]
+    [t, getActions, getStatusLabel, formatDate]
   )
 
   const table = useDataTable<OrganizationInvitationDto>({
@@ -228,20 +226,14 @@ export function InvitationList({ orgId }: InvitationListProps) {
           <InvitationMobileCard
             invitation={row.original}
             copy={{
-              existingUser: t("table.existingUser"),
-              typeLabel: t("table.type"),
-              channelLabel: t("table.channel"),
               sentLabel: t("table.sent"),
               expiresLabel: t("table.expires"),
-              getTypeLabel,
-              getChannelLabel,
               getStatusLabel,
               formatDate,
             }}
             actions={getActions(row.original)}
             actionsTriggerLabel={t("table.actionsFor", {
-              name:
-                getInvitationContact(row.original) ?? t("table.existingUser"),
+              name: getInvitationContact(row.original),
             })}
           />
         )}

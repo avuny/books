@@ -2,7 +2,6 @@ import { useCallback, useEffect, useMemo, useState } from "react"
 import type { PaginationState } from "@tanstack/react-table"
 import { Crown, Pencil, UserCheck, UserX } from "lucide-react"
 import { useTranslation } from "react-i18next"
-import { ORG_MEMBER_TYPES } from "@avuny/contracts"
 
 import {
   ConfirmDialog,
@@ -30,15 +29,10 @@ import {
   useMemberList,
   useSetMemberStatusMutation,
 } from "../organization-user-api"
-import type {
-  MemberStatusFilter,
-  MemberTypeFilter,
-  OrganizationUserDto,
-} from "../types"
+import type { MemberStatusFilter, OrganizationUserDto } from "../types"
 import { createMemberColumns } from "./member-columns"
 import { MemberMobileCard } from "./member-mobile-card"
 
-const TYPE_TABS: readonly MemberTypeFilter[] = ["all", ...ORG_MEMBER_TYPES]
 const STATUS_TABS: readonly MemberStatusFilter[] = ["all", "active", "inactive"]
 
 type OrganizationUserListProps = {
@@ -49,7 +43,6 @@ type OrganizationUserListProps = {
 export function OrganizationUserList({ orgId }: OrganizationUserListProps) {
   const { t } = useTranslation("organization-user")
 
-  const [type, setType] = useState<MemberTypeFilter>("all")
   const [status, setStatus] = useState<MemberStatusFilter>("all")
   const [searchInput, setSearchInput] = useState("")
   const [pagination, setPagination] = useState<PaginationState>({
@@ -76,12 +69,11 @@ export function OrganizationUserList({ orgId }: OrganizationUserListProps) {
   const { members, total, isLoading, error } = useMemberList(orgId, {
     page: pagination.pageIndex + 1,
     pageSize: pagination.pageSize,
-    type,
     status,
     search,
   })
   const abilities = useMemberAbilities(orgId)
-  const { getTypeLabel, getStatusLabel } = useMemberLabels()
+  const { getStatusLabel } = useMemberLabels()
   const formatDate = useFormatDate()
   const statusMutation = useSetMemberStatusMutation(orgId)
 
@@ -143,20 +135,18 @@ export function OrganizationUserList({ orgId }: OrganizationUserListProps) {
       createMemberColumns({
         copy: {
           member: t("table.member"),
-          type: t("table.type"),
           status: t("table.status"),
           joined: t("table.joined"),
           lastAccessed: t("table.lastAccessed"),
           actions: t("table.actions"),
           never: t("table.never"),
           actionsFor: (name) => t("table.actionsFor", { name }),
-          getTypeLabel,
           getStatusLabel,
           formatDate,
         },
         getActions,
       }),
-    [t, getActions, getTypeLabel, getStatusLabel, formatDate]
+    [t, getActions, getStatusLabel, formatDate]
   )
 
   const table = useDataTable<OrganizationUserDto>({
@@ -204,21 +194,6 @@ export function OrganizationUserList({ orgId }: OrganizationUserListProps) {
         <p className="text-sm text-muted-foreground">{t("list.description")}</p>
       </div>
 
-      <DataTableViewTabs
-        ariaLabel={t("list.tabs.typeAria")}
-        value={type}
-        onValueChange={(value) => {
-          const next = TYPE_TABS.find((item) => item === value)
-          if (!next) return
-          setType(next)
-          resetPage()
-        }}
-        tabs={TYPE_TABS.map((item) => ({
-          value: item,
-          label: item === "all" ? t("list.tabs.all") : getTypeLabel(item),
-        }))}
-      />
-
       <div className="flex flex-wrap items-center gap-3">
         <Input
           type="search"
@@ -258,9 +233,7 @@ export function OrganizationUserList({ orgId }: OrganizationUserListProps) {
         isLoading={isLoading}
         emptyState={
           <div className="flex flex-col items-center gap-1 px-6 py-16 text-center">
-            <p className="text-sm font-medium text-foreground">
-              {t("empty.title")}
-            </p>
+            <p className="font-medium text-foreground">{t("empty.title")}</p>
             <p className="text-sm text-muted-foreground">
               {t("empty.description")}
             </p>
@@ -273,7 +246,6 @@ export function OrganizationUserList({ orgId }: OrganizationUserListProps) {
               never: t("table.never"),
               joinedLabel: t("table.joined"),
               lastAccessedLabel: t("table.lastAccessed"),
-              getTypeLabel,
               getStatusLabel,
               formatDate,
             }}

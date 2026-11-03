@@ -8,7 +8,7 @@ import {
   useDeclineMyInvitationMutation,
   useMyInvitations,
 } from "../invitation-api"
-import { useFormatDate, useInvitationLabels } from "../lib"
+import { useFormatDate } from "../lib"
 import type { MyInvitationDto } from "../types"
 import { AcceptMyInvitationDialog } from "./accept-my-invitation-dialog"
 import {
@@ -26,7 +26,6 @@ export function MyInvitationList({ onAccepted }: MyInvitationListProps) {
   const { t } = useTranslation("organization-invitation")
 
   const { invitations, isLoading, error } = useMyInvitations()
-  const { getTypeLabel, getChannelLabel } = useInvitationLabels()
   const formatDate = useFormatDate()
   const declineMutation = useDeclineMyInvitationMutation()
 
@@ -41,17 +40,12 @@ export function MyInvitationList({ onAccepted }: MyInvitationListProps) {
       invitations.map((invitation) => ({
         id: invitation.id,
         title: invitation.org.name,
-        badge: getTypeLabel(invitation.type),
         details: [
           invitation.org.code,
-          t("inbox.via", { channel: getChannelLabel(invitation.channel) }),
           t("inbox.expires", { date: formatDate(invitation.expiresAt) }),
-          ...(invitation.username
-            ? [t("inbox.username", { username: invitation.username })]
-            : []),
         ],
       })),
-    [invitations, t, getTypeLabel, getChannelLabel, formatDate]
+    [invitations, t, formatDate]
   )
 
   /* --------------------------------- decline ------------------------------- */
@@ -64,7 +58,9 @@ export function MyInvitationList({ onAccepted }: MyInvitationListProps) {
     if (!invitationToDecline) return
     setDeclineError(null)
     try {
-      await declineMutation.mutateAsync({ invitationId: invitationToDecline.id })
+      await declineMutation.mutateAsync({
+        invitationId: invitationToDecline.id,
+      })
       closeDeclineDialog()
     } catch (e) {
       setDeclineError(parseApiError(e).message || null)

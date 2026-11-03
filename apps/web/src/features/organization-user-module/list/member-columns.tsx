@@ -5,13 +5,12 @@ import {
   type RowAction,
 } from "@workspace/ui/blocks/data-table"
 
-import { MemberStatusBadge, MemberTypeBadge } from "../components"
+import { MemberStatusBadge } from "../components"
 import { getMemberStatus } from "../lib"
-import type { MemberStatus, OrganizationUserDto, OrgMemberType } from "../types"
+import type { MemberStatus, OrganizationUserDto } from "../types"
 
 export type MemberColumnsCopy = {
   member: string
-  type: string
   status: string
   joined: string
   lastAccessed: string
@@ -20,7 +19,6 @@ export type MemberColumnsCopy = {
   never: string
   /** aria-label of the row menu button. */
   actionsFor: (member: string) => string
-  getTypeLabel: (type: OrgMemberType) => string
   getStatusLabel: (status: MemberStatus) => string
   /** Formats an ISO timestamp for the current locale. */
   formatDate: (iso: string) => string
@@ -44,17 +42,6 @@ export function createMemberColumns({
         <div className="max-w-xs truncate font-medium text-foreground">
           {row.original.username}
         </div>
-      ),
-    },
-    {
-      accessorKey: "type",
-      header: copy.type,
-      enableSorting: false,
-      cell: ({ row }) => (
-        <MemberTypeBadge
-          type={row.original.type}
-          label={copy.getTypeLabel(row.original.type)}
-        />
       ),
     },
     {
@@ -93,7 +80,6 @@ export function createMemberColumns({
         </span>
       ),
     },
-    // Built by hand: a row with no allowed action (the owner, say) shows no menu at all.
     {
       id: "actions",
       header: copy.actions,

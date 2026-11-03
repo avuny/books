@@ -18,8 +18,8 @@ const resolver = createPreparedResolver<
 
 type AcceptInvitationFormProps = {
   copy: AcceptInvitationFormCopy
-  /** Ask for a username: the inviter did not choose one for this person. */
-  showUsername: boolean
+  /** Ask for a username: optional handle for this person. */
+  showUsername?: boolean
   onSubmit: (values: AcceptMyInvitationInput) => void
   isPending: boolean
   /** Already localized. Shown above the button. */
@@ -29,7 +29,7 @@ type AcceptInvitationFormProps = {
 // UI + validation only. The caller supplies the heading and decides what happens next.
 export function AcceptInvitationForm({
   copy,
-  showUsername,
+  showUsername = false,
   onSubmit,
   isPending,
   errorMessage,
@@ -49,7 +49,7 @@ export function AcceptInvitationForm({
       noValidate
       className="space-y-4"
     >
-      {showUsername ? (
+      {showUsername && copy.username ? (
         <InputField
           control={form.control}
           name="username"

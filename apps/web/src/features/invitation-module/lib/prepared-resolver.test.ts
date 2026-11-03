@@ -14,7 +14,11 @@ const schema = {
         error: {
           issues: [
             { path: ["email"], code: "custom", message: "Email required" },
-            { path: ["email"], code: "custom", message: "second issue is ignored" },
+            {
+              path: ["email"],
+              code: "custom",
+              message: "second issue is ignored",
+            },
           ],
         },
       }
@@ -23,8 +27,13 @@ const schema = {
   },
 }
 
-const prepare = (values: Values) => ({ email: values.email.trim() || undefined })
-const resolver = createPreparedResolver<Values, { email: string }>(schema, prepare)
+const prepare = (values: Values) => ({
+  email: values.email.trim() || undefined,
+})
+const resolver = createPreparedResolver<Values, { email: string }>(
+  schema,
+  prepare
+)
 const options = {} as never
 
 describe("createPreparedResolver", () => {

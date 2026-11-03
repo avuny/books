@@ -4,19 +4,12 @@ import { useTranslation } from "react-i18next"
 import { Button } from "@workspace/ui/components/button"
 import { parseApiError } from "@workspace/ui/lib/api-error"
 
-import {
-  AcceptInvitationForm,
-  useAcceptInvitationFormCopy,
-} from "../forms"
+import { AcceptInvitationForm, useAcceptInvitationFormCopy } from "../forms"
 import {
   useAcceptInvitationByTokenMutation,
   useInvitationPreview,
 } from "../invitation-api"
-import {
-  getInvitationContact,
-  useFormatDate,
-  useInvitationLabels,
-} from "../lib"
+import { getInvitationContact, useFormatDate } from "../lib"
 import type { AcceptMyInvitationInput } from "../types"
 import {
   AcceptInvitationView,
@@ -47,7 +40,6 @@ export function AcceptInvitation({
   const { preview, isLoading, error } = useInvitationPreview(token)
   const acceptMutation = useAcceptInvitationByTokenMutation()
   const copy = useAcceptInvitationFormCopy()
-  const { getTypeLabel, getChannelLabel } = useInvitationLabels()
   const formatDate = useFormatDate()
 
   // Called only when Zod validation passes (the resolver guards the fields).
@@ -70,14 +62,10 @@ export function AcceptInvitation({
           label: t("join.organization"),
           value: `${preview.orgName} (${preview.orgCode})`,
         },
-        { label: t("join.type"), value: getTypeLabel(preview.type) },
         {
-          label: t("join.sentTo", { channel: getChannelLabel(preview.channel) }),
+          label: t("join.sentTo"),
           value: getInvitationContact(preview) ?? "—",
         },
-        ...(preview.username
-          ? [{ label: t("join.username"), value: preview.username }]
-          : []),
         { label: t("join.expires"), value: formatDate(preview.expiresAt) },
       ]
     : []
@@ -99,8 +87,8 @@ export function AcceptInvitation({
         isAuthenticated ? (
           <AcceptInvitationForm
             copy={copy}
-            // The inviter may have chosen a username already; otherwise ask for one.
-            showUsername={preview?.username === null}
+
+            showUsername={false}
             onSubmit={handleSubmit}
             isPending={acceptMutation.isPending}
             errorMessage={serverError}

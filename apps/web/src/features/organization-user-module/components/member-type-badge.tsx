@@ -1,6 +1,5 @@
 import { Badge } from "@workspace/ui/components/badge"
-
-import type { OrgMemberType } from "../types"
+import type { OrgMemberType } from "@avuny/contracts"
 
 const VARIANTS = {
   owner: "default",

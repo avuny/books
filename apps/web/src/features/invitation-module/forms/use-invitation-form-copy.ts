@@ -12,37 +12,13 @@ export function useInvitationFormCopy(): InvitationFormCopy {
   return {
     title: t("create.title"),
     description: t("create.description"),
-    type: {
-      legend: t("fields.type.legend"),
-      options: {
-        managed: {
-          label: t("types.managed"),
-          description: t("fields.type.descriptions.managed"),
-        },
-        portal: {
-          label: t("types.portal"),
-          description: t("fields.type.descriptions.portal"),
-        },
-      },
+    identifier: {
+      label: t("fields.identifier.label"),
+      placeholder: t("fields.identifier.placeholder"),
     },
-    channel: {
-      legend: t("fields.channel.legend"),
-      options: {
-        email: { label: t("labels.email") },
-        whatsapp: { label: t("labels.whatsapp") },
-      },
-    },
-    email: {
-      label: t("fields.email.label"),
-      placeholder: t("fields.email.placeholder"),
-    },
-    phone: {
-      label: t("fields.phone.label"),
-      placeholder: t("fields.phone.placeholder"),
-    },
-    username: {
-      label: t("fields.username.label"),
-      placeholder: t("fields.username.placeholder"),
+    role: {
+      label: t("fields.role.label"),
+      placeholder: t("fields.role.placeholder"),
     },
     submitLabel: t("create.submitLabel"),
     submittingLabel: t("create.submittingLabel"),

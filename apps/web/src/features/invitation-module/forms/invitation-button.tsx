@@ -18,11 +18,7 @@ export function InvitationButton({ orgId, className }: InvitationButtonProps) {
 
   return (
     <>
-      <Button
-        type="button"
-        className={className}
-        onClick={() => setOpen(true)}
-      >
+      <Button type="button" className={className} onClick={() => setOpen(true)}>
         <Plus className="size-4" aria-hidden />
         {t("actions.create")}
       </Button>

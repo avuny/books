@@ -20,7 +20,7 @@ describe("i18n", () => {
     await i18n.changeLanguage("en")
     expect(i18n.t("auth.signIn.title", { ns: "user" })).toBe("Welcome back")
     expect(i18n.t("auth.signIn.description", { ns: "user" })).toBe(
-      "Sign in with your email, phone number or username."
+      "Sign in with your email."
     )
   })
 })
