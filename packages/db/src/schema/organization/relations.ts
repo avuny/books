@@ -4,8 +4,6 @@ import { organizationUsers, organizations, organizationInvitations } from "./org
 import { users } from "../user/users.js"
 import { organizationUserRoles, roles } from "../access-control/role.js"
 
-
-
 /* organizations */
 
 export const organizationsRelations = relations(
@@ -14,11 +12,6 @@ export const organizationsRelations = relations(
     members: many(organizationUsers),
     invitations: many(organizationInvitations),
     roles: many(roles),
-    // billingAccount: one(billingAccounts),
-    // subscriptions: many(subscriptions),
-    // invoices: many(invoices),
-    // payments: many(payments),
-    // paymentMethods: many(paymentMethods),
   })
 )
 
@@ -43,6 +36,10 @@ export const organizationInvitationsRelations = relations(
     organization: one(organizations, {
       fields: [organizationInvitations.orgId],
       references: [organizations.id],
+    }),
+    role: one(roles, {
+      fields: [organizationInvitations.roleId],
+      references: [roles.id],
     }),
     inviteeUser: one(users, {
       fields: [organizationInvitations.inviteeUserId],

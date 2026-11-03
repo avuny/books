@@ -43,6 +43,13 @@
       "when": 1793457461776,
       "tag": "0005_adorable_toxin",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1793710568483,
+      "tag": "0006_futuristic_scourge",
+      "breakpoints": true
     }
   ]
 }

@@ -16,6 +16,7 @@ import {
 } from "drizzle-orm/pg-core"
 import { isUsername, pk, softDelete, timestamps, timestamptz } from "../_helpers.js"
 import { users } from "../user/users.js"
+import { roles } from "../access-control/role.js"
 import { countries, currencies, timezones, states } from "./geo.js"
 
 
@@ -39,16 +40,10 @@ export const invitationStatusEnum = pgEnum("invitation_status", [
   "revoked",
   "expired",
 ])
-export const invitationChannelEnum = pgEnum("invitation_channel", [
-  "email",
-  "whatsapp",
-])
 
 export type OrgMemberType = (typeof orgMemberTypeEnum.enumValues)[number]
 export type OrgStatus = (typeof orgStatusEnum.enumValues)[number]
 export type InvitationStatus = (typeof invitationStatusEnum.enumValues)[number]
-export type InvitationChannel =
-  (typeof invitationChannelEnum.enumValues)[number]
 
 /**
  * ORGANIZATIONS: the tenant. Every business row (subscriptions, invoices, payments,
@@ -195,14 +190,11 @@ export const organizationInvitations = pgTable(
   {
     id: pk(),
     orgId: orgRef(),
-    type: orgMemberTypeEnum("type").notNull(), // 'managed' | 'portal' (never 'owner')
-    channel: invitationChannelEnum("channel").notNull(),
-    email: text("email"), // lowercase
-    phone: text("phone"), // E.164, e.g. +201001234567
+    identifier: text("identifier").notNull(), // email (extensible to phone/username later)
+    roleId: uuid("role_id").references(() => roles.id, { onDelete: "set null" }), // which role the invited user gets
     inviteeUserId: uuid("invitee_user_id").references(() => users.id, {
       onDelete: "restrict",
     }),
-    username: text("username"), // proposed handle; the invitee can pick another at accept
     tokenHash: text("token_hash").notNull(), // hash of the one-time token, never the token
     status: invitationStatusEnum("status").notNull().default("pending"),
     invitedBy: uuid("invited_by").notNull(), // organization_users.id (same org, composite FK)
@@ -228,50 +220,24 @@ export const organizationInvitations = pgTable(
     }).onDelete("restrict"),
 
     uniqueIndex("ux_org_invitation_token").on(t.tokenHash),
-    // one OPEN invite per target per org; old ones stay as history
-    uniqueIndex("ux_org_invitation_pending_email")
-      .on(t.orgId, t.email)
-      .where(sql`${t.status} = 'pending'`),
-    uniqueIndex("ux_org_invitation_pending_phone")
-      .on(t.orgId, t.phone)
+    // one OPEN invite per identifier per org; old ones stay as history
+    uniqueIndex("ux_org_invitation_pending_identifier")
+      .on(t.orgId, t.identifier)
       .where(sql`${t.status} = 'pending'`),
     uniqueIndex("ux_org_invitation_pending_user")
       .on(t.orgId, t.inviteeUserId)
       .where(sql`${t.status} = 'pending'`),
     // sign-up auto-link and "my invitations" inbox
-    index("ix_org_invitation_email_pending")
-      .on(t.email)
-      .where(sql`${t.status} = 'pending'`),
-    index("ix_org_invitation_phone_pending")
-      .on(t.phone)
+    index("ix_org_invitation_identifier_pending")
+      .on(t.identifier)
       .where(sql`${t.status} = 'pending'`),
     index("ix_org_invitation_user_pending")
       .on(t.inviteeUserId)
       .where(sql`${t.status} = 'pending'`),
     index("ix_org_invitation_org_status").on(t.orgId, t.status),
+    index("ix_org_invitation_role").on(t.roleId),
 
-    check("ck_org_invitation_not_owner", sql`${t.type} <> 'owner'`),
-    check(
-      "ck_org_invitation_target",
-      sql`num_nonnulls(${t.email}, ${t.phone}, ${t.inviteeUserId}) >= 1`
-    ),
-    check(
-      "ck_org_invitation_channel",
-      sql`(${t.channel} = 'email' and ${t.email} is not null)
-        or (${t.channel} = 'whatsapp' and ${t.phone} is not null)`
-    ),
-    check(
-      "ck_org_invitation_email_lower",
-      sql`${t.email} is null or ${t.email} = lower(${t.email})`
-    ),
-    check(
-      "ck_org_invitation_phone_format",
-      sql`${t.phone} is null or ${t.phone} ~ '^\\+[1-9][0-9]{7,14}$'`
-    ),
-    check(
-      "ck_org_invitation_username_format",
-      sql`${t.username} is null or ${isUsername(t.username!)}`
-    ),
+    check("ck_org_invitation_identifier_not_empty", sql`char_length(${t.identifier}) > 0`),
     check(
       "ck_org_invitation_accepted_link",
       sql`(${t.status} = 'accepted') = (${t.acceptedOrgUserId} is not null)`
