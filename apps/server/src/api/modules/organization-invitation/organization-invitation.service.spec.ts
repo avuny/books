@@ -85,7 +85,7 @@ function setup() {
   const limits = { getMax: vi.fn(async () => null as number | null), isChannelAllowed: vi.fn(async () => true) }
   const users = {
     findVerifiedByContact: vi.fn(async () => null as { userId: string } | null),
-    getVerifiedContact: vi.fn(async () => ({ email: "sara@example.com", phone: null }) as { email: string | null; phone: string | null } | null),
+    getVerifiedContacts: vi.fn(async () => ({ emails: ["sara@example.com"], phones: [] })),
   }
   const notifier = { send: vi.fn(async () => {}) }
   const tokens = { generate: vi.fn(() => ({ token: "plain-token", hash: "hash-of-token" })), hash: vi.fn((t: string) => `hash-of-${t.replace("plain-", "")}`) }
@@ -166,7 +166,7 @@ describe("organizationInvitationService", () => {
       expect(t.notifier.send).toHaveBeenCalledWith(expect.objectContaining({ token: "plain-token" }))
       if (res.success) expect(JSON.stringify(res.data)).not.toContain("hash-of-token")
       expect(t.repository.expireStaleForTarget).toHaveBeenCalled()
-      expect(t.activityLog.log).toHaveBeenCalledWith(expect.objectContaining({ type: "organization_invitation.created" }))
+      expect(t.activityLog.log).toHaveBeenCalledWith(expect.objectContaining({ action: "organization_invitation.created", resource: "organization_invitation" }))
     })
 
     it("keeps the invitation when delivery fails", async () => {
@@ -213,7 +213,7 @@ describe("organizationInvitationService", () => {
     })
 
     it("an open link needs a verified contact that matches the invited one", async () => {
-      t.users.getVerifiedContact.mockResolvedValue({ email: "someone-else@example.com", phone: null })
+      t.users.getVerifiedContacts.mockResolvedValue({ emails: ["someone-else@example.com"], phones: [] })
       const res = await t.service.acceptByToken("u-sara", { token: "plain-token" })
       expect(res).toMatchObject({ success: false, error: "ORGANIZATION_INVITATION_IDENTITY_MISMATCH" })
       expect(t.members.insert).not.toHaveBeenCalled()
@@ -291,7 +291,7 @@ describe("organizationInvitationService", () => {
       t.repository.markDeclined.mockResolvedValue(invitation({ status: "declined" }))
       const res = await t.service.decline("u-sara", "inv-1")
       expect(res).toMatchObject({ success: true })
-      expect(t.activityLog.log).toHaveBeenCalledWith(expect.objectContaining({ type: "organization_invitation.declined" }))
+      expect(t.activityLog.log).toHaveBeenCalledWith(expect.objectContaining({ action: "organization_invitation.declined", resource: "organization_invitation" }))
     })
   })
 

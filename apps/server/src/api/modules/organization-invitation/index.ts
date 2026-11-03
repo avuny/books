@@ -4,18 +4,19 @@ export {
 } from "./organization-invitation.errors.js"
 export {
   createOrganizationInvitationService,
-  createDefaultOrganizationInvitationService,
-  organizationInvitationService,
   CryptoTokenGenerator,
-  DummyUserDirectory,
-  DummyInvitationNotifier,
   INVITATION_TTL_DAYS,
   type OrganizationInvitationService,
+  type PermissionChecker,
   type UserDirectory,
   type InvitationNotifier,
   type InvitationDelivery,
   type TokenGenerator,
 } from "./organization-invitation.service.js"
+export {
+  DummyUserDirectory,
+  DummyInvitationNotifier,
+} from "./testing.js"
 export {
   createOrganizationInvitationRepository,
   type OrganizationInvitationRepository,

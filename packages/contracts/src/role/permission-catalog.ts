@@ -29,6 +29,7 @@ export const PERMISSION_CATALOG = [
   { resource: "organization_user", actions: ["read", "update", "deactivate"] },
   { resource: "organization_invitation", actions: ["create", "read", "update"] },
   { resource: "role", actions: ["create", "read", "update", "delete", "assign"] },
+  { resource: "activity_log", actions: ["read"] },
 ] as const satisfies readonly PermissionCatalogEntry[]
 
 // ---------------------------------------------------------------------------

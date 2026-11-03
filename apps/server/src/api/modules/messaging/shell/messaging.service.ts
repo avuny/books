@@ -20,9 +20,18 @@ export interface SendSecurityNoticeInput {
   lang?: string
 }
 
+export interface SendInvitationInput {
+  to: string
+  type: "email" | "phone"
+  orgName: string
+  link: string
+  expiresAt: Date
+}
+
 export interface MessageSender {
   sendOtp(input: SendOtpMessageInput): Promise<void>
   sendSecurityNotice?(input: SendSecurityNoticeInput): Promise<void>
+  sendInvitation?(input: SendInvitationInput): Promise<void>
 }
 
 type Channel = SendOtpMessageInput["type"]
@@ -72,6 +81,13 @@ export class ConsoleMessageSender implements MessageSender {
     logger.info(
       { to: input.to, type: input.type, event: input.event },
       `[DEV SECURITY NOTICE] Security notice for ${input.to}: ${input.event}`
+    )
+  }
+
+  async sendInvitation(input: SendInvitationInput): Promise<void> {
+    logger.info(
+      { to: input.to, type: input.type, orgName: input.orgName, link: input.link },
+      `[DEV INVITATION] Invitation for ${input.to} to join "${input.orgName}": ${input.link}`
     )
   }
 }
