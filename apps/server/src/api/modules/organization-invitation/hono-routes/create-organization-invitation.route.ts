@@ -17,14 +17,12 @@ const router = createOpenAPIRouter()
 
 const rawErrorMap = {
   ORGANIZATION_INVITATION_FORBIDDEN: errors.ORGANIZATION_INVITATION_FORBIDDEN,
-  ORGANIZATION_INVITATION_CHANNEL_NOT_ALLOWED: errors.ORGANIZATION_INVITATION_CHANNEL_NOT_ALLOWED,
-  ORGANIZATION_INVITATION_TARGET_UNAVAILABLE: errors.ORGANIZATION_INVITATION_TARGET_UNAVAILABLE,
   ORGANIZATION_INVITATION_ORGANIZATION_UNAVAILABLE: errors.ORGANIZATION_INVITATION_ORGANIZATION_UNAVAILABLE,
   ORGANIZATION_INVITATION_ALREADY_MEMBER: errors.ORGANIZATION_INVITATION_ALREADY_MEMBER,
-  ORGANIZATION_INVITATION_MEMBER_TYPE_CONFLICT: errors.ORGANIZATION_INVITATION_MEMBER_TYPE_CONFLICT,
-  ORGANIZATION_INVITATION_USERNAME_TAKEN: errors.ORGANIZATION_INVITATION_USERNAME_TAKEN,
   ORGANIZATION_INVITATION_LIMIT_REACHED: errors.ORGANIZATION_INVITATION_LIMIT_REACHED,
   ORGANIZATION_INVITATION_ALREADY_PENDING: errors.ORGANIZATION_INVITATION_ALREADY_PENDING,
+  ORGANIZATION_INVITATION_ROLE_NOT_FOUND: errors.ORGANIZATION_INVITATION_ROLE_NOT_FOUND,
+  ORGANIZATION_INVITATION_TARGET_UNAVAILABLE: errors.ORGANIZATION_INVITATION_TARGET_UNAVAILABLE,
 } as const
 
 const errorMap = rawErrorMap as Record<Code, (typeof rawErrorMap)[keyof typeof rawErrorMap]>
@@ -34,7 +32,7 @@ export const createOrganizationInvitationRoute = createRoute({
   path: "/organizations/{orgId}/invitations",
   operationId: "createOrganizationInvitation",
   tags: ["organization-invitation"],
-  summary: "Invite someone to the organization as a managed or portal user",
+  summary: "Invite someone to the organization",
   middleware: [requireAuth] as const,
   request: {
     params: z.object({ orgId: z.string().uuid() }),
@@ -44,15 +42,11 @@ export const createOrganizationInvitationRoute = createRoute({
   },
   responses: {
     201: jsonOk("Invitation created", OrganizationInvitationDtoSchema),
-    403: jsonError("Forbidden", [
-      Code.ORGANIZATION_INVITATION_FORBIDDEN,
-      Code.ORGANIZATION_INVITATION_CHANNEL_NOT_ALLOWED,
-    ]),
+    403: jsonError("Forbidden", [Code.ORGANIZATION_INVITATION_FORBIDDEN]),
+    404: jsonError("Role not found", [Code.ORGANIZATION_INVITATION_ROLE_NOT_FOUND]),
     409: jsonError("Conflict", [
       Code.ORGANIZATION_INVITATION_ORGANIZATION_UNAVAILABLE,
       Code.ORGANIZATION_INVITATION_ALREADY_MEMBER,
-      Code.ORGANIZATION_INVITATION_MEMBER_TYPE_CONFLICT,
-      Code.ORGANIZATION_INVITATION_USERNAME_TAKEN,
       Code.ORGANIZATION_INVITATION_LIMIT_REACHED,
       Code.ORGANIZATION_INVITATION_ALREADY_PENDING,
     ]),

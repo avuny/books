@@ -19,15 +19,13 @@ import {
   type InvitationStatus,
   type NewOrganizationInvitation,
   type OrganizationInvitation,
-  type OrgMemberType,
   type Tx,
 } from "@avuny/db"
 import { isUniqueViolation } from "../shared/pg-errors.js"
 import type { OrganizationSummary } from "../organization-user/index.js"
 
 const PENDING_UNIQUE_INDEXES = [
-  "ux_org_invitation_pending_email",
-  "ux_org_invitation_pending_phone",
+  "ux_org_invitation_pending_identifier",
   "ux_org_invitation_pending_user",
 ] as const
 
@@ -38,14 +36,12 @@ export type InvitationWithOrganization = {
 
 export type ListInvitationsFilter = {
   status?: InvitationStatus
-  type?: "managed" | "portal"
   page: number
   pageSize: number
 }
 
 export type InvitationTarget = {
-  email?: string | null
-  phone?: string | null
+  identifier?: string | null
   inviteeUserId?: string | null
 }
 
@@ -60,8 +56,7 @@ const orgColumns = {
 /** Targets that identify "the same person" for the partial unique indexes. */
 function targetCondition(t: InvitationTarget): SQL | undefined {
   const parts: SQL[] = []
-  if (t.email) parts.push(eq(inv.email, t.email))
-  if (t.phone) parts.push(eq(inv.phone, t.phone))
+  if (t.identifier) parts.push(eq(inv.identifier, t.identifier))
   if (t.inviteeUserId) parts.push(eq(inv.inviteeUserId, t.inviteeUserId))
   return parts.length ? or(...parts) : undefined
 }
@@ -147,7 +142,6 @@ export function createOrganizationInvitationRepository({ db }: { db: DB }) {
       tx?: Tx
     ): Promise<{ rows: OrganizationInvitation[]; total: number }> {
       const conditions: SQL[] = [eq(inv.orgId, orgId)]
-      if (f.type) conditions.push(eq(inv.type, f.type))
       if (f.status === "pending")
         conditions.push(eq(inv.status, "pending"), gt(inv.expiresAt, now))
       else if (f.status === "expired")
@@ -199,7 +193,6 @@ export function createOrganizationInvitationRepository({ db }: { db: DB }) {
 
     async countPending(
       orgId: string,
-      type: OrgMemberType,
       now: Date,
       tx?: Tx
     ): Promise<number> {
@@ -209,7 +202,6 @@ export function createOrganizationInvitationRepository({ db }: { db: DB }) {
         .where(
           and(
             eq(inv.orgId, orgId),
-            eq(inv.type, type),
             eq(inv.status, "pending"),
             gt(inv.expiresAt, now)
           )
@@ -362,7 +354,7 @@ export function createOrganizationInvitationRepository({ db }: { db: DB }) {
     /* ----- sign-up auto-link ----- */
 
     async findLinkCandidates(
-      contact: { email?: string | null; phone?: string | null },
+      contact: { identifier?: string | null },
       now: Date,
       tx?: Tx
     ): Promise<OrganizationInvitation[]> {

@@ -30,7 +30,6 @@ export type MembershipWithOrganization = {
 }
 
 export type ListMembersFilter = {
-  type?: OrgMemberType
   isActive?: boolean
   search?: string
   page: number
@@ -139,7 +138,6 @@ export function createOrganizationUserRepository({ db }: { db: DB }) {
       tx?: Tx
     ): Promise<{ rows: OrganizationUser[]; total: number }> {
       const conditions: SQL[] = [eq(organizationUsers.orgId, orgId)]
-      if (f.type) conditions.push(eq(organizationUsers.type, f.type))
       if (f.isActive !== undefined)
         conditions.push(eq(organizationUsers.isActive, f.isActive))
       if (f.search)

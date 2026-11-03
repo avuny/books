@@ -26,11 +26,7 @@ export const organizationInvitationErrorsHttpMap = {
   },
   ORGANIZATION_INVITATION_LIMIT_REACHED: {
     statusCode: 409,
-    responseMessage: "The user limit for this member type has been reached",
-  },
-  ORGANIZATION_INVITATION_CHANNEL_NOT_ALLOWED: {
-    statusCode: 403,
-    responseMessage: "This invitation channel is not available on your plan",
+    responseMessage: "The user limit has been reached",
   },
   ORGANIZATION_INVITATION_TARGET_UNAVAILABLE: {
     statusCode: 422,
@@ -64,8 +60,8 @@ export const organizationInvitationErrorsHttpMap = {
     statusCode: 403,
     responseMessage: "This invitation was sent to a different verified contact",
   },
-  ORGANIZATION_INVITATION_MEMBER_TYPE_CONFLICT: {
-    statusCode: 409,
-    responseMessage: "You already have a different membership type here",
+  ORGANIZATION_INVITATION_ROLE_NOT_FOUND: {
+    statusCode: 404,
+    responseMessage: "The specified role was not found",
   },
 } as const satisfies Record<OrganizationInvitationErrorCode, ErrorMeta>

@@ -18,7 +18,6 @@ export interface MessageInvitationNotifierDeps {
   buildLink: (token: string) => string
 }
 
-/** Invitation channel "whatsapp" maps to the message service's "phone" channel. */
 export function createMessageInvitationNotifier({
   sender,
   buildLink,
@@ -36,14 +35,9 @@ export function createMessageInvitationNotifier({
         expiresAt: invitation.expiresAt,
       }
 
-      if (invitation.channel === "email") {
-        if (!invitation.email) throw new Error("Invitation has no email address")
-        return sender.sendInvitation({ ...base, to: invitation.email, type: "email" })
-      }
-
-      if (!invitation.phone) throw new Error("Invitation has no phone number")
-      return sender.sendInvitation({ ...base, to: invitation.phone, type: "phone" })
+      const isPhone = invitation.identifier.startsWith("+")
+      const type: "email" | "phone" = isPhone ? "phone" : "email"
+      return sender.sendInvitation({ ...base, to: invitation.identifier, type })
     },
   }
 }
-

@@ -1471,8 +1471,8 @@
                 "properties": {
                   "identifier": {
                     "type": "string",
-                    "minLength": 3,
-                    "maxLength": 254
+                    "maxLength": 254,
+                    "format": "email"
                   }
                 },
                 "required": [
@@ -1657,8 +1657,8 @@
                 "properties": {
                   "identifier": {
                     "type": "string",
-                    "minLength": 3,
-                    "maxLength": 254
+                    "maxLength": 254,
+                    "format": "email"
                   },
                   "name": {
                     "type": "string",
@@ -1907,8 +1907,8 @@
                 "properties": {
                   "identifier": {
                     "type": "string",
-                    "minLength": 3,
-                    "maxLength": 254
+                    "maxLength": 254,
+                    "format": "email"
                   },
                   "password": {
                     "type": "string",
@@ -2914,8 +2914,8 @@
                 "properties": {
                   "identifier": {
                     "type": "string",
-                    "minLength": 3,
-                    "maxLength": 254
+                    "maxLength": 254,
+                    "format": "email"
                   }
                 },
                 "required": [
@@ -5024,18 +5024,6 @@
             "required": false,
             "name": "status",
             "in": "query"
-          },
-          {
-            "schema": {
-              "type": "string",
-              "enum": [
-                "managed",
-                "portal"
-              ]
-            },
-            "required": false,
-            "name": "type",
-            "in": "query"
           }
         ],
         "responses": {
@@ -5062,36 +5050,18 @@
                                 "type": "string",
                                 "format": "uuid"
                               },
-                              "type": {
-                                "type": "string",
-                                "enum": [
-                                  "managed",
-                                  "portal"
-                                ]
+                              "identifier": {
+                                "type": "string"
                               },
-                              "channel": {
+                              "roleId": {
                                 "type": "string",
-                                "enum": [
-                                  "email",
-                                  "whatsapp"
-                                ]
-                              },
-                              "email": {
-                                "type": "string",
-                                "nullable": true
-                              },
-                              "phone": {
-                                "type": "string",
-                                "nullable": true
+                                "nullable": true,
+                                "format": "uuid"
                               },
                               "inviteeUserId": {
                                 "type": "string",
                                 "nullable": true,
                                 "format": "uuid"
-                              },
-                              "username": {
-                                "type": "string",
-                                "nullable": true
                               },
                               "status": {
                                 "type": "string",
@@ -5136,12 +5106,9 @@
                             "required": [
                               "id",
                               "orgId",
-                              "type",
-                              "channel",
-                              "email",
-                              "phone",
+                              "identifier",
+                              "roleId",
                               "inviteeUserId",
-                              "username",
                               "status",
                               "invitedBy",
                               "expiresAt",
@@ -5267,7 +5234,7 @@
         "tags": [
           "organization-invitation"
         ],
-        "summary": "Invite someone to the organization as a managed or portal user",
+        "summary": "Invite someone to the organization",
         "parameters": [
           {
             "schema": {
@@ -5285,43 +5252,18 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "type": {
+                  "identifier": {
                     "type": "string",
-                    "enum": [
-                      "managed",
-                      "portal"
-                    ]
+                    "minLength": 1,
+                    "maxLength": 320
                   },
-                  "channel": {
-                    "type": "string",
-                    "enum": [
-                      "email",
-                      "whatsapp"
-                    ]
-                  },
-                  "email": {
-                    "type": "string",
-                    "maxLength": 254,
-                    "format": "email"
-                  },
-                  "phone": {
-                    "type": "string",
-                    "pattern": "^\\+[1-9][0-9]{7,14}$"
-                  },
-                  "inviteeUserId": {
+                  "roleId": {
                     "type": "string",
                     "format": "uuid"
-                  },
-                  "username": {
-                    "type": "string",
-                    "minLength": 3,
-                    "maxLength": 31,
-                    "pattern": "^[a-z0-9][a-z0-9._-]{2,30}$"
                   }
                 },
                 "required": [
-                  "type",
-                  "channel"
+                  "identifier"
                 ]
               }
             }
@@ -5346,36 +5288,18 @@
                           "type": "string",
                           "format": "uuid"
                         },
-                        "type": {
-                          "type": "string",
-                          "enum": [
-                            "managed",
-                            "portal"
-                          ]
+                        "identifier": {
+                          "type": "string"
                         },
-                        "channel": {
+                        "roleId": {
                           "type": "string",
-                          "enum": [
-                            "email",
-                            "whatsapp"
-                          ]
-                        },
-                        "email": {
-                          "type": "string",
-                          "nullable": true
-                        },
-                        "phone": {
-                          "type": "string",
-                          "nullable": true
+                          "nullable": true,
+                          "format": "uuid"
                         },
                         "inviteeUserId": {
                           "type": "string",
                           "nullable": true,
                           "format": "uuid"
-                        },
-                        "username": {
-                          "type": "string",
-                          "nullable": true
                         },
                         "status": {
                           "type": "string",
@@ -5420,12 +5344,9 @@
                       "required": [
                         "id",
                         "orgId",
-                        "type",
-                        "channel",
-                        "email",
-                        "phone",
+                        "identifier",
+                        "roleId",
                         "inviteeUserId",
-                        "username",
                         "status",
                         "invitedBy",
                         "expiresAt",
@@ -5470,8 +5391,43 @@
                     "code": {
                       "type": "string",
                       "enum": [
-                        "ORGANIZATION_INVITATION_FORBIDDEN",
-                        "ORGANIZATION_INVITATION_CHANNEL_NOT_ALLOWED"
+                        "ORGANIZATION_INVITATION_FORBIDDEN"
+                      ]
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "success",
+                    "code",
+                    "message"
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Role not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string"
+                    },
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        false
+                      ]
+                    },
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "ORGANIZATION_INVITATION_ROLE_NOT_FOUND"
                       ]
                     },
                     "message": {
@@ -5509,8 +5465,6 @@
                       "enum": [
                         "ORGANIZATION_INVITATION_ORGANIZATION_UNAVAILABLE",
                         "ORGANIZATION_INVITATION_ALREADY_MEMBER",
-                        "ORGANIZATION_INVITATION_MEMBER_TYPE_CONFLICT",
-                        "ORGANIZATION_INVITATION_USERNAME_TAKEN",
                         "ORGANIZATION_INVITATION_LIMIT_REACHED",
                         "ORGANIZATION_INVITATION_ALREADY_PENDING"
                       ]
@@ -5653,36 +5607,18 @@
                           "type": "string",
                           "format": "uuid"
                         },
-                        "type": {
-                          "type": "string",
-                          "enum": [
-                            "managed",
-                            "portal"
-                          ]
+                        "identifier": {
+                          "type": "string"
                         },
-                        "channel": {
+                        "roleId": {
                           "type": "string",
-                          "enum": [
-                            "email",
-                            "whatsapp"
-                          ]
-                        },
-                        "email": {
-                          "type": "string",
-                          "nullable": true
-                        },
-                        "phone": {
-                          "type": "string",
-                          "nullable": true
+                          "nullable": true,
+                          "format": "uuid"
                         },
                         "inviteeUserId": {
                           "type": "string",
                           "nullable": true,
                           "format": "uuid"
-                        },
-                        "username": {
-                          "type": "string",
-                          "nullable": true
                         },
                         "status": {
                           "type": "string",
@@ -5727,12 +5663,9 @@
                       "required": [
                         "id",
                         "orgId",
-                        "type",
-                        "channel",
-                        "email",
-                        "phone",
+                        "identifier",
+                        "roleId",
                         "inviteeUserId",
-                        "username",
                         "status",
                         "invitedBy",
                         "expiresAt",
@@ -5954,36 +5887,18 @@
                           "type": "string",
                           "format": "uuid"
                         },
-                        "type": {
-                          "type": "string",
-                          "enum": [
-                            "managed",
-                            "portal"
-                          ]
+                        "identifier": {
+                          "type": "string"
                         },
-                        "channel": {
+                        "roleId": {
                           "type": "string",
-                          "enum": [
-                            "email",
-                            "whatsapp"
-                          ]
-                        },
-                        "email": {
-                          "type": "string",
-                          "nullable": true
-                        },
-                        "phone": {
-                          "type": "string",
-                          "nullable": true
+                          "nullable": true,
+                          "format": "uuid"
                         },
                         "inviteeUserId": {
                           "type": "string",
                           "nullable": true,
                           "format": "uuid"
-                        },
-                        "username": {
-                          "type": "string",
-                          "nullable": true
                         },
                         "status": {
                           "type": "string",
@@ -6028,12 +5943,9 @@
                       "required": [
                         "id",
                         "orgId",
-                        "type",
-                        "channel",
-                        "email",
-                        "phone",
+                        "identifier",
+                        "roleId",
                         "inviteeUserId",
-                        "username",
                         "status",
                         "invitedBy",
                         "expiresAt",
@@ -6326,31 +6238,13 @@
                         "orgName": {
                           "type": "string"
                         },
-                        "type": {
-                          "type": "string",
-                          "enum": [
-                            "managed",
-                            "portal"
-                          ]
+                        "identifier": {
+                          "type": "string"
                         },
-                        "channel": {
+                        "roleId": {
                           "type": "string",
-                          "enum": [
-                            "email",
-                            "whatsapp"
-                          ]
-                        },
-                        "email": {
-                          "type": "string",
-                          "nullable": true
-                        },
-                        "phone": {
-                          "type": "string",
-                          "nullable": true
-                        },
-                        "username": {
-                          "type": "string",
-                          "nullable": true
+                          "nullable": true,
+                          "format": "uuid"
                         },
                         "expiresAt": {
                           "type": "string",
@@ -6360,11 +6254,7 @@
                       "required": [
                         "orgCode",
                         "orgName",
-                        "type",
-                        "channel",
-                        "email",
-                        "phone",
-                        "username",
+                        "identifier",
                         "expiresAt"
                       ]
                     },
@@ -6551,12 +6441,6 @@
                     "type": "string",
                     "minLength": 20,
                     "maxLength": 128
-                  },
-                  "username": {
-                    "type": "string",
-                    "minLength": 3,
-                    "maxLength": 31,
-                    "pattern": "^[a-z0-9][a-z0-9._-]{2,30}$"
                   }
                 },
                 "required": [
@@ -6589,14 +6473,6 @@
                           "type": "string",
                           "format": "uuid"
                         },
-                        "type": {
-                          "type": "string",
-                          "enum": [
-                            "owner",
-                            "managed",
-                            "portal"
-                          ]
-                        },
                         "username": {
                           "type": "string"
                         },
@@ -6621,7 +6497,6 @@
                         "id",
                         "orgId",
                         "userId",
-                        "type",
                         "username",
                         "isActive",
                         "lastAccessedAt",
@@ -6738,7 +6613,6 @@
                         "ORGANIZATION_INVITATION_NOT_PENDING",
                         "ORGANIZATION_INVITATION_ORGANIZATION_UNAVAILABLE",
                         "ORGANIZATION_INVITATION_ALREADY_MEMBER",
-                        "ORGANIZATION_INVITATION_MEMBER_TYPE_CONFLICT",
                         "ORGANIZATION_INVITATION_LIMIT_REACHED",
                         "ORGANIZATION_INVITATION_USERNAME_TAKEN"
                       ]
@@ -6918,23 +6792,13 @@
                                   "name"
                                 ]
                               },
-                              "type": {
-                                "type": "string",
-                                "enum": [
-                                  "managed",
-                                  "portal"
-                                ]
+                              "identifier": {
+                                "type": "string"
                               },
-                              "channel": {
+                              "roleId": {
                                 "type": "string",
-                                "enum": [
-                                  "email",
-                                  "whatsapp"
-                                ]
-                              },
-                              "username": {
-                                "type": "string",
-                                "nullable": true
+                                "nullable": true,
+                                "format": "uuid"
                               },
                               "expiresAt": {
                                 "type": "string",
@@ -6948,9 +6812,7 @@
                             "required": [
                               "id",
                               "org",
-                              "type",
-                              "channel",
-                              "username",
+                              "identifier",
                               "expiresAt",
                               "createdAt"
                             ]
@@ -7041,14 +6903,7 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "properties": {
-                  "username": {
-                    "type": "string",
-                    "minLength": 3,
-                    "maxLength": 31,
-                    "pattern": "^[a-z0-9][a-z0-9._-]{2,30}$"
-                  }
-                }
+                "properties": {}
               }
             }
           }
@@ -7076,14 +6931,6 @@
                           "type": "string",
                           "format": "uuid"
                         },
-                        "type": {
-                          "type": "string",
-                          "enum": [
-                            "owner",
-                            "managed",
-                            "portal"
-                          ]
-                        },
                         "username": {
                           "type": "string"
                         },
@@ -7108,7 +6955,6 @@
                         "id",
                         "orgId",
                         "userId",
-                        "type",
                         "username",
                         "isActive",
                         "lastAccessedAt",
@@ -7225,7 +7071,6 @@
                         "ORGANIZATION_INVITATION_NOT_PENDING",
                         "ORGANIZATION_INVITATION_ORGANIZATION_UNAVAILABLE",
                         "ORGANIZATION_INVITATION_ALREADY_MEMBER",
-                        "ORGANIZATION_INVITATION_MEMBER_TYPE_CONFLICT",
                         "ORGANIZATION_INVITATION_LIMIT_REACHED",
                         "ORGANIZATION_INVITATION_USERNAME_TAKEN"
                       ]
@@ -7395,36 +7240,18 @@
                           "type": "string",
                           "format": "uuid"
                         },
-                        "type": {
-                          "type": "string",
-                          "enum": [
-                            "managed",
-                            "portal"
-                          ]
+                        "identifier": {
+                          "type": "string"
                         },
-                        "channel": {
+                        "roleId": {
                           "type": "string",
-                          "enum": [
-                            "email",
-                            "whatsapp"
-                          ]
-                        },
-                        "email": {
-                          "type": "string",
-                          "nullable": true
-                        },
-                        "phone": {
-                          "type": "string",
-                          "nullable": true
+                          "nullable": true,
+                          "format": "uuid"
                         },
                         "inviteeUserId": {
                           "type": "string",
                           "nullable": true,
                           "format": "uuid"
-                        },
-                        "username": {
-                          "type": "string",
-                          "nullable": true
                         },
                         "status": {
                           "type": "string",
@@ -7469,12 +7296,9 @@
                       "required": [
                         "id",
                         "orgId",
-                        "type",
-                        "channel",
-                        "email",
-                        "phone",
+                        "identifier",
+                        "roleId",
                         "inviteeUserId",
-                        "username",
                         "status",
                         "invitedBy",
                         "expiresAt",
@@ -7692,19 +7516,6 @@
             "schema": {
               "type": "string",
               "enum": [
-                "owner",
-                "managed",
-                "portal"
-              ]
-            },
-            "required": false,
-            "name": "type",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "string",
-              "enum": [
                 "true",
                 "false"
               ]
@@ -7752,14 +7563,6 @@
                                 "type": "string",
                                 "format": "uuid"
                               },
-                              "type": {
-                                "type": "string",
-                                "enum": [
-                                  "owner",
-                                  "managed",
-                                  "portal"
-                                ]
-                              },
                               "username": {
                                 "type": "string"
                               },
@@ -7784,7 +7587,6 @@
                               "id",
                               "orgId",
                               "userId",
-                              "type",
                               "username",
                               "isActive",
                               "lastAccessedAt",
@@ -7973,14 +7775,6 @@
                           "type": "string",
                           "format": "uuid"
                         },
-                        "type": {
-                          "type": "string",
-                          "enum": [
-                            "owner",
-                            "managed",
-                            "portal"
-                          ]
-                        },
                         "username": {
                           "type": "string"
                         },
@@ -8005,7 +7799,6 @@
                         "id",
                         "orgId",
                         "userId",
-                        "type",
                         "username",
                         "isActive",
                         "lastAccessedAt",
@@ -8246,14 +8039,6 @@
                           "type": "string",
                           "format": "uuid"
                         },
-                        "type": {
-                          "type": "string",
-                          "enum": [
-                            "owner",
-                            "managed",
-                            "portal"
-                          ]
-                        },
                         "username": {
                           "type": "string"
                         },
@@ -8278,7 +8063,6 @@
                         "id",
                         "orgId",
                         "userId",
-                        "type",
                         "username",
                         "isActive",
                         "lastAccessedAt",
@@ -8517,14 +8301,6 @@
                           "type": "string",
                           "format": "uuid"
                         },
-                        "type": {
-                          "type": "string",
-                          "enum": [
-                            "owner",
-                            "managed",
-                            "portal"
-                          ]
-                        },
                         "username": {
                           "type": "string"
                         },
@@ -8549,7 +8325,6 @@
                         "id",
                         "orgId",
                         "userId",
-                        "type",
                         "username",
                         "isActive",
                         "lastAccessedAt",
@@ -8803,14 +8578,6 @@
                                   "closed"
                                 ]
                               },
-                              "type": {
-                                "type": "string",
-                                "enum": [
-                                  "owner",
-                                  "managed",
-                                  "portal"
-                                ]
-                              },
                               "lastAccessedAt": {
                                 "type": "string",
                                 "nullable": true,
@@ -8823,7 +8590,6 @@
                               "code",
                               "name",
                               "orgStatus",
-                              "type",
                               "lastAccessedAt"
                             ]
                           }
@@ -11406,7 +11172,8 @@
                                     "organization",
                                     "organizationUser",
                                     "report",
-                                    "receipt"
+                                    "receipt",
+                                    "organizationInvitation"
                                   ]
                                 },
                                 "label": {

@@ -6,7 +6,6 @@ export function toOrganizationUserDto(row: OrganizationUser): OrganizationUserDt
     id: row.id,
     orgId: row.orgId,
     userId: row.userId,
-    type: row.type,
     username: row.username,
     isActive: row.isActive,
     lastAccessedAt: row.lastAccessedAt?.toISOString() ?? null,

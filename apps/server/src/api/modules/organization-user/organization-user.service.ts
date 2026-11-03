@@ -154,7 +154,6 @@ export function createOrganizationUserService(
             code: org.code,
             name: org.name,
             orgStatus: org.status,
-            type: membership.type,
             lastAccessedAt: membership.lastAccessedAt?.toISOString() ?? null,
           })),
         },

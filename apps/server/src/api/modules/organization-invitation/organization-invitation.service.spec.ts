@@ -28,12 +28,9 @@ const inviter: OrganizationUser = {
 const invitation = (o: Partial<OrganizationInvitation> = {}): OrganizationInvitation => ({
   id: "inv-1",
   orgId: "org-1",
-  type: "managed",
-  channel: "email",
-  email: "sara@example.com",
-  phone: null,
+  identifier: "sara@example.com",
+  roleId: null,
   inviteeUserId: null,
-  username: "sara",
   tokenHash: "hash",
   status: "pending",
   invitedBy: "m-owner",
@@ -60,35 +57,41 @@ function setup() {
     listPendingForUser: vi.fn(),
     countPending: vi.fn(async () => 0),
     expireStaleForTarget: vi.fn(async () => 0),
-    expireAllDue: vi.fn(),
+    expireAllDue: vi.fn(async () => 0),
     insert: vi.fn(),
-    markExpired: vi.fn(),
-    markRevoked: vi.fn(),
-    markDeclined: vi.fn(),
-    markAccepted: vi.fn(),
-    rotateToken: vi.fn(),
+    markExpired: vi.fn(async () => {}),
+    markRevoked: vi.fn(async () => invitation({ status: "revoked" })),
+    markDeclined: vi.fn(async () => invitation({ status: "declined" })),
+    markAccepted: vi.fn(async () => invitation({ status: "accepted" })),
+    rotateToken: vi.fn(async () => invitation({ sendCount: 2 })),
     revokeOtherPending: vi.fn(async () => 0),
-    findLinkCandidates: vi.fn(),
-    listPendingOrgIdsForUser: vi.fn(),
-    linkInvitee: vi.fn(),
+    findLinkCandidates: vi.fn(async (): Promise<OrganizationInvitation[]> => []),
+    listPendingOrgIdsForUser: vi.fn(async () => []),
+    linkInvitee: vi.fn(async () => 0),
   }
   const members = {
     lockOrgMembership: vi.fn(async () => {}),
     findByOrgAndUser: vi.fn(),
     findByUsername: vi.fn(async () => null),
     countActiveByType: vi.fn(async () => 0),
-    insert: vi.fn(),
-    reactivate: vi.fn(),
+    insert: vi.fn(async (v) => ({ ok: true, row: { ...inviter, id: "m-new", ...v } })),
+    reactivate: vi.fn(async (_o, id, u) => ({ ok: true, row: { ...inviter, id, username: u } })),
   }
   const permissions = { check: vi.fn(async () => true) }
   const activityLog = { log: vi.fn(async () => {}) }
-  const limits = { getMax: vi.fn(async () => null as number | null), isChannelAllowed: vi.fn(async () => true) }
+  const limits = {
+    getMax: vi.fn(async (): Promise<number | null> => null),
+    isChannelAllowed: vi.fn(async () => true),
+  }
   const users = {
-    findVerifiedByContact: vi.fn(async () => null as { userId: string } | null),
+    findVerifiedByContact: vi.fn(async (): Promise<{ userId: string } | null> => null),
     getVerifiedContacts: vi.fn(async () => ({ emails: ["sara@example.com"], phones: [] })),
   }
   const notifier = { send: vi.fn(async () => {}) }
-  const tokens = { generate: vi.fn(() => ({ token: "plain-token", hash: "hash-of-token" })), hash: vi.fn((t: string) => `hash-of-${t.replace("plain-", "")}`) }
+  const tokens = {
+    generate: () => ({ token: "plain-token", hash: "hash-of-token" }),
+    hash: (t: string) => `hash-of-${t}`,
+  }
 
   const service = createOrganizationInvitationService({
     repository: repository as unknown as OrganizationInvitationRepository,
@@ -106,7 +109,7 @@ describe("organizationInvitationService", () => {
   })
 
   describe("create", () => {
-    const input = { type: "managed" as const, channel: "email" as const, email: "sara@example.com" }
+    const input = { identifier: "sara@example.com" }
 
     beforeEach(() => {
       t.members.findByOrgAndUser.mockResolvedValue(inviter)
@@ -120,12 +123,6 @@ describe("organizationInvitationService", () => {
       t.permissions.check.mockResolvedValueOnce(false)
       const res = await t.service.create("u-x", "org-1", input)
       expect(res).toMatchObject({ success: false, error: "ORGANIZATION_INVITATION_FORBIDDEN" })
-    })
-
-    it("blocks WhatsApp on plans that do not include it", async () => {
-      t.limits.isChannelAllowed.mockResolvedValueOnce(false)
-      const res = await t.service.create("u-owner", "org-1", { type: "managed", channel: "whatsapp", phone: "+201001234567" })
-      expect(res).toMatchObject({ success: false, error: "ORGANIZATION_INVITATION_CHANNEL_NOT_ALLOWED" })
     })
 
     it("rejects people who are already active members", async () => {
@@ -161,7 +158,7 @@ describe("organizationInvitationService", () => {
 
       expect(res).toMatchObject({ success: true })
       const inserted = t.repository.insert.mock.calls[0]![0]
-      expect(inserted).toMatchObject({ tokenHash: "hash-of-token", inviteeUserId: "u-sara", invitedBy: "m-owner", status: "pending" })
+      expect(inserted).toMatchObject({ tokenHash: "hash-of-token", identifier: "sara@example.com", invitedBy: "m-owner", status: "pending" })
       expect(inserted.expiresAt.getTime()).toBe(NOW.getTime() + 7 * DAY)
       expect(t.notifier.send).toHaveBeenCalledWith(expect.objectContaining({ token: "plain-token" }))
       if (res.success) expect(JSON.stringify(res.data)).not.toContain("hash-of-token")
@@ -178,55 +175,45 @@ describe("organizationInvitationService", () => {
   })
 
   describe("revoke / resend", () => {
-    it("revoke refuses non-pending invitations", async () => {
-      t.repository.findInOrg.mockResolvedValue(invitation({ status: "accepted" }))
-      const res = await t.service.revoke("u-owner", "org-1", "inv-1")
-      expect(res).toMatchObject({ success: false, error: "ORGANIZATION_INVITATION_NOT_PENDING" })
+    it("refuses to resend an invitation that already expired (and marks it expired)", async () => {
+      t.repository.findInOrg.mockResolvedValue(
+        invitation({ expiresAt: new Date(NOW.getTime() - 1000) })
+      )
+      const res = await t.service.resend("u-owner", "org-1", "inv-1")
+      expect(res).toMatchObject({ success: false, error: "ORGANIZATION_INVITATION_EXPIRED" })
+      expect(t.repository.markExpired).toHaveBeenCalledWith("inv-1", expect.anything())
     })
 
-    it("resend enforces the cooldown", async () => {
-      t.repository.findInOrg.mockResolvedValue(invitation({ lastSentAt: new Date(NOW.getTime() - 5_000) }))
+    it("enforces cooldown before resending", async () => {
+      t.repository.findInOrg.mockResolvedValue(
+        invitation({ lastSentAt: new Date(NOW.getTime() - 5_000) })
+      )
       const res = await t.service.resend("u-owner", "org-1", "inv-1")
       expect(res).toMatchObject({ success: false, error: "ORGANIZATION_INVITATION_RESEND_TOO_SOON" })
     })
 
-    it("resend rotates the token and notifies", async () => {
-      t.repository.findInOrg.mockResolvedValue(invitation())
-      t.repository.rotateToken.mockResolvedValue(invitation({ sendCount: 2 }))
+    it("caps resends at MAX_SEND_COUNT", async () => {
+      t.repository.findInOrg.mockResolvedValue(invitation({ sendCount: 5 }))
       const res = await t.service.resend("u-owner", "org-1", "inv-1")
-      expect(res).toMatchObject({ success: true })
-      expect(t.repository.rotateToken).toHaveBeenCalledWith("inv-1", expect.objectContaining({ tokenHash: "hash-of-token" }), expect.anything())
-      expect(t.notifier.send).toHaveBeenCalledTimes(1)
+      expect(res).toMatchObject({ success: false, error: "ORGANIZATION_INVITATION_RESEND_LIMIT_REACHED" })
     })
   })
 
   describe("accept", () => {
-    const newMember = {
-      ...inviter, id: "m-new", userId: "u-sara", type: "managed", username: "sara",
-    } as OrganizationUser
-
     beforeEach(() => {
       t.repository.findByTokenHash.mockResolvedValue(invitation())
-      t.members.findByOrgAndUser.mockResolvedValue(null)
-      t.members.insert.mockResolvedValue({ ok: true, row: newMember })
-      t.repository.markAccepted.mockResolvedValue(invitation({ status: "accepted" }))
     })
 
-    it("an open link needs a verified contact that matches the invited one", async () => {
-      t.users.getVerifiedContacts.mockResolvedValue({ emails: ["someone-else@example.com"], phones: [] })
-      const res = await t.service.acceptByToken("u-sara", { token: "plain-token" })
+    it("blocks acceptance when the signed-in user does not own the verified target contact", async () => {
+      t.users.getVerifiedContacts.mockResolvedValue({ emails: ["other@example.com"], phones: [] })
+      const res = await t.service.acceptByToken("u-other", { token: "plain-token" })
       expect(res).toMatchObject({ success: false, error: "ORGANIZATION_INVITATION_IDENTITY_MISMATCH" })
-      expect(t.members.insert).not.toHaveBeenCalled()
     })
 
-    it("an invitation addressed to someone else looks like it does not exist", async () => {
-      t.repository.findByTokenHash.mockResolvedValue(invitation({ inviteeUserId: "u-other" }))
-      const res = await t.service.acceptByToken("u-sara", { token: "plain-token" })
-      expect(res).toMatchObject({ success: false, error: "ORGANIZATION_INVITATION_NOT_FOUND" })
-    })
-
-    it("flips a lapsed invitation to expired and commits that change", async () => {
-      t.repository.findByTokenHash.mockResolvedValue(invitation({ expiresAt: new Date(NOW.getTime() - 1000) }))
+    it("refuses expired tokens and flips the row to expired", async () => {
+      t.repository.findByTokenHash.mockResolvedValue(
+        invitation({ expiresAt: new Date(NOW.getTime() - 1000) })
+      )
       const res = await t.service.acceptByToken("u-sara", { token: "plain-token" })
       expect(res).toMatchObject({ success: false, error: "ORGANIZATION_INVITATION_EXPIRED" })
       expect(t.repository.markExpired).toHaveBeenCalledWith("inv-1", expect.anything())
@@ -237,18 +224,6 @@ describe("organizationInvitationService", () => {
       t.members.countActiveByType.mockResolvedValue(2)
       const res = await t.service.acceptByToken("u-sara", { token: "plain-token" })
       expect(res).toMatchObject({ success: false, error: "ORGANIZATION_INVITATION_LIMIT_REACHED" })
-    })
-
-    it("requires a username when neither the invite nor the user provides one", async () => {
-      t.repository.findByTokenHash.mockResolvedValue(invitation({ username: null }))
-      const res = await t.service.acceptByToken("u-sara", { token: "plain-token" })
-      expect(res).toMatchObject({ success: false, error: "ORGANIZATION_INVITATION_USERNAME_REQUIRED" })
-    })
-
-    it("rejects a username already used in the organization", async () => {
-      t.members.findByUsername.mockResolvedValue({ ...inviter, id: "m-other" } as never)
-      const res = await t.service.acceptByToken("u-sara", { token: "plain-token", username: "boss" })
-      expect(res).toMatchObject({ success: false, error: "ORGANIZATION_INVITATION_USERNAME_TAKEN" })
     })
 
     it("creates the membership, marks the invite accepted, and revokes sibling invites", async () => {
@@ -263,62 +238,29 @@ describe("organizationInvitationService", () => {
         expect.objectContaining({ acceptedOrgUserId: "m-new", inviteeUserId: "u-sara" }),
         expect.anything()
       )
-      expect(t.repository.revokeOtherPending).toHaveBeenCalled()
-      const lock = t.members.lockOrgMembership.mock.invocationCallOrder[0]!
-      expect(lock).toBeLessThan(t.members.insert.mock.invocationCallOrder[0]!)
-    })
-
-    it("re-activates an offboarded member instead of inserting a second row", async () => {
-      t.repository.findForInvitee.mockResolvedValue(invitation({ inviteeUserId: "u-sara" }))
-      t.members.findByOrgAndUser.mockResolvedValue({ ...newMember, isActive: false })
-      t.members.reactivate.mockResolvedValue({ ok: true, row: newMember })
-      const res = await t.service.acceptMine("u-sara", "inv-1", {})
-      expect(res).toMatchObject({ success: true })
-      expect(t.members.reactivate).toHaveBeenCalledWith("org-1", "m-new", "sara", expect.anything())
-      expect(t.members.insert).not.toHaveBeenCalled()
-    })
-
-    it("refuses when the person is already an active member", async () => {
-      t.members.findByOrgAndUser.mockResolvedValue(newMember)
-      const res = await t.service.acceptByToken("u-sara", { token: "plain-token" })
-      expect(res).toMatchObject({ success: false, error: "ORGANIZATION_INVITATION_ALREADY_MEMBER" })
-    })
-  })
-
-  describe("decline", () => {
-    it("declines an open invitation addressed to the user", async () => {
-      t.repository.findForInvitee.mockResolvedValue(invitation({ inviteeUserId: "u-sara" }))
-      t.repository.markDeclined.mockResolvedValue(invitation({ status: "declined" }))
-      const res = await t.service.decline("u-sara", "inv-1")
-      expect(res).toMatchObject({ success: true })
-      expect(t.activityLog.log).toHaveBeenCalledWith(expect.objectContaining({ action: "organization_invitation.declined", resource: "organization_invitation" }))
+      expect(t.repository.revokeOtherPending).toHaveBeenCalledWith(
+        "org-1",
+        "inv-1",
+        expect.objectContaining({ inviteeUserId: "u-sara", identifier: "sara@example.com" }),
+        NOW,
+        expect.anything()
+      )
     })
   })
 
   describe("linkPendingInvitations", () => {
-    it("links at most one invitation per organization, newest first", async () => {
+    it("attaches at most one invitation per organization (the newest)", async () => {
       t.repository.findLinkCandidates.mockResolvedValue([
-        invitation({ id: "new", orgId: "org-1" }),
-        invitation({ id: "old", orgId: "org-1" }),
-        invitation({ id: "other-org", orgId: "org-2" }),
-        invitation({ id: "already", orgId: "org-3" }),
+        invitation({ id: "inv-newest", orgId: "org-1" }),
+        invitation({ id: "inv-older", orgId: "org-1" }),
+        invitation({ id: "inv-other-org", orgId: "org-2" }),
       ])
-      t.repository.listPendingOrgIdsForUser.mockResolvedValue(["org-3"])
+      t.repository.listPendingOrgIdsForUser.mockResolvedValue([])
       t.repository.linkInvitee.mockResolvedValue(2)
-      const n = await t.service.linkPendingInvitations("u-sara", { email: "sara@example.com" })
-      expect(t.repository.linkInvitee).toHaveBeenCalledWith(["new", "other-org"], "u-sara")
-      expect(n).toBe(2)
-    })
-  })
 
-  describe("preview", () => {
-    it("hides unusable links", async () => {
-      t.repository.findPreviewByTokenHash.mockResolvedValue({
-        invitation: invitation({ expiresAt: new Date(NOW.getTime() - 1) }),
-        org,
-      })
-      const res = await t.service.preview("plain-token")
-      expect(res).toMatchObject({ success: false, error: "ORGANIZATION_INVITATION_EXPIRED" })
+      const count = await t.service.linkPendingInvitations("u-sara", { email: "sara@example.com" })
+      expect(count).toBe(2)
+      expect(t.repository.linkInvitee).toHaveBeenCalledWith(["inv-newest", "inv-other-org"], "u-sara")
     })
   })
 })

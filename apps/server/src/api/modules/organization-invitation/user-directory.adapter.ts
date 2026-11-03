@@ -1,11 +1,4 @@
 // organization-invitation/user-directory.adapter.ts  (NEW)
-//
-// ASSUMPTIONS, adjust to your schema:
-//   - tables `users` and `userIdentifiers` exported from @avuny/db
-//   - userIdentifiers columns: userId, type ("email" | "phone" | "username"),
-//     value, isPrimary, verifiedAt (null = not verified)
-// If you'd rather keep table access inside the users module, move the two queries
-// into users.repo.ts and call them from here.
 import { and, desc, eq, isNotNull } from "drizzle-orm"
 import { userIdentifiers, users, type Database } from "@avuny/db"
 import { normalizeIdentifier } from "../users/index.js" // pure helper; adjust path
@@ -28,9 +21,11 @@ export function createUserDirectory(db: Database): UserDirectory {
   }
 
   return {
-    async findVerifiedByContact({ email, phone }) {
-      if (email) {
-        const hit = await findVerified("email", email)
+    async findVerifiedByContact({ identifier, email, phone }) {
+      const target = identifier ?? email
+      if (target) {
+        const type = target.startsWith("+") ? "phone" : "email"
+        const hit = await findVerified(type, target)
         if (hit) return hit
       }
       if (phone) {
