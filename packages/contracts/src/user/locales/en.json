@@ -51,9 +51,9 @@
   "auth": {
     "signIn": {
       "title": "Welcome back",
-      "description": "Sign in with your email, phone number or username.",
+      "description": "Sign in with your email.",
       "identifier": {
-        "label": "Email, phone or username",
+        "label": "Email",
         "placeholder": "name@example.com"
       },
       "password": {
@@ -71,9 +71,9 @@
       "proofExpired": "Your session has expired. Please start over.",
       "sendOtp": {
         "title": "Create your account",
-        "description": "Enter your email or phone number and we will send you a verification code.",
+        "description": "Enter your email and we will send you a verification code.",
         "identifier": {
-          "label": "Email or phone number",
+          "label": "Email",
           "placeholder": "name@example.com"
         },
         "submitLabel": "Send code",
@@ -91,7 +91,7 @@
         "resendLabel": "Resend code",
         "resendIn": "Resend in {seconds}s",
         "resendLimitReached": "You’ve reached the maximum number of resends.",
-        "changeIdentifierLabel": "Use a different email or phone"
+        "changeIdentifierLabel": "Use a different email"
       },
       "completeSignUp": {
         "title": "Finish setting up",
@@ -118,9 +118,9 @@
       "proofExpired": "Your session has expired. Please start over.",
       "sendOtp": {
         "title": "Forgot your password?",
-        "description": "Enter your email, phone number or username and we will send you a verification code.",
+        "description": "Enter your email and we will send you a verification code.",
         "identifier": {
-          "label": "Email, phone or username",
+          "label": "Email",
           "placeholder": "name@example.com"
         },
         "submitLabel": "Send code",
@@ -136,7 +136,7 @@
         "resendLabel": "Resend code",
         "resendIn": "Resend in {seconds}s",
         "resendLimitReached": "You’ve reached the resend limit. Please try again later.",
-        "changeIdentifierLabel": "Use a different account"
+        "changeIdentifierLabel": "Use a different email"
       },
       "resetPassword": {
         "title": "Choose a new password",
@@ -164,7 +164,7 @@
       "OTP_RESEND_TOO_SOON": "Please wait a moment before requesting another code.",
       "VERIFICATION_TOKEN_INVALID": "Verification failed. Please start again.",
       "WEAK_PASSWORD": "This password is too weak. Choose a stronger one.",
-      "INVALID_IDENTIFIER_TYPE": "Use a valid email or phone number.",
+      "INVALID_IDENTIFIER_TYPE": "Use a valid email.",
       "proofExpired": "Your session has expired. Please start over."
     }
   },
@@ -191,7 +191,7 @@
         "placeholder": "Enter your name"
       },
       "identifier": {
-        "label": "Email / Identifier"
+        "label": "Email"
       },
       "submitLabel": "Save changes",
       "submittingLabel": "Saving…",

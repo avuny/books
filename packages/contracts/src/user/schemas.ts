@@ -1,4 +1,5 @@
 import { z } from "@avuny/zod"
+import { IdentifierSchema } from "../common/index.js"
 import {
   PASSWORD_MAX_BYTES,
   PASSWORD_MIN_LENGTH,
@@ -9,16 +10,16 @@ import {
 
 // ── Identifier ─────────────────────────────────────────────────────────────
 
-/** Any identifier value (email, phone or username). */
-export const IdentifierValueSchema = z.string().min(3).max(254).trim()
+export { IdentifierSchema } from "../common/index.js"
 
-/** Public-facing identifier for sign-up / OTP sends (email or phone only). */
-export const EmailOrPhoneSchema = z
-  .string()
-  .min(3)
-  .max(254)
-  .trim()
-  .toLowerCase()
+/**
+ * Public-facing and auth identifiers now strictly validate emails.
+ * Retained for backwards compatibility across existing module imports.
+ */
+export const IdentifierValueSchema = IdentifierSchema
+
+/** Public-facing identifier for sign-up / OTP sends (strictly email). */
+export const EmailOrPhoneSchema = IdentifierSchema
 
 // ── OTP ────────────────────────────────────────────────────────────────────
 
@@ -151,13 +152,14 @@ export const SessionsListResponseSchema = z.array(SessionItemSchema)
 
 // ── Users/me ───────────────────────────────────────────────────────────────
 
-export const IdentifierSchema = z.object({
+export const UserIdentifierDtoSchema = z.object({
   id: z.string().uuid(),
   type: z.enum(["email", "phone", "username"]),
   value: z.string(),
   isPrimary: z.boolean(),
   verifiedAt: z.string().datetime().nullable(),
 })
+export const UserIdentifierSchema = UserIdentifierDtoSchema
 
 export const MeResponseSchema = z.object({
   id: z.string().uuid(),

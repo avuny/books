@@ -5,8 +5,7 @@
     "ORGANIZATION_INVITATION_ORGANIZATION_UNAVAILABLE": "This organization is not accepting new members right now.",
     "ORGANIZATION_INVITATION_ALREADY_MEMBER": "This person is already a member of the organization.",
     "ORGANIZATION_INVITATION_ALREADY_PENDING": "There is already a pending invitation for this person.",
-    "ORGANIZATION_INVITATION_LIMIT_REACHED": "Your plan's user limit for this member type has been reached.",
-    "ORGANIZATION_INVITATION_CHANNEL_NOT_ALLOWED": "This invitation channel is not available on your plan.",
+    "ORGANIZATION_INVITATION_LIMIT_REACHED": "Your plan's user limit has been reached.",
     "ORGANIZATION_INVITATION_TARGET_UNAVAILABLE": "We could not find a usable contact for this invitee.",
     "ORGANIZATION_INVITATION_NOT_PENDING": "This invitation is no longer pending.",
     "ORGANIZATION_INVITATION_EXPIRED": "This invitation has expired.",
@@ -14,17 +13,15 @@
     "ORGANIZATION_INVITATION_RESEND_LIMIT_REACHED": "This invitation was resent too many times. Create a new one.",
     "ORGANIZATION_INVITATION_USERNAME_REQUIRED": "Choose a username to join this organization.",
     "ORGANIZATION_INVITATION_USERNAME_TAKEN": "This username is already used in the organization.",
-    "ORGANIZATION_INVITATION_IDENTITY_MISMATCH": "This invitation was sent to a different verified email or phone number.",
-    "ORGANIZATION_INVITATION_MEMBER_TYPE_CONFLICT": "You already have a different membership type in this organization."
+    "ORGANIZATION_INVITATION_IDENTITY_MISMATCH": "This invitation was sent to a different verified email.",
+    "ORGANIZATION_INVITATION_ROLE_NOT_FOUND": "The specified role was not found."
   },
   "labels": {
     "pending": "Pending",
     "accepted": "Accepted",
     "declined": "Declined",
     "revoked": "Revoked",
-    "expired": "Expired",
-    "email": "Email",
-    "whatsapp": "WhatsApp"
+    "expired": "Expired"
   },
   "msgs": {
     "INVITATION_CREATED": "Invitation sent.",
@@ -45,10 +42,6 @@
     "accept": "Accept",
     "decline": "Decline"
   },
-  "types": {
-    "managed": "Team member",
-    "portal": "Portal user"
-  },
   "list": {
     "title": "Invitations",
     "description": "Invite people to this organization and follow the status of each invitation.",
@@ -59,8 +52,7 @@
   },
   "table": {
     "invitee": "Invitee",
-    "type": "Type",
-    "channel": "Sent via",
+    "role": "Role",
     "status": "Status",
     "sent": "Last sent",
     "expires": "Expires",
@@ -83,32 +75,18 @@
   },
   "create": {
     "title": "Invite someone",
-    "description": "Send an invitation by email or WhatsApp.",
+    "description": "Send an invitation by email.",
     "submitLabel": "Send invitation",
     "submittingLabel": "Sending…"
   },
   "fields": {
-    "type": {
-      "legend": "Member type",
-      "descriptions": {
-        "managed": "Works inside the organization. Access is controlled by roles.",
-        "portal": "External user. Has no role-based permissions."
-      }
-    },
-    "channel": {
-      "legend": "Send via"
-    },
-    "email": {
+    "identifier": {
       "label": "Email address",
       "placeholder": "name@example.com"
     },
-    "phone": {
-      "label": "WhatsApp number",
-      "placeholder": "+201001234567"
-    },
-    "username": {
-      "label": "Username (optional)",
-      "placeholder": "Choose a username for them"
+    "role": {
+      "label": "Role (optional)",
+      "placeholder": "Select a role"
     },
     "acceptUsername": {
       "label": "Username",
@@ -130,9 +108,7 @@
       "title": "No open invitations",
       "description": "When an organization invites you, it will show up here."
     },
-    "via": "Via {{channel}}",
-    "expires": "Expires {{date}}",
-    "username": "Username: {{username}}"
+    "expires": "Expires {{date}}"
   },
   "accept": {
     "title": "Join {{name}}",
@@ -148,11 +124,10 @@
     "title": "Join {{name}}",
     "description": "You have been invited to join this organization.",
     "organization": "Organization",
-    "type": "Joining as",
-    "sentTo": "Sent to ({{channel}})",
-    "username": "Username",
+    "role": "Role",
+    "sentTo": "Sent to",
     "expires": "Expires",
-    "signInPrompt": "Sign in, or create an account, with the invited email address or phone number to accept this invitation.",
+    "signInPrompt": "Sign in, or create an account, with the invited email address to accept this invitation.",
     "signIn": "Sign in to continue",
     "missingToken": "This invitation link is incomplete. Ask for a new invitation."
   }

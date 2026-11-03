@@ -5,13 +5,14 @@ export const INVITATION_STATUSES = [
   "revoked",
   "expired",
 ] as const
-export const INVITATION_CHANNELS = ["email", "whatsapp"] as const
-/** Owners are never invited (DB check ck_org_invitation_not_owner). */
-export const INVITABLE_MEMBER_TYPES = ["managed", "portal"] as const
 
-export const INVITATION_EMAIL_MAX_LENGTH = 254
-/** E.164, same rule as ck_org_invitation_phone_format. */
-export const INVITATION_PHONE_PATTERN = /^\+[1-9][0-9]{7,14}$/
+/**
+ * `identifier` is currently constrained to email in the frontend, but the backend
+ * accepts any non-empty string so it can later support phone numbers or usernames
+ * without a contract change. The channel is derived by the server from the identifier format.
+ */
+export const INVITATION_IDENTIFIER_MAX_LENGTH = 320
+
 export const INVITATION_TOKEN_MIN_LENGTH = 20
 export const INVITATION_TOKEN_MAX_LENGTH = 128
 

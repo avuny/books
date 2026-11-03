@@ -5,8 +5,7 @@
     "ORGANIZATION_INVITATION_ORGANIZATION_UNAVAILABLE": "هذه المؤسسة لا تقبل أعضاء جددًا حاليًا.",
     "ORGANIZATION_INVITATION_ALREADY_MEMBER": "هذا الشخص عضو بالفعل في المؤسسة.",
     "ORGANIZATION_INVITATION_ALREADY_PENDING": "توجد دعوة معلّقة لهذا الشخص بالفعل.",
-    "ORGANIZATION_INVITATION_LIMIT_REACHED": "تم الوصول إلى حد المستخدمين في باقتك لهذا النوع.",
-    "ORGANIZATION_INVITATION_CHANNEL_NOT_ALLOWED": "قناة الدعوة هذه غير متاحة في باقتك.",
+    "ORGANIZATION_INVITATION_LIMIT_REACHED": "تم الوصول إلى الحد الأقصى للمستخدمين في باقتك.",
     "ORGANIZATION_INVITATION_TARGET_UNAVAILABLE": "تعذر العثور على وسيلة تواصل صالحة لهذا المدعو.",
     "ORGANIZATION_INVITATION_NOT_PENDING": "هذه الدعوة لم تعد معلّقة.",
     "ORGANIZATION_INVITATION_EXPIRED": "انتهت صلاحية هذه الدعوة.",
@@ -14,17 +13,15 @@
     "ORGANIZATION_INVITATION_RESEND_LIMIT_REACHED": "تمت إعادة إرسال هذه الدعوة مرات كثيرة. أنشئ دعوة جديدة.",
     "ORGANIZATION_INVITATION_USERNAME_REQUIRED": "اختر اسم مستخدم للانضمام إلى هذه المؤسسة.",
     "ORGANIZATION_INVITATION_USERNAME_TAKEN": "اسم المستخدم مستخدم بالفعل في المؤسسة.",
-    "ORGANIZATION_INVITATION_IDENTITY_MISMATCH": "أُرسلت هذه الدعوة إلى بريد إلكتروني أو رقم هاتف موثّق مختلف.",
-    "ORGANIZATION_INVITATION_MEMBER_TYPE_CONFLICT": "لديك بالفعل نوع عضوية مختلف في هذه المؤسسة."
+    "ORGANIZATION_INVITATION_IDENTITY_MISMATCH": "أُرسلت هذه الدعوة إلى بريد إلكتروني موثّق مختلف.",
+    "ORGANIZATION_INVITATION_ROLE_NOT_FOUND": "الدور المحدد غير موجود."
   },
   "labels": {
     "pending": "معلّقة",
     "accepted": "مقبولة",
     "declined": "مرفوضة",
     "revoked": "ملغاة",
-    "expired": "منتهية",
-    "email": "البريد الإلكتروني",
-    "whatsapp": "واتساب"
+    "expired": "منتهية"
   },
   "msgs": {
     "INVITATION_CREATED": "تم إرسال الدعوة.",
@@ -45,10 +42,6 @@
     "accept": "قبول",
     "decline": "رفض"
   },
-  "types": {
-    "managed": "عضو في الفريق",
-    "portal": "مستخدم البوابة"
-  },
   "list": {
     "title": "الدعوات",
     "description": "ادعُ أشخاصًا إلى هذه المؤسسة وتابع حالة كل دعوة.",
@@ -59,8 +52,7 @@
   },
   "table": {
     "invitee": "المدعو",
-    "type": "النوع",
-    "channel": "أُرسلت عبر",
+    "role": "الدور",
     "status": "الحالة",
     "sent": "آخر إرسال",
     "expires": "تنتهي في",
@@ -83,32 +75,18 @@
   },
   "create": {
     "title": "دعوة شخص",
-    "description": "أرسل دعوة عبر البريد الإلكتروني أو واتساب.",
+    "description": "أرسل دعوة عبر البريد الإلكتروني.",
     "submitLabel": "إرسال الدعوة",
     "submittingLabel": "جارٍ الإرسال…"
   },
   "fields": {
-    "type": {
-      "legend": "نوع العضوية",
-      "descriptions": {
-        "managed": "يعمل داخل المؤسسة، وتُحدَّد صلاحياته بالأدوار.",
-        "portal": "مستخدم خارجي بلا صلاحيات قائمة على الأدوار."
-      }
-    },
-    "channel": {
-      "legend": "إرسال عبر"
-    },
-    "email": {
+    "identifier": {
       "label": "البريد الإلكتروني",
       "placeholder": "name@example.com"
     },
-    "phone": {
-      "label": "رقم واتساب",
-      "placeholder": "+201001234567"
-    },
-    "username": {
-      "label": "اسم المستخدم (اختياري)",
-      "placeholder": "اختر اسم مستخدم له"
+    "role": {
+      "label": "الدور (اختياري)",
+      "placeholder": "اختر دورًا"
     },
     "acceptUsername": {
       "label": "اسم المستخدم",
@@ -130,9 +108,7 @@
       "title": "لا توجد دعوات مفتوحة",
       "description": "عندما تدعوك مؤسسة، ستظهر دعوتها هنا."
     },
-    "via": "عبر {{channel}}",
-    "expires": "تنتهي في {{date}}",
-    "username": "اسم المستخدم: {{username}}"
+    "expires": "تنتهي في {{date}}"
   },
   "accept": {
     "title": "الانضمام إلى {{name}}",
@@ -148,11 +124,10 @@
     "title": "الانضمام إلى {{name}}",
     "description": "تمت دعوتك للانضمام إلى هذه المؤسسة.",
     "organization": "المؤسسة",
-    "type": "الانضمام بصفة",
-    "sentTo": "أُرسلت إلى ({{channel}})",
-    "username": "اسم المستخدم",
+    "role": "الدور",
+    "sentTo": "أُرسلت إلى",
     "expires": "تنتهي في",
-    "signInPrompt": "سجّل الدخول، أو أنشئ حسابًا، بالبريد الإلكتروني أو رقم الهاتف المدعو لقبول هذه الدعوة.",
+    "signInPrompt": "سجّل الدخول، أو أنشئ حسابًا، بالبريد الإلكتروني المدعو لقبول هذه الدعوة.",
     "signIn": "سجّل الدخول للمتابعة",
     "missingToken": "رابط الدعوة هذا غير مكتمل. اطلب دعوة جديدة."
   }

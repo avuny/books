@@ -51,9 +51,9 @@
   "auth": {
     "signIn": {
       "title": "مرحباً بعودتك",
-      "description": "سجّل دخولك بالبريد الإلكتروني أو رقم الهاتف أو اسم المستخدم.",
+      "description": "سجّل دخولك بالبريد الإلكتروني.",
       "identifier": {
-        "label": "البريد الإلكتروني أو الهاتف أو اسم المستخدم",
+        "label": "البريد الإلكتروني",
         "placeholder": "name@example.com"
       },
       "password": {
@@ -71,9 +71,9 @@
       "proofExpired": "انتهت صلاحية الجلسة. يرجى البدء من جديد.",
       "sendOtp": {
         "title": "إنشاء حساب جديد",
-        "description": "أدخل بريدك الإلكتروني أو رقم هاتفك وسنرسل لك رمز التحقق.",
+        "description": "أدخل بريدك الإلكتروني وسنرسل لك رمز التحقق.",
         "identifier": {
-          "label": "البريد الإلكتروني أو رقم الهاتف",
+          "label": "البريد الإلكتروني",
           "placeholder": "name@example.com"
         },
         "submitLabel": "إرسال الرمز",
@@ -91,7 +91,7 @@
         "resendLabel": "إعادة إرسال الرمز",
         "resendIn": "إعادة الإرسال خلال {seconds} ث",
         "resendLimitReached": "لقد وصلت إلى الحد الأقصى لإعادة الإرسال.",
-        "changeIdentifierLabel": "استخدام بريد إلكتروني أو هاتف مختلف"
+        "changeIdentifierLabel": "استخدام بريد إلكتروني مختلف"
       },
       "completeSignUp": {
         "title": "إتمام إعداد الحساب",
@@ -118,9 +118,9 @@
       "proofExpired": "انتهت صلاحية الجلسة. يرجى البدء من جديد.",
       "sendOtp": {
         "title": "نسيت كلمة المرور؟",
-        "description": "أدخل بريدك الإلكتروني أو رقم هاتفك أو اسم المستخدم وسنرسل لك رمز التحقق.",
+        "description": "أدخل بريدك الإلكتروني وسنرسل لك رمز التحقق.",
         "identifier": {
-          "label": "البريد الإلكتروني أو الهاتف أو اسم المستخدم",
+          "label": "البريد الإلكتروني",
           "placeholder": "name@example.com"
         },
         "submitLabel": "إرسال الرمز",
@@ -136,7 +136,7 @@
         "resendLabel": "إعادة إرسال الرمز",
         "resendIn": "إعادة الإرسال خلال {seconds} ث",
         "resendLimitReached": "لقد وصلت إلى الحد الأقصى لإعادة الإرسال. يرجى المحاولة لاحقاً.",
-        "changeIdentifierLabel": "استخدام حساب مختلف"
+        "changeIdentifierLabel": "استخدام بريد إلكتروني مختلف"
       },
       "resetPassword": {
         "title": "اختر كلمة مرور جديدة",
@@ -164,7 +164,7 @@
       "OTP_RESEND_TOO_SOON": "يرجى الانتظار لحظة قبل طلب رمز آخر.",
       "VERIFICATION_TOKEN_INVALID": "فشل التحقق. يرجى البدء من جديد.",
       "WEAK_PASSWORD": "كلمة المرور ضعيفة جداً. اختر كلمة مرور أقوى.",
-      "INVALID_IDENTIFIER_TYPE": "استخدم بريداً إلكترونياً أو رقم هاتف صالحاً.",
+      "INVALID_IDENTIFIER_TYPE": "استخدم بريداً إلكترونياً صالحاً.",
       "proofExpired": "انتهت صلاحية الجلسة. يرجى البدء من جديد."
     }
   },
@@ -191,7 +191,7 @@
         "placeholder": "أدخل اسمك"
       },
       "identifier": {
-        "label": "البريد الإلكتروني / المعرّف"
+        "label": "البريد الإلكتروني"
       },
       "submitLabel": "حفظ التغييرات",
       "submittingLabel": "جارٍ الحفظ…",

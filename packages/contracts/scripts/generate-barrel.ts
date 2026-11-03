@@ -32,7 +32,7 @@ const outputPath = resolve(__dirname, "../src/index.ts")
  * Directories inside src/ that are NOT public contract modules and should be
  * excluded from the barrel.  Add new entries here as needed.
  */
-const EXCLUDED_DIRS = new Set(["common", "errors"])
+const EXCLUDED_DIRS = new Set(["errors"])
 
 // ---------------------------------------------------------------------------
 // Generator

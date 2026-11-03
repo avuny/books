@@ -70,9 +70,24 @@
     "info": "Information",
     "loading": "Loading"
   },
+  "labels": {
+    "identifier": "Email",
+    "email": "Email"
+  },
+  "fields": {
+    "identifier": {
+      "label": "Email",
+      "placeholder": "name@example.com"
+    },
+    "email": {
+      "label": "Email",
+      "placeholder": "name@example.com"
+    }
+  },
   "validation": {
     "required": "This field is required",
     "invalidEmail": "Please enter a valid email address",
+    "invalidIdentifier": "Please enter a valid email address",
     "minLength": "Must be at least {{min}} characters",
     "maxLength": "Must be less than {{max}} characters"
   }

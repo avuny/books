@@ -69,9 +69,24 @@
     "info": "معلومة",
     "loading": "جارٍ التحميل"
   },
+  "labels": {
+    "identifier": "البريد الإلكتروني",
+    "email": "البريد الإلكتروني"
+  },
+  "fields": {
+    "identifier": {
+      "label": "البريد الإلكتروني",
+      "placeholder": "name@example.com"
+    },
+    "email": {
+      "label": "البريد الإلكتروني",
+      "placeholder": "name@example.com"
+    }
+  },
   "validation": {
     "required": "هذا الحقل مطلوب",
     "invalidEmail": "يرجى إدخال بريد إلكتروني صالح",
+    "invalidIdentifier": "يرجى إدخال بريد إلكتروني صالح",
     "minLength": "يجب أن يكون على الأقل {{min}} حروفًا",
     "maxLength": "يجب أن يكون أقل من {{max}} حروفًا"
   }

@@ -9,6 +9,7 @@ import {
   ORG_USER_SEARCH_MAX_LENGTH,
 } from "./constants.js"
 
+/** Internal enum – kept for ownership-transfer internals; NOT exposed on public DTOs. */
 export const OrgMemberTypeSchema = z.enum(ORG_MEMBER_TYPES)
 export type OrgMemberType = z.infer<typeof OrgMemberTypeSchema>
 
@@ -25,11 +26,11 @@ export const OrganizationUsernameSchema = z
 
 /* ---------- DTOs ---------- */
 
+/** `type` is intentionally omitted – membership kind is determined by assigned roles. */
 export const OrganizationUserDtoSchema = z.object({
   id: z.string().uuid(),
   orgId: z.string().uuid(),
   userId: z.string().uuid(),
-  type: OrgMemberTypeSchema,
   username: z.string(),
   isActive: z.boolean(),
   lastAccessedAt: z.string().datetime().nullable(),
@@ -45,7 +46,6 @@ export const MyOrganizationDtoSchema = z.object({
   code: z.string(),
   name: z.string(),
   orgStatus: OrgStatusSchema,
-  type: OrgMemberTypeSchema,
   lastAccessedAt: z.string().datetime().nullable(),
 })
 export type MyOrganizationDto = z.infer<typeof MyOrganizationDtoSchema>
@@ -93,7 +93,6 @@ export const OrganizationUserOffsetListQuerySchema = z.object({
     .min(1)
     .max(ORG_USER_MAX_PAGE_SIZE)
     .default(ORG_USER_DEFAULT_PAGE_SIZE),
-  type: OrgMemberTypeSchema.optional(),
   isActive: z
     .enum(["true", "false"])
     .transform((v) => v === "true")
