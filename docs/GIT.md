@@ -11,6 +11,6 @@ When asked to review Git changes or suggest a commit message:
 7. Keep the message informative but concise. Avoid repetition, vague descriptions, and unnecessary implementation details.
 8. **Always split commits by logical change:** When the working tree contains multiple distinct changes (e.g. features, bug fixes, documentation, configuration, or agent instructions), split them into separate atomic commits. Never bundle unrelated logical changes into a single commit.
 9. **Provide staging commands for each commit:** For every split commit, provide the exact `git add` command specifying only the files belonging to that change, paired immediately with its proposed commit message in a copy-ready Markdown code block.
-10. Do not modify files, stage changes, create commits, or run destructive Git commands when only asked to review changes or suggest commit messages.
+10. When the user says **"commit"** (without asking to "review" or "suggest"), execute the full commit process: run `git add` and `git commit` for each atomic commit — do not just propose commands. Only suggest (without executing) when the user explicitly asks to review or preview commit messages.
 
 Output each proposed commit with its staging `git add` command and commit message in a Markdown code block, ready to copy and run in Git.
