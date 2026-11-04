@@ -15,8 +15,11 @@ pnpm --filter @avuny/books-server typecheck
 # Run server unit & integration tests
 pnpm --filter @avuny/books-server test
 
-# Run a single test file
-pnpm --filter @avuny/books-server test <filename>.spec.ts
+# Run a single test file (route tests live in __tests__/)
+pnpm --filter @avuny/books-server test <filename>.test.ts
+
+# Service unit tests
+pnpm --filter @avuny/books-server test <module>.service.spec.ts
 
 # OpenAPI Spec & Client Generation Pipeline
 pnpm intl:generate      # Generates i18next.ts and i18next.d.ts from locales/
@@ -44,15 +47,24 @@ packages/contracts/src/<module>/          <-- 1. Single source of truth (Schemas
 packages/db/src/schema/<module>/          <-- 2. Drizzle ORM tables & relations (if schema changes needed)
   └── <entity>.ts
 
-apps/server/src/api/modules/<module>/      <-- 3. Server Feature Module
-  ├── <module>.errors.ts                   <-- HTTP status mapping for domain errors
+apps/server/src/api/modules/<module>/      <-- 3. Server Feature Module (canonical layout)
+  ├── SPEC.md                              <-- Module specification & requirements (update on every requirement change)
+  ├── deps.ts                              <-- Singleton composition / DI wiring (the ONLY place that imports db & config)
+  ├── index.ts                             <-- Public barrel: ONLY file other modules may import
+  ├── <module>.errors.ts                   <-- HTTP status mapping for domain errors (re-exports ErrorCode)
+  ├── <module>.error-map.ts                <-- Full Code → ErrorMeta map covering ALL error codes
   ├── <module>.repository.ts               <-- Pure Drizzle DB queries & transactions
-  ├── <module>.service.ts                  <-- Core business rules (returns Result<T, E>) & Port Dummies
-  ├── <module>.service.spec.ts             <-- Vitest isolated unit tests
-  ├── hono-routes/                         <-- OpenAPI HTTP controllers
-  │   ├── <action>-<entity>.route.ts
-  │   └── index.ts                         <-- Combines routes into <module>Routes router
-  └── index.ts                             <-- Module Public API (ONLY file other modules may import)
+  ├── <module>.service.ts                  <-- Business logic as closure factory (returns Result<T, E>)
+  ├── <module>.service.spec.ts             <-- Vitest isolated service unit tests
+  ├── <module>.types.ts                    <-- Service/repo return types + port interfaces
+  ├── <module>.mapper.ts                   <-- row → DTO converters (pure, no deps)
+  ├── hono-routes/                         <-- OpenAPI HTTP controllers (one file per endpoint)
+  │   ├── _shared.ts                       <-- jsonOk / jsonError / honoPath helpers
+  │   ├── module-routes.types.ts           <-- RouteDeps interface (service + requireAuth)
+  │   ├── index.ts                         <-- Aggregates routes; exports singletons
+  │   └── <action>-<entity>.route.ts       <-- One route per HTTP operation
+  └── __tests__/                           <-- Route-level tests (one file per route)
+      └── <action>-<entity>.route.test.ts
 
 apps/server/src/api/intl/                  <-- 4. Server i18n registration
   ├── locales/<module>/{en,ar}.json
@@ -60,6 +72,115 @@ apps/server/src/api/intl/                  <-- 4. Server i18n registration
 
 apps/server/src/api/routes.ts              <-- 5. Mount module router on main app
 ```
+
+---
+
+## Module File Conventions
+
+### `<module>.types.ts` — Service & Repository Types
+
+This file is the **single point of truth for all TypeScript interfaces and types** that live at the boundary between layers. It must NOT contain logic.
+
+```ts
+// Use ReturnType to derive service/repo types from their factory functions:
+export type OrganizationInvitationService = ReturnType<typeof createOrganizationInvitationService>
+export type OrganizationInvitationRepository = ReturnType<typeof createOrganizationInvitationRepository>
+
+// Port interfaces (implemented outside the module, injected via deps):
+export interface InvitationNotifier {
+  send(delivery: InvitationDelivery): Promise<void>
+}
+
+// Service deps bag:
+export interface OrganizationInvitationServiceDeps {
+  repo: OrganizationInvitationRepository
+  organizationUserService: OrganizationUserService
+  roleService: RoleService
+  permissions: { check(...): Promise<boolean> }
+  // …
+}
+
+// Internal repo-layer types that have no equivalent in contracts:
+export type InvitationTarget = { identifier?: string | null; inviteeUserId?: string | null }
+```
+
+### `deps.ts` — Singleton Composition
+
+The **only** file that knows about the concrete infrastructure (`db`, `config`, other module singletons). It wires everything together and exports a lazy singleton via `get<Module>Service()` + a `Proxy`-based export:
+
+```ts
+let _serviceInstance: OrganizationInvitationService | undefined
+
+export function getOrganizationInvitationService(): OrganizationInvitationService {
+  if (!_serviceInstance) {
+    _serviceInstance = createOrganizationInvitationService({
+      repo: createOrganizationInvitationRepository({ db }),
+      organizationUserService,  // from org-user/index.js
+      roleService,              // from role/index.js
+      // …
+    })
+  }
+  return _serviceInstance
+}
+
+export const organizationInvitationService = new Proxy({} as OrganizationInvitationService, {
+  get(_t, prop) { return (getOrganizationInvitationService() as any)[prop] },
+})
+```
+
+> [!IMPORTANT]
+> `deps.ts` must **never** be imported by other modules. Use `index.ts` exports only.
+
+### `<module>.error-map.ts` — Full Error Map
+
+Provides a single `Record<Code, ErrorMeta>` covering **all** codes in the enum:
+
+```ts
+export const organizationInvitationErrorMap = {
+  ORGANIZATION_INVITATION_NOT_FOUND: errors.ORGANIZATION_INVITATION_NOT_FOUND,
+  // … every code from the enum
+} as const satisfies Record<Code, (typeof errors)[keyof typeof errors]>
+```
+
+Route files build **subset** error maps inline from `errors.*`; this file provides the exhaustive union for reuse in tests.
+
+### `hono-routes/module-routes.types.ts` — Route Dependencies
+
+```ts
+import type { MiddlewareHandler } from "hono"
+import type { OrganizationInvitationService } from "../organization-invitation.types.js"
+
+export interface RouteDeps {
+  service: OrganizationInvitationService
+  requireAuth: MiddlewareHandler
+}
+```
+
+All route factories accept `(deps: RouteDeps)` — never the concrete service or middleware directly.
+
+### `__tests__/<action>-<entity>.route.test.ts` — Route Tests
+
+Each route file has a parallel test file. Tests use a mock `service` and a mock `requireAuth` middleware; they never import `deps.ts` or touch the database.
+
+```ts
+const mockRequireAuth: MiddlewareHandler = async (c, next) => {
+  c.set("user", { id: "uuid..." })
+  await next()
+}
+const mockService: any = { create: vi.fn().mockResolvedValue(ok({ data: {...}, msg: "..." })) }
+```
+
+### `SPEC.md` — Module Specification
+
+Every module with non-trivial business rules must have a `SPEC.md` at the module root. It documents:
+- Domain model
+- Business rules (creation, validation, side effects)
+- Error codes table
+- Routes summary
+- File structure
+- Dependency rules
+
+**Update `SPEC.md` whenever a requirement changes.**
 
 ---
 
@@ -128,11 +249,25 @@ export const organizationErrorsHttpMap = {
 
 ---
 
-### Step 4: Implement Domain Service (`<module>.service.ts`)
+### Step 4: Define Module Types (`<module>.types.ts`)
 
+Create `<module>.types.ts` for all type definitions that live at the layer boundary:
+- `ReturnType<typeof create<Module>Service>` and `ReturnType<typeof create<Module>Repository>` as named service/repo types.
+- Port interfaces (`InvitationNotifier`, `UserDirectory`, etc.).
+- The deps bag interface (`<Module>ServiceDeps`).
+- Internal repository-layer types not present in contracts (e.g. `InvitationTarget`, `InvitationWithOrganization`).
+
+> [!IMPORTANT]
+> Import contract types (input shapes, DTOs, error codes) from `@avuny/contracts`. Types local to the server layer belong here.
+
+---
+
+### Step 5: Implement Domain Service (`<module>.service.ts`)
+
+- **Always use the closure factory pattern**: `export const create<Module>Service = (deps: <Module>ServiceDeps) => { ... return { method1, method2, ... } }`
+- **Never export a class** for the service.
+- **Port Interfaces** are defined in `<module>.types.ts`, not in the service file.
 - **Domain Result Handling**: Always return `Result<T, E>` (`ok({ data, msg })` or `fail({ error: Err.<CODE>, msg })`) from `@avuny/utils`. Never throw expected business errors.
-- **Port Interfaces & Dependency Injection**:
-  Define explicit port interfaces for external services (e.g., `PermissionChecker`, `Cache`, `ActivityLog`, `Limits`).
 - **Dummy Fallbacks**:
   Implement dummy fallback classes for ports so routes can run out-of-the-box before full infrastructure is wired:
   ```ts
@@ -141,20 +276,19 @@ export const organizationErrorsHttpMap = {
       return true
     }
   }
-  export class DummyCache implements Cache {
-    async get<T>(): Promise<T | null> {
-      return null
-    }
-    async set(): Promise<void> {}
-    async del(): Promise<void> {}
-  }
   ```
-- **Service Factory & Default Instance**:
-  Export `create<Entity>Service(deps)` and a default instantiated service `export const <entity>Service = createDefault<Entity>Service()`.
+- **Never import the repository** — receive it as `repo` in the deps bag.
+- **Inter-module dependencies**: accept other modules' services via their types from `../other-module/index.js`, not repositories.
 
 ---
 
-### Step 5: Unit Tests (`<module>.service.spec.ts`)
+### Step 6: Compose Dependencies (`deps.ts`)
+
+Wire concrete implementations in `deps.ts`. See the **Module File Conventions → `deps.ts`** section above for the pattern.
+
+---
+
+### Step 7: Unit Tests (`<module>.service.spec.ts`)
 
 - Use `vitest` (`describe`, `it`, `expect`, `vi`).
 - Mock dependencies via `vi.fn()` and verify:
@@ -166,7 +300,7 @@ export const organizationErrorsHttpMap = {
 
 ---
 
-### Step 6: OpenAPI HTTP Routes (`hono-routes/`)
+### Step 8: OpenAPI HTTP Routes (`hono-routes/`)
 
 Create dedicated route files under `src/api/modules/<module>/hono-routes/`:
 
@@ -289,7 +423,47 @@ organizationRoutes.route("/", updateOrganizationRoute)
 
 ---
 
-### Step 7: Module Public API (`<module>/index.ts`)
+### Step 9: Route Tests (`__tests__/`)
+
+Create one test file per route under `__tests__/`:
+
+```ts
+// __tests__/create-entity.route.test.ts
+import { describe, expect, it, vi } from "vitest"
+import type { MiddlewareHandler } from "hono"
+import { createOpenAPIRouter } from "@avuny/hono"
+import { ok, fail } from "@avuny/utils"
+import { createEntityRoute } from "../hono-routes/create-entity.route.js"
+import { EntityErrorCode } from "@avuny/contracts"
+
+describe("createEntityRoute", () => {
+  const mockUser = { id: "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a01" }
+  const mockRequireAuth: MiddlewareHandler = async (c, next) => {
+    c.set("user", mockUser)
+    await next()
+  }
+
+  it("returns 201 on success", async () => {
+    const mockService: any = { create: vi.fn().mockResolvedValue(ok({ data: {...}, msg: "Created" })) }
+    const app = createOpenAPIRouter()
+    app.route("/", createEntityRoute({ service: mockService, requireAuth: mockRequireAuth }))
+    const res = await app.request("/entities", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({...}) })
+    expect(res.status).toBe(201)
+  })
+
+  it("returns 403 when forbidden", async () => {
+    const mockService: any = { create: vi.fn().mockResolvedValue(fail({ error: EntityErrorCode.ENTITY_FORBIDDEN, msg: "No" })) }
+    // ...
+  })
+})
+```
+
+> [!IMPORTANT]
+> Route tests **never** import `deps.ts`. They receive a mock service and mock `requireAuth`. They test HTTP status codes and response shapes.
+
+---
+
+### Step 10: Module Public API (`<module>/index.ts`)
 
 Create a clean barrel export at the module root.
 **Critical Rule**: Outside modules must **only** import from `apps/server/src/api/modules/<module>/index.js`, never from internal paths.
@@ -318,7 +492,7 @@ export { organizationRoutes } from "./hono-routes/index.js"
 
 ---
 
-### Step 8: Wire Server i18n & Mount Routes
+### Step 10: Wire Server i18n & Mount Routes
 
 1. **Copy or link locales to server intl**:
    Create `apps/server/src/api/intl/locales/<module>/{en,ar}.json` with error keys:
@@ -340,7 +514,7 @@ export { organizationRoutes } from "./hono-routes/index.js"
 
 ---
 
-### Step 9: Re-generate Client & Validate
+### Step 11: Re-generate Client & Validate
 
 1. Run `pnpm openapi:generate` to regenerate the OpenAPI specification.
 2. Run `pnpm api:generate` to update TanStack Query hooks in `apps/web`.
@@ -354,15 +528,29 @@ export { organizationRoutes } from "./hono-routes/index.js"
    - Always include the `.js` extension when importing local TypeScript files (e.g., `import ... from "./foo.js"`).
    - Always import `z` from `@avuny/zod`.
    - Never import `@avuny/db` into contracts, utils, or web apps.
-2. **Error Responses in OpenAPI**:
+2. **Module Boundaries**:
+   - Other modules must **only** import from a module's `index.ts` — never from internal paths like `.service.js`, `.repository.js`, or `deps.js`.
+   - `deps.ts` is private to the module; it must never be imported by external modules.
+   - A module's service must **never** import another module's repository. Import only the other module's service via its `index.ts`.
+3. **Service Pattern**:
+   - Use the **closure factory** (`export const createService = (deps) => { ... return { method } }`), not classes.
+   - All deps (repo, permissions, limits, activityLog, etc.) are injected via the deps bag.
+   - Port interfaces live in `<module>.types.ts`, not in the service file.
+4. **Error Responses in OpenAPI**:
    - Always include `...globalErrorResponses` in `createRoute.responses`.
    - Any domain error returned by `handleResult` must be documented with `createDomainErrorResponseSchema([ErrorCode])` under the matching HTTP status code.
    - For handlers that always succeed and return typed JSON directly, use `return c.json({ success: true, data: result.data }, 200)`.
-3. **Authentication & Context**:
+5. **Authentication & Context**:
    - Protected routes must define `middleware: [requireAuth] as const` on `createRoute` and call `router.use(..., requireAuth)`.
    - Access current user using `c.get("user")` or `c.var.user`.
-4. **Database Seed Scripts & Full State Synchronization**:
+6. **Database Seed Scripts & Full State Synchronization**:
    - Seed scripts (e.g. `sidebar.seed.ts`, `role.seed.ts`) must be declarative, idempotent, and fully synchronizing.
    - **Never only insert or upsert**: When seed arrays are edited and items/options/headings are removed, the database MUST reflect that removal.
    - Always delete stale rows using `delete(...).where(notInArray(table.key, targetKeys))` inside the seed transaction so removed items are cleaned up.
    - Running the seed script must guarantee that the database strictly matches the seed definition array and contains no leftover or orphaned rows.
+7. **SPEC.md**:
+   - Modules with non-trivial business rules must have a `SPEC.md` at their root.
+   - **Update `SPEC.md` whenever a requirement changes**: new error code, new route, changed policy, new delivery channel, etc.
+8. **Messaging & Notifications**:
+   - Always use the messaging module (`getMessageSender()` from `../messaging/index.js`) for outbound notifications (email, WhatsApp, SMS).
+   - Never call an email/SMS/WhatsApp API directly from a service or route. Use `MessageSender` through the notifier adapter pattern.
