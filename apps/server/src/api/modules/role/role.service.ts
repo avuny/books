@@ -377,6 +377,22 @@ export function createRoleService(deps: RoleServiceDeps) {
         msg: "Permissions retrieved successfully",
       })
     },
+
+    async assignRole(params: {
+      orgId: string
+      memberId: string
+      roleId: string
+      assignedByUserId: string
+    }): Promise<void> {
+      await repo.applyMemberRoles({
+        orgId: params.orgId,
+        orgUserId: params.memberId,
+        add: [params.roleId],
+        remove: [],
+        assignedByUserId: params.assignedByUserId,
+      })
+      await resolver.invalidateMember(params.memberId)
+    },
   }
 }
 

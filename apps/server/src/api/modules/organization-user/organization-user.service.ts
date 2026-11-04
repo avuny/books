@@ -9,6 +9,7 @@ import {
   type UpdateOrganizationUserInput,
 } from "@avuny/contracts"
 import { fail, ok, type Result } from "@avuny/utils"
+import type { OrganizationUser } from "@avuny/db"
 
 import {
   OrganizationUserErrorCode,
@@ -339,6 +340,80 @@ export function createOrganizationUserService(
       return ok({
         data: toOrganizationUserDto(outcome.newOwner),
         msg: "Ownership transferred",
+      })
+    },
+
+    async findMember(
+      orgId: string,
+      userId: string
+    ): Promise<OrganizationUser | null> {
+      return repo.findByOrgAndUser(orgId, userId)
+    },
+
+    async countActive(
+      orgId: string,
+      type: "owner" | "managed" | "portal"
+    ): Promise<number> {
+      return repo.countActiveByType(orgId, type)
+    },
+
+    async addMember(params: {
+      orgId: string
+      userId: string
+      type?: "managed" | "portal"
+      username?: string
+    }): Promise<Result<OrganizationUser, Code>> {
+      const type = params.type ?? "managed"
+      const existing = await repo.findByOrgAndUser(params.orgId, params.userId)
+      if (existing) {
+        if (existing.isActive) {
+          return fail({
+            error: Err.ORGANIZATION_USER_FORBIDDEN,
+            msg: "This person is already an active member",
+          })
+        }
+        const reactivated = await repo.reactivate(
+          params.orgId,
+          existing.id,
+          params.username ?? existing.username
+        )
+        if (!reactivated.ok) {
+          return fail({
+            error: Err.ORGANIZATION_USER_USERNAME_TAKEN,
+            msg: "The username is already in use in this organization",
+          })
+        }
+        return ok({
+          data: reactivated.row,
+          msg: "Member joined successfully",
+        })
+      }
+
+      const username = params.username ?? `user_${params.userId.slice(0, 8)}`
+      const inserted = await repo.insert({
+        orgId: params.orgId,
+        userId: params.userId,
+        type,
+        username,
+        isActive: true,
+      })
+
+      if (!inserted.ok) {
+        if (inserted.reason === "username_taken") {
+          return fail({
+            error: Err.ORGANIZATION_USER_USERNAME_TAKEN,
+            msg: "The username is already in use in this organization",
+          })
+        }
+        return fail({
+          error: Err.ORGANIZATION_USER_FORBIDDEN,
+          msg: "This person is already a member",
+        })
+      }
+
+      return ok({
+        data: inserted.row,
+        msg: "Member joined successfully",
       })
     },
   }
