@@ -137,6 +137,36 @@ export class ResendEmailSender implements MessageSender {
     })
   }
 
+  async sendInvitation({
+    to,
+    orgName,
+    link,
+    expiresAt,
+  }: SendInvitationInput): Promise<void> {
+    await this.send({
+      to,
+      subject: `Invitation to join ${orgName}`,
+      html: `
+        <div style="font-family:sans-serif;max-width:520px;margin:auto;padding:24px;border:1px solid #eaeaea;border-radius:8px">
+          <h2 style="color:#111;margin-top:0">You've been invited!</h2>
+          <p style="color:#444;font-size:16px;line-height:24px">
+            You have been invited to join <b>${escapeHtml(orgName)}</b>.
+          </p>
+          <div style="margin:28px 0">
+            <a href="${escapeHtml(link)}" style="background-color:#111827;color:#ffffff;padding:12px 24px;text-decoration:none;border-radius:6px;font-weight:600;display:inline-block">Accept Invitation</a>
+          </div>
+          <p style="color:#666;font-size:13px;line-height:20px">
+            This invitation expires on ${expiresAt.toLocaleDateString()}.
+          </p>
+          <hr style="border:none;border-top:1px solid #eaeaea;margin:24px 0" />
+          <p style="color:#888;font-size:12px;word-break:break-all">
+            If the button doesn't work, copy and paste this link into your browser:<br/>
+            <a href="${escapeHtml(link)}" style="color:#2563eb">${escapeHtml(link)}</a>
+          </p>
+        </div>`,
+    })
+  }
+
   private async send(msg: {
     to: string
     subject: string
@@ -212,7 +242,36 @@ export class WhatsAppMessageSender implements MessageSender {
     )
     await assertOk(res, "WhatsApp")
   }
-  // No sendSecurityNotice: it needs its own approved template.
+
+  async sendInvitation({ to, orgName, link }: SendInvitationInput): Promise<void> {
+    const { accessToken, phoneNumberId, apiVersion } = this.config
+    if (!accessToken || !phoneNumberId) {
+      logger.warn(
+        { to, orgName },
+        `[WhatsApp DEV/FALLBACK] WhatsApp credentials not configured. Invitation link: ${link}`
+      )
+      return
+    }
+    const res = await fetch(
+      `https://graph.facebook.com/${apiVersion || "v23.0"}/${phoneNumberId}/messages`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          messaging_product: "whatsapp",
+          to: to.replace(/\D/g, ""),
+          type: "text",
+          text: {
+            body: `You have been invited to join ${orgName}. Click here to accept your invitation: ${link}`,
+          },
+        }),
+      }
+    )
+    await assertOk(res, "WhatsApp")
+  }
 }
 
 /* -------------------------------------------------------------------------- */
@@ -238,6 +297,18 @@ export class ChannelMessageSender implements MessageSender {
     }
     await strategy.sendSecurityNotice(input)
   }
+
+  async sendInvitation(input: SendInvitationInput): Promise<void> {
+    const strategy = this.strategies[input.type]
+    if (!strategy?.sendInvitation) {
+      logger.warn(
+        { type: input.type },
+        "Invitation sending not supported for channel"
+      )
+      return
+    }
+    await strategy.sendInvitation(input)
+  }
 }
 
 /* -------------------------------------------------------------------------- */
@@ -249,26 +320,28 @@ let instance: MessageSender | undefined
 /**
  * Resolves the message sender.
  * - MESSAGE_SENDER_MODE=console | live (optional)
- * - Default: "live" in production, "console" everywhere else.
+ * - Default: "live" in production, "console" everywhere else unless live credentials exist.
  */
 export function getMessageSender(): MessageSender {
-  console.log("getMessageSender called", instance)
   if (instance) return instance
 
-  // const mode =
-  //   process.env.MESSAGE_SENDER_MODE ??
-  //   (process.env.NODE_ENV === "production" ? "live" : "console")
+  const mode =
+    process.env.MESSAGE_SENDER_MODE ??
+    (process.env.NODE_ENV === "production"
+      ? "live"
+      : config.RESEND_API_KEY
+        ? "live"
+        : "console")
 
-  // if (mode === "console") {
-  //   return (instance = new ConsoleMessageSender())
-  // }
+  if (mode === "console") {
+    return (instance = new ConsoleMessageSender())
+  }
 
   return (instance = new ChannelMessageSender({
     email: new ResendEmailSender({
       apiKey: config.RESEND_API_KEY,
       from: config.EMAIL_FROM,
     }),
-    // TODO
     phone: new WhatsAppMessageSender({
       accessToken: config.WHATSAPP_API_TOKEN || "",
       phoneNumberId: config.WHATSAPP_PHONE_NUMBER_ID || "",

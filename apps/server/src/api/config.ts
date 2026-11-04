@@ -84,6 +84,7 @@ export const envSchema = z
     SIGNIN_THROTTLE_WINDOW: duration("15m"),
 
     // Web / CORS
+    WEB_APP_URL: z.string().default("http://localhost:5173"),
     COOKIE_SAMESITE: z.enum(["strict", "lax", "none"]).default("lax"),
     COOKIE_DOMAIN: z.string().optional(),
     CORS_ORIGINS: z
