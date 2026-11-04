@@ -8,10 +8,8 @@ import {
 import { globalErrorResponses } from "@avuny/utils"
 import { trans } from "../../../intl/i18next.js"
 import { organizationInvitationErrorsHttpMap as errors } from "../organization-invitation.errors.js"
-import { organizationInvitationService } from "../organization-invitation.service.js"
 import { jsonError, jsonOk } from "./_shared.js"
-
-const router = createOpenAPIRouter()
+import type { RouteDeps } from "./module-routes.types.js"
 
 const rawErrorMap = {
   ORGANIZATION_INVITATION_NOT_FOUND: errors.ORGANIZATION_INVITATION_NOT_FOUND,
@@ -27,40 +25,46 @@ const errorMap = rawErrorMap as Record<Code, (typeof rawErrorMap)[keyof typeof r
  * POST with the token in the body so it never lands in URLs or access logs.
  * Put a strict rate limit in front of this route.
  */
-export const previewOrganizationInvitationRoute = createRoute({
-  method: "post",
-  path: "/invitations/preview",
-  operationId: "previewOrganizationInvitation",
-  tags: ["organization-invitation"],
-  summary: "Preview an invitation from its link token",
-  request: {
-    body: { content: { "application/json": { schema: PreviewInvitationSchema } } },
-  },
-  responses: {
-    200: jsonOk("Invitation preview", InvitationPreviewDtoSchema),
-    404: jsonError("Invitation not found", [Code.ORGANIZATION_INVITATION_NOT_FOUND]),
-    409: jsonError("Not usable", [
-      Code.ORGANIZATION_INVITATION_NOT_PENDING,
-      Code.ORGANIZATION_INVITATION_ORGANIZATION_UNAVAILABLE,
-    ]),
-    410: jsonError("Expired", [Code.ORGANIZATION_INVITATION_EXPIRED]),
-    ...globalErrorResponses,
-  },
-})
+export const previewOrganizationInvitationRoute = ({ service }: RouteDeps) => {
+  const router = createOpenAPIRouter()
 
-router.openapi(previewOrganizationInvitationRoute, async (c) => {
-  const errorTrans = trans({ lang: getRequestLocale() })
-  const { token } = c.req.valid("json")
-
-  const result = await organizationInvitationService.preview(token)
-  return handleResult({
-    c,
-    result,
-    successStatus: 200,
-    errorMap,
-    errorTrans,
-    moduleName: "organization-invitation",
+  const route = createRoute({
+    method: "post",
+    path: "/invitations/preview",
+    operationId: "previewOrganizationInvitation",
+    tags: ["organization-invitation"],
+    summary: "Preview an invitation from its link token",
+    request: {
+      body: { content: { "application/json": { schema: PreviewInvitationSchema } } },
+    },
+    responses: {
+      200: jsonOk("Invitation preview", InvitationPreviewDtoSchema),
+      404: jsonError("Invitation not found", [Code.ORGANIZATION_INVITATION_NOT_FOUND]),
+      409: jsonError("Not usable", [
+        Code.ORGANIZATION_INVITATION_NOT_PENDING,
+        Code.ORGANIZATION_INVITATION_ORGANIZATION_UNAVAILABLE,
+      ]),
+      410: jsonError("Expired", [Code.ORGANIZATION_INVITATION_EXPIRED]),
+      ...globalErrorResponses,
+    },
   })
-})
 
-export default router
+  router.openapi(route, async (c) => {
+    const errorTrans = trans({ lang: getRequestLocale() })
+    const { token } = c.req.valid("json")
+
+    const result = await service.preview(token)
+    return handleResult({
+      c,
+      result,
+      successStatus: 200,
+      errorMap,
+      errorTrans,
+      moduleName: "organization-invitation",
+    })
+  })
+
+  return router
+}
+
+export default previewOrganizationInvitationRoute

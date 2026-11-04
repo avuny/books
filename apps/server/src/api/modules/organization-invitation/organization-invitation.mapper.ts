@@ -4,7 +4,7 @@ import type {
   OrganizationInvitationDto,
 } from "@avuny/contracts"
 import type { OrganizationInvitation } from "@avuny/db"
-import type { OrganizationSummary } from "../organization-user/index.js"
+import type { OrganizationSummary } from "./organization-invitation.types.js"
 
 /** A pending invite past `expires_at` is reported as "expired" even before the job flips it. */
 export function effectiveStatus(row: OrganizationInvitation, now: Date) {
@@ -34,13 +34,15 @@ export function toOrganizationInvitationDto(
 
 export function toInvitationPreviewDto(
   row: OrganizationInvitation,
-  org: OrganizationSummary
+  org: OrganizationSummary,
+  roleName?: string | null
 ): InvitationPreviewDto {
   return {
     orgCode: org.code,
     orgName: org.name,
     identifier: row.identifier,
     roleId: row.roleId,
+    roleName: roleName ?? null,
     expiresAt: row.expiresAt.toISOString(),
   }
 }

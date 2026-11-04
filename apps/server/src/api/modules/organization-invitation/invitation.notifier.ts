@@ -1,4 +1,4 @@
-import type { InvitationNotifier } from "./organization-invitation.service.js"
+import type { InvitationNotifier } from "./organization-invitation.types.js"
 import { logger } from "@avuny/logger"
 
 export interface MessageInvitationNotifierDeps {

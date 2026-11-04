@@ -1,7 +1,8 @@
-import { createHash, randomBytes } from "node:crypto"
+import { randomBytes, createHash } from "node:crypto"
 import {
   ORG_INVITATION_AUDIT_EVENTS,
   ORG_USER_AUDIT_EVENTS,
+  OrganizationInvitationErrorCode,
   type AcceptInvitationByTokenInput,
   type AcceptMyInvitationInput,
   type CreateOrganizationInvitationInput,
@@ -11,20 +12,13 @@ import {
   type OrganizationInvitationOffsetListQuery,
   type OrganizationInvitationOffsetListResponse,
   type OrganizationUserDto,
-  type PermissionKey,
+  OrganizationUserErrorCode,
 } from "@avuny/contracts"
 import type { OrganizationInvitation, Tx } from "@avuny/db"
 import { logger } from "@avuny/logger"
 import { fail, ok, type Result } from "@avuny/utils"
 import {
-  toOrganizationUserDto,
-  type Limits,
-  type OrganizationUserRepository,
-} from "../organization-user/index.js"
-import type { RoleRepository } from "../role/index.js"
-import type { ActivityLog } from "../activity-log/index.js"
-import {
-  OrganizationInvitationErrorCode,
+  organizationInvitationErrorsHttpMap as errors,
   type OrganizationInvitationErrorCode as Code,
 } from "./organization-invitation.errors.js"
 import {
@@ -32,7 +26,23 @@ import {
   toMyInvitationDto,
   toOrganizationInvitationDto,
 } from "./organization-invitation.mapper.js"
-import type { OrganizationInvitationRepository } from "./organization-invitation.repository.js"
+import { toOrganizationUserDto } from "../organization-user/index.js"
+import type {
+  InvitationDelivery,
+  InvitationNotifier,
+  OrganizationInvitationRepository,
+  OrganizationInvitationServiceDeps,
+  TokenGenerator,
+  UserDirectory,
+} from "./organization-invitation.types.js"
+
+export type {
+  InvitationDelivery,
+  InvitationNotifier,
+  OrganizationInvitationServiceDeps,
+  TokenGenerator,
+  UserDirectory,
+}
 
 const Err = OrganizationInvitationErrorCode
 
@@ -42,120 +52,69 @@ export const INVITATION_TTL_DAYS = 7
 export const RESEND_COOLDOWN_MS = 60_000
 export const MAX_SEND_COUNT = 5
 
-/* ---------- ports ---------- */
-
-export interface PermissionChecker {
-  check(
-    actor: { userId: string; orgId: string },
-    action: PermissionKey,
-    opts?: { resourceId?: string }
-  ): Promise<boolean>
-}
-
-/** Verified contacts of a user. A user can hold several, primary first. */
-export interface VerifiedContacts {
-  emails: string[]
-  phones: string[]
-}
-
-/** Reads of the users table owned by the auth module. Contacts MUST be verified ones. */
-export interface UserDirectory {
-  /** Verified user matching the identifier (e.g. email); null if none. */
-  findVerifiedByContact(c: {
-    identifier?: string | null
-    email?: string | null
-    phone?: string | null
-  }): Promise<{ userId: string } | null>
-  /** Verified contact details of a user; null when the user does not exist. */
-  getVerifiedContacts(userId: string): Promise<VerifiedContacts | null>
-}
-
-export interface InvitationDelivery {
-  invitation: {
-    id: string
-    identifier: string
-    roleId: string | null
-    inviteeUserId: string | null
-    expiresAt: Date
-  }
-  org: { id: string; code: string; name: string }
-  /** Plaintext one-time token. Exists only here; the database keeps its hash. */
-  token: string
-}
-export interface InvitationNotifier {
-  send(delivery: InvitationDelivery): Promise<void>
-}
-
-export interface TokenGenerator {
-  generate(): { token: string; hash: string }
-  hash(token: string): string
-}
-
-/** 256-bit random token; SHA-256 is enough because the token is high-entropy. */
-export class CryptoTokenGenerator implements TokenGenerator {
-  hash(token: string): string {
-    return createHash("sha256").update(token).digest("hex")
-  }
-  generate() {
-    const token = randomBytes(32).toString("base64url")
-    return { token, hash: this.hash(token) }
-  }
-}
-
-/* ---------- internals ---------- */
-
-/** Compile-time check that every key exists in the permission registry. */
-const PERM = {
+export const PERM = {
   create: "create:organization-invitation",
   read: "read:organization-invitation",
   update: "update:organization-invitation",
-} as const satisfies Record<string, PermissionKey>
+} as const
 
-type Failure = { failed: true; error: Code; msg: string }
-const failure = (error: Code, msg: string): Failure => ({ failed: true, error, msg })
-const isFailure = (v: unknown): v is Failure =>
-  typeof v === "object" && v !== null && (v as Failure).failed === true
-const toFail = (f: Failure) => fail({ error: f.error, msg: f.msg })
+type PermissionKey = (typeof PERM)[keyof typeof PERM]
+
+/* ---------- default crypto ---------- */
+
+export class CryptoTokenGenerator implements TokenGenerator {
+  generate(): { token: string; hash: string } {
+    const token = randomBytes(32).toString("base64url")
+    return { token, hash: this.hash(token) }
+  }
+
+  hash(token: string): string {
+    return createHash("sha256").update(token, "utf8").digest("hex")
+  }
+}
 
 const MSG = {
-  forbidden: "You are not allowed to manage invitations",
+  forbidden: "You are not allowed to perform this action",
   notFound: "Invitation not found",
   notPending: "This invitation is no longer pending",
   expired: "This invitation has expired",
   orgUnavailable: "This organization is not accepting new members",
 } as const
 
-const addDays = (d: Date, days: number) => new Date(d.getTime() + days * 86_400_000)
+const addDays = (d: Date, days: number) =>
+  new Date(d.getTime() + days * 86_400_000)
 
 type AcceptRef = { kind: "id"; id: string } | { kind: "token"; token: string }
 
-export interface OrganizationInvitationServiceDeps {
-  repository: OrganizationInvitationRepository
-  /** Membership writes reuse the organization-user repository so both share one lock + tx. */
-  members: OrganizationUserRepository
-  roles?: RoleRepository
-  permissions: PermissionChecker
-  activityLog: ActivityLog
-  limits: Limits
-  users: UserDirectory
-  notifier: InvitationNotifier
-  /** Pure crypto, so the default is fine. */
-  tokens?: TokenGenerator
-  now?: () => Date
-}
-
-export function createOrganizationInvitationService(
-  deps: OrganizationInvitationServiceDeps
-) {
-  const repo = deps.repository
-  const members = deps.members
-  const rolesRepo = deps.roles
-  const { permissions, activityLog, limits, users, notifier } = deps
-  const tokens = deps.tokens ?? new CryptoTokenGenerator()
-  const clock = deps.now ?? (() => new Date())
+export const createOrganizationInvitationService = ({
+  repo,
+  organizationUserService,
+  roleService,
+  permissions,
+  activityLog,
+  limits,
+  users,
+  notifier,
+  tokens: customTokens,
+  now: customNow,
+}: OrganizationInvitationServiceDeps) => {
+  const tokens = customTokens ?? new CryptoTokenGenerator()
+  const clock = customNow ?? (() => new Date())
 
   const can = (actorId: string, action: PermissionKey, orgId: string) =>
-    permissions.check({ userId: actorId, orgId }, action)
+    permissions.check({ userId: actorId }, action, { orgId })
+
+  const forbidden = () =>
+    fail({
+      error: Err.ORGANIZATION_INVITATION_FORBIDDEN,
+      msg: MSG.forbidden,
+    })
+
+  const notFound = () =>
+    fail({
+      error: Err.ORGANIZATION_INVITATION_NOT_FOUND,
+      msg: MSG.notFound,
+    })
 
   /** Delivery must never roll back a committed invitation; the caller can resend. */
   async function deliver(d: InvitationDelivery): Promise<boolean> {
@@ -165,7 +124,11 @@ export function createOrganizationInvitationService(
     } catch (err) {
       // Never log the token.
       logger.error(
-        { err, invitationId: d.invitation.id, identifier: d.invitation.identifier },
+        {
+          err,
+          invitationId: d.invitation.id,
+          identifier: d.invitation.identifier,
+        },
         "Invitation delivery failed"
       )
       return false
@@ -188,38 +151,6 @@ export function createOrganizationInvitationService(
     token,
   })
 
-  /**
-   * Reads an invitation, takes the org lock, and re-reads it, so the checks that follow
-   * run against state no concurrent invite/accept/revoke can change.
-   */
-  async function lockedInvitation(
-    tx: Tx,
-    load: () => Promise<OrganizationInvitation | null>
-  ): Promise<OrganizationInvitation | null> {
-    const probe = await load()
-    if (!probe) return null
-    await members.lockOrgMembership(probe.orgId, tx)
-    return load()
-  }
-
-  /** Generates a safe lowercase handle for a new member joining without a specified handle. */
-  async function resolveMemberUsername(
-    orgId: string,
-    identifier: string,
-    existingUsername: string | null | undefined,
-    tx: Tx
-  ): Promise<string> {
-    if (existingUsername) return existingUsername
-    const raw = (identifier.split("@")[0] ?? "user").toLowerCase().replace(/[^a-z0-9_]/g, "_")
-    const base = (raw.length < 3 ? `${raw}usr` : raw).slice(0, 24)
-    let candidate = base
-    let counter = 1
-    while (await members.findByUsername(orgId, candidate, tx)) {
-      candidate = `${base.slice(0, 20)}_${counter++}`
-    }
-    return candidate
-  }
-
   /* ---------- accept (shared by id / token) ---------- */
 
   async function accept(
@@ -228,114 +159,124 @@ export function createOrganizationInvitationService(
   ): Promise<Result<OrganizationUserDto, Code>> {
     const now = clock()
     const tokenHash = ref.kind === "token" ? tokens.hash(ref.token) : null
-    // External read outside the transaction: the user's VERIFIED contacts.
-    const contact = ref.kind === "token" ? await users.getVerifiedContacts(userId) : null
+    const contact =
+      ref.kind === "token" ? await users.getVerifiedContacts(userId) : null
 
-    const outcome = await repo.transaction(async (tx) => {
-      const row = await lockedInvitation(tx, () =>
-        ref.kind === "token"
-          ? repo.findByTokenHash(tokenHash!, tx)
-          : repo.findForInvitee(ref.id, userId, tx)
+    const row =
+      ref.kind === "token"
+        ? await repo.findByTokenHash(tokenHash!)
+        : await repo.findForInvitee(ref.id, userId)
+
+    if (!row) return notFound()
+
+    // Identity check: targeted invite must match user; open token needs matching verified contact
+    if (row.inviteeUserId && row.inviteeUserId !== userId) return notFound()
+    if (!row.inviteeUserId) {
+      const matches = Boolean(
+        contact?.emails.some(
+          (e) => e.toLowerCase() === row.identifier.toLowerCase()
+        ) || contact?.phones.some((p) => p === row.identifier)
       )
-      if (!row) return failure(Err.ORGANIZATION_INVITATION_NOT_FOUND, MSG.notFound)
-
-      // Identity: an invite addressed to a user is theirs only; an open link needs a
-      // verified contact that matches the invited one.
-      if (row.inviteeUserId && row.inviteeUserId !== userId)
-        return failure(Err.ORGANIZATION_INVITATION_NOT_FOUND, MSG.notFound)
-      if (!row.inviteeUserId) {
-        const matches = !!(
-          contact?.emails.some((e) => e.toLowerCase() === row.identifier.toLowerCase()) ||
-          contact?.phones.some((p) => p === row.identifier)
-        )
-        if (!matches)
-          return failure(
-            Err.ORGANIZATION_INVITATION_IDENTITY_MISMATCH,
-            "This invitation was sent to a different verified email"
-          )
+      if (!matches) {
+        return fail({
+          error: Err.ORGANIZATION_INVITATION_IDENTITY_MISMATCH,
+          msg: "This invitation was sent to a different verified email or phone",
+        })
       }
+    }
 
-      if (row.status !== "pending")
-        return failure(
+    if (row.status !== "pending") {
+      return fail({
+        error:
           row.status === "expired"
             ? Err.ORGANIZATION_INVITATION_EXPIRED
             : Err.ORGANIZATION_INVITATION_NOT_PENDING,
-          row.status === "expired" ? MSG.expired : MSG.notPending
-        )
-      if (row.expiresAt <= now) {
-        await repo.markExpired(row.id, tx) // commits: we return, not throw
-        return failure(Err.ORGANIZATION_INVITATION_EXPIRED, MSG.expired)
-      }
+        msg: row.status === "expired" ? MSG.expired : MSG.notPending,
+      })
+    }
 
-      const org = await repo.findOrganization(row.orgId, tx)
-      if (!org || org.deletedAt || org.status !== "active")
-        return failure(
-          Err.ORGANIZATION_INVITATION_ORGANIZATION_UNAVAILABLE,
-          MSG.orgUnavailable
-        )
+    if (row.expiresAt <= now) {
+      await repo.markExpired(row.id)
+      return fail({
+        error: Err.ORGANIZATION_INVITATION_EXPIRED,
+        msg: MSG.expired,
+      })
+    }
 
-      // Offboarded members come back through their old row (history stays intact).
-      const existing = await members.findByOrgAndUser(row.orgId, userId, tx)
-      if (existing?.isActive)
-        return failure(
-          Err.ORGANIZATION_INVITATION_ALREADY_MEMBER,
-          "You are already a member"
-        )
+    const org = await repo.findOrganization(row.orgId)
+    if (!org || org.deletedAt || org.status !== "active") {
+      return fail({
+        error: Err.ORGANIZATION_INVITATION_ORGANIZATION_UNAVAILABLE,
+        msg: MSG.orgUnavailable,
+      })
+    }
 
-      const max = await limits.getMax(row.orgId, "managedUsers")
-      if (
-        max !== null &&
-        (await members.countActiveByType(row.orgId, "managed", tx)) >= max
-      )
-        return failure(
-          Err.ORGANIZATION_INVITATION_LIMIT_REACHED,
-          "The user limit has been reached"
-        )
+    // Check if already an active member
+    const existing = await organizationUserService.findMember(row.orgId, userId)
+    if (existing?.isActive) {
+      return fail({
+        error: Err.ORGANIZATION_INVITATION_ALREADY_MEMBER,
+        msg: "You are already a member of this organization",
+      })
+    }
 
-      const username = await resolveMemberUsername(
+    // Check plan limits
+    const max = await limits.getMax(row.orgId, "managedUsers")
+    if (max !== null) {
+      const active = await organizationUserService.countActive(
         row.orgId,
-        row.identifier,
-        existing?.username,
-        tx
+        "managed"
       )
-
-      // A unique violation aborts the PG transaction, so these failures roll everything back.
-      const written = existing
-        ? await members.reactivate(row.orgId, existing.id, username, tx)
-        : await members.insert(
-            { orgId: row.orgId, userId, type: "managed", username, isActive: true },
-            tx
-          )
-      if (!written.ok)
-        return failure(
-          written.reason === "username_taken"
-            ? Err.ORGANIZATION_INVITATION_USERNAME_TAKEN
-            : Err.ORGANIZATION_INVITATION_ALREADY_MEMBER,
-          written.reason === "username_taken"
-            ? "This username is already used in the organization"
-            : "You are already a member"
-        )
-
-      // Assign role if specified on invitation
-      if (row.roleId && rolesRepo) {
-        await rolesRepo.applyMemberRoles(
-          {
-            orgId: row.orgId,
-            orgUserId: written.row.id,
-            add: [row.roleId],
-            remove: [],
-            assignedByUserId: row.invitedBy,
-          },
-          tx
-        )
+      if (active >= max) {
+        return fail({
+          error: Err.ORGANIZATION_INVITATION_LIMIT_REACHED,
+          msg: "The user limit has been reached",
+        })
       }
+    }
 
-      const accepted = await repo.markAccepted(
+    // Add or reactivate member through organizationUserService
+    const memberResult = await organizationUserService.addMember({
+      orgId: row.orgId,
+      userId,
+      type: "managed",
+    })
+
+    if (!memberResult.success) {
+      if (
+        memberResult.error ===
+        OrganizationUserErrorCode.ORGANIZATION_USER_USERNAME_TAKEN
+      ) {
+        return fail({
+          error: Err.ORGANIZATION_INVITATION_USERNAME_TAKEN,
+          msg: "The username is already in use in this organization",
+        })
+      }
+      return fail({
+        error: Err.ORGANIZATION_INVITATION_ALREADY_MEMBER,
+        msg: "You are already a member of this organization",
+      })
+    }
+
+    const member = memberResult.data
+
+    // Assign role if specified on invitation
+    if (row.roleId) {
+      await roleService.assignRole({
+        orgId: row.orgId,
+        memberId: member.id,
+        roleId: row.roleId,
+        assignedByUserId: row.invitedBy,
+      })
+    }
+
+    // Mark invitation accepted and revoke other pending
+    await repo.transaction(async (tx) => {
+      await repo.markAccepted(
         row.id,
-        { acceptedOrgUserId: written.row.id, inviteeUserId: userId, now },
+        { acceptedOrgUserId: member.id, inviteeUserId: userId, now },
         tx
       )
-      if (!accepted) throw new Error("Invitation changed while locked") // rolls back the member write
       await repo.revokeOtherPending(
         row.orgId,
         row.id,
@@ -343,17 +284,14 @@ export function createOrganizationInvitationService(
         now,
         tx
       )
-      return { member: written.row, invitationId: row.id }
     })
-    if (isFailure(outcome)) return toFail(outcome)
 
-    const { member, invitationId } = outcome
     await activityLog.log({
       action: ORG_INVITATION_AUDIT_EVENTS.ACCEPTED,
       actorId: userId,
       orgId: member.orgId,
       resource: "organization_invitation",
-      resourceId: invitationId,
+      resourceId: row.id,
     })
     await activityLog.log({
       action: ORG_USER_AUDIT_EVENTS.JOINED,
@@ -362,7 +300,11 @@ export function createOrganizationInvitationService(
       resource: "organization_user",
       resourceId: member.id,
     })
-    return ok({ data: toOrganizationUserDto(member), msg: "You joined the organization" })
+
+    return ok({
+      data: toOrganizationUserDto(member),
+      msg: "You joined the organization",
+    })
   }
 
   return {
@@ -373,69 +315,90 @@ export function createOrganizationInvitationService(
       orgId: string,
       input: CreateOrganizationInvitationInput
     ): Promise<Result<OrganizationInvitationDto, Code>> {
-      if (!(await can(actorId, PERM.create, orgId)))
-        return fail({ error: Err.ORGANIZATION_INVITATION_FORBIDDEN, msg: MSG.forbidden })
+      if (!(await can(actorId, PERM.create, orgId))) return forbidden()
 
       const identifier = input.identifier.trim().toLowerCase()
 
-      if (input.roleId && rolesRepo) {
-        const visibleRole = await rolesRepo.findVisibleById(orgId, input.roleId)
-        if (!visibleRole)
-          return fail({
-            error: Err.ORGANIZATION_INVITATION_ROLE_NOT_FOUND,
-            msg: "The specified role was not found",
-          })
+      if (!input.roleId) {
+        return fail({
+          error: Err.ORGANIZATION_INVITATION_ROLE_NOT_FOUND,
+          msg: "The specified role was not found",
+        })
       }
 
-      // Resolve the invitee BEFORE the transaction: external reads must not hold the lock.
-      const found = await users.findVerifiedByContact({ identifier, email: identifier })
+      const roleResult = await roleService.getById(orgId, input.roleId)
+      if (!roleResult.success) {
+        return fail({
+          error: Err.ORGANIZATION_INVITATION_ROLE_NOT_FOUND,
+          msg: "The specified role was not found",
+        })
+      }
+
+      // Check inviter membership
+      const inviter = await organizationUserService.findMember(orgId, actorId)
+      if (!inviter || !inviter.isActive) return forbidden()
+
+      // Resolve invitee if account already exists
+      const found = await users.findVerifiedByContact({
+        identifier,
+        email: identifier,
+      })
       const inviteeUserId = found?.userId ?? null
+
+      if (inviteeUserId) {
+        const existing = await organizationUserService.findMember(
+          orgId,
+          inviteeUserId
+        )
+        if (existing?.isActive) {
+          return fail({
+            error: Err.ORGANIZATION_INVITATION_ALREADY_MEMBER,
+            msg: "This person is already a member",
+          })
+        }
+      }
 
       const now = clock()
       const issued = tokens.generate()
 
+      // Check plan limits
+      const max = await limits.getMax(orgId, "managedUsers")
+      if (max !== null) {
+        const active = await organizationUserService.countActive(
+          orgId,
+          "managed"
+        )
+        const pending = await repo.countPending(orgId, now)
+        if (active + pending >= max) {
+          return fail({
+            error: Err.ORGANIZATION_INVITATION_LIMIT_REACHED,
+            msg: "The user limit has been reached",
+          })
+        }
+      }
+
       const outcome = await repo.transaction(async (tx) => {
-        await members.lockOrgMembership(orgId, tx)
-
         const org = await repo.findOrganization(orgId, tx)
-        if (!org || org.deletedAt || org.status !== "active")
-          return failure(
-            Err.ORGANIZATION_INVITATION_ORGANIZATION_UNAVAILABLE,
-            MSG.orgUnavailable
-          )
-
-        const inviter = await members.findByOrgAndUser(orgId, actorId, tx)
-        if (!inviter || !inviter.isActive)
-          return failure(Err.ORGANIZATION_INVITATION_FORBIDDEN, MSG.forbidden)
-
-        if (inviteeUserId) {
-          const existing = await members.findByOrgAndUser(orgId, inviteeUserId, tx)
-          if (existing?.isActive)
-            return failure(
-              Err.ORGANIZATION_INVITATION_ALREADY_MEMBER,
-              "This person is already a member"
-            )
+        if (!org || org.deletedAt || org.status !== "active") {
+          return {
+            failed: true as const,
+            error: Err.ORGANIZATION_INVITATION_ORGANIZATION_UNAVAILABLE,
+            msg: MSG.orgUnavailable,
+          }
         }
 
-        // Plan limit: active members + open invitations.
-        const max = await limits.getMax(orgId, "managedUsers")
-        if (max !== null) {
-          const active = await members.countActiveByType(orgId, "managed", tx)
-          const pending = await repo.countPending(orgId, now, tx)
-          if (active + pending >= max)
-            return failure(
-              Err.ORGANIZATION_INVITATION_LIMIT_REACHED,
-              "The user limit has been reached"
-            )
-        }
-
-        await repo.expireStaleForTarget(orgId, { identifier, inviteeUserId }, now, tx)
+        await repo.expireStaleForTarget(
+          orgId,
+          { identifier, inviteeUserId },
+          now,
+          tx
+        )
 
         const res = await repo.insert(
           {
             orgId,
             identifier,
-            roleId: input.roleId ?? null,
+            roleId: input.roleId,
             inviteeUserId,
             tokenHash: issued.hash,
             status: "pending",
@@ -446,14 +409,21 @@ export function createOrganizationInvitationService(
           },
           tx
         )
-        if (!res.ok)
-          return failure(
-            Err.ORGANIZATION_INVITATION_ALREADY_PENDING,
-            "There is already a pending invitation for this person"
-          )
-        return { row: res.row, org }
+
+        if (!res.ok) {
+          return {
+            failed: true as const,
+            error: Err.ORGANIZATION_INVITATION_ALREADY_PENDING,
+            msg: "There is already a pending invitation for this person",
+          }
+        }
+
+        return { failed: false as const, row: res.row, org }
       })
-      if (isFailure(outcome)) return toFail(outcome)
+
+      if (outcome.failed) {
+        return fail({ error: outcome.error, msg: outcome.msg })
+      }
 
       await activityLog.log({
         action: ORG_INVITATION_AUDIT_EVENTS.CREATED,
@@ -461,9 +431,16 @@ export function createOrganizationInvitationService(
         orgId,
         resource: "organization_invitation",
         resourceId: outcome.row.id,
-        metadata: { identifier: outcome.row.identifier, roleId: outcome.row.roleId },
+        metadata: {
+          identifier: outcome.row.identifier,
+          roleId: outcome.row.roleId,
+        },
       })
-      const delivered = await deliver(deliveryOf(outcome.row, outcome.org, issued.token))
+
+      const delivered = await deliver(
+        deliveryOf(outcome.row, outcome.org, issued.token)
+      )
+
       return ok({
         data: toOrganizationInvitationDto(outcome.row, now),
         msg: delivered
@@ -477,8 +454,7 @@ export function createOrganizationInvitationService(
       orgId: string,
       query: OrganizationInvitationOffsetListQuery
     ): Promise<Result<OrganizationInvitationOffsetListResponse, Code>> {
-      if (!(await can(actorId, PERM.read, orgId)))
-        return fail({ error: Err.ORGANIZATION_INVITATION_FORBIDDEN, msg: MSG.forbidden })
+      if (!(await can(actorId, PERM.read, orgId))) return forbidden()
       const now = clock()
       const { rows, total } = await repo.list(orgId, query, now)
       return ok({
@@ -497,32 +473,36 @@ export function createOrganizationInvitationService(
       orgId: string,
       invitationId: string
     ): Promise<Result<OrganizationInvitationDto, Code>> {
-      if (!(await can(actorId, PERM.update, orgId)))
-        return fail({ error: Err.ORGANIZATION_INVITATION_FORBIDDEN, msg: MSG.forbidden })
+      if (!(await can(actorId, PERM.update, orgId))) return forbidden()
       const now = clock()
 
-      const outcome = await repo.transaction(async (tx) => {
-        await members.lockOrgMembership(orgId, tx)
-        const row = await repo.findInOrg(orgId, invitationId, tx)
-        if (!row) return failure(Err.ORGANIZATION_INVITATION_NOT_FOUND, MSG.notFound)
-        if (row.status !== "pending")
-          return failure(Err.ORGANIZATION_INVITATION_NOT_PENDING, MSG.notPending)
-        const revoked = await repo.markRevoked(row.id, now, tx)
-        if (!revoked)
-          return failure(Err.ORGANIZATION_INVITATION_NOT_PENDING, MSG.notPending)
-        return revoked
-      })
-      if (isFailure(outcome)) return toFail(outcome)
+      const row = await repo.findInOrg(orgId, invitationId)
+      if (!row) return notFound()
+      if (row.status !== "pending") {
+        return fail({
+          error: Err.ORGANIZATION_INVITATION_NOT_PENDING,
+          msg: MSG.notPending,
+        })
+      }
+
+      const revoked = await repo.markRevoked(row.id, now)
+      if (!revoked) {
+        return fail({
+          error: Err.ORGANIZATION_INVITATION_NOT_PENDING,
+          msg: MSG.notPending,
+        })
+      }
 
       await activityLog.log({
         action: ORG_INVITATION_AUDIT_EVENTS.REVOKED,
         actorId,
         orgId,
         resource: "organization_invitation",
-        resourceId: outcome.id,
+        resourceId: revoked.id,
       })
+
       return ok({
-        data: toOrganizationInvitationDto(outcome, now),
+        data: toOrganizationInvitationDto(revoked, now),
         msg: "Invitation revoked",
       })
     },
@@ -532,65 +512,76 @@ export function createOrganizationInvitationService(
       orgId: string,
       invitationId: string
     ): Promise<Result<OrganizationInvitationDto, Code>> {
-      if (!(await can(actorId, PERM.update, orgId)))
-        return fail({ error: Err.ORGANIZATION_INVITATION_FORBIDDEN, msg: MSG.forbidden })
+      if (!(await can(actorId, PERM.update, orgId))) return forbidden()
       const now = clock()
       const issued = tokens.generate()
 
-      const outcome = await repo.transaction(async (tx) => {
-        await members.lockOrgMembership(orgId, tx)
-        const row = await repo.findInOrg(orgId, invitationId, tx)
-        if (!row) return failure(Err.ORGANIZATION_INVITATION_NOT_FOUND, MSG.notFound)
-        if (row.status !== "pending")
-          return failure(Err.ORGANIZATION_INVITATION_NOT_PENDING, MSG.notPending)
-        if (row.expiresAt <= now) {
-          await repo.markExpired(row.id, tx) // commits: we return, not throw
-          return failure(Err.ORGANIZATION_INVITATION_EXPIRED, MSG.expired)
-        }
-        if (row.sendCount >= MAX_SEND_COUNT)
-          return failure(
-            Err.ORGANIZATION_INVITATION_RESEND_LIMIT_REACHED,
-            "This invitation was resent too many times"
-          )
-        if (now.getTime() - row.lastSentAt.getTime() < RESEND_COOLDOWN_MS)
-          return failure(
-            Err.ORGANIZATION_INVITATION_RESEND_TOO_SOON,
-            "Please wait before resending this invitation"
-          )
-        const org = await repo.findOrganization(orgId, tx)
-        if (!org || org.deletedAt || org.status !== "active")
-          return failure(
-            Err.ORGANIZATION_INVITATION_ORGANIZATION_UNAVAILABLE,
-            MSG.orgUnavailable
-          )
+      const row = await repo.findInOrg(orgId, invitationId)
+      if (!row) return notFound()
+      if (row.status !== "pending") {
+        return fail({
+          error: Err.ORGANIZATION_INVITATION_NOT_PENDING,
+          msg: MSG.notPending,
+        })
+      }
+      if (row.expiresAt <= now) {
+        await repo.markExpired(row.id)
+        return fail({
+          error: Err.ORGANIZATION_INVITATION_EXPIRED,
+          msg: MSG.expired,
+        })
+      }
+      if (row.sendCount >= MAX_SEND_COUNT) {
+        return fail({
+          error: Err.ORGANIZATION_INVITATION_RESEND_LIMIT_REACHED,
+          msg: "This invitation was resent too many times",
+        })
+      }
+      if (now.getTime() - row.lastSentAt.getTime() < RESEND_COOLDOWN_MS) {
+        return fail({
+          error: Err.ORGANIZATION_INVITATION_RESEND_TOO_SOON,
+          msg: "Please wait before resending this invitation",
+        })
+      }
 
-        const rotated = await repo.rotateToken(
-          row.id,
-          {
-            tokenHash: issued.hash,
-            expiresAt: addDays(now, INVITATION_TTL_DAYS),
-            now,
-          },
-          tx
-        )
-        if (!rotated)
-          return failure(Err.ORGANIZATION_INVITATION_NOT_PENDING, MSG.notPending)
-        return { row: rotated, org }
+      const org = await repo.findOrganization(orgId)
+      if (!org || org.deletedAt || org.status !== "active") {
+        return fail({
+          error: Err.ORGANIZATION_INVITATION_ORGANIZATION_UNAVAILABLE,
+          msg: MSG.orgUnavailable,
+        })
+      }
+
+      const rotated = await repo.rotateToken(row.id, {
+        tokenHash: issued.hash,
+        expiresAt: addDays(now, INVITATION_TTL_DAYS),
+        now,
       })
-      if (isFailure(outcome)) return toFail(outcome)
+      if (!rotated) {
+        return fail({
+          error: Err.ORGANIZATION_INVITATION_NOT_PENDING,
+          msg: MSG.notPending,
+        })
+      }
 
       await activityLog.log({
         action: ORG_INVITATION_AUDIT_EVENTS.RESENT,
         actorId,
         orgId,
         resource: "organization_invitation",
-        resourceId: outcome.row.id,
-        metadata: { identifier: outcome.row.identifier },
+        resourceId: rotated.id,
+        metadata: { identifier: rotated.identifier },
       })
-      const delivered = await deliver(deliveryOf(outcome.row, outcome.org, issued.token))
+
+      const delivered = await deliver(
+        deliveryOf(rotated, org, issued.token)
+      )
+
       return ok({
-        data: toOrganizationInvitationDto(outcome.row, now),
-        msg: delivered ? "Invitation resent" : "Delivery failed. Try again shortly",
+        data: toOrganizationInvitationDto(rotated, now),
+        msg: delivered
+          ? "Invitation resent"
+          : "Delivery failed. Try again shortly",
       })
     },
 
@@ -599,10 +590,10 @@ export function createOrganizationInvitationService(
     /** Public: what the sign-up / accept page shows for a link. */
     async preview(token: string): Promise<Result<InvitationPreviewDto, Code>> {
       const found = await repo.findPreviewByTokenHash(tokens.hash(token))
-      if (!found)
-        return fail({ error: Err.ORGANIZATION_INVITATION_NOT_FOUND, msg: MSG.notFound })
+      if (!found) return notFound()
       const { invitation, org } = found
-      if (invitation.status !== "pending")
+
+      if (invitation.status !== "pending") {
         return fail({
           error:
             invitation.status === "expired"
@@ -610,31 +601,57 @@ export function createOrganizationInvitationService(
               : Err.ORGANIZATION_INVITATION_NOT_PENDING,
           msg: invitation.status === "expired" ? MSG.expired : MSG.notPending,
         })
-      if (invitation.expiresAt <= clock())
-        return fail({ error: Err.ORGANIZATION_INVITATION_EXPIRED, msg: MSG.expired })
-      if (org.deletedAt || org.status !== "active")
+      }
+      if (invitation.expiresAt <= clock()) {
+        return fail({
+          error: Err.ORGANIZATION_INVITATION_EXPIRED,
+          msg: MSG.expired,
+        })
+      }
+      if (org.deletedAt || org.status !== "active") {
         return fail({
           error: Err.ORGANIZATION_INVITATION_ORGANIZATION_UNAVAILABLE,
-          msg: MSG.orgUnavailable
+          msg: MSG.orgUnavailable,
         })
+      }
+
+      let roleName: string | null = null
+      if (invitation.roleId) {
+        const roleRes = await roleService.getById(
+          invitation.orgId,
+          invitation.roleId
+        )
+        if (roleRes.success) {
+          roleName = roleRes.data.name
+        }
+      }
+
       return ok({
-        data: toInvitationPreviewDto(invitation, org),
+        data: toInvitationPreviewDto(invitation, org, roleName),
         msg: "Invitation retrieved successfully",
       })
     },
 
-    async listMine(userId: string): Promise<Result<{ items: MyInvitationDto[] }, Code>> {
+    async listMine(
+      userId: string
+    ): Promise<Result<{ items: MyInvitationDto[] }, Code>> {
       const rows = await repo.listPendingForUser(userId, clock())
       return ok({
         data: {
-          items: rows.map(({ invitation, org }) => toMyInvitationDto(invitation, org)),
+          items: rows.map(({ invitation, org }) =>
+            toMyInvitationDto(invitation, org)
+          ),
         },
         msg: "Invitations retrieved successfully",
       })
     },
 
     /** Accept from the dashboard inbox (invitation addressed to this user). */
-    acceptMine(userId: string, invitationId: string, _input?: AcceptMyInvitationInput) {
+    acceptMine(
+      userId: string,
+      invitationId: string,
+      _input?: AcceptMyInvitationInput
+    ) {
       return accept(userId, { kind: "id", id: invitationId })
     },
 
@@ -648,53 +665,63 @@ export function createOrganizationInvitationService(
       invitationId: string
     ): Promise<Result<OrganizationInvitationDto, Code>> {
       const now = clock()
-      const outcome = await repo.transaction(async (tx) => {
-        const row = await lockedInvitation(tx, () =>
-          repo.findForInvitee(invitationId, userId, tx)
-        )
-        if (!row) return failure(Err.ORGANIZATION_INVITATION_NOT_FOUND, MSG.notFound)
-        if (row.status !== "pending")
-          return failure(Err.ORGANIZATION_INVITATION_NOT_PENDING, MSG.notPending)
-        if (row.expiresAt <= now) {
-          await repo.markExpired(row.id, tx)
-          return failure(Err.ORGANIZATION_INVITATION_EXPIRED, MSG.expired)
-        }
-        const declined = await repo.markDeclined(row.id, now, tx)
-        if (!declined)
-          return failure(Err.ORGANIZATION_INVITATION_NOT_PENDING, MSG.notPending)
-        return declined
-      })
-      if (isFailure(outcome)) return toFail(outcome)
+      const row = await repo.findForInvitee(invitationId, userId)
+      if (!row) return notFound()
+      if (row.status !== "pending") {
+        return fail({
+          error: Err.ORGANIZATION_INVITATION_NOT_PENDING,
+          msg: MSG.notPending,
+        })
+      }
+      if (row.expiresAt <= now) {
+        await repo.markExpired(row.id)
+        return fail({
+          error: Err.ORGANIZATION_INVITATION_EXPIRED,
+          msg: MSG.expired,
+        })
+      }
+
+      const declined = await repo.markDeclined(row.id, now)
+      if (!declined) {
+        return fail({
+          error: Err.ORGANIZATION_INVITATION_NOT_PENDING,
+          msg: MSG.notPending,
+        })
+      }
 
       await activityLog.log({
         action: ORG_INVITATION_AUDIT_EVENTS.DECLINED,
         actorId: userId,
-        orgId: outcome.orgId,
+        orgId: declined.orgId,
         resource: "organization_invitation",
-        resourceId: outcome.id,
+        resourceId: declined.id,
       })
-      return ok({ data: toOrganizationInvitationDto(outcome, now), msg: "Invitation declined" })
+
+      return ok({
+        data: toOrganizationInvitationDto(declined, now),
+        msg: "Invitation declined",
+      })
     },
 
     /* ------------------------------ system hooks ------------------------------ */
 
-    /**
-     * Call from the auth module right after an email / phone is VERIFIED. Attaches open
-     * invitations for that contact to the user so they appear in the inbox.
-     * At most one invitation per organization is linked (unique pending-per-user index).
-     */
     async linkPendingInvitations(
       userId: string,
-      contact: { identifier?: string | null; email?: string | null; phone?: string | null }
+      contact: {
+        identifier?: string | null
+        email?: string | null
+        phone?: string | null
+      }
     ): Promise<number> {
       const now = clock()
       const identifier = contact.identifier ?? contact.email ?? contact.phone
       const candidates = await repo.findLinkCandidates({ identifier }, now)
       if (!candidates.length) return 0
-      const alreadyLinkedOrgs = new Set(await repo.listPendingOrgIdsForUser(userId, now))
+      const alreadyLinkedOrgs = new Set(
+        await repo.listPendingOrgIdsForUser(userId, now)
+      )
       const ids: string[] = []
       for (const c of candidates) {
-        // candidates are newest first: keep the newest per org
         if (alreadyLinkedOrgs.has(c.orgId)) continue
         alreadyLinkedOrgs.add(c.orgId)
         ids.push(c.id)
@@ -702,52 +729,8 @@ export function createOrganizationInvitationService(
       return repo.linkInvitee(ids, userId)
     },
 
-    /** Cron entry point; keeps statuses honest because the unique indexes only see 'pending'. */
     expireDueInvitations(): Promise<number> {
       return repo.expireAllDue(clock())
     },
   }
 }
-
-export type OrganizationInvitationService = ReturnType<
-  typeof createOrganizationInvitationService
->
-
-// ---------------------------------------------------------------------------
-// Module-level singleton – wired by organization.composition.ts in production.
-// The lazy pattern means the real deps are resolved at first use, not at import
-// time, so tests that import individual route handlers still work without a DB.
-// ---------------------------------------------------------------------------
-import { db } from "../../db.js"
-import { createOrganizationUserRepository } from "../organization-user/organization-user.repository.js"
-import { createRoleRepository } from "../role/role.repository.js"
-import { DummyActivityLog } from "../activity-log/testing.js"
-import { DummyLimits } from "../organization-user/organization-user.service.js"
-import { DummyUserDirectory, DummyInvitationNotifier } from "./testing.js"
-import { PermissionChecker as RealPermissionChecker } from "../role/permission-checker/permission-checker.query.js"
-import { createOrganizationInvitationRepository } from "./organization-invitation.repository.js"
-
-let _singleton: OrganizationInvitationService | undefined
-
-export function getOrganizationInvitationService(): OrganizationInvitationService {
-  if (!_singleton) {
-    _singleton = createOrganizationInvitationService({
-      repository: createOrganizationInvitationRepository({ db }),
-      members: createOrganizationUserRepository({ db }),
-      roles: createRoleRepository({ db }),
-      permissions: new RealPermissionChecker(db),
-      activityLog: new DummyActivityLog(), // TODO: wire real ActivityLogService
-      limits: new DummyLimits(),
-      users: new DummyUserDirectory(),
-      notifier: new DummyInvitationNotifier(),
-    })
-  }
-  return _singleton
-}
-
-/** @deprecated Use getOrganizationInvitationService() or inject via createOrganizationModules. */
-export const organizationInvitationService = new Proxy({} as OrganizationInvitationService, {
-  get(_target, prop) {
-    return (getOrganizationInvitationService() as any)[prop]
-  },
-})

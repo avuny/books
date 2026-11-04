@@ -22,28 +22,24 @@ import {
   type Tx,
 } from "@avuny/db"
 import { isUniqueViolation } from "../shared/pg-errors.js"
-import type { OrganizationSummary } from "../organization-user/index.js"
+
+import type {
+  InvitationTarget,
+  InvitationWithOrganization,
+  ListInvitationsFilter,
+  OrganizationSummary,
+} from "./organization-invitation.types.js"
+
+export type {
+  InvitationTarget,
+  InvitationWithOrganization,
+  ListInvitationsFilter,
+}
 
 const PENDING_UNIQUE_INDEXES = [
   "ux_org_invitation_pending_identifier",
   "ux_org_invitation_pending_user",
 ] as const
-
-export type InvitationWithOrganization = {
-  invitation: OrganizationInvitation
-  org: OrganizationSummary
-}
-
-export type ListInvitationsFilter = {
-  status?: InvitationStatus
-  page: number
-  pageSize: number
-}
-
-export type InvitationTarget = {
-  identifier?: string | null
-  inviteeUserId?: string | null
-}
 
 const orgColumns = {
   id: organizations.id,
@@ -66,7 +62,11 @@ function targetCondition(t: InvitationTarget): SQL | undefined {
  * Callers hold the per-organization advisory lock (see organization-user repository)
  * for every mutation, so no row locks are needed here.
  */
-export function createOrganizationInvitationRepository({ db }: { db: DB }) {
+export const createOrganizationInvitationRepository = ({
+  db,
+}: {
+  db: DB
+}) => {
   const exec = (tx?: Tx): DB | Tx => tx ?? db
 
   return {
@@ -395,7 +395,7 @@ export function createOrganizationInvitationRepository({ db }: { db: DB }) {
         .returning({ id: inv.id })
       return rows.length
     },
-  }
+  } as const
 }
 
 export type OrganizationInvitationRepository = ReturnType<

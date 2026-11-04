@@ -1,10 +1,10 @@
 // organization-invitation/user-directory.adapter.ts  (NEW)
 import { and, desc, eq, isNotNull } from "drizzle-orm"
-import { userIdentifiers, users, type Database } from "@avuny/db"
+import { userIdentifiers, users, type DB } from "@avuny/db"
 import { normalizeIdentifier } from "../users/index.js" // pure helper; adjust path
-import type { UserDirectory } from "./organization-invitation.service.js"
+import type { UserDirectory } from "./organization-invitation.types.js"
 
-export function createUserDirectory(db: Database): UserDirectory {
+export function createUserDirectory(db: DB): UserDirectory {
   async function findVerified(type: "email" | "phone", raw: string) {
     const [row] = await db
       .select({ userId: userIdentifiers.userId })
