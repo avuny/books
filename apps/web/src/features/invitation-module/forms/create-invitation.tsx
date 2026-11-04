@@ -2,7 +2,7 @@ import { useState } from "react"
 
 import { parseApiError } from "@workspace/ui/lib/api-error"
 
-import { useCreateInvitationMutation } from "../invitation-api"
+import { useCreateInvitationMutation, useRoleOptions } from "../invitation-api"
 import type { OrganizationInvitationDto } from "../types"
 import {
   CreateInvitationForm,
@@ -20,6 +20,7 @@ export function CreateInvitation({ orgId, onSuccess }: CreateInvitationProps) {
   const [serverError, setServerError] = useState<string | null>(null)
 
   const createMutation = useCreateInvitationMutation(orgId)
+  const { roleOptions, isLoading: isLoadingRoles } = useRoleOptions(orgId)
   const copy = useInvitationFormCopy()
 
   // Called only when Zod validation passes (the resolver guards the fields).
@@ -40,8 +41,9 @@ export function CreateInvitation({ orgId, onSuccess }: CreateInvitationProps) {
   return (
     <CreateInvitationForm
       copy={copy}
+      roleOptions={roleOptions}
       onSubmit={handleSubmit}
-      isPending={createMutation.isPending}
+      isPending={createMutation.isPending || isLoadingRoles}
       errorMessage={serverError}
     />
   )

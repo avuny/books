@@ -29,6 +29,7 @@ import {
   useGetMyPermissions,
   useListMyInvitations,
   useListOrganizationInvitations,
+  useListRoles,
   useResendOrganizationInvitation,
   useRevokeOrganizationInvitation,
 } from "@/api"
@@ -67,6 +68,25 @@ export function useInvitationList(
     total: query.data?.data.total ?? 0,
     isLoading: query.isLoading,
     error: query.error,
+  }
+}
+
+export type RoleOption = {
+  value: string
+  label: string
+}
+
+export function useRoleOptions(orgId: string) {
+  const query = useListRoles(orgId, { pageSize: 100 })
+  const roles = query.data?.data?.items ?? []
+  const roleOptions: RoleOption[] = roles.map((r) => ({
+    value: r.id,
+    label: r.name,
+  }))
+
+  return {
+    roleOptions,
+    isLoading: query.isLoading,
   }
 }
 

@@ -1,7 +1,12 @@
 import { useForm } from "react-hook-form"
 import { CreateOrganizationInvitationSchema } from "@avuny/contracts"
 
-import { FormShell, InputField, SubmitButton } from "@workspace/ui/blocks/form"
+import {
+  FormShell,
+  InputField,
+  SelectField,
+  SubmitButton,
+} from "@workspace/ui/blocks/form"
 
 import { createPreparedResolver } from "../lib"
 import type { CreateOrganizationInvitationInput } from "../types"
@@ -22,6 +27,7 @@ const resolver = createPreparedResolver<
 
 type CreateInvitationFormProps = {
   copy: InvitationFormCopy
+  roleOptions: { value: string; label: string }[]
   onSubmit: (values: CreateInvitationFormSubmit) => void
   isPending: boolean
   /** Already localized. Shown in the form-level alert. */
@@ -31,6 +37,7 @@ type CreateInvitationFormProps = {
 // UI + validation only. No i18n, API, auth or navigation knowledge.
 export function CreateInvitationForm({
   copy,
+  roleOptions,
   onSubmit,
   isPending,
   errorMessage,
@@ -63,6 +70,15 @@ export function CreateInvitationForm({
           autoComplete="off"
           autoFocus
           disabled={isPending}
+        />
+
+        <SelectField
+          control={form.control}
+          name="roleId"
+          copy={copy.role}
+          options={roleOptions}
+          disabled={isPending}
+          placeholder={copy.role.placeholder}
         />
 
         <SubmitButton

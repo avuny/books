@@ -16,7 +16,7 @@ export function toCreateInvitationInput(
 ): CreateOrganizationInvitationInput {
   return {
     identifier: values.identifier.trim().toLowerCase(),
-    roleId: blankToUndefined(values.roleId),
+    roleId: values.roleId,
   }
 }
 
