@@ -85,7 +85,7 @@
       "placeholder": "name@example.com"
     },
     "role": {
-      "label": "Role (optional)",
+      "label": "Role",
       "placeholder": "Select a role"
     },
     "acceptUsername": {

@@ -85,7 +85,7 @@
       "placeholder": "name@example.com"
     },
     "role": {
-      "label": "الدور (اختياري)",
+      "label": "الدور",
       "placeholder": "اختر دورًا"
     },
     "acceptUsername": {

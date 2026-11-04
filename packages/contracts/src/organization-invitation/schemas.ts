@@ -16,7 +16,7 @@ export type InvitationStatus = z.infer<typeof InvitationStatusSchema>
 
 /**
  * Invite by identifier (email currently, extensible to phone/username).
- * Optionally specify which role the invitee will be assigned upon joining.
+ * The role the invitee will be assigned upon joining is required.
  */
 export const CreateOrganizationInvitationSchema = z.object({
   identifier: z
@@ -25,7 +25,7 @@ export const CreateOrganizationInvitationSchema = z.object({
     .toLowerCase()
     .min(1)
     .max(INVITATION_IDENTIFIER_MAX_LENGTH),
-  roleId: z.string().uuid().optional(),
+  roleId: z.string().uuid(),
 })
 export type CreateOrganizationInvitationInput = z.infer<
   typeof CreateOrganizationInvitationSchema
@@ -79,6 +79,7 @@ export const InvitationPreviewDtoSchema = z.object({
   orgName: z.string(),
   identifier: z.string(),
   roleId: z.string().uuid().nullable().optional(),
+  roleName: z.string().nullable().optional(),
   expiresAt: z.string().datetime(),
 })
 export type InvitationPreviewDto = z.infer<typeof InvitationPreviewDtoSchema>
