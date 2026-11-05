@@ -30,7 +30,6 @@ import { toOrganizationUserDto } from "../organization-user/index.js"
 import type {
   InvitationDelivery,
   InvitationNotifier,
-  OrganizationInvitationRepository,
   OrganizationInvitationServiceDeps,
   TokenGenerator,
   UserDirectory,

@@ -22,6 +22,7 @@ import type { Result } from "@avuny/utils"
 import type { SQL } from "drizzle-orm"
 import type { OrganizationUserService } from "../organization-user/index.js"
 import type { RoleService } from "../role/index.js"
+import type { ActivityLog } from "../activity-log/activity-log.port.js"
 import type { createOrganizationInvitationService } from "./organization-invitation.service.js"
 import type { createOrganizationInvitationRepository } from "./organization-invitation.repository.js"
 
@@ -86,16 +87,7 @@ export interface OrganizationInvitationServiceDeps {
       context: { orgId: string }
     ): Promise<boolean>
   }
-  activityLog: {
-    log(entry: {
-      action: string
-      actorId: string
-      orgId: string
-      resource: string
-      resourceId: string
-      metadata?: Record<string, unknown>
-    }): Promise<void>
-  }
+  activityLog: ActivityLog
   limits: {
     getMax(orgId: string, resource: "managedUsers"): Promise<number | null>
   }

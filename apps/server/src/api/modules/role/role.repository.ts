@@ -119,6 +119,34 @@ export function createRoleRepository({ db }: { db: DB }) {
       return { rows, total: counted?.total ?? 0 }
     },
 
+    async listOptions(
+      orgId: string,
+      f: {
+        search?: string
+        after: { custom: boolean; name: string; id: string } | null
+        limit: number
+      },
+      tx?: Tx
+    ): Promise<{ id: string; name: string; custom: boolean }[]> {
+      // Same order as `list` (system roles first, then name), plus `id` so the sort key is unique.
+      // That is what makes "continue after this row" exact.
+      const custom = sql<boolean>`(${roles.orgId} is not null)`
+      const conditions: SQL[] = [visibleTo(orgId)]
+      // `ilike '%…%'` is fine for roles. On a big table, add a pg_trgm index on the name.
+      if (f.search) conditions.push(ilike(roles.name, `%${escapeLike(f.search)}%`))
+      if (f.after) {
+        conditions.push(
+          sql`(${custom}, ${roles.name}, ${roles.id}) > (${f.after.custom}::boolean, ${f.after.name}::text, ${f.after.id}::uuid)`
+        )
+      }
+      return exec(tx)
+        .select({ id: roles.id, name: roles.name, custom })
+        .from(roles)
+        .where(and(...conditions))
+        .orderBy(asc(custom), asc(roles.name), asc(roles.id))
+        .limit(f.limit)
+    },
+
     async insertRole(values: NewRole, tx?: Tx): Promise<RoleWriteResult> {
       try {
         const [row] = await exec(tx).insert(roles).values(values).returning()

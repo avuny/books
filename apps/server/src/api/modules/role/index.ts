@@ -1,13 +1,9 @@
 export { RoleErrorCode, roleErrorsHttpMap } from "./role.errors.js"
+export { roleErrorMap } from "./role.error-map.js"
 export {
   createRoleService,
-  createDefaultRoleService,
-  roleService,
   DummyPlanFeatures,
   DummyActivityLog,
-  type RoleService,
-  type PlanFeatures,
-  type ActivityLog,
 } from "./role.service.js"
 export {
   createRoleRepository,
@@ -16,13 +12,32 @@ export {
 export {
   createPermissionResolver,
   createRbacPermissionChecker,
-  permissionResolver,
-  permissionChecker,
   DummyCache,
-  type PermissionChecker,
-  type PermissionResolver,
-  type Cache,
 } from "./role.permissions.js"
+export {
+  roleService,
+  getRoleService,
+  permissionResolver,
+  getPermissionResolver,
+  permissionChecker,
+  getPermissionChecker,
+  getRoleRepository,
+} from "./deps.js"
 export { requirePermission } from "./role.middleware.js"
 export { syncSystemRoles } from "./role.seed.js"
-export { roleRoutes } from "./hono-routes/index.js"
+export {
+  roleRoutes,
+  createRoleRoutes,
+} from "./hono-routes/index.js"
+export { DummyPermissionChecker } from "./testing.js"
+export type {
+  RoleService,
+  RoleServiceDeps,
+  PlanFeatures,
+  ActivityLog,
+  ActivityLogEntry,
+  PermissionChecker,
+  PermissionResolver,
+  PermissionResolverDeps,
+  Cache,
+} from "./role.types.js"

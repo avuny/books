@@ -5263,7 +5263,8 @@
                   }
                 },
                 "required": [
-                  "identifier"
+                  "identifier",
+                  "roleId"
                 ]
               }
             }
@@ -6245,6 +6246,10 @@
                           "type": "string",
                           "nullable": true,
                           "format": "uuid"
+                        },
+                        "roleName": {
+                          "type": "string",
+                          "nullable": true
                         },
                         "expiresAt": {
                           "type": "string",
@@ -9588,6 +9593,187 @@
                       "type": "string",
                       "enum": [
                         "ROLE_INVALID_PERMISSION"
+                      ]
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "success",
+                    "code",
+                    "message"
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        false
+                      ]
+                    },
+                    "type": {
+                      "type": "string",
+                      "enum": [
+                        "server"
+                      ]
+                    },
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "SERVER_ERROR"
+                      ]
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "type",
+                    "code",
+                    "message"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/roles/organizations/{orgId}/role-options": {
+      "get": {
+        "operationId": "listRoleOptions",
+        "tags": [
+          "role"
+        ],
+        "summary": "Search roles for pickers: id and name only, cursor-paginated",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": true,
+            "name": "orgId",
+            "in": "path"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100
+            },
+            "required": false,
+            "name": "search",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512
+            },
+            "required": false,
+            "name": "cursor",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50,
+              "default": 20
+            },
+            "required": false,
+            "name": "limit",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Role options retrieved",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "items": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string"
+                              },
+                              "name": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "id",
+                              "name"
+                            ]
+                          }
+                        },
+                        "nextCursor": {
+                          "type": "string",
+                          "nullable": true
+                        }
+                      },
+                      "required": [
+                        "items",
+                        "nextCursor"
+                      ]
+                    },
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        true
+                      ]
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "success"
+                  ]
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string"
+                    },
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        false
+                      ]
+                    },
+                    "code": {
+                      "type": "string",
+                      "enum": [
+                        "ROLE_PERMISSION_DENIED"
                       ]
                     },
                     "message": {

@@ -4,7 +4,8 @@ import { handleResult, getRequestLocale } from "@avuny/hono"
 import { parsePermissionKey } from "@avuny/contracts"
 import { trans } from "../../intl/i18next.js"
 import { RoleErrorCode, roleErrorsHttpMap } from "./role.errors.js"
-import { permissionChecker, type PermissionChecker } from "./role.permissions.js"
+import { permissionChecker } from "./deps.js"
+import type { PermissionChecker } from "./role.types.js"
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 

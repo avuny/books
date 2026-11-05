@@ -139,3 +139,11 @@ export const MyPermissionsDtoSchema = z.object({
   statements: z.array(PermissionStatementSchema),
 })
 export type MyPermissionsDto = z.infer<typeof MyPermissionsDtoSchema>
+
+export const roleOptionCursorSchema = z.object({
+  custom: z.boolean(),
+  name: z.string(),
+  id: z.string(),
+})
+
+export type RoleOptionCursor = z.infer<typeof roleOptionCursorSchema>

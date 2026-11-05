@@ -3,7 +3,7 @@ import { config } from "../../config.js"
 import { getMessageSender } from "../messaging/index.js"
 import { organizationUserService } from "../organization-user/index.js"
 import { roleService, permissionChecker } from "../role/index.js"
-import { DummyActivityLog } from "../activity-log/testing.js"
+import { activityLogService } from "../activity-log/index.js"
 import { DummyLimits } from "../organization-user/organization-user.service.js"
 import { createUserDirectory } from "./user-directory.adapter.js"
 import { createMessageInvitationNotifier } from "./invitation.notifier.js"
@@ -27,7 +27,7 @@ export function getOrganizationInvitationService(): OrganizationInvitationServic
       organizationUserService,
       roleService,
       permissions: permissionChecker,
-      activityLog: new DummyActivityLog(),
+      activityLog: activityLogService,
       limits: new DummyLimits(),
       users: createUserDirectory(db),
       notifier,

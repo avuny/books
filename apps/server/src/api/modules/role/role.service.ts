@@ -2,6 +2,7 @@ import {
   findInvalidStatement,
   grantsAll,
   PERMISSION_CATALOG,
+  ActivityLogAction,
   ROLE_AUDIT_EVENTS,
   type MemberRolesDto,
   type MyPermissionsDto,
@@ -13,41 +14,27 @@ import {
   type SetMemberRolesInput,
   type CreateRoleInput,
   type UpdateRoleInput,
+  type OptionListQuery,
+  type OptionListResponse,
+  roleOptionCursorSchema,
 } from "@avuny/contracts"
-import { fail, ok, type Result } from "@avuny/utils"
+import { decodeCursor, fail, ok, toCursorPage, type Result } from "@avuny/utils"
 import { RoleErrorCode, type RoleErrorCode as Code } from "./role.errors.js"
 import { toMemberRolesDto, toRoleDto, toRoleListItemDto } from "./role.mapper.js"
-import { permissionResolver, type PermissionResolver } from "./role.permissions.js"
-import { createRoleRepository, type RoleRepository } from "./role.repository.js"
-import { db } from "../../db.js"
+import type {
+  ActivityLog,
+  ActivityLogEntry,
+  PlanFeatures,
+  RoleRepository,
+  RoleService,
+  RoleServiceDeps,
+} from "./role.types.js"
+import { DummyActivityLog, DummyPlanFeatures } from "./testing.js"
+
+export { DummyPlanFeatures, DummyActivityLog }
+export type { PlanFeatures, ActivityLog, ActivityLogEntry, RoleService, RoleServiceDeps }
 
 const Err = RoleErrorCode
-
-/* ---------- ports ---------- */
-
-/** Plan features. `customRoles` gates creating and editing custom roles. */
-export interface PlanFeatures {
-  has(orgId: string, feature: "customRoles"): Promise<boolean>
-}
-export class DummyPlanFeatures implements PlanFeatures {
-  async has(): Promise<boolean> {
-    return true
-  }
-}
-
-export interface ActivityLogEntry {
-  type: string
-  actorId: string
-  orgId: string
-  entityId: string
-  metadata?: Record<string, unknown>
-}
-export interface ActivityLog {
-  log(entry: ActivityLogEntry): Promise<void>
-}
-export class DummyActivityLog implements ActivityLog {
-  async log(): Promise<void> { }
-}
 
 /* ---------- internals ---------- */
 
@@ -78,14 +65,6 @@ function invalidPermission(list: readonly { resource: string; action: string; re
     error: Err.ROLE_INVALID_PERMISSION,
     msg: `Invalid permission "${s.action}:${s.resource}" (${bad.reason})`,
   })
-}
-
-export interface RoleServiceDeps {
-  repository: RoleRepository
-  resolver: PermissionResolver
-  features?: PlanFeatures
-  activityLog?: ActivityLog
-  now?: () => Date
 }
 
 /**
@@ -130,7 +109,32 @@ export function createRoleService(deps: RoleServiceDeps) {
       })
     },
 
-    async getById(orgId: string, roleId: string) {
+    async listOptions(
+      orgId: string,
+      query: OptionListQuery
+    ): Promise<Result<OptionListResponse, Code>> {
+      const rows = await repo.listOptions(orgId, {
+        search: query.search,
+        after: decodeCursor(query.cursor, roleOptionCursorSchema),
+        limit: query.limit + 1,
+      })
+
+      const page = toCursorPage(rows, query.limit, (row) => ({
+        custom: row.custom,
+        name: row.name,
+        id: row.id,
+      }))
+
+      return ok({
+        data: {
+          items: page.items.map((r) => ({ id: r.id, name: r.name })),
+          nextCursor: page.nextCursor,
+        },
+        msg: "Role options retrieved successfully",
+      })
+    },
+
+    async getById(orgId: string, roleId: string): Promise<Result<RoleDto, Code>> {
       const role = await repo.findVisibleById(orgId, roleId)
       if (!role) return fail({ error: Err.ROLE_NOT_FOUND, msg: MSG.notFound })
       const [statements, memberCount] = await Promise.all([
@@ -170,10 +174,10 @@ export function createRoleService(deps: RoleServiceDeps) {
       if (isFailure(outcome)) return toFail(outcome)
 
       await activityLog.log({
-        type: ROLE_AUDIT_EVENTS.CREATED,
+        action: ActivityLogAction.ROLE_CREATED,
         actorId,
         orgId,
-        entityId: outcome.id,
+        resourceId: outcome.id,
         metadata: { name: outcome.name, statements: statements.length },
       })
       return ok({ data: toRoleDto(outcome, statements, 0), msg: "Role created" })
@@ -232,10 +236,10 @@ export function createRoleService(deps: RoleServiceDeps) {
 
       if (statements) await resolver.invalidateRole(roleId) // holders pick up the change now
       await activityLog.log({
-        type: ROLE_AUDIT_EVENTS.UPDATED,
+        action: ActivityLogAction.ROLE_UPDATED,
         actorId,
         orgId,
-        entityId: roleId,
+        resourceId: roleId,
         metadata: { name: input.name, permissionsReplaced: !!statements },
       })
       return ok({
@@ -266,10 +270,10 @@ export function createRoleService(deps: RoleServiceDeps) {
       if (isFailure(outcome)) return toFail(outcome)
 
       await activityLog.log({
-        type: ROLE_AUDIT_EVENTS.DELETED,
+        action: ActivityLogAction.ROLE_DELETED,
         actorId,
         orgId,
-        entityId: roleId,
+        resourceId: roleId,
         metadata: { name: outcome.name },
       })
       return ok({ data: { id: roleId }, msg: "Role deleted" })
@@ -345,10 +349,10 @@ export function createRoleService(deps: RoleServiceDeps) {
       if (outcome.add.length || outcome.remove.length) {
         await resolver.invalidateMember(outcome.member.id)
         await activityLog.log({
-          type: ROLE_AUDIT_EVENTS.MEMBER_ROLES_CHANGED,
+          action: ActivityLogAction.ORGANIZATION_USER_ROLES_CHANGED,
           actorId,
           orgId,
-          entityId: outcome.member.id,
+          resourceId: outcome.member.id,
           metadata: { added: outcome.add, removed: outcome.remove },
         })
       }
@@ -395,14 +399,3 @@ export function createRoleService(deps: RoleServiceDeps) {
     },
   }
 }
-
-export type RoleService = ReturnType<typeof createRoleService>
-
-export function createDefaultRoleService(): RoleService {
-  return createRoleService({
-    repository: createRoleRepository({ db }),
-    resolver: permissionResolver, // shared instance: one cache for checker and service
-  })
-}
-
-export const roleService = createDefaultRoleService()

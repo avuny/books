@@ -4,47 +4,21 @@ import {
   type EffectivePermissions,
   type PermissionStatement,
 } from "@avuny/contracts"
-import { db } from "../../db.js"
-import { createRoleRepository, type RoleRepository } from "./role.repository.js"
+import type {
+  Cache,
+  PermissionChecker,
+  PermissionResolver,
+  PermissionResolverDeps,
+} from "./role.types.js"
+import { DummyCache } from "./testing.js"
 
-/* ---------- ports ---------- */
-
-export interface Cache {
-  get<T>(key: string): Promise<T | null>
-  set<T>(key: string, value: T, ttlSeconds?: number): Promise<void>
-  del(key: string): Promise<void>
-}
-export class DummyCache implements Cache {
-  async get<T>(): Promise<T | null> {
-    return null
-  }
-  async set(): Promise<void> {}
-  async del(): Promise<void> {}
-}
-
-/**
- * The port other modules inject. `ctx.orgId` is the organization the check happens in;
- * `ctx.resourceId` narrows to one record. For resource "organization" the org id may also
- * come in as `resourceId` (the shape the organization service already uses).
- */
-export interface PermissionChecker {
-  check(
-    subject: { userId: string },
-    action: string,
-    ctx?: { orgId?: string; resourceId?: string }
-  ): Promise<boolean>
-}
+export { DummyCache }
+export type { Cache, PermissionChecker, PermissionResolver, PermissionResolverDeps }
 
 /* ---------- resolver: "what may this user do in this org?" ---------- */
 
 const STATEMENTS_TTL_SECONDS = 60
 const statementsKey = (orgUserId: string) => `rbac:statements:${orgUserId}`
-
-export interface PermissionResolverDeps {
-  repository: RoleRepository
-  cache?: Cache
-  ttlSeconds?: number
-}
 
 /**
  * Membership is ALWAYS read fresh (one indexed query), so deactivating a member or an
@@ -85,7 +59,6 @@ export function createPermissionResolver(deps: PermissionResolverDeps) {
     },
   }
 }
-export type PermissionResolver = ReturnType<typeof createPermissionResolver>
 
 /* ---------- checker: the PermissionChecker the rest of the server injects ---------- */
 
@@ -108,11 +81,3 @@ export function createRbacPermissionChecker({
     },
   }
 }
-
-/* ---------- default instances ---------- */
-
-// TODO: pass your real Cache (Redis, ...) here; DummyCache means "no caching".
-export const permissionResolver = createPermissionResolver({
-  repository: createRoleRepository({ db }),
-})
-export const permissionChecker = createRbacPermissionChecker({ resolver: permissionResolver })

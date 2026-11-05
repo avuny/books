@@ -122,7 +122,7 @@ describe("roleService", () => {
       const res = await t.service.create("u-owner", "org-1", input)
       expect(res).toMatchObject({ success: true })
       expect(t.repository.replaceStatements).toHaveBeenCalledWith("role-1", [allow("role", "read")], expect.anything())
-      expect(t.activityLog.log).toHaveBeenCalledWith(expect.objectContaining({ type: "role.created", entityId: "role-1" }))
+      expect(t.activityLog.log).toHaveBeenCalledWith(expect.objectContaining({ action: "role.created", resourceId: "role-1" }))
     })
   })
 
@@ -168,7 +168,7 @@ describe("roleService", () => {
       t.repository.deleteRole.mockResolvedValue({ ok: true })
       const res = await t.service.remove("u-owner", "org-1", "role-1")
       expect(res).toMatchObject({ success: true })
-      expect(t.activityLog.log).toHaveBeenCalledWith(expect.objectContaining({ type: "role.deleted" }))
+      expect(t.activityLog.log).toHaveBeenCalledWith(expect.objectContaining({ action: "role.deleted" }))
     })
   })
 
@@ -206,7 +206,7 @@ describe("roleService", () => {
         expect.anything()
       )
       expect(t.resolver.invalidateMember).toHaveBeenCalledWith("m-sara")
-      expect(t.activityLog.log).toHaveBeenCalledWith(expect.objectContaining({ type: "organization_user.roles_changed" }))
+      expect(t.activityLog.log).toHaveBeenCalledWith(expect.objectContaining({ action: "organization_user.roles_changed" }))
     })
 
     it("is a no-op when nothing changes", async () => {
