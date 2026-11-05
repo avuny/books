@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest"
-import { AUDIT_EVENT_TYPES, OrganizationErrorCode as Err } from "@avuny/contracts"
+import { ActivityLogAction, OrganizationErrorCode as Err } from "@avuny/contracts"
 import type { Tx } from "@avuny/db"
 import type { OrganizationRepository } from "./organization.repository.js"
 import { createOrganizationService } from "./organization.service.js"
@@ -56,7 +56,7 @@ const makeService = () => {
     set: vi.fn().mockResolvedValue(undefined),
     del: vi.fn().mockResolvedValue(undefined),
   }
-  const activityLog = { record: vi.fn().mockResolvedValue(undefined) }
+  const activityLog = { log: vi.fn().mockResolvedValue(undefined) }
   const limits = { maxOwnedPerUser: vi.fn().mockResolvedValue(2) }
 
   const service = createOrganizationService({
@@ -88,13 +88,13 @@ describe("organizationService", () => {
           tx,
         })
       )
-      expect(t.activityLog.record).toHaveBeenCalledWith(
+      expect(t.activityLog.log).toHaveBeenCalledWith(
         expect.objectContaining({
-          type: AUDIT_EVENT_TYPES.ORGANIZATION_CREATED,
+          action: ActivityLogAction.ORGANIZATION_CREATED,
           actorId: ACTOR,
           orgId: ORG_ID,
         }),
-        tx
+        { tx }
       )
     })
 
@@ -140,7 +140,7 @@ describe("organizationService", () => {
 
       expect(result).toMatchObject({ error: Err.ORGANIZATION_NAME_TAKEN })
       expect(t.repo.createWithOwner).not.toHaveBeenCalled()
-      expect(t.activityLog.record).not.toHaveBeenCalled()
+      expect(t.activityLog.log).not.toHaveBeenCalled()
     })
 
     it("maps a code unique-violation (race) to CODE_TAKEN", async () => {
@@ -206,12 +206,12 @@ describe("organizationService", () => {
     it("logs the activity and invalidates the cache", async () => {
       await t.service.update(ACTOR, ORG_ID, { timezone: "UTC" })
 
-      expect(t.activityLog.record).toHaveBeenCalledWith(
+      expect(t.activityLog.log).toHaveBeenCalledWith(
         expect.objectContaining({
-          type: AUDIT_EVENT_TYPES.ORGANIZATION_UPDATED,
+          action: ActivityLogAction.ORGANIZATION_UPDATED,
           metadata: { fields: ["timezone"] },
         }),
-        tx
+        { tx }
       )
       expect(t.cache.del).toHaveBeenCalledWith(`organization:${ORG_ID}`)
     })
@@ -223,9 +223,9 @@ describe("organizationService", () => {
 
       expect(result).toMatchObject({ data: { id: ORG_ID } })
       expect(t.repo.softDelete).toHaveBeenCalledWith({ id: ORG_ID, tx })
-      expect(t.activityLog.record).toHaveBeenCalledWith(
-        expect.objectContaining({ type: AUDIT_EVENT_TYPES.ORGANIZATION_DELETED }),
-        tx
+      expect(t.activityLog.log).toHaveBeenCalledWith(
+        expect.objectContaining({ action: ActivityLogAction.ORGANIZATION_DELETED }),
+        { tx }
       )
       expect(t.cache.del).toHaveBeenCalledWith(`organization:${ORG_ID}`)
     })
@@ -236,7 +236,7 @@ describe("organizationService", () => {
       const result = await t.service.delete(ACTOR, ORG_ID)
 
       expect(result).toMatchObject({ error: Err.ORGANIZATION_NOT_FOUND })
-      expect(t.activityLog.record).not.toHaveBeenCalled()
+      expect(t.activityLog.log).not.toHaveBeenCalled()
     })
 
     it("fails when the user is not allowed", async () => {

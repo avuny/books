@@ -1,15 +1,26 @@
 import { createOpenAPIRouter } from "@avuny/hono"
-import createOrganizationRoute from "./create-organization.route.js"
-import getOrganizationRoute from "./get-organization.route.js"
-import updateOrganizationRoute from "./update-organization.route.js"
-import organizationListRoute from "./organization-list.route.js"
+import { requireAuth } from "../../auth/index.js"
+import { organizationService } from "../deps.js"
+import type { RouteDeps } from "./module-routes.types.js"
+import { createOrganizationRoute } from "./create-organization.route.js"
+import { getOrganizationRoute } from "./get-organization.route.js"
+import { updateOrganizationRoute } from "./update-organization.route.js"
+import { organizationListRoute } from "./organization-list.route.js"
 
-export const organizationRoutes = createOpenAPIRouter()
+export const createOrganizationRoutes = (deps: RouteDeps) => {
+  const router = createOpenAPIRouter()
 
-// List and Create on "/"
-organizationRoutes.route("/", organizationListRoute)
-organizationRoutes.route("/", createOrganizationRoute)
+  router.route("/", organizationListRoute(deps))
+  router.route("/", createOrganizationRoute(deps))
+  router.route("/", getOrganizationRoute(deps))
+  router.route("/", updateOrganizationRoute(deps))
 
-// Get and Update on "/:id"
-organizationRoutes.route("/", getOrganizationRoute)
-organizationRoutes.route("/", updateOrganizationRoute)
+  return router
+}
+
+export const organizationRoutes = createOrganizationRoutes({
+  service: organizationService,
+  requireAuth,
+})
+
+export default organizationRoutes

@@ -1,6 +1,6 @@
 import { ok, fail } from "@avuny/utils"
 import {
-  AUDIT_EVENT_TYPES,
+  ActivityLogAction,
   OrganizationErrorCode as Err,
   RESERVED_ORGANIZATION_CODES,
   type CreateOrganizationInput,
@@ -9,13 +9,9 @@ import {
   type OrganizationListQuery,
   type UpdateOrganizationInput,
 } from "@avuny/contracts"
-import type { DB, Organization, Tx } from "@avuny/db"
-import { db } from "../../db.js"
-import {
-  createOrganizationRepository,
-  isUniqueViolation,
-  type OrganizationRepository,
-} from "./organization.repository.js"
+import { isUniqueViolation } from "./organization.repository.js"
+import { toOrganizationDto } from "./organization.mapper.js"
+import type { OrganizationServiceDeps } from "./organization.types.js"
 
 export type {
   CreateOrganizationInput,
@@ -24,101 +20,6 @@ export type {
   OrganizationDto,
   OrganizationAction,
 }
-
-/* ---------- ports (replace with your existing types if you already have them) ---------- */
-
-export interface PermissionChecker {
-  check(
-    subject: { userId: string },
-    action: OrganizationAction,
-    options?: { resourceId?: string }
-  ): Promise<boolean>
-}
-
-export interface Cache {
-  get<T>(key: string): Promise<T | null>
-  set(key: string, value: unknown, ttlSeconds: number): Promise<void>
-  del(key: string): Promise<void>
-}
-
-export interface ActivityLog {
-  /** Receives the transaction so the audit row commits (or rolls back) with the change. */
-  record(
-    entry: {
-      type: string
-      actorId: string
-      orgId?: string
-      resourceId?: string
-      metadata?: Record<string, unknown>
-    },
-    tx?: Tx
-  ): Promise<void>
-}
-
-export interface OrganizationLimits {
-  /** Max organizations a user may own (usually derived from their plan). */
-  maxOwnedPerUser(userId: string): Promise<number>
-}
-
-export type OrganizationServiceDeps = {
-  repo: OrganizationRepository
-  permissions: PermissionChecker
-  cache: Cache
-  activityLog: ActivityLog
-  limits: OrganizationLimits
-}
-
-/* ---------- dummy implementations ---------- */
-
-export class DummyPermissionChecker implements PermissionChecker {
-  async check(
-    _subject: { userId: string },
-    _action: OrganizationAction,
-    _options?: { resourceId?: string }
-  ): Promise<boolean> {
-    return true
-  }
-}
-
-export class DummyCache implements Cache {
-  async get<T>(_key: string): Promise<T | null> {
-    return null
-  }
-  async set(_key: string, _value: unknown, _ttlSeconds: number): Promise<void> {}
-  async del(_key: string): Promise<void> {}
-}
-
-export class DummyActivityLog implements ActivityLog {
-  async record(
-    _entry: {
-      type: string
-      actorId: string
-      orgId?: string
-      resourceId?: string
-      metadata?: Record<string, unknown>
-    },
-    _tx?: Tx
-  ): Promise<void> {}
-}
-
-export class DummyOrganizationLimits implements OrganizationLimits {
-  async maxOwnedPerUser(_userId: string): Promise<number> {
-    return 100
-  }
-}
-
-/* ---------- helpers ---------- */
-
-const toDto = (o: Organization): OrganizationDto => ({
-  id: o.id,
-  code: o.code,
-  name: o.name,
-  status: o.status,
-  countryCode: o.countryCode,
-  stateId: o.stateId,
-  defaultCurrency: o.defaultCurrency,
-  timezone: o.timezone,
-})
 
 /* ---------- constants ---------- */
 
@@ -201,18 +102,18 @@ export const createOrganizationService = ({
             ownerUsername,
             tx,
           })
-          await activityLog.record(
+          await activityLog.log(
             {
-              type: AUDIT_EVENT_TYPES.ORGANIZATION_CREATED,
+              action: ActivityLogAction.ORGANIZATION_CREATED,
               actorId,
               orgId: org.id,
               resourceId: org.id,
               metadata: { code: org.code, name: org.name },
             },
-            tx
+            { tx }
           )
           return ok({
-            data: toDto(org),
+            data: toOrganizationDto(org),
             msg: "Organization created successfully",
           })
         })
@@ -259,18 +160,18 @@ export const createOrganizationService = ({
         })
         if (!updated) return notFound()
 
-        await activityLog.record(
+        await activityLog.log(
           {
-            type: AUDIT_EVENT_TYPES.ORGANIZATION_UPDATED,
+            action: ActivityLogAction.ORGANIZATION_UPDATED,
             actorId,
             orgId: id,
             resourceId: id,
             metadata: { fields: Object.keys(input) },
           },
-          tx
+          { tx }
         )
         return ok({
-          data: toDto(updated),
+          data: toOrganizationDto(updated),
           msg: "Organization updated successfully",
         })
       })
@@ -287,14 +188,14 @@ export const createOrganizationService = ({
         const deleted = await repo.softDelete({ id, tx })
         if (!deleted) return notFound()
 
-        await activityLog.record(
+        await activityLog.log(
           {
-            type: AUDIT_EVENT_TYPES.ORGANIZATION_DELETED,
+            action: ActivityLogAction.ORGANIZATION_DELETED,
             actorId,
             orgId: id,
             resourceId: id,
           },
-          tx
+          { tx }
         )
         return ok({ data: { id }, msg: "Organization deleted successfully" })
       })
@@ -315,7 +216,7 @@ export const createOrganizationService = ({
       const org = await repo.findById({ id })
       if (!org) return notFound()
 
-      const dto = toDto(org)
+      const dto = toOrganizationDto(org)
       await cache.set(cacheKey(id), dto, CACHE_TTL_SECONDS)
       return ok({ data: dto, msg: "Organization retrieved successfully" })
     },
@@ -342,7 +243,7 @@ export const createOrganizationService = ({
 
       return ok({
         data: {
-          items: items.map(toDto),
+          items: items.map(toOrganizationDto),
           page,
           pageSize,
           total,
@@ -385,19 +286,3 @@ export const createOrganizationService = ({
     },
   }
 }
-
-/** Use this to type the service where it is injected (routes, container). */
-export type OrganizationService = ReturnType<typeof createOrganizationService>
-
-export const createDefaultOrganizationService = (dbInstance: DB = db) => {
-  const repo = createOrganizationRepository({ db: dbInstance })
-  return createOrganizationService({
-    repo,
-    permissions: new DummyPermissionChecker(),
-    cache: new DummyCache(),
-    activityLog: new DummyActivityLog(),
-    limits: new DummyOrganizationLimits(),
-  })
-}
-
-export const organizationService = createDefaultOrganizationService()
