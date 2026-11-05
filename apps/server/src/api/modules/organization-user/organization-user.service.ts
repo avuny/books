@@ -1,4 +1,5 @@
 import {
+  ActivityLogAction,
   ORG_USER_AUDIT_EVENTS,
   type MyOrganizationDto,
   type OrganizationUserDto,
@@ -16,59 +17,41 @@ import {
   type OrganizationUserErrorCode as Code,
 } from "./organization-user.errors.js"
 import { toOrganizationUserDto } from "./organization-user.mapper.js"
+import type {
+  ActivityLog,
+  ActivityLogEntry,
+  InvitationChannelName,
+  Limits,
+  MemberLimitResource,
+  OrganizationUserRepository,
+  OrganizationUserService,
+  OrganizationUserServiceDeps,
+  PermissionChecker,
+} from "./organization-user.types.js"
 import {
-  createOrganizationUserRepository,
-  type OrganizationUserRepository,
-} from "./organization-user.repository.js"
-import { db } from "../../db.js"
+  DummyActivityLog,
+  DummyLimits,
+  DummyPermissionChecker,
+} from "./testing.js"
+
+export type {
+  PermissionChecker,
+  ActivityLog,
+  ActivityLogEntry,
+  Limits,
+  MemberLimitResource,
+  InvitationChannelName,
+  OrganizationUserServiceDeps,
+  OrganizationUserService,
+}
+
+export {
+  DummyPermissionChecker,
+  DummyActivityLog,
+  DummyLimits,
+}
 
 const Err = OrganizationUserErrorCode
-
-/* ---------- ports (shared with the invitation module through index.ts) ---------- */
-
-export interface PermissionChecker {
-  check(
-    subject: { userId: string },
-    action: string,
-    ctx?: { resourceId?: string }
-  ): Promise<boolean>
-}
-
-export interface ActivityLogEntry {
-  type: string
-  actorId: string
-  orgId: string
-  entityId: string
-  metadata?: Record<string, unknown>
-}
-export interface ActivityLog {
-  log(entry: ActivityLogEntry): Promise<void>
-}
-
-/** Plan limits. `null` means unlimited. */
-export type MemberLimitResource = "managedUsers" | "portalUsers"
-export type InvitationChannelName = "email" | "whatsapp"
-export interface Limits {
-  getMax(orgId: string, resource: MemberLimitResource): Promise<number | null>
-  isChannelAllowed(orgId: string, channel: InvitationChannelName): Promise<boolean>
-}
-
-export class DummyPermissionChecker implements PermissionChecker {
-  async check(): Promise<boolean> {
-    return true
-  }
-}
-export class DummyActivityLog implements ActivityLog {
-  async log(): Promise<void> { }
-}
-export class DummyLimits implements Limits {
-  async getMax(): Promise<number | null> {
-    return null
-  }
-  async isChannelAllowed(): Promise<boolean> {
-    return true
-  }
-}
 
 /** `managed` / `portal` count against the plan; the owner does not. */
 export const limitResourceFor = (
@@ -98,14 +81,6 @@ const forbidden = () =>
 const notFound = () =>
   fail({ error: Err.ORGANIZATION_USER_NOT_FOUND, msg: "Member not found" })
 
-export interface OrganizationUserServiceDeps {
-  repository: OrganizationUserRepository
-  permissions?: PermissionChecker
-  activityLog?: ActivityLog
-  limits?: Limits
-  now?: () => Date
-}
-
 /**
  * Membership rules for `organization_users`. Invitations create members through
  * the invitation module, which reuses this module's repository.
@@ -120,7 +95,7 @@ export function createOrganizationUserService(
   const clock = deps.now ?? (() => new Date())
 
   const can = (actorId: string, action: string, orgId: string) =>
-    permissions.check({ userId: actorId }, action, { resourceId: orgId })
+    permissions.check({ userId: actorId }, action, { resourceId: orgId, orgId })
 
   return {
     async list(
@@ -213,10 +188,10 @@ export function createOrganizationUserService(
           : notFound()
 
       await activityLog.log({
-        type: ORG_USER_AUDIT_EVENTS.USERNAME_CHANGED,
+        action: ActivityLogAction.ORGANIZATION_USER_USERNAME_CHANGED,
         actorId,
         orgId,
-        entityId: memberId,
+        resourceId: memberId,
         metadata: { from: member.username, to: input.username },
       })
       return ok({ data: toOrganizationUserDto(res.row), msg: "Username updated" })
@@ -271,12 +246,12 @@ export function createOrganizationUserService(
 
       if (outcome.changed)
         await activityLog.log({
-          type: input.isActive
-            ? ORG_USER_AUDIT_EVENTS.REACTIVATED
-            : ORG_USER_AUDIT_EVENTS.DEACTIVATED,
+          action: input.isActive
+            ? ActivityLogAction.ORGANIZATION_USER_REACTIVATED
+            : ActivityLogAction.ORGANIZATION_USER_DEACTIVATED,
           actorId,
           orgId,
-          entityId: memberId,
+          resourceId: memberId,
         })
       return ok({
         data: toOrganizationUserDto(outcome.row),
@@ -328,10 +303,10 @@ export function createOrganizationUserService(
       if (isFailure(outcome)) return toFail(outcome)
 
       await activityLog.log({
-        type: ORG_USER_AUDIT_EVENTS.OWNERSHIP_TRANSFERRED,
+        action: ActivityLogAction.ORGANIZATION_OWNERSHIP_TRANSFERRED,
         actorId,
         orgId,
-        entityId: outcome.newOwner.id,
+        resourceId: outcome.newOwner.id,
         metadata: {
           fromMemberId: outcome.fromMemberId,
           toMemberId: outcome.newOwner.id,
@@ -418,15 +393,3 @@ export function createOrganizationUserService(
     },
   }
 }
-
-export type OrganizationUserService = ReturnType<
-  typeof createOrganizationUserService
->
-
-export function createDefaultOrganizationUserService(): OrganizationUserService {
-  return createOrganizationUserService({
-    repository: createOrganizationUserRepository({ db }),
-  })
-}
-
-export const organizationUserService = createDefaultOrganizationUserService()

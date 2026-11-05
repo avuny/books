@@ -9,11 +9,8 @@ import {
 import { globalErrorResponses } from "@avuny/utils"
 import { trans } from "../../../intl/i18next.js"
 import { organizationUserErrorsHttpMap as errors } from "../organization-user.errors.js"
-import { organizationUserService } from "../organization-user.service.js"
-import { requireAuth } from "../../auth/index.js"
 import { honoPath, jsonError, jsonOk } from "./_shared.js"
-
-const router = createOpenAPIRouter()
+import type { RouteDeps } from "./module-routes.types.js"
 
 const rawErrorMap = {
   ORGANIZATION_USER_NOT_FOUND: errors.ORGANIZATION_USER_NOT_FOUND,
@@ -24,48 +21,54 @@ const rawErrorMap = {
 
 const errorMap = rawErrorMap as Record<Code, (typeof rawErrorMap)[keyof typeof rawErrorMap]>
 
-export const updateOrganizationUserRoute = createRoute({
-  method: "patch",
-  path: "/organizations/{orgId}/members/{memberId}",
-  operationId: "updateOrganizationUser",
-  tags: ["organization-user"],
-  summary: "Change a member's username",
-  middleware: [requireAuth] as const,
-  request: {
-    params: z.object({ orgId: z.string().uuid(), memberId: z.string().uuid() }),
-    body: {
-      content: { "application/json": { schema: UpdateOrganizationUserSchema } },
+export const updateOrganizationUserRoute = ({ service, requireAuth }: RouteDeps) => {
+  const router = createOpenAPIRouter()
+
+  const route = createRoute({
+    method: "patch",
+    path: "/organizations/{orgId}/members/{memberId}",
+    operationId: "updateOrganizationUser",
+    tags: ["organization-user"],
+    summary: "Change a member's username",
+    middleware: [requireAuth] as const,
+    request: {
+      params: z.object({ orgId: z.string().uuid(), memberId: z.string().uuid() }),
+      body: {
+        content: { "application/json": { schema: UpdateOrganizationUserSchema } },
+      },
     },
-  },
-  responses: {
-    200: jsonOk("Member updated", OrganizationUserDtoSchema),
-    403: jsonError("Forbidden", [Code.ORGANIZATION_USER_FORBIDDEN]),
-    404: jsonError("Member not found", [Code.ORGANIZATION_USER_NOT_FOUND]),
-    409: jsonError("Conflict", [
-      Code.ORGANIZATION_USER_OWNER_PROTECTED,
-      Code.ORGANIZATION_USER_USERNAME_TAKEN,
-    ]),
-    ...globalErrorResponses,
-  },
-})
-
-router.use(honoPath(updateOrganizationUserRoute.path), requireAuth)
-
-router.openapi(updateOrganizationUserRoute, async (c) => {
-  const errorTrans = trans({ lang: getRequestLocale() })
-  const user = c.get("user")
-  const { orgId, memberId } = c.req.valid("param")
-  const body = c.req.valid("json")
-
-  const result = await organizationUserService.updateUsername(user.id, orgId, memberId, body)
-  return handleResult({
-    c,
-    result,
-    successStatus: 200,
-    errorMap,
-    errorTrans,
-    moduleName: "organization-user",
+    responses: {
+      200: jsonOk("Member updated", OrganizationUserDtoSchema),
+      403: jsonError("Forbidden", [Code.ORGANIZATION_USER_FORBIDDEN]),
+      404: jsonError("Member not found", [Code.ORGANIZATION_USER_NOT_FOUND]),
+      409: jsonError("Conflict", [
+        Code.ORGANIZATION_USER_OWNER_PROTECTED,
+        Code.ORGANIZATION_USER_USERNAME_TAKEN,
+      ]),
+      ...globalErrorResponses,
+    },
   })
-})
 
-export default router
+  router.use(honoPath(route.path), requireAuth)
+
+  router.openapi(route, async (c) => {
+    const errorTrans = trans({ lang: getRequestLocale() })
+    const user = c.get("user")
+    const { orgId, memberId } = c.req.valid("param")
+    const body = c.req.valid("json")
+
+    const result = await service.updateUsername(user.id, orgId, memberId, body)
+    return handleResult({
+      c,
+      result,
+      successStatus: 200,
+      errorMap,
+      errorTrans,
+      moduleName: "organization-user",
+    })
+  })
+
+  return router
+}
+
+export default updateOrganizationUserRoute

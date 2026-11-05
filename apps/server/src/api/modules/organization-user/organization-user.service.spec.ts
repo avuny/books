@@ -98,7 +98,7 @@ describe("organizationUserService", () => {
       const res = await t.service.updateUsername("u-owner", "org-1", "m-sara", { username: "sara2" })
       expect(res).toMatchObject({ success: true })
       expect(t.activityLog.log).toHaveBeenCalledWith(
-        expect.objectContaining({ type: "organization_user.username_changed", entityId: "m-sara" })
+        expect.objectContaining({ action: "organization_user.username_changed", resourceId: "m-sara" })
       )
     })
   })
@@ -132,7 +132,7 @@ describe("organizationUserService", () => {
       const res = await t.service.setStatus("u-owner", "org-1", "m-sara", { isActive: false })
       expect(res).toMatchObject({ success: true })
       expect(t.activityLog.log).toHaveBeenCalledWith(
-        expect.objectContaining({ type: "organization_user.deactivated" })
+        expect.objectContaining({ action: "organization_user.deactivated" })
       )
     })
 
@@ -191,7 +191,7 @@ describe("organizationUserService", () => {
         expect.anything()
       )
       expect(t.activityLog.log).toHaveBeenCalledWith(
-        expect.objectContaining({ type: "organization.ownership_transferred" })
+        expect.objectContaining({ action: "organization.ownership_transferred" })
       )
     })
 
