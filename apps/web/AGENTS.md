@@ -106,14 +106,15 @@ Route (routes/**)
 2. **Schemas**:
    - Derive form types directly from contract schemas: `z.infer<typeof SignInBodySchema>`, `z.infer<typeof UpdateProfileBodySchema>`. Never manually duplicate schema definitions.
 3. **Error Parsing**:
-   - Use `parseApiError(error)` and `resolveErrorMessage()` from `@/features/auth/lib/api-error` to safely extract localized server messages or error codes.
+   - Use `parseApiError(error)` and `resolveErrorMessage()` from `"@workspace/ui/lib/api-error"` to safely extract localized server messages or error codes.
    - Match error codes against contract enums (`AuthErrorCode`, `UsersErrorCode`), never against error message strings.
 
 ---
 
 ## Directory Conventions
 
-- `apps/web/src/features/<feature>/`: Feature modules (e.g., `auth`, `organization`, `user`).
+- `apps/web/src/features/<feature>/`: core Features (e.g., `auth`, `organization`, `user`).
+- `apps/web/src/features/<feature>-module/`: Feature modules (e.g., `role-module`, `organization-user-module`).
 - `apps/web/src/features/<feature>/index.ts`: Public feature barrel export. Routes must **only** import from `@/features/<feature>`, never deep into inner step files.
 - `apps/web/src/routes/`: TanStack file-based routes (`__root.tsx`, `auth/route.tsx`, `user/route.tsx`, `user/settings.tsx`, etc.).
 - `apps/web/src/features/routes.ts`: Central typed routes mapping (`ROUTES`). Always use `ROUTES` for navigation paths.
