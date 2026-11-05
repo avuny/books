@@ -9,7 +9,6 @@
   "msgs": {
     "add": "The {thing} has been added successfully",
     "create": "The {thing} has been created successfully",
-
     "update": "The {thing} has been updated successfully",
     "remove": "The {thing} has been removed successfully",
     "save": "The {thing} has been saved successfully",
@@ -90,5 +89,12 @@
     "invalidIdentifier": "Please enter a valid email address",
     "minLength": "Must be at least {{min}} characters",
     "maxLength": "Must be less than {{max}} characters"
+  },
+  "combobox": {
+    "loading": "Loading…",
+    "loadingMore": "Loading more…",
+    "empty": "No results",
+    "error": "Couldn’t load the list.",
+    "retry": "Retry"
   }
 }
