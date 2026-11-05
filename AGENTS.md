@@ -75,8 +75,18 @@ pnpm dlx shadcn@latest add <component-name> -c apps/web
 3. **Domain Error & Result Handling**:
    - Backend services return `Result<T, E>` (`ok(data)` or `fail(code, message)`) from `@avuny/utils`.
    - Server endpoints map `Result` objects using `handleResult(c, result)` from `@avuny/hono`.
-4. **Package-Specific AGENTS.md**:
+4. **Package-Specific AGENTS.md & Backend Architecture**:
    - Check subpackage `AGENTS.md` files (e.g. in `apps/server/`, `apps/web/`, `packages/contracts/`, `packages/db/`, `packages/hono/`) for localized package constraints.
+   - For backend modules in `apps/server`, agents must strictly follow the canonical module pattern demonstrated in `apps/server/src/api/modules/organization-invitation` and described in `apps/server/AGENTS.md`:
+     - Explicit `deps.ts` for singleton DI wiring.
+     - Closure factory routes accepting `RouteDeps` (`module-routes.types.ts`).
+     - Port interfaces in `<module>.types.ts` (PermissionChecker, ActivityLog, Limits, etc.).
+     - Comprehensive `<module>.error-map.ts` and `SPEC.md`.
+     - Route-level tests in `__tests__/`.
+5. **Execution Tracking & Sequential Work via TODO.md**:
+   - When executing multi-step or multi-module refactorings or implementations, AI agents must maintain a `TODO.md` in the working package (e.g. `apps/server/TODO.md`).
+   - Group tasks by module into `Todo`, `InProgress`, and `Done` sections with exact dates and timestamps (`YYYY-MM-DD HH:mm`).
+   - Always work sequentially: finish one module completely (all files, tests, typecheck) before moving to the next, keeping `TODO.md` continuously synced.
 
 ---
 

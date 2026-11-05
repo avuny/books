@@ -312,6 +312,8 @@ Create dedicated route files under `src/api/modules/<module>/hono-routes/`:
 
 #### Route Pattern Standard:
 
+Route handlers must be **closure factories** accepting `RouteDeps`:
+
 ```ts
 import { createRoute } from "@hono/zod-openapi"
 import { z } from "@avuny/zod"
@@ -322,103 +324,98 @@ import {
 } from "@avuny/hono"
 import { OrganizationDtoSchema, OrganizationErrorCode } from "@avuny/contracts"
 import {
-  createResponseSchema,
-  createDomainErrorResponseSchema,
   globalErrorResponses,
 } from "@avuny/utils"
 import { trans } from "../../../intl/i18next.js"
 import { organizationErrorsHttpMap } from "../organization.errors.js"
-import { organizationService } from "../organization.service.js"
-import { requireAuth } from "../../auth/index.js"
+import { honoPath, jsonError, jsonOk } from "./_shared.js"
+import type { RouteDeps } from "./module-routes.types.js"
 
-const router = createOpenAPIRouter()
-
-const getOrganizationErrorMap = {
+const rawErrorMap = {
   ORGANIZATION_NOT_FOUND: organizationErrorsHttpMap.ORGANIZATION_NOT_FOUND,
   ORGANIZATION_FORBIDDEN: organizationErrorsHttpMap.ORGANIZATION_FORBIDDEN,
 } as const
 
-export const getOrganizationRoute = createRoute({
-  method: "get",
-  path: "/{id}",
-  operationId: "getOrganization",
-  tags: ["organization"],
-  summary: "Get organization by ID",
-  middleware: [requireAuth] as const,
-  request: {
-    params: z.object({ id: z.string().uuid() }),
-  },
-  responses: {
-    200: {
-      description: "Organization retrieved successfully",
-      content: {
-        "application/json": {
-          schema: createResponseSchema(OrganizationDtoSchema),
-        },
-      },
+const getOrganizationErrorMap = rawErrorMap as Record<
+  OrganizationErrorCode,
+  (typeof rawErrorMap)[keyof typeof rawErrorMap]
+>
+
+export const getOrganizationRoute = ({ service, requireAuth }: RouteDeps) => {
+  const router = createOpenAPIRouter()
+
+  const route = createRoute({
+    method: "get",
+    path: "/{id}",
+    operationId: "getOrganization",
+    tags: ["organization"],
+    summary: "Get organization by ID",
+    middleware: [requireAuth] as const,
+    request: {
+      params: z.object({ id: z.string().uuid() }),
     },
-    403: {
-      description: "Forbidden",
-      content: {
-        "application/json": {
-          schema: createDomainErrorResponseSchema([
-            OrganizationErrorCode.ORGANIZATION_FORBIDDEN,
-          ]),
-        },
-      },
+    responses: {
+      200: jsonOk("Organization retrieved successfully", OrganizationDtoSchema),
+      403: jsonError("Forbidden", [OrganizationErrorCode.ORGANIZATION_FORBIDDEN]),
+      404: jsonError("Organization not found", [OrganizationErrorCode.ORGANIZATION_NOT_FOUND]),
+      ...globalErrorResponses,
     },
-    404: {
-      description: "Organization not found",
-      content: {
-        "application/json": {
-          schema: createDomainErrorResponseSchema([
-            OrganizationErrorCode.ORGANIZATION_NOT_FOUND,
-          ]),
-        },
-      },
-    },
-    ...globalErrorResponses,
-  },
-})
-
-router.use("/:id", requireAuth)
-
-router.openapi(getOrganizationRoute, async (c) => {
-  const lang = getRequestLocale()
-  const errorTrans = trans({ lang })
-  const user = c.get("user")
-  const { id } = c.req.valid("param")
-
-  const result = await organizationService.getById(user.id, id)
-
-  return handleResult({
-    c,
-    result,
-    successStatus: 200,
-    errorMap: getOrganizationErrorMap,
-    errorTrans,
-    moduleName: "organization",
   })
-})
 
-export default router
+  router.use(honoPath(route.path), requireAuth)
+
+  router.openapi(route, async (c) => {
+    const errorTrans = trans({ lang: getRequestLocale() })
+    const user = c.get("user")
+    const { id } = c.req.valid("param")
+
+    const result = await service.getById(user.id, id)
+
+    return handleResult({
+      c,
+      result,
+      successStatus: 200,
+      errorMap: getOrganizationErrorMap,
+      errorTrans,
+      moduleName: "organization",
+    })
+  })
+
+  return router
+}
+
+export default getOrganizationRoute
 ```
 
 #### Hono Routes Aggregator (`hono-routes/index.ts`):
 
 ```ts
 import { createOpenAPIRouter } from "@avuny/hono"
+import { requireAuth } from "../../auth/index.js"
+import { organizationService } from "../deps.js"
+import type { RouteDeps } from "./module-routes.types.js"
 import createOrganizationRoute from "./create-organization.route.js"
 import getOrganizationRoute from "./get-organization.route.js"
 import updateOrganizationRoute from "./update-organization.route.js"
 import organizationListRoute from "./organization-list.route.js"
 
-export const organizationRoutes = createOpenAPIRouter()
+export const createOrganizationRoutes = (deps: RouteDeps) => {
+  const router = createOpenAPIRouter()
 
-organizationRoutes.route("/", organizationListRoute)
-organizationRoutes.route("/", createOrganizationRoute)
-organizationRoutes.route("/", getOrganizationRoute)
-organizationRoutes.route("/", updateOrganizationRoute)
+  router.route("/", organizationListRoute(deps))
+  router.route("/", createOrganizationRoute(deps))
+  router.route("/", getOrganizationRoute(deps))
+  router.route("/", updateOrganizationRoute(deps))
+
+  return router
+}
+
+export const organizationRoutes = createOrganizationRoutes({
+  service: organizationService,
+  requireAuth,
+})
+
+export default organizationRoutes
 ```
 
 ---
@@ -554,3 +551,9 @@ export { organizationRoutes } from "./hono-routes/index.js"
 8. **Messaging & Notifications**:
    - Always use the messaging module (`getMessageSender()` from `../messaging/index.js`) for outbound notifications (email, WhatsApp, SMS).
    - Never call an email/SMS/WhatsApp API directly from a service or route. Use `MessageSender` through the notifier adapter pattern.
+9. **Route Closures & Testing Isolation**:
+   - All HTTP route handlers in `hono-routes/` must be exported as closure factories accepting `RouteDeps` (`{ service, requireAuth }`).
+   - Route tests in `__tests__/` must instantiate route closures using mock dependencies, never importing concrete singletons or `deps.ts`.
+10. **Progress Synchronization via `TODO.md`**:
+    - During multi-module refactorings or implementations, agents must track progress in `apps/server/TODO.md` divided into `Todo`, `InProgress`, and `Done` with timestamps (`YYYY-MM-DD HH:mm`).
+    - Agents must work sequentially, completing one module fully (contracts, types, service, closure routes, tests, SPEC.md, public exports) before moving to the next.
