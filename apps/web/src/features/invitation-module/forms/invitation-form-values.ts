@@ -1,4 +1,3 @@
-import { blankToUndefined } from "../lib"
 import type { CreateOrganizationInvitationInput } from "../types"
 
 export type CreateInvitationFormValues = {
@@ -16,7 +15,7 @@ export function toCreateInvitationInput(
 ): CreateOrganizationInvitationInput {
   return {
     identifier: values.identifier.trim().toLowerCase(),
-    roleId: values.roleId,
+    roleId: values.roleId.trim(),
   }
 }
 

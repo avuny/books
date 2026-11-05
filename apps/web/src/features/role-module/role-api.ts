@@ -13,7 +13,9 @@ import {
 
 import {
   getGetRoleQueryKey,
+  getListRoleOptionsQueryKey,
   getListRolesQueryKey,
+  listRoleOptions,
   useCreateRole,
   useDeleteRole,
   useGetMyPermissions,
@@ -29,6 +31,7 @@ import type {
   RoleListItemDto,
   RoleScope,
 } from "./types"
+import { useCursorOptions } from "../lib/options/use-cursor-options"
 
 const NO_ROLES: RoleListItemDto[] = []
 const NO_GROUPS: PermissionGroup[] = []
@@ -164,8 +167,8 @@ function useInvalidateRoles(orgId: string) {
       queryClient.invalidateQueries({ queryKey: getListRolesQueryKey(orgId) }),
       roleId
         ? queryClient.invalidateQueries({
-            queryKey: getGetRoleQueryKey(orgId, roleId),
-          })
+          queryKey: getGetRoleQueryKey(orgId, roleId),
+        })
         : Promise.resolve(),
     ])
 }
@@ -190,4 +193,15 @@ export function useUpdateRoleMutation(orgId: string) {
 export function useDeleteRoleMutation(orgId: string) {
   const invalidate = useInvalidateRoles(orgId)
   return useDeleteRole({ mutation: { onSuccess: () => invalidate() } })
+}
+
+
+
+export function useRoleOptions(orgId: string) {
+  return useCursorOptions({
+    queryKey: getListRoleOptionsQueryKey(orgId),
+    fetchPage: async ({ cursor, search, limit, signal }) =>
+      (await listRoleOptions(orgId, { cursor, search, limit }, { signal })).data,
+    enabled: Boolean(orgId),
+  })
 }

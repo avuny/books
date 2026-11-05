@@ -2,10 +2,13 @@ import { useForm } from "react-hook-form"
 import { CreateOrganizationInvitationSchema } from "@avuny/contracts"
 
 import {
+  AsyncComboboxField,
   FormShell,
   InputField,
-  SelectField,
   SubmitButton,
+  type AsyncComboboxCopy,
+  type AsyncOptionsSource,
+  type ComboboxCreateAction,
 } from "@workspace/ui/blocks/form"
 
 import { createPreparedResolver } from "../lib"
@@ -27,7 +30,11 @@ const resolver = createPreparedResolver<
 
 type CreateInvitationFormProps = {
   copy: InvitationFormCopy
-  roleOptions: { value: string; label: string }[]
+  /** Strings for the role combobox's loading, empty and error states. */
+  roleCombobox: AsyncComboboxCopy
+  roleSource: AsyncOptionsSource
+  /** Leave undefined to hide the "Create new" button. */
+  roleCreateAction?: ComboboxCreateAction
   onSubmit: (values: CreateInvitationFormSubmit) => void
   isPending: boolean
   /** Already localized. Shown in the form-level alert. */
@@ -37,7 +44,9 @@ type CreateInvitationFormProps = {
 // UI + validation only. No i18n, API, auth or navigation knowledge.
 export function CreateInvitationForm({
   copy,
-  roleOptions,
+  roleCombobox,
+  roleSource,
+  roleCreateAction,
   onSubmit,
   isPending,
   errorMessage,
@@ -72,11 +81,13 @@ export function CreateInvitationForm({
           disabled={isPending}
         />
 
-        <SelectField
+        <AsyncComboboxField
           control={form.control}
           name="roleId"
           copy={copy.role}
-          options={roleOptions}
+          comboboxCopy={roleCombobox}
+          source={roleSource}
+          createAction={roleCreateAction}
           disabled={isPending}
           placeholder={copy.role.placeholder}
         />

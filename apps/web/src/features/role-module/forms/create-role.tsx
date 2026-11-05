@@ -12,11 +12,12 @@ import {
 
 type CreateRoleProps = {
   orgId: string
+  defaultName?: string
   onSuccess?: (role: RoleDto) => void
 }
 
 // Composition only: strings + API behavior wired into the pure form.
-export function CreateRole({ orgId, onSuccess }: CreateRoleProps) {
+export function CreateRole({ orgId, defaultName, onSuccess }: CreateRoleProps) {
   const [serverError, setServerError] = useState<string | null>(null)
 
   const createMutation = useCreateRoleMutation(orgId)
@@ -42,6 +43,7 @@ export function CreateRole({ orgId, onSuccess }: CreateRoleProps) {
     <CreateRoleForm
       copy={copy}
       permissions={permissions}
+      defaultName={defaultName}
       onSubmit={handleSubmit}
       isPending={createMutation.isPending}
       errorMessage={serverError}

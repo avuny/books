@@ -16,6 +16,7 @@ type CreateRoleFormInput = z.input<typeof CreateRoleSchema>
 type CreateRoleFormProps = {
   copy: RoleFormCopy
   permissions: RolePermissionsOptions
+  defaultName?: string
   onSubmit: (values: CreateRoleFormValues) => void
   isPending: boolean
   /** Already localized. Shown in the form-level alert. */
@@ -26,13 +27,18 @@ type CreateRoleFormProps = {
 export function CreateRoleForm({
   copy,
   permissions,
+  defaultName,
   onSubmit,
   isPending,
   errorMessage,
 }: CreateRoleFormProps) {
   const form = useForm<CreateRoleFormInput, unknown, CreateRoleFormValues>({
     resolver: zodResolver(CreateRoleSchema),
-    defaultValues: { name: "", description: "", permissions: [] },
+    defaultValues: {
+      name: defaultName ?? "",
+      description: "",
+      permissions: [],
+    },
   })
 
   return (
