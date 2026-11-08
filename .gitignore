@@ -38,3 +38,5 @@ dist-ssr
 
 # Temporary output files
 .tmp/
+
+openapi/
