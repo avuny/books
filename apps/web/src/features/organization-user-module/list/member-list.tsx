@@ -135,6 +135,7 @@ export function OrganizationUserList({ orgId }: OrganizationUserListProps) {
       createMemberColumns({
         copy: {
           member: t("table.member"),
+          identifier: t("table.identifier"),
           status: t("table.status"),
           joined: t("table.joined"),
           lastAccessed: t("table.lastAccessed"),
@@ -243,6 +244,7 @@ export function OrganizationUserList({ orgId }: OrganizationUserListProps) {
           <MemberMobileCard
             member={row.original}
             copy={{
+              identifierLabel: t("table.identifier"),
               never: t("table.never"),
               joinedLabel: t("table.joined"),
               lastAccessedLabel: t("table.lastAccessed"),

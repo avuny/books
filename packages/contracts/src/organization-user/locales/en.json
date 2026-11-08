@@ -39,7 +39,7 @@
     "description": "People who belong to this organization. Manage their usernames, access and ownership.",
     "search": {
       "label": "Search members",
-      "placeholder": "Search by username"
+      "placeholder": "Search by username or identifier"
     },
     "tabs": {
       "typeAria": "Filter members by type",
@@ -49,13 +49,14 @@
   },
   "table": {
     "member": "Member",
+    "identifier": "Identifier",
     "type": "Type",
     "status": "Status",
     "joined": "Joined",
     "lastAccessed": "Last active",
     "never": "Never",
     "actions": "Actions",
-    "actionsFor": "Actions for {{name}}"
+    "actionsFor": "Actions for {name}"
   },
   "empty": {
     "title": "No members found",
@@ -66,9 +67,9 @@
     "previous": "Previous",
     "next": "Next",
     "rowsPerPage": "Rows per page",
-    "summary": "{{from}}–{{to}} of {{total}}",
-    "pageOf": "Page {{page}} of {{pageCount}}",
-    "goTo": "Go to page {{page}}"
+    "summary": "{from}–{to} of {total}",
+    "pageOf": "Page {page} of {pageCount}",
+    "goTo": "Go to page {page}"
   },
   "fields": {
     "username": {
@@ -82,21 +83,21 @@
   },
   "edit": {
     "title": "Edit username",
-    "description": "Change how {{name}} appears in this organization.",
+    "description": "Change how {name} appears in this organization.",
     "submitLabel": "Save changes",
     "submittingLabel": "Saving…"
   },
   "deactivate": {
     "title": "Deactivate member?",
-    "description": "{{name}} will lose access to this organization until they are reactivated."
+    "description": "{name} will lose access to this organization until they are reactivated."
   },
   "activate": {
     "title": "Reactivate member?",
-    "description": "{{name}} will be able to access this organization again."
+    "description": "{name} will be able to access this organization again."
   },
   "transfer": {
-    "title": "Transfer ownership to {{name}}?",
-    "description": "{{name}} will become the owner and you will no longer be the owner. Type the organization code to confirm.",
+    "title": "Transfer ownership to {name}?",
+    "description": "{name} will become the owner and you will no longer be the owner. Type the organization code to confirm.",
     "submitLabel": "Transfer ownership",
     "submittingLabel": "Transferring…"
   }

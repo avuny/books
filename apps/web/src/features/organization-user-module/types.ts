@@ -1,11 +1,13 @@
 import type {
   OrganizationUserDto,
+  PrimaryIdentifierDto,
   TransferOrganizationOwnershipInput,
   UpdateOrganizationUserInput,
 } from "@avuny/contracts"
 
 export type {
   OrganizationUserDto,
+  PrimaryIdentifierDto,
   TransferOrganizationOwnershipInput,
   UpdateOrganizationUserInput,
 }

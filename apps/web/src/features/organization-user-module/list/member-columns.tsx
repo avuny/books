@@ -11,6 +11,7 @@ import type { MemberStatus, OrganizationUserDto } from "../types"
 
 export type MemberColumnsCopy = {
   member: string
+  identifier: string
   status: string
   joined: string
   lastAccessed: string
@@ -43,6 +44,25 @@ export function createMemberColumns({
           {row.original.username}
         </div>
       ),
+    },
+    {
+      id: "primaryIdentifier",
+      header: copy.identifier,
+      enableSorting: false,
+      cell: ({ row }) => {
+        const identifier = row.original.primaryIdentifier
+        if (!identifier?.value) {
+          return <span className="text-muted-foreground">—</span>
+        }
+        return (
+          <div
+            className="max-w-xs truncate text-muted-foreground"
+            title={identifier.value}
+          >
+            {identifier.value}
+          </div>
+        )
+      },
     },
     {
       id: "status",

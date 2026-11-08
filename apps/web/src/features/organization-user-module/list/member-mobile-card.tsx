@@ -9,6 +9,7 @@ import { getMemberStatus } from "../lib"
 import type { MemberStatus, OrganizationUserDto } from "../types"
 
 export type MemberMobileCardCopy = {
+  identifierLabel: string
   never: string
   joinedLabel: string
   lastAccessedLabel: string
@@ -43,6 +44,14 @@ export function MemberMobileCard({
         />
       }
       fields={[
+        ...(member.primaryIdentifier?.value
+          ? [
+              {
+                label: copy.identifierLabel,
+                value: member.primaryIdentifier.value,
+              },
+            ]
+          : []),
         { label: copy.joinedLabel, value: copy.formatDate(member.createdAt) },
         {
           label: copy.lastAccessedLabel,
