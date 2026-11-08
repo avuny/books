@@ -26,6 +26,12 @@ export const OrganizationUsernameSchema = z
 
 /* ---------- DTOs ---------- */
 
+export const PrimaryIdentifierDtoSchema = z.object({
+  type: z.enum(["email", "phone", "username"]),
+  value: z.string(),
+})
+export type PrimaryIdentifierDto = z.infer<typeof PrimaryIdentifierDtoSchema>
+
 /** `type` is intentionally omitted – membership kind is determined by assigned roles. */
 export const OrganizationUserDtoSchema = z.object({
   id: z.string().uuid(),
@@ -33,6 +39,7 @@ export const OrganizationUserDtoSchema = z.object({
   userId: z.string().uuid(),
   username: z.string(),
   isActive: z.boolean(),
+  primaryIdentifier: PrimaryIdentifierDtoSchema.nullable(),
   lastAccessedAt: z.string().datetime().nullable(),
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime(),

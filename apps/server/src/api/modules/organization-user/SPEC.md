@@ -32,7 +32,8 @@ The organization-user module manages memberships within organizations: listing m
 
 ### 3.1 Listing Members (`GET /organizations/{orgId}/members`)
 - Caller must have `read:organization-user` permission on the organization.
-- Supports offset pagination (`page`, `pageSize`) and search/filter.
+- Supports offset pagination (`page`, `pageSize`) and search/filter by username or primary identifier.
+- Returns member details along with their primary identifier (`{ type, value }` or null).
 
 ### 3.2 Switcher / My Organizations (`GET /me/organizations`)
 - Lists all active memberships for the caller across all organizations, sorted by `lastAccessedAt` desc.

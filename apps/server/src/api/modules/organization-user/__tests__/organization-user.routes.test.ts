@@ -27,8 +27,13 @@ describe("organization-user routes", () => {
     type: "managed" as const,
     username: "john_doe",
     isActive: true,
+    primaryIdentifier: {
+      type: "email" as const,
+      value: "john@example.com",
+    },
     lastAccessedAt: new Date().toISOString(),
     createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
   }
 
   describe("myOrganizationListRoute", () => {

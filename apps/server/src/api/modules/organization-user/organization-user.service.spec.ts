@@ -67,12 +67,21 @@ describe("organizationUserService", () => {
     })
 
     it("returns a page of DTOs", async () => {
-      t.repository.list.mockResolvedValue({ rows: [member()], total: 1 })
+      t.repository.list.mockResolvedValue({
+        rows: [
+          {
+            member: member(),
+            primaryIdentifier: { type: "email", value: "sara@example.com" },
+          },
+        ],
+        total: 1,
+      })
       const res = await t.service.list("u-owner", "org-1", { page: 1, pageSize: 20 })
       expect(res).toMatchObject({ success: true })
       if (res.success) {
         expect(res.data.total).toBe(1)
         expect(res.data.items[0]?.username).toBe("sara")
+        expect(res.data.items[0]?.primaryIdentifier?.value).toBe("sara@example.com")
       }
     })
   })

@@ -108,7 +108,11 @@ export function createOrganizationUserService(
       const { rows, total } = await repo.list(orgId, query)
       return ok({
         data: {
-          items: rows.map(toOrganizationUserDto),
+          items: rows.map((r: any) =>
+            "member" in r
+              ? toOrganizationUserDto(r.member, r.primaryIdentifier)
+              : toOrganizationUserDto(r)
+          ),
           page: query.page,
           pageSize: query.pageSize,
           total,

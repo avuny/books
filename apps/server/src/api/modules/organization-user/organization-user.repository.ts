@@ -1,7 +1,8 @@
-import { and, asc, eq, ilike, sql, type SQL } from "drizzle-orm"
+import { and, asc, eq, ilike, or, sql, type SQL } from "drizzle-orm"
 import {
   organizationUsers,
   organizations,
+  userIdentifiers,
   type DB,
   type NewOrganizationUser,
   type Organization,
@@ -14,6 +15,14 @@ import { isUniqueViolation } from "../shared/pg-errors.js"
 // Index names from packages/db/src/schema/organization/organizations.ts
 const UX_MEMBER = "ux_org_user_member"
 const UX_USERNAME = "ux_org_user_username"
+
+export type MemberWithPrimaryIdentifier = {
+  member: OrganizationUser
+  primaryIdentifier: {
+    type: "email" | "phone" | "username"
+    value: string
+  } | null
+}
 
 export type OrganizationUserWriteResult =
   | { ok: true; row: OrganizationUser }
@@ -136,28 +145,64 @@ export function createOrganizationUserRepository({ db }: { db: DB }) {
       orgId: string,
       f: ListMembersFilter,
       tx?: Tx
-    ): Promise<{ rows: OrganizationUser[]; total: number }> {
+    ): Promise<{ rows: MemberWithPrimaryIdentifier[]; total: number }> {
       const conditions: SQL[] = [eq(organizationUsers.orgId, orgId)]
       if (f.isActive !== undefined)
         conditions.push(eq(organizationUsers.isActive, f.isActive))
-      if (f.search)
+      if (f.search) {
+        const pattern = `%${escapeLike(f.search)}%`
         conditions.push(
-          ilike(organizationUsers.username, `%${escapeLike(f.search)}%`)
+          or(
+            ilike(organizationUsers.username, pattern),
+            ilike(userIdentifiers.value, pattern)
+          )!
         )
+      }
       const where = and(...conditions)
 
       const rows = await exec(tx)
-        .select()
+        .select({
+          member: organizationUsers,
+          primaryIdentifierType: userIdentifiers.type,
+          primaryIdentifierValue: userIdentifiers.value,
+        })
         .from(organizationUsers)
+        .leftJoin(
+          userIdentifiers,
+          and(
+            eq(userIdentifiers.userId, organizationUsers.userId),
+            eq(userIdentifiers.isPrimary, true)
+          )
+        )
         .where(where)
         .orderBy(asc(organizationUsers.createdAt), asc(organizationUsers.id))
         .limit(f.pageSize)
         .offset((f.page - 1) * f.pageSize)
+
       const [counted] = await exec(tx)
         .select({ total: sql<number>`count(*)::int` })
         .from(organizationUsers)
+        .leftJoin(
+          userIdentifiers,
+          and(
+            eq(userIdentifiers.userId, organizationUsers.userId),
+            eq(userIdentifiers.isPrimary, true)
+          )
+        )
         .where(where)
-      return { rows, total: counted?.total ?? 0 }
+
+      const items: MemberWithPrimaryIdentifier[] = rows.map((r) => ({
+        member: r.member,
+        primaryIdentifier:
+          r.primaryIdentifierType && r.primaryIdentifierValue
+            ? {
+                type: r.primaryIdentifierType,
+                value: r.primaryIdentifierValue,
+              }
+            : null,
+      }))
+
+      return { rows: items, total: counted?.total ?? 0 }
     },
 
     async countActiveByType(
