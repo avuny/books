@@ -23,4 +23,8 @@ export const ROUTES = {
   },
 
   home: "/",
+  invitations: {
+    inbox: "/invitations",
+    accept: "/invitations/accept",
+  },
 }

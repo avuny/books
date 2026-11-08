@@ -11,12 +11,14 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthRouteRouteImport } from './routes/auth/route'
+import { Route as InvitationsRouteRouteImport } from './routes/invitations/route'
 import { Route as OrganizationRouteRouteImport } from './routes/organization/route'
 import { Route as UserRouteRouteImport } from './routes/user/route'
 import { Route as AuthIndexRouteImport } from './routes/auth/index'
 import { Route as AuthForgotPasswordRouteImport } from './routes/auth/forgot-password'
 import { Route as AuthSignInRouteImport } from './routes/auth/sign-in'
 import { Route as AuthSignUpRouteImport } from './routes/auth/sign-up'
+import { Route as InvitationsIndexRouteImport } from './routes/invitations/index'
 import { Route as InvitationsAcceptRouteImport } from './routes/invitations/accept'
 import { Route as OrganizationIndexRouteImport } from './routes/organization/index'
 import { Route as OrganizationOrgIdRouteRouteImport } from './routes/organization/$orgId/route'
@@ -40,6 +42,11 @@ const IndexRoute = IndexRouteImport.update({
 const AuthRouteRoute = AuthRouteRouteImport.update({
   id: '/auth',
   path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InvitationsRouteRoute = InvitationsRouteRouteImport.update({
+  id: '/invitations',
+  path: '/invitations',
   getParentRoute: () => rootRouteImport,
 } as any)
 const OrganizationRouteRoute = OrganizationRouteRouteImport.update({
@@ -72,10 +79,15 @@ const AuthSignUpRoute = AuthSignUpRouteImport.update({
   path: '/sign-up',
   getParentRoute: () => AuthRouteRoute,
 } as any)
+const InvitationsIndexRoute = InvitationsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => InvitationsRouteRoute,
+} as any)
 const InvitationsAcceptRoute = InvitationsAcceptRouteImport.update({
-  id: '/invitations/accept',
-  path: '/invitations/accept',
-  getParentRoute: () => rootRouteImport,
+  id: '/accept',
+  path: '/accept',
+  getParentRoute: () => InvitationsRouteRoute,
 } as any)
 const OrganizationIndexRoute = OrganizationIndexRouteImport.update({
   id: '/',
@@ -152,6 +164,7 @@ const OrganizationOrgIdUsersIndexRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRouteRouteWithChildren
+  '/invitations': typeof InvitationsRouteRouteWithChildren
   '/organization': typeof OrganizationRouteRouteWithChildren
   '/user': typeof UserRouteRouteWithChildren
   '/organization/$orgId': typeof OrganizationOrgIdRouteRouteWithChildren
@@ -162,6 +175,7 @@ export interface FileRoutesByFullPath {
   '/organization/create': typeof OrganizationCreateRoute
   '/user/settings': typeof UserSettingsRoute
   '/auth/': typeof AuthIndexRoute
+  '/invitations/': typeof InvitationsIndexRoute
   '/organization/': typeof OrganizationIndexRoute
   '/user/': typeof UserIndexRoute
   '/organization/$orgId/settings': typeof OrganizationOrgIdSettingsRouteRouteWithChildren
@@ -182,6 +196,7 @@ export interface FileRoutesByTo {
   '/organization/create': typeof OrganizationCreateRoute
   '/user/settings': typeof UserSettingsRoute
   '/auth': typeof AuthIndexRoute
+  '/invitations': typeof InvitationsIndexRoute
   '/organization': typeof OrganizationIndexRoute
   '/user': typeof UserIndexRoute
   '/organization/$orgId/role': typeof OrganizationOrgIdRoleRoute
@@ -196,6 +211,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/auth': typeof AuthRouteRouteWithChildren
+  '/invitations': typeof InvitationsRouteRouteWithChildren
   '/organization': typeof OrganizationRouteRouteWithChildren
   '/user': typeof UserRouteRouteWithChildren
   '/organization/$orgId': typeof OrganizationOrgIdRouteRouteWithChildren
@@ -206,6 +222,7 @@ export interface FileRoutesById {
   '/organization/create': typeof OrganizationCreateRoute
   '/user/settings': typeof UserSettingsRoute
   '/auth/': typeof AuthIndexRoute
+  '/invitations/': typeof InvitationsIndexRoute
   '/organization/': typeof OrganizationIndexRoute
   '/user/': typeof UserIndexRoute
   '/organization/$orgId/settings': typeof OrganizationOrgIdSettingsRouteRouteWithChildren
@@ -222,6 +239,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/auth'
+    | '/invitations'
     | '/organization'
     | '/user'
     | '/organization/$orgId'
@@ -232,6 +250,7 @@ export interface FileRouteTypes {
     | '/organization/create'
     | '/user/settings'
     | '/auth/'
+    | '/invitations/'
     | '/organization/'
     | '/user/'
     | '/organization/$orgId/settings'
@@ -252,6 +271,7 @@ export interface FileRouteTypes {
     | '/organization/create'
     | '/user/settings'
     | '/auth'
+    | '/invitations'
     | '/organization'
     | '/user'
     | '/organization/$orgId/role'
@@ -265,6 +285,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/auth'
+    | '/invitations'
     | '/organization'
     | '/user'
     | '/organization/$orgId'
@@ -275,6 +296,7 @@ export interface FileRouteTypes {
     | '/organization/create'
     | '/user/settings'
     | '/auth/'
+    | '/invitations/'
     | '/organization/'
     | '/user/'
     | '/organization/$orgId/settings'
@@ -290,9 +312,9 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthRouteRoute: typeof AuthRouteRouteWithChildren
+  InvitationsRouteRoute: typeof InvitationsRouteRouteWithChildren
   OrganizationRouteRoute: typeof OrganizationRouteRouteWithChildren
   UserRouteRoute: typeof UserRouteRouteWithChildren
-  InvitationsAcceptRoute: typeof InvitationsAcceptRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -309,6 +331,13 @@ declare module '@tanstack/react-router' {
       path: '/auth'
       fullPath: '/auth'
       preLoaderRoute: typeof AuthRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/invitations': {
+      id: '/invitations'
+      path: '/invitations'
+      fullPath: '/invitations'
+      preLoaderRoute: typeof InvitationsRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/organization': {
@@ -353,12 +382,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthSignUpRouteImport
       parentRoute: typeof AuthRouteRoute
     }
+    '/invitations/': {
+      id: '/invitations/'
+      path: '/'
+      fullPath: '/invitations/'
+      preLoaderRoute: typeof InvitationsIndexRouteImport
+      parentRoute: typeof InvitationsRouteRoute
+    }
     '/invitations/accept': {
       id: '/invitations/accept'
-      path: '/invitations/accept'
+      path: '/accept'
       fullPath: '/invitations/accept'
       preLoaderRoute: typeof InvitationsAcceptRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof InvitationsRouteRoute
     }
     '/organization/': {
       id: '/organization/'
@@ -472,6 +508,19 @@ const AuthRouteRouteWithChildren = AuthRouteRoute._addFileChildren(
   AuthRouteRouteChildren,
 )
 
+interface InvitationsRouteRouteChildren {
+  InvitationsAcceptRoute: typeof InvitationsAcceptRoute
+  InvitationsIndexRoute: typeof InvitationsIndexRoute
+}
+
+const InvitationsRouteRouteChildren: InvitationsRouteRouteChildren = {
+  InvitationsAcceptRoute: InvitationsAcceptRoute,
+  InvitationsIndexRoute: InvitationsIndexRoute,
+}
+
+const InvitationsRouteRouteWithChildren =
+  InvitationsRouteRoute._addFileChildren(InvitationsRouteRouteChildren)
+
 interface OrganizationOrgIdSettingsRouteRouteChildren {
   OrganizationOrgIdSettingsIndexRoute: typeof OrganizationOrgIdSettingsIndexRoute
 }
@@ -546,9 +595,9 @@ const UserRouteRouteWithChildren = UserRouteRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthRouteRoute: AuthRouteRouteWithChildren,
+  InvitationsRouteRoute: InvitationsRouteRouteWithChildren,
   OrganizationRouteRoute: OrganizationRouteRouteWithChildren,
   UserRouteRoute: UserRouteRouteWithChildren,
-  InvitationsAcceptRoute: InvitationsAcceptRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
