@@ -322,7 +322,7 @@ export function createRoleRepository({ db }: { db: DB }) {
         orgUserId: string
         add: string[]
         remove: string[]
-        assignedByUserId: string
+        assignedByUserId?: string | null
       },
       tx?: Tx
     ): Promise<void> {
@@ -343,7 +343,7 @@ export function createRoleRepository({ db }: { db: DB }) {
               orgId: p.orgId,
               orgUserId: p.orgUserId,
               roleId,
-              assignedByUserId: p.assignedByUserId,
+              assignedByUserId: p.assignedByUserId ?? null,
             }))
           )
           .onConflictDoNothing()

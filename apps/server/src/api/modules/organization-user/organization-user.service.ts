@@ -325,6 +325,13 @@ export function createOrganizationUserService(
       return repo.findByOrgAndUser(orgId, userId)
     },
 
+    async findMemberById(
+      orgId: string,
+      memberId: string
+    ): Promise<OrganizationUser | null> {
+      return repo.findById(orgId, memberId)
+    },
+
     async countActive(
       orgId: string,
       type: "owner" | "managed" | "portal"

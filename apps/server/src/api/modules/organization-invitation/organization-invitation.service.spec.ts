@@ -84,6 +84,7 @@ function setup() {
 
   const organizationUserService = {
     findMember: vi.fn(async (_o: string, _u: string): Promise<OrganizationUser | null> => inviter),
+    findMemberById: vi.fn(async (_o: string, _m: string): Promise<OrganizationUser | null> => inviter),
     countActive: vi.fn(async () => 0),
     addMember: vi.fn(async (v: { orgId: string; userId: string; username?: string }) =>
       ok({
@@ -359,6 +360,7 @@ describe("organizationInvitationService", () => {
         expect.objectContaining({
           orgId: "org-1",
           roleId: "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11",
+          assignedByUserId: "u-owner",
         })
       )
       expect(t.repository.markAccepted).toHaveBeenCalledWith(

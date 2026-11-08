@@ -386,14 +386,14 @@ export function createRoleService(deps: RoleServiceDeps) {
       orgId: string
       memberId: string
       roleId: string
-      assignedByUserId: string
+      assignedByUserId?: string | null
     }): Promise<void> {
       await repo.applyMemberRoles({
         orgId: params.orgId,
         orgUserId: params.memberId,
         add: [params.roleId],
         remove: [],
-        assignedByUserId: params.assignedByUserId,
+        assignedByUserId: params.assignedByUserId ?? null,
       })
       await resolver.invalidateMember(params.memberId)
     },

@@ -261,11 +261,15 @@ export const createOrganizationInvitationService = ({
 
     // Assign role if specified on invitation
     if (row.roleId) {
+      const inviterMember = await organizationUserService.findMemberById(
+        row.orgId,
+        row.invitedBy
+      )
       await roleService.assignRole({
         orgId: row.orgId,
         memberId: member.id,
         roleId: row.roleId,
-        assignedByUserId: row.invitedBy,
+        assignedByUserId: inviterMember?.userId ?? null,
       })
     }
 
