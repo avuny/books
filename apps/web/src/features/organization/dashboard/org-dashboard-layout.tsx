@@ -15,7 +15,7 @@ import { cn } from "@workspace/ui/lib/utils"
 import DashboardButton from "@/components/buttons/dashboard-button"
 import { HomeButton } from "@/components/buttons/home-button"
 import { LanguageSwitcherButton } from "@/components/buttons/language-button"
-import UserButton from "@/components/buttons/user-button"
+import { UserButtonContainer } from "@/components/buttons/user-button"
 import { OrganizationSwitcher } from "../list/organization-switcher"
 import { OrgDashboardSidebar } from "./org-dashboard-sidebar"
 
@@ -55,7 +55,7 @@ export function OrgDashboardLayout({
                 <Settings2Icon className="size-4" />
                 <span className="sr-only">Organization settings</span>
               </Link>
-              <UserButton />
+              <UserButtonContainer />
               <ModeSwitcherBtn />
               <LanguageSwitcherButton />
             </div>

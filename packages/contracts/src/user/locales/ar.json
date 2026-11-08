@@ -172,7 +172,8 @@
     "account": "الحساب",
     "settings": "الإعدادات",
     "notifications": "الإشعارات",
-    "logout": "تسجيل الخروج"
+    "logout": "تسجيل الخروج",
+    "invitations": "الدعوات"
   },
   "settings": {
     "header": "الإعدادات",

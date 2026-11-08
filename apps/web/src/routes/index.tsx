@@ -1,11 +1,11 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router"
+import { createFileRoute } from "@tanstack/react-router"
 import { useTranslation } from "react-i18next"
 
 import { Navbar } from "@workspace/ui/blocks/layout/navbar"
 import ModeSwitcherBtn from "@workspace/ui/blocks/buttons/mode-switcher-btn"
-import UserButton from "@/components/buttons/user-button"
+import { UserButtonContainer } from "@/components/buttons/user-button"
 
-import { useSignOut } from "@/api"
+
 import DashboardButton from "@/components/buttons/dashboard-button"
 import { HomeButton } from "@/components/buttons/home-button"
 import { LanguageSwitcherButton } from "@/components/buttons/language-button"
@@ -17,16 +17,11 @@ export const Route = createFileRoute("/")({
 
 function Index() {
   const { t } = useTranslation("common")
-  const navigate = useNavigate()
 
-  const { mutateAsync: signOut, isPending } = useSignOut({})
+
+
   const { data, isLoading } = useAuthenticatedHandler()
-  const useSignOutHandler = () => ({
-    submit: async () => {
-      await signOut()
-    },
-    isPending,
-  })
+
 
   return (
     <>
@@ -39,13 +34,10 @@ function Index() {
         }
         end={
           <>
-            <UserButton
+            <UserButtonContainer
               user={data?.data}
               isLoading={isLoading}
-              onClick={() => {
-                void navigate({ to: "/auth/sign-in" })
-              }}
-              useSignOutHandler={useSignOutHandler}
+
             />
 
             <ModeSwitcherBtn />

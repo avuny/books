@@ -1,6 +1,13 @@
 "use client"
 
-import { BadgeCheck, Bell, CreditCard, LogOut, Sparkles } from "lucide-react"
+import {
+  BadgeCheck,
+  Bell,
+  CreditCard,
+  Inbox,
+  LogOut,
+  Sparkles,
+} from "lucide-react"
 import React from "react"
 
 import {
@@ -34,6 +41,7 @@ export type UserDropdownMenuProps = {
     upgrade?: MenuSection
     account?: MenuSection
     billing?: MenuSection
+    invitations?: MenuSection
     notifications?: MenuSection
     logout?: MenuSection
   }
@@ -53,6 +61,7 @@ export function UserDropdownMenu({
     upgrade,
     account,
     billing,
+    invitations,
     notifications,
     logout = { enabled: true }, // Default to enabled
   } = sections
@@ -60,6 +69,7 @@ export function UserDropdownMenu({
   const showUpgrade = upgrade?.enabled
   const showAccount = account?.enabled
   const showBilling = billing?.enabled
+  const showInvitations = invitations?.enabled
   const showNotifications = notifications?.enabled
   const showLogout = logout?.enabled
 
@@ -107,7 +117,10 @@ export function UserDropdownMenu({
           </>
         )}
 
-        {(showAccount || showBilling || showNotifications) && (
+        {(showAccount ||
+          showBilling ||
+          showInvitations ||
+          showNotifications) && (
           <>
             <DropdownMenuGroup>
               {showAccount && (
@@ -120,6 +133,12 @@ export function UserDropdownMenu({
                 <DropdownMenuItem onClick={billing?.onClick}>
                   <CreditCard className="mr-2 size-4" />
                   {billing?.label || "Billing"}
+                </DropdownMenuItem>
+              )}
+              {showInvitations && (
+                <DropdownMenuItem onClick={invitations?.onClick}>
+                  <Inbox className="mr-2 size-4" />
+                  {invitations?.label || "My invitations"}
                 </DropdownMenuItem>
               )}
               {showNotifications && (

@@ -9,6 +9,7 @@ import { LogInIcon } from "lucide-react"
 export type UserButtonCopy = {
   account?: string
   notifications?: string
+  invitations?: string
   logout?: string
   upgrade?: string
   billing?: string
@@ -20,6 +21,8 @@ export type UserButtonProps = {
   onClick: () => void
   onAccountClick?: () => void
   onNotificationsClick?: () => void
+  /** The "My invitations" item is only shown when this is provided. */
+  onInvitationsClick?: () => void
   copy?: UserButtonCopy
   useSignOutHandler(): {
     submit: () => Promise<void>
@@ -33,6 +36,7 @@ export default function UserButton({
   onClick,
   onAccountClick,
   onNotificationsClick,
+  onInvitationsClick,
   copy,
   useSignOutHandler,
 }: UserButtonProps) {
@@ -67,6 +71,11 @@ export default function UserButton({
           enabled: true,
           label: copy?.account,
           onClick: onAccountClick,
+        },
+        invitations: {
+          enabled: Boolean(onInvitationsClick),
+          label: copy?.invitations,
+          onClick: onInvitationsClick,
         },
         notifications: {
           enabled: true,

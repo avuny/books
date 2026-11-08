@@ -172,7 +172,8 @@
     "account": "Account",
     "settings": "Settings",
     "notifications": "Notifications",
-    "logout": "Log out"
+    "logout": "Log out",
+    "invitations": "Invitations"
   },
   "settings": {
     "header": "Settings",

@@ -6,8 +6,7 @@ import UserButton, {
   type UserButtonProps,
   type UserButtonCopy,
 } from "@workspace/ui/blocks/buttons/user-btn"
-import { useSignOut } from "@/api"
-import { useAuthenticatedHandler } from "@/features/auth"
+import { useAuthenticatedHandler, useSignOutHandler as useDefaultSignOutHandler } from "@/features/auth"
 import { ROUTES } from "@/features/routes"
 
 export type UserButtonContainerProps = Partial<UserButtonProps>
@@ -18,6 +17,7 @@ export function UserButtonContainer({
   onClick,
   onAccountClick,
   onNotificationsClick,
+  onInvitationsClick,
   copy: propCopy,
   useSignOutHandler: propUseSignOutHandler,
 }: UserButtonContainerProps) {
@@ -25,22 +25,17 @@ export function UserButtonContainer({
   const { t } = useTranslation("user")
 
   const auth = useAuthenticatedHandler()
-  const { mutateAsync: signOut, isPending } = useSignOut({})
-
-  const defaultSignOutHandler = () => ({
-    submit: async () => {
-      await signOut()
-    },
-    isPending,
-  })
 
   const user = propUser !== undefined ? propUser : auth.data?.data
   const isLoading = propIsLoading !== undefined ? propIsLoading : auth.isLoading
-  const useSignOutHandler = propUseSignOutHandler ?? defaultSignOutHandler
+
+  const useSignOutHandler =
+    propUseSignOutHandler ?? useDefaultSignOutHandler
 
   const copy: UserButtonCopy = {
     account: propCopy?.account ?? t("menu.account"),
     notifications: propCopy?.notifications ?? t("menu.notifications"),
+    invitations: propCopy?.invitations ?? t("menu.invitations"),
     logout: propCopy?.logout ?? t("menu.logout"),
   }
 
@@ -60,6 +55,14 @@ export function UserButtonContainer({
     }
   }
 
+  const handleInvitations = () => {
+    if (onInvitationsClick) {
+      onInvitationsClick()
+    } else {
+      void navigate({ to: ROUTES.invitations.inbox })
+    }
+  }
+
   return (
     <UserButton
       user={user}
@@ -67,6 +70,7 @@ export function UserButtonContainer({
       onClick={handleSignIn}
       onAccountClick={handleAccount}
       onNotificationsClick={onNotificationsClick}
+      onInvitationsClick={handleInvitations}
       copy={copy}
       useSignOutHandler={useSignOutHandler}
     />
