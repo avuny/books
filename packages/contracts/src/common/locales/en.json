@@ -87,8 +87,8 @@
     "required": "This field is required",
     "invalidEmail": "Please enter a valid email address",
     "invalidIdentifier": "Please enter a valid email address",
-    "minLength": "Must be at least {{min}} characters",
-    "maxLength": "Must be less than {{max}} characters"
+    "minLength": "Must be at least {min} characters",
+    "maxLength": "Must be less than {max} characters"
   },
   "combobox": {
     "loading": "Loading…",
