@@ -2,10 +2,17 @@ import { sql, type SQL } from "drizzle-orm"
 import {
   bigint,
   char,
+  numeric,
   timestamp,
   uuid,
   type AnyPgColumn,
 } from "drizzle-orm/pg-core"
+import {
+  CONVERSION_FACTOR_PRECISION,
+  CONVERSION_FACTOR_SCALE,
+  QUANTITY_PRECISION,
+  QUANTITY_SCALE,
+} from "@avuny/contracts/unit"
 
 /**
  * SHARED COLUMNS & UTILS: the ONLY cross-cutting file of the schema.
@@ -52,6 +59,23 @@ export const money = (name: string) =>
 export const currency = (name = "currency") =>
   char(name, { length: 3 }).notNull()
 
+/* ---------- quantities & unit conversion ---------- */
+
+// Stock quantity in the item's BASE unit: numeric(18, 6). Nullable by default, chain
+// `.notNull()` where required. Drizzle returns numeric as a string: use a decimal
+// library for arithmetic, never JS floats.
+export const quantity = (name: string) =>
+  numeric(name, { precision: QUANTITY_PRECISION, scale: QUANTITY_SCALE })
+
+// Units of the BASE unit that one of this unit equals (cm -> 0.01 m). numeric(24, 12).
+// Also use it (with `quantity()`) for the "entered unit + conversion snapshot" columns on
+// source documents and stock-movement lines.
+export const conversionFactor = (name = "conversion_factor") =>
+  numeric(name, {
+    precision: CONVERSION_FACTOR_PRECISION,
+    scale: CONVERSION_FACTOR_SCALE,
+  }).notNull()
+
 /* ---------- check-constraint helpers ---------- */
 
 // Use inside a table's extra-config callback:
@@ -72,6 +96,18 @@ export const isNormalized = (col: AnyPgColumn): SQL =>
  */
 export const matchesRegex = (col: AnyPgColumn, pattern: string): SQL =>
   sql`${col} ~ ${sql.raw(`'${pattern.replace(/'/g, "''")}'`)}`
+
+/**
+ * `char_length(col) BETWEEN min AND max`, with the bounds inlined from the shared
+ * contracts constants (check constraints cannot use bind params), so the API schema
+ * and the database never drift apart. Integers only; throws otherwise.
+ */
+const inlineInt = (n: number): SQL => {
+  if (!Number.isInteger(n)) throw new Error(`Expected an integer, got ${n}`)
+  return sql.raw(String(n))
+}
+export const lengthBetween = (col: AnyPgColumn, min: number, max: number): SQL =>
+  sql`char_length(${col}) BETWEEN ${inlineInt(min)} AND ${inlineInt(max)}`
 
 /** Per-organization sign-in handle: lowercase, 3-31 chars, no ':' or '@'. */
 export const USERNAME_PATTERN = "^[a-z0-9][a-z0-9._-]{2,30}$"
