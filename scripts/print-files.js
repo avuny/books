@@ -49,6 +49,9 @@ Usage:
   node printFiles.js [directory] [options]
   node printFiles.js [directory] [include] [exclude]     (legacy positional form)
 
+Examples:
+    pnpm print-files ./packages/db/src/schema/ --depth 0  > .tmp/flow/database/schema.txt
+
 Recursively prints the contents of every text file under a directory, each one
 preceded by a header with its path, with a directory tree at the top.
 Paths are shown relative to the project root: the git root if there is one,
