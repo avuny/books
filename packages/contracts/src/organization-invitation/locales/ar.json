@@ -57,7 +57,7 @@
     "sent": "آخر إرسال",
     "expires": "تنتهي في",
     "actions": "الإجراءات",
-    "actionsFor": "إجراءات {{name}}",
+    "actionsFor": "إجراءات {name}",
     "existingUser": "مستخدم موجود"
   },
   "empty": {
@@ -69,9 +69,9 @@
     "previous": "السابق",
     "next": "التالي",
     "rowsPerPage": "عدد الصفوف في الصفحة",
-    "summary": "{{from}}–{{to}} من {{total}}",
-    "pageOf": "الصفحة {{page}} من {{pageCount}}",
-    "goTo": "اذهب إلى الصفحة {{page}}"
+    "summary": "{from}–{to} من {total}",
+    "pageOf": "الصفحة {page} من {pageCount}",
+    "goTo": "اذهب إلى الصفحة {page}"
   },
   "create": {
     "title": "دعوة شخص",
@@ -95,11 +95,11 @@
   },
   "revoke": {
     "title": "إلغاء الدعوة؟",
-    "description": "لن يتمكن {{name}} من استخدام هذه الدعوة بعد الآن."
+    "description": "لن يتمكن {name} من استخدام هذه الدعوة بعد الآن."
   },
   "resend": {
     "title": "إعادة إرسال الدعوة؟",
-    "description": "سيصل {{name}} رابط جديد وسيتم تمديد تاريخ الانتهاء. يتوقف الرابط السابق عن العمل."
+    "description": "سيصل {name} رابط جديد وسيتم تمديد تاريخ الانتهاء. يتوقف الرابط السابق عن العمل."
   },
   "inbox": {
     "title": "دعواتي",
@@ -108,20 +108,22 @@
       "title": "لا توجد دعوات مفتوحة",
       "description": "عندما تدعوك مؤسسة، ستظهر دعوتها هنا."
     },
-    "expires": "تنتهي في {{date}}"
+    "expires": "تنتهي في {date}"
   },
   "accept": {
-    "title": "الانضمام إلى {{name}}",
+    "title": "الانضمام إلى {name}",
     "description": "اقبل الدعوة لتصبح عضوًا في هذه المؤسسة.",
+    "descriptionWithRole": "اقبل الدعوة للانضمام إلى هذه المؤسسة بصفتك {role}.",
+    "role": "الدور",
     "submitLabel": "قبول الدعوة",
     "submittingLabel": "جارٍ الانضمام…"
   },
   "decline": {
     "title": "رفض الدعوة؟",
-    "description": "لن تنضم إلى {{name}}. يمكنك أن تطلب منهم دعوتك مجددًا لاحقًا."
+    "description": "لن تنضم إلى {name}. يمكنك أن تطلب منهم دعوتك مجددًا لاحقًا."
   },
   "join": {
-    "title": "الانضمام إلى {{name}}",
+    "title": "الانضمام إلى {name}",
     "description": "تمت دعوتك للانضمام إلى هذه المؤسسة.",
     "organization": "المؤسسة",
     "role": "الدور",

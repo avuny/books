@@ -80,7 +80,9 @@ export function MyInvitationListView({
                   <h2 className="text-sm font-medium text-foreground">
                     {item.title}
                   </h2>
-                  <Badge variant="outline">{item.badge}</Badge>
+                  {item.badge ? (
+                    <Badge variant="outline">{item.badge}</Badge>
+                  ) : null}
                 </div>
                 <p className="text-xs text-muted-foreground">
                   {item.details.join(" · ")}

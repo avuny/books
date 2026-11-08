@@ -34,13 +34,19 @@ export function AcceptInvitation({
   onSignIn,
   onSuccess,
 }: AcceptInvitationProps) {
-  const { t } = useTranslation("organization-invitation")
+  const { t } = useTranslation(["organization-invitation", "role"])
   const [serverError, setServerError] = useState<string | null>(null)
 
   const { preview, isLoading, error } = useInvitationPreview(token)
   const acceptMutation = useAcceptInvitationByTokenMutation()
   const copy = useAcceptInvitationFormCopy()
   const formatDate = useFormatDate()
+
+  const roleLabel = preview?.roleName
+    ? t(`role:labels.systemRoles.${preview.roleName}`, {
+        defaultValue: preview.roleName,
+      })
+    : null
 
   // Called only when Zod validation passes (the resolver guards the fields).
   const handleSubmit = async (values: AcceptMyInvitationInput) => {
@@ -62,6 +68,7 @@ export function AcceptInvitation({
           label: t("join.organization"),
           value: `${preview.orgName} (${preview.orgCode})`,
         },
+        ...(roleLabel ? [{ label: t("join.role"), value: roleLabel }] : []),
         {
           label: t("join.sentTo"),
           value: getInvitationContact(preview) ?? "—",

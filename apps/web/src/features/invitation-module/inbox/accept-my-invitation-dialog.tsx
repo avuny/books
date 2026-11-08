@@ -27,11 +27,17 @@ export function AcceptMyInvitationDialog({
   onOpenChange,
   onSuccess,
 }: AcceptMyInvitationDialogProps) {
-  const { t } = useTranslation("organization-invitation")
+  const { t } = useTranslation(["organization-invitation", "role"])
   const [serverError, setServerError] = useState<string | null>(null)
 
   const acceptMutation = useAcceptMyInvitationMutation()
   const copy = useAcceptInvitationFormCopy()
+
+  const roleLabel = invitation?.roleName
+    ? t(`role:labels.systemRoles.${invitation.roleName}`, {
+        defaultValue: invitation.roleName,
+      })
+    : null
 
   // Called only when Zod validation passes (the resolver guards the fields).
   const handleSubmit = async (values: AcceptMyInvitationInput) => {
@@ -61,8 +67,21 @@ export function AcceptMyInvitationDialog({
           <DialogTitle>
             {t("accept.title", { name: invitation?.org.name })}
           </DialogTitle>
-          <DialogDescription>{t("accept.description")}</DialogDescription>
+          <DialogDescription>
+            {roleLabel
+              ? t("accept.descriptionWithRole", { role: roleLabel })
+              : t("accept.description")}
+          </DialogDescription>
         </DialogHeader>
+
+        {roleLabel ? (
+          <div className="flex items-center justify-between rounded-md border border-border bg-muted/40 px-3 py-2 text-sm">
+            <span className="text-xs text-muted-foreground">
+              {t("accept.role")}:
+            </span>
+            <span className="font-medium text-foreground">{roleLabel}</span>
+          </div>
+        ) : null}
 
         {invitation ? (
           <AcceptInvitationForm

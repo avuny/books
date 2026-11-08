@@ -23,7 +23,7 @@ type MyInvitationListProps = {
 
 // Composition only: strings + API behavior wired into the pure view.
 export function MyInvitationList({ onAccepted }: MyInvitationListProps) {
-  const { t } = useTranslation("organization-invitation")
+  const { t } = useTranslation(["organization-invitation", "role"])
 
   const { invitations, isLoading, error } = useMyInvitations()
   const formatDate = useFormatDate()
@@ -37,14 +37,23 @@ export function MyInvitationList({ onAccepted }: MyInvitationListProps) {
 
   const items = useMemo<MyInvitationItem[]>(
     () =>
-      invitations.map((invitation) => ({
-        id: invitation.id,
-        title: invitation.org.name,
-        details: [
-          invitation.org.code,
-          t("inbox.expires", { date: formatDate(invitation.expiresAt) }),
-        ],
-      })),
+      invitations.map((invitation) => {
+        const roleLabel = invitation.roleName
+          ? t(`role:labels.systemRoles.${invitation.roleName}`, {
+              defaultValue: invitation.roleName,
+            })
+          : undefined
+
+        return {
+          id: invitation.id,
+          title: invitation.org.name,
+          badge: roleLabel,
+          details: [
+            invitation.org.code,
+            t("inbox.expires", { date: formatDate(invitation.expiresAt) }),
+          ],
+        }
+      }),
     [invitations, t, formatDate]
   )
 

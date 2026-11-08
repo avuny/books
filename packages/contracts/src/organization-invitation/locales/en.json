@@ -57,7 +57,7 @@
     "sent": "Last sent",
     "expires": "Expires",
     "actions": "Actions",
-    "actionsFor": "Actions for {{name}}",
+    "actionsFor": "Actions for {name}",
     "existingUser": "Existing user"
   },
   "empty": {
@@ -69,9 +69,9 @@
     "previous": "Previous",
     "next": "Next",
     "rowsPerPage": "Rows per page",
-    "summary": "{{from}}–{{to}} of {{total}}",
-    "pageOf": "Page {{page}} of {{pageCount}}",
-    "goTo": "Go to page {{page}}"
+    "summary": "{from}–{to} of {total}",
+    "pageOf": "Page {page} of {pageCount}",
+    "goTo": "Go to page {page}"
   },
   "create": {
     "title": "Invite someone",
@@ -95,11 +95,11 @@
   },
   "revoke": {
     "title": "Revoke invitation?",
-    "description": "{{name}} will no longer be able to use this invitation."
+    "description": "{name} will no longer be able to use this invitation."
   },
   "resend": {
     "title": "Resend invitation?",
-    "description": "{{name}} will get a new link and the expiry date is extended. The previous link stops working."
+    "description": "{name} will get a new link and the expiry date is extended. The previous link stops working."
   },
   "inbox": {
     "title": "My invitations",
@@ -108,20 +108,22 @@
       "title": "No open invitations",
       "description": "When an organization invites you, it will show up here."
     },
-    "expires": "Expires {{date}}"
+    "expires": "Expires {date}"
   },
   "accept": {
-    "title": "Join {{name}}",
+    "title": "Join {name}",
     "description": "Accept to become a member of this organization.",
+    "descriptionWithRole": "Accept to join this organization as {role}.",
+    "role": "Role",
     "submitLabel": "Accept invitation",
     "submittingLabel": "Joining…"
   },
   "decline": {
     "title": "Decline invitation?",
-    "description": "You will not join {{name}}. You can ask them to invite you again later."
+    "description": "You will not join {name}. You can ask them to invite you again later."
   },
   "join": {
-    "title": "Join {{name}}",
+    "title": "Join {name}",
     "description": "You have been invited to join this organization.",
     "organization": "Organization",
     "role": "Role",
