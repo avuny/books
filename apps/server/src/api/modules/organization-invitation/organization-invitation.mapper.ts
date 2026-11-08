@@ -49,13 +49,15 @@ export function toInvitationPreviewDto(
 
 export function toMyInvitationDto(
   row: OrganizationInvitation,
-  org: OrganizationSummary
+  org: OrganizationSummary,
+  roleName?: string | null
 ): MyInvitationDto {
   return {
     id: row.id,
     org: { id: org.id, code: org.code, name: org.name },
     identifier: row.identifier,
     roleId: row.roleId,
+    roleName: roleName ?? null,
     expiresAt: row.expiresAt.toISOString(),
     createdAt: row.createdAt.toISOString(),
   }

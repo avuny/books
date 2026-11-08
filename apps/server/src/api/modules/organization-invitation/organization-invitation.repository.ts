@@ -15,6 +15,7 @@ import {
 import {
   organizationInvitations as inv,
   organizations,
+  roles,
   type DB,
   type InvitationStatus,
   type NewOrganizationInvitation,
@@ -127,9 +128,10 @@ export const createOrganizationInvitationRepository = ({
       tx?: Tx
     ): Promise<InvitationWithOrganization | null> {
       const [row] = await exec(tx)
-        .select({ invitation: inv, org: orgColumns })
+        .select({ invitation: inv, org: orgColumns, roleName: roles.name })
         .from(inv)
         .innerJoin(organizations, eq(organizations.id, inv.orgId))
+        .leftJoin(roles, eq(roles.id, inv.roleId))
         .where(eq(inv.tokenHash, tokenHash))
         .limit(1)
       return row ?? null
@@ -175,9 +177,10 @@ export const createOrganizationInvitationRepository = ({
       tx?: Tx
     ): Promise<InvitationWithOrganization[]> {
       return exec(tx)
-        .select({ invitation: inv, org: orgColumns })
+        .select({ invitation: inv, org: orgColumns, roleName: roles.name })
         .from(inv)
         .innerJoin(organizations, eq(organizations.id, inv.orgId))
+        .leftJoin(roles, eq(roles.id, inv.roleId))
         .where(
           and(
             eq(inv.inviteeUserId, userId),

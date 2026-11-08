@@ -594,7 +594,7 @@ export const createOrganizationInvitationService = ({
     async preview(token: string): Promise<Result<InvitationPreviewDto, Code>> {
       const found = await repo.findPreviewByTokenHash(tokens.hash(token))
       if (!found) return notFound()
-      const { invitation, org } = found
+      const { invitation, org, roleName: previewRoleName } = found
 
       if (invitation.status !== "pending") {
         return fail({
@@ -618,8 +618,8 @@ export const createOrganizationInvitationService = ({
         })
       }
 
-      let roleName: string | null = null
-      if (invitation.roleId) {
+      let roleName: string | null = previewRoleName ?? null
+      if (!roleName && invitation.roleId) {
         const roleRes = await roleService.getById(
           invitation.orgId,
           invitation.roleId
@@ -641,8 +641,8 @@ export const createOrganizationInvitationService = ({
       const rows = await repo.listPendingForUser(userId, clock())
       return ok({
         data: {
-          items: rows.map(({ invitation, org }) =>
-            toMyInvitationDto(invitation, org)
+          items: rows.map(({ invitation, org, roleName }) =>
+            toMyInvitationDto(invitation, org, roleName)
           ),
         },
         msg: "Invitations retrieved successfully",

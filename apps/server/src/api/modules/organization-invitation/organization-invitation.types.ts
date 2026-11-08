@@ -109,6 +109,7 @@ export type OrganizationSummary = Pick<
 export type InvitationWithOrganization = {
   invitation: OrganizationInvitation
   org: OrganizationSummary
+  roleName?: string | null
 }
 
 export type ListInvitationsFilter = {

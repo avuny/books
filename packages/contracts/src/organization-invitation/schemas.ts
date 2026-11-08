@@ -94,6 +94,7 @@ export const MyInvitationDtoSchema = z.object({
   }),
   identifier: z.string(),
   roleId: z.string().uuid().nullable().optional(),
+  roleName: z.string().nullable().optional(),
   expiresAt: z.string().datetime(),
   createdAt: z.string().datetime(),
 })
