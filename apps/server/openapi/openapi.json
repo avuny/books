@@ -6484,6 +6484,27 @@
                         "isActive": {
                           "type": "boolean"
                         },
+                        "primaryIdentifier": {
+                          "type": "object",
+                          "nullable": true,
+                          "properties": {
+                            "type": {
+                              "type": "string",
+                              "enum": [
+                                "email",
+                                "phone",
+                                "username"
+                              ]
+                            },
+                            "value": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "type",
+                            "value"
+                          ]
+                        },
                         "lastAccessedAt": {
                           "type": "string",
                           "nullable": true,
@@ -6504,6 +6525,7 @@
                         "userId",
                         "username",
                         "isActive",
+                        "primaryIdentifier",
                         "lastAccessedAt",
                         "createdAt",
                         "updatedAt"
@@ -6805,6 +6827,10 @@
                                 "nullable": true,
                                 "format": "uuid"
                               },
+                              "roleName": {
+                                "type": "string",
+                                "nullable": true
+                              },
                               "expiresAt": {
                                 "type": "string",
                                 "format": "date-time"
@@ -6942,6 +6968,27 @@
                         "isActive": {
                           "type": "boolean"
                         },
+                        "primaryIdentifier": {
+                          "type": "object",
+                          "nullable": true,
+                          "properties": {
+                            "type": {
+                              "type": "string",
+                              "enum": [
+                                "email",
+                                "phone",
+                                "username"
+                              ]
+                            },
+                            "value": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "type",
+                            "value"
+                          ]
+                        },
                         "lastAccessedAt": {
                           "type": "string",
                           "nullable": true,
@@ -6962,6 +7009,7 @@
                         "userId",
                         "username",
                         "isActive",
+                        "primaryIdentifier",
                         "lastAccessedAt",
                         "createdAt",
                         "updatedAt"
@@ -7574,6 +7622,27 @@
                               "isActive": {
                                 "type": "boolean"
                               },
+                              "primaryIdentifier": {
+                                "type": "object",
+                                "nullable": true,
+                                "properties": {
+                                  "type": {
+                                    "type": "string",
+                                    "enum": [
+                                      "email",
+                                      "phone",
+                                      "username"
+                                    ]
+                                  },
+                                  "value": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "type",
+                                  "value"
+                                ]
+                              },
                               "lastAccessedAt": {
                                 "type": "string",
                                 "nullable": true,
@@ -7594,6 +7663,7 @@
                               "userId",
                               "username",
                               "isActive",
+                              "primaryIdentifier",
                               "lastAccessedAt",
                               "createdAt",
                               "updatedAt"
@@ -7786,6 +7856,27 @@
                         "isActive": {
                           "type": "boolean"
                         },
+                        "primaryIdentifier": {
+                          "type": "object",
+                          "nullable": true,
+                          "properties": {
+                            "type": {
+                              "type": "string",
+                              "enum": [
+                                "email",
+                                "phone",
+                                "username"
+                              ]
+                            },
+                            "value": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "type",
+                            "value"
+                          ]
+                        },
                         "lastAccessedAt": {
                           "type": "string",
                           "nullable": true,
@@ -7806,6 +7897,7 @@
                         "userId",
                         "username",
                         "isActive",
+                        "primaryIdentifier",
                         "lastAccessedAt",
                         "createdAt",
                         "updatedAt"
@@ -8050,6 +8142,27 @@
                         "isActive": {
                           "type": "boolean"
                         },
+                        "primaryIdentifier": {
+                          "type": "object",
+                          "nullable": true,
+                          "properties": {
+                            "type": {
+                              "type": "string",
+                              "enum": [
+                                "email",
+                                "phone",
+                                "username"
+                              ]
+                            },
+                            "value": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "type",
+                            "value"
+                          ]
+                        },
                         "lastAccessedAt": {
                           "type": "string",
                           "nullable": true,
@@ -8070,6 +8183,7 @@
                         "userId",
                         "username",
                         "isActive",
+                        "primaryIdentifier",
                         "lastAccessedAt",
                         "createdAt",
                         "updatedAt"
@@ -8312,6 +8426,27 @@
                         "isActive": {
                           "type": "boolean"
                         },
+                        "primaryIdentifier": {
+                          "type": "object",
+                          "nullable": true,
+                          "properties": {
+                            "type": {
+                              "type": "string",
+                              "enum": [
+                                "email",
+                                "phone",
+                                "username"
+                              ]
+                            },
+                            "value": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "type",
+                            "value"
+                          ]
+                        },
                         "lastAccessedAt": {
                           "type": "string",
                           "nullable": true,
@@ -8332,6 +8467,7 @@
                         "userId",
                         "username",
                         "isActive",
+                        "primaryIdentifier",
                         "lastAccessedAt",
                         "createdAt",
                         "updatedAt"
