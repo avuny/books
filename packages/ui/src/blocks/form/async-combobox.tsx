@@ -56,7 +56,10 @@ export type ComboboxCreateAction = {
    * `select(option)` once the item exists: it picks that option and sets the form value.
    * `search` is what the user had typed, handy for prefilling a name.
    */
-  onClick: (ctx: { search: string; select: (option: ComboboxOption) => void }) => void
+  onClick: (ctx: {
+    search: string
+    select: (option: ComboboxOption) => void
+  }) => void
 }
 
 export type AsyncComboboxProps = {
@@ -103,7 +106,8 @@ export function AsyncCombobox({
   const selected = React.useMemo(
     () =>
       value
-        ? ([picked, initialOption, ...options].find((o) => o?.id === value) ?? null)
+        ? ([picked, initialOption, ...options].find((o) => o?.id === value) ??
+          null)
         : null,
     [value, picked, initialOption, options]
   )
@@ -236,11 +240,23 @@ export function AsyncCombobox({
   )
 }
 
-function ErrorStatus({ copy, onRetry }: { copy: AsyncComboboxCopy; onRetry: () => void }) {
+function ErrorStatus({
+  copy,
+  onRetry,
+}: {
+  copy: AsyncComboboxCopy
+  onRetry: () => void
+}) {
   return (
     <span className="flex items-center justify-center gap-2">
       {copy.error}
-      <Button type="button" variant="link" size="sm" className="h-auto p-0" onClick={onRetry}>
+      <Button
+        type="button"
+        variant="link"
+        size="sm"
+        className="h-auto p-0"
+        onClick={onRetry}
+      >
         {copy.retry}
       </Button>
     </span>

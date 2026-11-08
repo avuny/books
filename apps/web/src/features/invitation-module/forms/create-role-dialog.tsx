@@ -11,54 +11,53 @@ import { useTranslation } from "react-i18next"
 import type { RoleDto } from "@avuny/contracts"
 
 import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogHeader,
-    DialogTitle,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
 } from "@workspace/ui/components/dialog"
 import { CreateRole } from "@/features/role-module"
 
-
 type CreateRoleDialogProps = {
-    orgId: string
-    open: boolean
-    onOpenChange: (open: boolean) => void
-    /** What the user had typed in the combobox search box. Prefill the name with it if the form supports it. */
-    defaultName?: string
-    /** Receives the created role; the combobox uses it to select the new role. */
-    onSuccess: (role: RoleDto) => void
+  orgId: string
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  /** What the user had typed in the combobox search box. Prefill the name with it if the form supports it. */
+  defaultName?: string
+  /** Receives the created role; the combobox uses it to select the new role. */
+  onSuccess: (role: RoleDto) => void
 }
 
 /** Controlled modal around the create-role form. */
 export function CreateRoleDialog({
-    orgId,
-    open,
-    onOpenChange,
-    defaultName,
-    onSuccess,
+  orgId,
+  open,
+  onOpenChange,
+  defaultName,
+  onSuccess,
 }: CreateRoleDialogProps) {
-    const { t } = useTranslation("role")
+  const { t } = useTranslation("role")
 
-    return (
-        <Dialog open={open} onOpenChange={onOpenChange}>
-            {/* Wider than the invitation dialog: a role form usually carries a permissions picker. */}
-            <DialogContent className="max-h-[90dvh] overflow-y-auto sm:max-w-2xl">
-                <DialogHeader className="sr-only">
-                    <DialogTitle>{t("create.title")}</DialogTitle>
-                    <DialogDescription>{t("create.description")}</DialogDescription>
-                </DialogHeader>
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      {/* Wider than the invitation dialog: a role form usually carries a permissions picker. */}
+      <DialogContent className="max-h-[90dvh] overflow-y-auto sm:max-w-2xl">
+        <DialogHeader className="sr-only">
+          <DialogTitle>{t("create.title")}</DialogTitle>
+          <DialogDescription>{t("create.description")}</DialogDescription>
+        </DialogHeader>
 
-                {/* <- adjust props to your form; `defaultName` is optional */}
-                <CreateRole
-                    orgId={orgId}
-                    defaultName={defaultName}
-                    onSuccess={(role) => {
-                        onSuccess(role) // selects the role in the invitation form's combobox
-                        onOpenChange(false)
-                    }}
-                />
-            </DialogContent>
-        </Dialog>
-    )
+        {/* <- adjust props to your form; `defaultName` is optional */}
+        <CreateRole
+          orgId={orgId}
+          defaultName={defaultName}
+          onSuccess={(role) => {
+            onSuccess(role) // selects the role in the invitation form's combobox
+            onOpenChange(false)
+          }}
+        />
+      </DialogContent>
+    </Dialog>
+  )
 }

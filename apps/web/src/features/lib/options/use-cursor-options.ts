@@ -73,7 +73,12 @@ export function useCursorOptions({
   const query = useInfiniteQuery({
     queryKey: [...queryKey, "infinite", { search: committed, limit }],
     queryFn: ({ pageParam, signal }) =>
-      fetchPage({ cursor: pageParam, search: committed || undefined, limit, signal }),
+      fetchPage({
+        cursor: pageParam,
+        search: committed || undefined,
+        limit,
+        signal,
+      }),
     initialPageParam: undefined as string | undefined,
     getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
     enabled: enabled && open,

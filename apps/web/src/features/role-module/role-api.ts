@@ -167,8 +167,8 @@ function useInvalidateRoles(orgId: string) {
       queryClient.invalidateQueries({ queryKey: getListRolesQueryKey(orgId) }),
       roleId
         ? queryClient.invalidateQueries({
-          queryKey: getGetRoleQueryKey(orgId, roleId),
-        })
+            queryKey: getGetRoleQueryKey(orgId, roleId),
+          })
         : Promise.resolve(),
     ])
 }
@@ -195,13 +195,12 @@ export function useDeleteRoleMutation(orgId: string) {
   return useDeleteRole({ mutation: { onSuccess: () => invalidate() } })
 }
 
-
-
 export function useRoleOptions(orgId: string) {
   return useCursorOptions({
     queryKey: getListRoleOptionsQueryKey(orgId),
     fetchPage: async ({ cursor, search, limit, signal }) =>
-      (await listRoleOptions(orgId, { cursor, search, limit }, { signal })).data,
+      (await listRoleOptions(orgId, { cursor, search, limit }, { signal }))
+        .data,
     enabled: Boolean(orgId),
   })
 }
