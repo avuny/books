@@ -15,12 +15,15 @@ import { cors } from "hono/cors"
 import { adminRoutes } from "./modules/admin/index.js"
 import { authRoutes } from "./modules/auth/index.js"
 import { geoRoutes } from "./modules/geo/index.js"
+import { itemRoutes } from "./modules/item/index.js"
+import { itemCategoryRoutes } from "./modules/item-category/index.js"
 import { organizationRoutes } from "./modules/organization/index.js"
 import { organizationInvitationRoutes } from "./modules/organization-invitation/index.js"
 import { organizationUserRoutes } from "./modules/organization-user/index.js"
 import { otpRoutes } from "./modules/otp/index.js"
 import { roleRoutes } from "./modules/role/index.js"
 import { sidebarRoutes } from "./modules/sidebar/index.js"
+import { unitRoutes } from "./modules/unit/index.js"
 import { usersRoutes } from "./modules/users/index.js"
 // [codegen:imports:end]
 import { config } from "./index.js"
@@ -84,12 +87,15 @@ app.route("/", healthRoute)
 app.route("/admin", adminRoutes)
 app.route("/auth", authRoutes)
 app.route("/geo", geoRoutes)
+app.route("/item", itemRoutes)
+app.route("/item-categories", itemCategoryRoutes)
 app.route("/organizations", organizationRoutes)
 app.route("/organization-invitations", organizationInvitationRoutes)
 app.route("/organization-users", organizationUserRoutes)
 app.route("/otp", otpRoutes)
 app.route("/roles", roleRoutes)
 app.route("/sidebar", sidebarRoutes)
+app.route("/unit", unitRoutes)
 app.route("/users", usersRoutes)
 // [codegen:routes:end]
 
