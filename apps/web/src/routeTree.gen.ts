@@ -29,9 +29,15 @@ import { Route as OrganizationOrgIdIndexRouteImport } from './routes/organizatio
 import { Route as OrganizationOrgIdRoleRouteImport } from './routes/organization/$orgId/role'
 import { Route as OrganizationOrgIdSettingsRouteRouteImport } from './routes/organization/$orgId/settings/route'
 import { Route as OrganizationOrgIdInvitationsIndexRouteImport } from './routes/organization/$orgId/invitations/index'
+import { Route as OrganizationOrgIdItemCategoriesIndexRouteImport } from './routes/organization/$orgId/item-categories/index'
+import { Route as OrganizationOrgIdItemCategoriesCategoryIdRouteImport } from './routes/organization/$orgId/item-categories/$categoryId'
+import { Route as OrganizationOrgIdItemsIndexRouteImport } from './routes/organization/$orgId/items/index'
+import { Route as OrganizationOrgIdItemsItemIdRouteImport } from './routes/organization/$orgId/items/$itemId'
 import { Route as OrganizationOrgIdRolesIndexRouteImport } from './routes/organization/$orgId/roles/index'
 import { Route as OrganizationOrgIdRolesRoleIdRouteImport } from './routes/organization/$orgId/roles/$roleId'
 import { Route as OrganizationOrgIdSettingsIndexRouteImport } from './routes/organization/$orgId/settings/index'
+import { Route as OrganizationOrgIdUnitCollectionsIndexRouteImport } from './routes/organization/$orgId/unit-collections/index'
+import { Route as OrganizationOrgIdUnitCollectionsCollectionIdRouteImport } from './routes/organization/$orgId/unit-collections/$collectionId'
 import { Route as OrganizationOrgIdUsersIndexRouteImport } from './routes/organization/$orgId/users/index'
 
 const IndexRoute = IndexRouteImport.update({
@@ -136,6 +142,30 @@ const OrganizationOrgIdInvitationsIndexRoute =
     path: '/invitations/',
     getParentRoute: () => OrganizationOrgIdRouteRoute,
   } as any)
+const OrganizationOrgIdItemCategoriesIndexRoute =
+  OrganizationOrgIdItemCategoriesIndexRouteImport.update({
+    id: '/item-categories/',
+    path: '/item-categories/',
+    getParentRoute: () => OrganizationOrgIdRouteRoute,
+  } as any)
+const OrganizationOrgIdItemCategoriesCategoryIdRoute =
+  OrganizationOrgIdItemCategoriesCategoryIdRouteImport.update({
+    id: '/item-categories/$categoryId',
+    path: '/item-categories/$categoryId',
+    getParentRoute: () => OrganizationOrgIdRouteRoute,
+  } as any)
+const OrganizationOrgIdItemsIndexRoute =
+  OrganizationOrgIdItemsIndexRouteImport.update({
+    id: '/items/',
+    path: '/items/',
+    getParentRoute: () => OrganizationOrgIdRouteRoute,
+  } as any)
+const OrganizationOrgIdItemsItemIdRoute =
+  OrganizationOrgIdItemsItemIdRouteImport.update({
+    id: '/items/$itemId',
+    path: '/items/$itemId',
+    getParentRoute: () => OrganizationOrgIdRouteRoute,
+  } as any)
 const OrganizationOrgIdRolesIndexRoute =
   OrganizationOrgIdRolesIndexRouteImport.update({
     id: '/roles/',
@@ -153,6 +183,18 @@ const OrganizationOrgIdSettingsIndexRoute =
     id: '/',
     path: '/',
     getParentRoute: () => OrganizationOrgIdSettingsRouteRoute,
+  } as any)
+const OrganizationOrgIdUnitCollectionsIndexRoute =
+  OrganizationOrgIdUnitCollectionsIndexRouteImport.update({
+    id: '/unit-collections/',
+    path: '/unit-collections/',
+    getParentRoute: () => OrganizationOrgIdRouteRoute,
+  } as any)
+const OrganizationOrgIdUnitCollectionsCollectionIdRoute =
+  OrganizationOrgIdUnitCollectionsCollectionIdRouteImport.update({
+    id: '/unit-collections/$collectionId',
+    path: '/unit-collections/$collectionId',
+    getParentRoute: () => OrganizationOrgIdRouteRoute,
   } as any)
 const OrganizationOrgIdUsersIndexRoute =
   OrganizationOrgIdUsersIndexRouteImport.update({
@@ -181,10 +223,16 @@ export interface FileRoutesByFullPath {
   '/organization/$orgId/settings': typeof OrganizationOrgIdSettingsRouteRouteWithChildren
   '/organization/$orgId/role': typeof OrganizationOrgIdRoleRoute
   '/organization/$orgId/': typeof OrganizationOrgIdIndexRoute
+  '/organization/$orgId/item-categories/$categoryId': typeof OrganizationOrgIdItemCategoriesCategoryIdRoute
+  '/organization/$orgId/items/$itemId': typeof OrganizationOrgIdItemsItemIdRoute
   '/organization/$orgId/roles/$roleId': typeof OrganizationOrgIdRolesRoleIdRoute
+  '/organization/$orgId/unit-collections/$collectionId': typeof OrganizationOrgIdUnitCollectionsCollectionIdRoute
   '/organization/$orgId/invitations/': typeof OrganizationOrgIdInvitationsIndexRoute
+  '/organization/$orgId/item-categories/': typeof OrganizationOrgIdItemCategoriesIndexRoute
+  '/organization/$orgId/items/': typeof OrganizationOrgIdItemsIndexRoute
   '/organization/$orgId/roles/': typeof OrganizationOrgIdRolesIndexRoute
   '/organization/$orgId/settings/': typeof OrganizationOrgIdSettingsIndexRoute
+  '/organization/$orgId/unit-collections/': typeof OrganizationOrgIdUnitCollectionsIndexRoute
   '/organization/$orgId/users/': typeof OrganizationOrgIdUsersIndexRoute
 }
 export interface FileRoutesByTo {
@@ -201,10 +249,16 @@ export interface FileRoutesByTo {
   '/user': typeof UserIndexRoute
   '/organization/$orgId/role': typeof OrganizationOrgIdRoleRoute
   '/organization/$orgId': typeof OrganizationOrgIdIndexRoute
+  '/organization/$orgId/item-categories/$categoryId': typeof OrganizationOrgIdItemCategoriesCategoryIdRoute
+  '/organization/$orgId/items/$itemId': typeof OrganizationOrgIdItemsItemIdRoute
   '/organization/$orgId/roles/$roleId': typeof OrganizationOrgIdRolesRoleIdRoute
+  '/organization/$orgId/unit-collections/$collectionId': typeof OrganizationOrgIdUnitCollectionsCollectionIdRoute
   '/organization/$orgId/invitations': typeof OrganizationOrgIdInvitationsIndexRoute
+  '/organization/$orgId/item-categories': typeof OrganizationOrgIdItemCategoriesIndexRoute
+  '/organization/$orgId/items': typeof OrganizationOrgIdItemsIndexRoute
   '/organization/$orgId/roles': typeof OrganizationOrgIdRolesIndexRoute
   '/organization/$orgId/settings': typeof OrganizationOrgIdSettingsIndexRoute
+  '/organization/$orgId/unit-collections': typeof OrganizationOrgIdUnitCollectionsIndexRoute
   '/organization/$orgId/users': typeof OrganizationOrgIdUsersIndexRoute
 }
 export interface FileRoutesById {
@@ -228,10 +282,16 @@ export interface FileRoutesById {
   '/organization/$orgId/settings': typeof OrganizationOrgIdSettingsRouteRouteWithChildren
   '/organization/$orgId/role': typeof OrganizationOrgIdRoleRoute
   '/organization/$orgId/': typeof OrganizationOrgIdIndexRoute
+  '/organization/$orgId/item-categories/$categoryId': typeof OrganizationOrgIdItemCategoriesCategoryIdRoute
+  '/organization/$orgId/items/$itemId': typeof OrganizationOrgIdItemsItemIdRoute
   '/organization/$orgId/roles/$roleId': typeof OrganizationOrgIdRolesRoleIdRoute
+  '/organization/$orgId/unit-collections/$collectionId': typeof OrganizationOrgIdUnitCollectionsCollectionIdRoute
   '/organization/$orgId/invitations/': typeof OrganizationOrgIdInvitationsIndexRoute
+  '/organization/$orgId/item-categories/': typeof OrganizationOrgIdItemCategoriesIndexRoute
+  '/organization/$orgId/items/': typeof OrganizationOrgIdItemsIndexRoute
   '/organization/$orgId/roles/': typeof OrganizationOrgIdRolesIndexRoute
   '/organization/$orgId/settings/': typeof OrganizationOrgIdSettingsIndexRoute
+  '/organization/$orgId/unit-collections/': typeof OrganizationOrgIdUnitCollectionsIndexRoute
   '/organization/$orgId/users/': typeof OrganizationOrgIdUsersIndexRoute
 }
 export interface FileRouteTypes {
@@ -256,10 +316,16 @@ export interface FileRouteTypes {
     | '/organization/$orgId/settings'
     | '/organization/$orgId/role'
     | '/organization/$orgId/'
+    | '/organization/$orgId/item-categories/$categoryId'
+    | '/organization/$orgId/items/$itemId'
     | '/organization/$orgId/roles/$roleId'
+    | '/organization/$orgId/unit-collections/$collectionId'
     | '/organization/$orgId/invitations/'
+    | '/organization/$orgId/item-categories/'
+    | '/organization/$orgId/items/'
     | '/organization/$orgId/roles/'
     | '/organization/$orgId/settings/'
+    | '/organization/$orgId/unit-collections/'
     | '/organization/$orgId/users/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -276,10 +342,16 @@ export interface FileRouteTypes {
     | '/user'
     | '/organization/$orgId/role'
     | '/organization/$orgId'
+    | '/organization/$orgId/item-categories/$categoryId'
+    | '/organization/$orgId/items/$itemId'
     | '/organization/$orgId/roles/$roleId'
+    | '/organization/$orgId/unit-collections/$collectionId'
     | '/organization/$orgId/invitations'
+    | '/organization/$orgId/item-categories'
+    | '/organization/$orgId/items'
     | '/organization/$orgId/roles'
     | '/organization/$orgId/settings'
+    | '/organization/$orgId/unit-collections'
     | '/organization/$orgId/users'
   id:
     | '__root__'
@@ -302,10 +374,16 @@ export interface FileRouteTypes {
     | '/organization/$orgId/settings'
     | '/organization/$orgId/role'
     | '/organization/$orgId/'
+    | '/organization/$orgId/item-categories/$categoryId'
+    | '/organization/$orgId/items/$itemId'
     | '/organization/$orgId/roles/$roleId'
+    | '/organization/$orgId/unit-collections/$collectionId'
     | '/organization/$orgId/invitations/'
+    | '/organization/$orgId/item-categories/'
+    | '/organization/$orgId/items/'
     | '/organization/$orgId/roles/'
     | '/organization/$orgId/settings/'
+    | '/organization/$orgId/unit-collections/'
     | '/organization/$orgId/users/'
   fileRoutesById: FileRoutesById
 }
@@ -459,6 +537,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OrganizationOrgIdInvitationsIndexRouteImport
       parentRoute: typeof OrganizationOrgIdRouteRoute
     }
+    '/organization/$orgId/item-categories/': {
+      id: '/organization/$orgId/item-categories/'
+      path: '/item-categories'
+      fullPath: '/organization/$orgId/item-categories/'
+      preLoaderRoute: typeof OrganizationOrgIdItemCategoriesIndexRouteImport
+      parentRoute: typeof OrganizationOrgIdRouteRoute
+    }
+    '/organization/$orgId/item-categories/$categoryId': {
+      id: '/organization/$orgId/item-categories/$categoryId'
+      path: '/item-categories/$categoryId'
+      fullPath: '/organization/$orgId/item-categories/$categoryId'
+      preLoaderRoute: typeof OrganizationOrgIdItemCategoriesCategoryIdRouteImport
+      parentRoute: typeof OrganizationOrgIdRouteRoute
+    }
+    '/organization/$orgId/items/': {
+      id: '/organization/$orgId/items/'
+      path: '/items'
+      fullPath: '/organization/$orgId/items/'
+      preLoaderRoute: typeof OrganizationOrgIdItemsIndexRouteImport
+      parentRoute: typeof OrganizationOrgIdRouteRoute
+    }
+    '/organization/$orgId/items/$itemId': {
+      id: '/organization/$orgId/items/$itemId'
+      path: '/items/$itemId'
+      fullPath: '/organization/$orgId/items/$itemId'
+      preLoaderRoute: typeof OrganizationOrgIdItemsItemIdRouteImport
+      parentRoute: typeof OrganizationOrgIdRouteRoute
+    }
     '/organization/$orgId/roles/': {
       id: '/organization/$orgId/roles/'
       path: '/roles'
@@ -479,6 +585,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/organization/$orgId/settings/'
       preLoaderRoute: typeof OrganizationOrgIdSettingsIndexRouteImport
       parentRoute: typeof OrganizationOrgIdSettingsRouteRoute
+    }
+    '/organization/$orgId/unit-collections/': {
+      id: '/organization/$orgId/unit-collections/'
+      path: '/unit-collections'
+      fullPath: '/organization/$orgId/unit-collections/'
+      preLoaderRoute: typeof OrganizationOrgIdUnitCollectionsIndexRouteImport
+      parentRoute: typeof OrganizationOrgIdRouteRoute
+    }
+    '/organization/$orgId/unit-collections/$collectionId': {
+      id: '/organization/$orgId/unit-collections/$collectionId'
+      path: '/unit-collections/$collectionId'
+      fullPath: '/organization/$orgId/unit-collections/$collectionId'
+      preLoaderRoute: typeof OrganizationOrgIdUnitCollectionsCollectionIdRouteImport
+      parentRoute: typeof OrganizationOrgIdRouteRoute
     }
     '/organization/$orgId/users/': {
       id: '/organization/$orgId/users/'
@@ -539,9 +659,15 @@ interface OrganizationOrgIdRouteRouteChildren {
   OrganizationOrgIdSettingsRouteRoute: typeof OrganizationOrgIdSettingsRouteRouteWithChildren
   OrganizationOrgIdRoleRoute: typeof OrganizationOrgIdRoleRoute
   OrganizationOrgIdIndexRoute: typeof OrganizationOrgIdIndexRoute
+  OrganizationOrgIdItemCategoriesCategoryIdRoute: typeof OrganizationOrgIdItemCategoriesCategoryIdRoute
+  OrganizationOrgIdItemsItemIdRoute: typeof OrganizationOrgIdItemsItemIdRoute
   OrganizationOrgIdRolesRoleIdRoute: typeof OrganizationOrgIdRolesRoleIdRoute
+  OrganizationOrgIdUnitCollectionsCollectionIdRoute: typeof OrganizationOrgIdUnitCollectionsCollectionIdRoute
   OrganizationOrgIdInvitationsIndexRoute: typeof OrganizationOrgIdInvitationsIndexRoute
+  OrganizationOrgIdItemCategoriesIndexRoute: typeof OrganizationOrgIdItemCategoriesIndexRoute
+  OrganizationOrgIdItemsIndexRoute: typeof OrganizationOrgIdItemsIndexRoute
   OrganizationOrgIdRolesIndexRoute: typeof OrganizationOrgIdRolesIndexRoute
+  OrganizationOrgIdUnitCollectionsIndexRoute: typeof OrganizationOrgIdUnitCollectionsIndexRoute
   OrganizationOrgIdUsersIndexRoute: typeof OrganizationOrgIdUsersIndexRoute
 }
 
@@ -551,10 +677,20 @@ const OrganizationOrgIdRouteRouteChildren: OrganizationOrgIdRouteRouteChildren =
       OrganizationOrgIdSettingsRouteRouteWithChildren,
     OrganizationOrgIdRoleRoute: OrganizationOrgIdRoleRoute,
     OrganizationOrgIdIndexRoute: OrganizationOrgIdIndexRoute,
+    OrganizationOrgIdItemCategoriesCategoryIdRoute:
+      OrganizationOrgIdItemCategoriesCategoryIdRoute,
+    OrganizationOrgIdItemsItemIdRoute: OrganizationOrgIdItemsItemIdRoute,
     OrganizationOrgIdRolesRoleIdRoute: OrganizationOrgIdRolesRoleIdRoute,
+    OrganizationOrgIdUnitCollectionsCollectionIdRoute:
+      OrganizationOrgIdUnitCollectionsCollectionIdRoute,
     OrganizationOrgIdInvitationsIndexRoute:
       OrganizationOrgIdInvitationsIndexRoute,
+    OrganizationOrgIdItemCategoriesIndexRoute:
+      OrganizationOrgIdItemCategoriesIndexRoute,
+    OrganizationOrgIdItemsIndexRoute: OrganizationOrgIdItemsIndexRoute,
     OrganizationOrgIdRolesIndexRoute: OrganizationOrgIdRolesIndexRoute,
+    OrganizationOrgIdUnitCollectionsIndexRoute:
+      OrganizationOrgIdUnitCollectionsIndexRoute,
     OrganizationOrgIdUsersIndexRoute: OrganizationOrgIdUsersIndexRoute,
   }
 
