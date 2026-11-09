@@ -1,0 +1,166 @@
+{
+  "errors": {
+    "ITEM_NOT_FOUND": "Item not found.",
+    "ITEM_NAME_TAKEN": "An item with this name already exists.",
+    "ITEM_CATEGORY_INVALID": "Choose an active category from this organization.",
+    "ITEM_UNIT_INVALID": "Choose an active base unit.",
+    "ITEM_UNIT_COLLECTION_INVALID": "The selected unit collection does not exist.",
+    "ITEM_BATCH_REQUIRES_TRACKING": "Batch tracking requires inventory tracking.",
+    "ITEM_LOCKED_FIELD": "These settings cannot change after the item has stock movements.",
+    "ITEM_HAS_HISTORY": "This item has stock history. Deactivate it instead of deleting it."
+  },
+  "labels": {
+    "valuation": {
+      "fifo": "First in, first out (FIFO)",
+      "weighted_average": "Weighted average"
+    }
+  },
+  "msgs": {
+    "ITEMS_LISTED": "Items retrieved successfully.",
+    "ITEM_CREATED": "Item created.",
+    "ITEM_UPDATED": "Item updated.",
+    "ITEM_DELETED": "Item deleted."
+  },
+  "list": {
+    "title": "Items",
+    "description": "Everything you buy, sell, store or assemble.",
+    "tabs": {
+      "aria": "Item status",
+      "all": "All",
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "search": {
+      "placeholder": "Search items",
+      "clear": "Clear search"
+    }
+  },
+  "create": {
+    "title": "Create item",
+    "description": "Set up the item, its category and how it is measured.",
+    "submitLabel": "Create item",
+    "submittingLabel": "Creating…"
+  },
+  "update": {
+    "title": "Edit item",
+    "description": "Some settings are locked once the item has stock movements.",
+    "submitLabel": "Save changes",
+    "submittingLabel": "Saving…"
+  },
+  "form": {
+    "category": {
+      "createNew": "Create new category"
+    }
+  },
+  "fields": {
+    "name": {
+      "label": "Name",
+      "placeholder": "e.g. Royal Cement"
+    },
+    "description": {
+      "label": "Description",
+      "placeholder": "Optional"
+    },
+    "category": {
+      "label": "Category",
+      "placeholder": "Choose a category"
+    },
+    "baseUnit": {
+      "label": "Base unit",
+      "placeholder": "Choose a unit",
+      "description": "A unit collection holding just this unit is created for the item."
+    },
+    "unitCollection": {
+      "label": "Or use an existing unit collection",
+      "placeholder": "Choose a collection",
+      "description": "Its base unit becomes the item’s base unit."
+    },
+    "unitExclusive": "Choose either a base unit or a unit collection.",
+    "canAssembled": {
+      "label": "Can be assembled"
+    },
+    "isReturnable": {
+      "label": "Returnable"
+    },
+    "isInventoryTracked": {
+      "label": "Track inventory"
+    },
+    "isBatchTracked": {
+      "label": "Track batches",
+      "description": "Requires inventory tracking."
+    },
+    "valuationMethod": {
+      "label": "Valuation method",
+      "placeholder": "Choose a method"
+    },
+    "allowNegativeStock": {
+      "label": "Allow negative stock"
+    },
+    "reorderPoint": {
+      "label": "Reorder point",
+      "placeholder": "e.g. 20",
+      "description": "In the item’s base unit. Optional."
+    },
+    "isActive": {
+      "label": "Active"
+    },
+    "lockedHint": "Locked because the item has stock movements."
+  },
+  "actions": {
+    "create": "Create item",
+    "edit": "Edit",
+    "view": "View",
+    "delete": "Delete",
+    "cancel": "Cancel"
+  },
+  "type": {
+    "tracked": "Tracked",
+    "untracked": "Not tracked",
+    "batch": "Batches",
+    "active": "Active",
+    "inactive": "Inactive"
+  },
+  "table": {
+    "name": "Item",
+    "category": "Category",
+    "baseUnit": "Base unit",
+    "tracking": "Tracking",
+    "status": "Status",
+    "actions": "Actions",
+    "actionsFor": "Actions for {name}"
+  },
+  "empty": {
+    "title": "No items found",
+    "description": "Try a different search or status."
+  },
+  "delete": {
+    "title": "Delete item?",
+    "description": "“{name}” will be permanently deleted. This can’t be undone."
+  },
+  "details": {
+    "back": "Back to items",
+    "category": "Category",
+    "baseUnit": "Base unit",
+    "valuation": "Valuation method",
+    "reorderPoint": "Reorder point",
+    "allowNegativeStock": "Negative stock",
+    "createdAt": "Created",
+    "updatedAt": "Last updated",
+    "settingsTitle": "Settings",
+    "yes": "Allowed",
+    "no": "Not allowed",
+    "none": "Not set",
+    "flagsTitle": "Behaviour",
+    "assemblable": "Can be assembled",
+    "returnable": "Returnable"
+  },
+  "pagination": {
+    "nav": "Items pagination",
+    "previous": "Previous",
+    "next": "Next",
+    "rowsPerPage": "Rows per page",
+    "summary": "{from}–{to} of {total}",
+    "pageOf": "Page {page} of {pageCount}",
+    "goTo": "Go to page {page}"
+  }
+}

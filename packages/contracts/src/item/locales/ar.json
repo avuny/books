@@ -1,0 +1,166 @@
+{
+  "errors": {
+    "ITEM_NOT_FOUND": "الصنف غير موجود.",
+    "ITEM_NAME_TAKEN": "يوجد صنف بهذا الاسم بالفعل.",
+    "ITEM_CATEGORY_INVALID": "اختر فئة نشطة من هذه المؤسسة.",
+    "ITEM_UNIT_INVALID": "اختر وحدة أساسية نشطة.",
+    "ITEM_UNIT_COLLECTION_INVALID": "مجموعة الوحدات المحددة غير موجودة.",
+    "ITEM_BATCH_REQUIRES_TRACKING": "تتبع الدفعات يتطلب تتبع المخزون.",
+    "ITEM_LOCKED_FIELD": "لا يمكن تغيير هذه الإعدادات بعد وجود حركات مخزون للصنف.",
+    "ITEM_HAS_HISTORY": "لهذا الصنف سجل مخزون. عطّله بدلاً من حذفه."
+  },
+  "labels": {
+    "valuation": {
+      "fifo": "الوارد أولاً يصرف أولاً (FIFO)",
+      "weighted_average": "المتوسط المرجح"
+    }
+  },
+  "msgs": {
+    "ITEMS_LISTED": "تم جلب الأصناف بنجاح.",
+    "ITEM_CREATED": "تم إنشاء الصنف.",
+    "ITEM_UPDATED": "تم تحديث الصنف.",
+    "ITEM_DELETED": "تم حذف الصنف."
+  },
+  "list": {
+    "title": "الأصناف",
+    "description": "كل ما تشتريه أو تبيعه أو تخزنه أو تجمّعه.",
+    "tabs": {
+      "aria": "حالة الصنف",
+      "all": "الكل",
+      "active": "نشطة",
+      "inactive": "غير نشطة"
+    },
+    "search": {
+      "placeholder": "ابحث في الأصناف",
+      "clear": "مسح البحث"
+    }
+  },
+  "create": {
+    "title": "إنشاء صنف",
+    "description": "حدد الصنف وفئته وطريقة قياسه.",
+    "submitLabel": "إنشاء الصنف",
+    "submittingLabel": "جارٍ الإنشاء…"
+  },
+  "update": {
+    "title": "تعديل الصنف",
+    "description": "بعض الإعدادات تُقفل بعد وجود حركات مخزون للصنف.",
+    "submitLabel": "حفظ التغييرات",
+    "submittingLabel": "جارٍ الحفظ…"
+  },
+  "form": {
+    "category": {
+      "createNew": "إنشاء فئة جديدة"
+    }
+  },
+  "fields": {
+    "name": {
+      "label": "الاسم",
+      "placeholder": "مثال: أسمنت رويال"
+    },
+    "description": {
+      "label": "الوصف",
+      "placeholder": "اختياري"
+    },
+    "category": {
+      "label": "الفئة",
+      "placeholder": "اختر فئة"
+    },
+    "baseUnit": {
+      "label": "الوحدة الأساسية",
+      "placeholder": "اختر وحدة",
+      "description": "تُنشأ للصنف مجموعة وحدات تحتوي هذه الوحدة فقط."
+    },
+    "unitCollection": {
+      "label": "أو استخدم مجموعة وحدات موجودة",
+      "placeholder": "اختر مجموعة",
+      "description": "تصبح وحدتها الأساسية هي الوحدة الأساسية للصنف."
+    },
+    "unitExclusive": "اختر وحدة أساسية أو مجموعة وحدات، وليس الاثنين.",
+    "canAssembled": {
+      "label": "يمكن تجميعه"
+    },
+    "isReturnable": {
+      "label": "قابل للإرجاع"
+    },
+    "isInventoryTracked": {
+      "label": "تتبع المخزون"
+    },
+    "isBatchTracked": {
+      "label": "تتبع الدفعات",
+      "description": "يتطلب تتبع المخزون."
+    },
+    "valuationMethod": {
+      "label": "طريقة التقييم",
+      "placeholder": "اختر طريقة"
+    },
+    "allowNegativeStock": {
+      "label": "السماح بالمخزون السالب"
+    },
+    "reorderPoint": {
+      "label": "حد إعادة الطلب",
+      "placeholder": "مثال: 20",
+      "description": "بالوحدة الأساسية للصنف. اختياري."
+    },
+    "isActive": {
+      "label": "نشط"
+    },
+    "lockedHint": "مقفل لأن للصنف حركات مخزون."
+  },
+  "actions": {
+    "create": "إنشاء صنف",
+    "edit": "تعديل",
+    "view": "عرض",
+    "delete": "حذف",
+    "cancel": "إلغاء"
+  },
+  "type": {
+    "tracked": "متتبع",
+    "untracked": "غير متتبع",
+    "batch": "دفعات",
+    "active": "نشط",
+    "inactive": "غير نشط"
+  },
+  "table": {
+    "name": "الصنف",
+    "category": "الفئة",
+    "baseUnit": "الوحدة الأساسية",
+    "tracking": "التتبع",
+    "status": "الحالة",
+    "actions": "الإجراءات",
+    "actionsFor": "إجراءات {name}"
+  },
+  "empty": {
+    "title": "لا توجد أصناف",
+    "description": "جرّب بحثاً أو حالة مختلفة."
+  },
+  "delete": {
+    "title": "حذف الصنف؟",
+    "description": "سيتم حذف «{name}» نهائياً. لا يمكن التراجع عن ذلك."
+  },
+  "details": {
+    "back": "العودة إلى الأصناف",
+    "category": "الفئة",
+    "baseUnit": "الوحدة الأساسية",
+    "valuation": "طريقة التقييم",
+    "reorderPoint": "حد إعادة الطلب",
+    "allowNegativeStock": "المخزون السالب",
+    "createdAt": "تاريخ الإنشاء",
+    "updatedAt": "آخر تحديث",
+    "settingsTitle": "الإعدادات",
+    "yes": "مسموح",
+    "no": "غير مسموح",
+    "none": "غير محدد",
+    "flagsTitle": "السلوك",
+    "assemblable": "يمكن تجميعه",
+    "returnable": "قابل للإرجاع"
+  },
+  "pagination": {
+    "nav": "ترقيم صفحات الأصناف",
+    "previous": "السابق",
+    "next": "التالي",
+    "rowsPerPage": "عدد الصفوف في الصفحة",
+    "summary": "{from}–{to} من {total}",
+    "pageOf": "الصفحة {page} من {pageCount}",
+    "goTo": "الانتقال إلى الصفحة {page}"
+  }
+}

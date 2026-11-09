@@ -1,0 +1,107 @@
+{
+  "errors": {
+    "ITEM_CATEGORY_NOT_FOUND": "Category not found.",
+    "ITEM_CATEGORY_PARENT_NOT_FOUND": "The parent category does not exist.",
+    "ITEM_CATEGORY_NAME_TAKEN": "A category with this name already exists at this level.",
+    "ITEM_CATEGORY_CYCLE": "A category cannot be moved under itself or one of its sub-categories.",
+    "ITEM_CATEGORY_MAX_DEPTH_EXCEEDED": "Categories cannot be nested this deeply.",
+    "ITEM_CATEGORY_IN_USE": "This category has sub-categories or items. Deactivate it instead of deleting it."
+  },
+  "labels": {
+    "root": "Top level"
+  },
+  "msgs": {
+    "ITEM_CATEGORIES_LISTED": "Categories retrieved successfully.",
+    "ITEM_CATEGORY_CREATED": "Category created.",
+    "ITEM_CATEGORY_UPDATED": "Category updated.",
+    "ITEM_CATEGORY_DELETED": "Category deleted."
+  },
+  "list": {
+    "title": "Item categories",
+    "description": "Organize your items in a tree of categories.",
+    "tabs": {
+      "aria": "Category status",
+      "all": "All",
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "search": {
+      "placeholder": "Search categories",
+      "clear": "Clear search"
+    }
+  },
+  "create": {
+    "title": "Create category",
+    "description": "Name the category and choose where it goes.",
+    "submitLabel": "Create category",
+    "submittingLabel": "Creating…"
+  },
+  "update": {
+    "title": "Edit category",
+    "description": "Rename, move or deactivate the category.",
+    "submitLabel": "Save changes",
+    "submittingLabel": "Saving…"
+  },
+  "fields": {
+    "name": {
+      "label": "Name",
+      "placeholder": "e.g. Cement"
+    },
+    "description": {
+      "label": "Description",
+      "placeholder": "What belongs here? (optional)"
+    },
+    "parent": {
+      "label": "Parent category",
+      "placeholder": "None (top level)"
+    },
+    "isActive": {
+      "label": "Active",
+      "description": "Inactive categories cannot be chosen for new items."
+    }
+  },
+  "actions": {
+    "create": "Create category",
+    "edit": "Edit",
+    "view": "View",
+    "delete": "Delete",
+    "cancel": "Cancel"
+  },
+  "type": {
+    "active": "Active",
+    "inactive": "Inactive"
+  },
+  "table": {
+    "name": "Category",
+    "subCategories": "Sub-categories",
+    "items": "Items",
+    "status": "Status",
+    "actions": "Actions",
+    "actionsFor": "Actions for {name}"
+  },
+  "empty": {
+    "title": "No categories found",
+    "description": "Try a different search or status."
+  },
+  "delete": {
+    "title": "Delete category?",
+    "description": "“{name}” will be permanently deleted. This can’t be undone."
+  },
+  "details": {
+    "back": "Back to categories",
+    "subCategories": "Sub-categories",
+    "items": "Items",
+    "createdAt": "Created",
+    "updatedAt": "Last updated",
+    "inUseHint": "This category has sub-categories or items, so it can be deactivated but not deleted."
+  },
+  "pagination": {
+    "nav": "Item categories pagination",
+    "previous": "Previous",
+    "next": "Next",
+    "rowsPerPage": "Rows per page",
+    "summary": "{from}–{to} of {total}",
+    "pageOf": "Page {page} of {pageCount}",
+    "goTo": "Go to page {page}"
+  }
+}

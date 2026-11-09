@@ -1,0 +1,122 @@
+{
+  "errors": {
+    "UNIT_NOT_FOUND": "الوحدة غير موجودة.",
+    "UNIT_COLLECTION_NOT_FOUND": "مجموعة الوحدات غير موجودة.",
+    "UNIT_COLLECTION_IN_USE": "مجموعة الوحدات هذه مستخدمة في أصناف ولا يمكن حذفها.",
+    "UNIT_FEATURE_NOT_AVAILABLE": "الوحدات الإضافية غير متاحة في باقتك.",
+    "UNIT_TYPE_MISMATCH": "يجب أن تقيس كل وحدات المجموعة نفس ما تقيسه الوحدة الأساسية.",
+    "UNIT_DUPLICATE_IN_COLLECTION": "لا يمكن تكرار الوحدة نفسها في المجموعة.",
+    "UNIT_COLLECTION_TOO_MANY_UNITS": "عدد الوحدات في هذه المجموعة كبير جداً.",
+    "UNIT_INVALID_CONVERSION_FACTOR": "يجب أن يكون معامل التحويل رقماً أكبر من الصفر."
+  },
+  "labels": {
+    "base": "أساسية"
+  },
+  "msgs": {
+    "UNITS_LISTED": "تم جلب الوحدات بنجاح.",
+    "UNIT_COLLECTION_CREATED": "تم إنشاء مجموعة الوحدات.",
+    "UNIT_COLLECTION_UPDATED": "تم تحديث مجموعة الوحدات.",
+    "UNIT_COLLECTION_DELETED": "تم حذف مجموعة الوحدات."
+  },
+  "list": {
+    "title": "مجموعات الوحدات",
+    "description": "وحدة أساسية والوحدات التي تتحول إليها. تستخدمها الأصناف لتحويل الكميات.",
+    "search": {
+      "placeholder": "ابحث في المجموعات",
+      "clear": "مسح البحث"
+    }
+  },
+  "create": {
+    "title": "إنشاء مجموعة وحدات",
+    "description": "اختر وحدة أساسية ثم أضف الوحدات التي تتحول إليها.",
+    "submitLabel": "إنشاء المجموعة",
+    "submittingLabel": "جارٍ الإنشاء…"
+  },
+  "update": {
+    "title": "تعديل مجموعة الوحدات",
+    "description": "غيّر اسم المجموعة أو الوحدات التي تتحول إلى الوحدة الأساسية.",
+    "submitLabel": "حفظ التغييرات",
+    "submittingLabel": "جارٍ الحفظ…"
+  },
+  "fields": {
+    "name": {
+      "label": "الاسم",
+      "placeholder": "يُنشأ من الوحدة الأساسية عند تركه فارغاً"
+    },
+    "baseUnit": {
+      "label": "الوحدة الأساسية",
+      "placeholder": "اختر وحدة",
+      "locked": "لا يمكن تغيير الوحدة الأساسية."
+    },
+    "extraUnits": {
+      "label": "وحدات أخرى",
+      "description": "يجب أن تقيس كل وحدة نفس ما تقيسه الوحدة الأساسية.",
+      "empty": "لا توجد وحدات أخرى.",
+      "add": "إضافة وحدة",
+      "remove": "إزالة الوحدة",
+      "pickBaseFirst": "اختر الوحدة الأساسية أولاً."
+    },
+    "unit": {
+      "label": "الوحدة",
+      "placeholder": "اختر وحدة"
+    },
+    "conversionFactor": {
+      "label": "معامل التحويل",
+      "placeholder": "مثال: 0.01",
+      "description": "عدد الوحدات الأساسية التي تساويها وحدة واحدة من هذه الوحدة."
+    }
+  },
+  "actions": {
+    "create": "إنشاء مجموعة",
+    "edit": "تعديل",
+    "view": "عرض",
+    "delete": "حذف",
+    "cancel": "إلغاء"
+  },
+  "type": {
+    "count": "عدد",
+    "weight": "وزن",
+    "length": "طول",
+    "area": "مساحة",
+    "volume": "حجم"
+  },
+  "table": {
+    "name": "المجموعة",
+    "baseUnit": "الوحدة الأساسية",
+    "units": "الوحدات",
+    "items": "الأصناف",
+    "updated": "آخر تحديث",
+    "actions": "الإجراءات",
+    "actionsFor": "إجراءات {name}"
+  },
+  "empty": {
+    "title": "لا توجد مجموعات وحدات",
+    "description": "تُنشأ المجموعات أيضاً تلقائياً عند إضافة صنف."
+  },
+  "delete": {
+    "title": "حذف مجموعة الوحدات؟",
+    "description": "سيتم حذف «{name}» نهائياً. لا يمكن التراجع عن ذلك."
+  },
+  "details": {
+    "back": "العودة إلى مجموعات الوحدات",
+    "items": "الأصناف",
+    "createdAt": "تاريخ الإنشاء",
+    "updatedAt": "آخر تحديث",
+    "unitsTitle": "الوحدات",
+    "unit": "الوحدة",
+    "symbol": "الرمز",
+    "factor": "التحويل",
+    "inUseHint": "تستخدم أصناف هذه المجموعة، لذا لا يمكن حذفها.",
+    "conversion": "1 {unit} = {factor} {base}",
+    "type": "النوع"
+  },
+  "pagination": {
+    "nav": "ترقيم صفحات مجموعات الوحدات",
+    "previous": "السابق",
+    "next": "التالي",
+    "rowsPerPage": "عدد الصفوف في الصفحة",
+    "summary": "{from}–{to} من {total}",
+    "pageOf": "الصفحة {page} من {pageCount}",
+    "goTo": "الانتقال إلى الصفحة {page}"
+  }
+}

@@ -1,0 +1,107 @@
+{
+  "errors": {
+    "ITEM_CATEGORY_NOT_FOUND": "الفئة غير موجودة.",
+    "ITEM_CATEGORY_PARENT_NOT_FOUND": "الفئة الأم غير موجودة.",
+    "ITEM_CATEGORY_NAME_TAKEN": "توجد فئة بهذا الاسم في هذا المستوى بالفعل.",
+    "ITEM_CATEGORY_CYCLE": "لا يمكن نقل الفئة تحت نفسها أو تحت إحدى فئاتها الفرعية.",
+    "ITEM_CATEGORY_MAX_DEPTH_EXCEEDED": "لا يمكن تداخل الفئات بهذا العمق.",
+    "ITEM_CATEGORY_IN_USE": "لهذه الفئة فئات فرعية أو أصناف. عطّلها بدلاً من حذفها."
+  },
+  "labels": {
+    "root": "المستوى الأعلى"
+  },
+  "msgs": {
+    "ITEM_CATEGORIES_LISTED": "تم جلب الفئات بنجاح.",
+    "ITEM_CATEGORY_CREATED": "تم إنشاء الفئة.",
+    "ITEM_CATEGORY_UPDATED": "تم تحديث الفئة.",
+    "ITEM_CATEGORY_DELETED": "تم حذف الفئة."
+  },
+  "list": {
+    "title": "فئات الأصناف",
+    "description": "نظّم أصنافك في شجرة من الفئات.",
+    "tabs": {
+      "aria": "حالة الفئة",
+      "all": "الكل",
+      "active": "نشطة",
+      "inactive": "غير نشطة"
+    },
+    "search": {
+      "placeholder": "ابحث في الفئات",
+      "clear": "مسح البحث"
+    }
+  },
+  "create": {
+    "title": "إنشاء فئة",
+    "description": "سمّ الفئة وحدد مكانها.",
+    "submitLabel": "إنشاء الفئة",
+    "submittingLabel": "جارٍ الإنشاء…"
+  },
+  "update": {
+    "title": "تعديل الفئة",
+    "description": "غيّر اسم الفئة أو انقلها أو عطّلها.",
+    "submitLabel": "حفظ التغييرات",
+    "submittingLabel": "جارٍ الحفظ…"
+  },
+  "fields": {
+    "name": {
+      "label": "الاسم",
+      "placeholder": "مثال: أسمنت"
+    },
+    "description": {
+      "label": "الوصف",
+      "placeholder": "ما الذي ينتمي إلى هنا؟ (اختياري)"
+    },
+    "parent": {
+      "label": "الفئة الأم",
+      "placeholder": "بلا (المستوى الأعلى)"
+    },
+    "isActive": {
+      "label": "نشطة",
+      "description": "لا يمكن اختيار الفئات غير النشطة للأصناف الجديدة."
+    }
+  },
+  "actions": {
+    "create": "إنشاء فئة",
+    "edit": "تعديل",
+    "view": "عرض",
+    "delete": "حذف",
+    "cancel": "إلغاء"
+  },
+  "type": {
+    "active": "نشطة",
+    "inactive": "غير نشطة"
+  },
+  "table": {
+    "name": "الفئة",
+    "subCategories": "الفئات الفرعية",
+    "items": "الأصناف",
+    "status": "الحالة",
+    "actions": "الإجراءات",
+    "actionsFor": "إجراءات {name}"
+  },
+  "empty": {
+    "title": "لا توجد فئات",
+    "description": "جرّب بحثاً أو حالة مختلفة."
+  },
+  "delete": {
+    "title": "حذف الفئة؟",
+    "description": "سيتم حذف «{name}» نهائياً. لا يمكن التراجع عن ذلك."
+  },
+  "details": {
+    "back": "العودة إلى الفئات",
+    "subCategories": "الفئات الفرعية",
+    "items": "الأصناف",
+    "createdAt": "تاريخ الإنشاء",
+    "updatedAt": "آخر تحديث",
+    "inUseHint": "لهذه الفئة فئات فرعية أو أصناف، لذا يمكن تعطيلها ولا يمكن حذفها."
+  },
+  "pagination": {
+    "nav": "ترقيم صفحات فئات الأصناف",
+    "previous": "السابق",
+    "next": "التالي",
+    "rowsPerPage": "عدد الصفوف في الصفحة",
+    "summary": "{from}–{to} من {total}",
+    "pageOf": "الصفحة {page} من {pageCount}",
+    "goTo": "الانتقال إلى الصفحة {page}"
+  }
+}
