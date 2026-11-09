@@ -1,8 +1,15 @@
+import { ItemCategoryAuditEvent } from "../item-category/constants.js"
+import { ItemAuditEvent } from "../item/constants.js"
+import { UnitAuditEvent } from "../unit/constants.js"
+
 export const ACTIVITY_LOG_RESOURCES = [
   "organization",
   "organization_user",
   "organization_invitation",
   "role",
+  "unit",
+  "item_category",
+  "item",
 ] as const
 
 export type ActivityLogResource = (typeof ACTIVITY_LOG_RESOURCES)[number]
@@ -41,7 +48,7 @@ export const ACTIVITY_LOG_ACTIONS = [
   "role.deleted",
 ] as const
 
-export type ActivityLogAction = (typeof ACTIVITY_LOG_ACTIONS)[number]
+export type ActivityLogAction = (typeof ACTIVITY_LOG_ACTIONS)[number] | ItemCategoryAuditEvent | ItemAuditEvent | UnitAuditEvent
 
 export const ActivityLogAction = {
   ORGANIZATION_CREATED: "organization.created",
@@ -64,6 +71,7 @@ export const ActivityLogAction = {
   ROLE_CREATED: "role.created",
   ROLE_UPDATED: "role.updated",
   ROLE_DELETED: "role.deleted",
+
 } as const
 
 export const ACTIVITY_LOG_DEFAULT_PAGE_SIZE = 20
