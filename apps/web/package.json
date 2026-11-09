@@ -9,7 +9,7 @@
     "deploy": "wrangler deploy",
     "lint": "eslint",
     "format": "prettier --write \"**/*.{ts,tsx}\"",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc -b --noEmit",
     "preview": "vite preview",
     "test": "vitest run",
     "api:generate": "orval --config orval.config.ts"
