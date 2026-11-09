@@ -1,13 +1,19 @@
 import {
-  commonTranslationsEn,
   commonTranslationsAr,
+  commonTranslationsEn,
 } from "@avuny/contracts/common"
-import { userTranslationsAr, userTranslationsEn } from "@avuny/contracts/user"
+import {
+  itemTranslationsAr,
+  itemTranslationsEn,
+} from "@avuny/contracts/item"
+import {
+  itemCategoryTranslationsAr,
+  itemCategoryTranslationsEn,
+} from "@avuny/contracts/item-category"
 import {
   organizationTranslationsAr,
   organizationTranslationsEn,
 } from "@avuny/contracts/organization"
-import { roleTranslationsAr, roleTranslationsEn } from "@avuny/contracts"
 import {
   organizationInvitationTranslationsAr,
   organizationInvitationTranslationsEn,
@@ -16,6 +22,12 @@ import {
   organizationUserTranslationsAr,
   organizationUserTranslationsEn,
 } from "@avuny/contracts/organization-user"
+import { roleTranslationsAr, roleTranslationsEn } from "@avuny/contracts"
+import {
+  unitTranslationsAr,
+  unitTranslationsEn,
+} from "@avuny/contracts/unit"
+import { userTranslationsAr, userTranslationsEn } from "@avuny/contracts/user"
 
 export const resources = {
   en: {
@@ -25,6 +37,9 @@ export const resources = {
     role: roleTranslationsEn,
     "organization-invitation": organizationInvitationTranslationsEn,
     "organization-user": organizationUserTranslationsEn,
+    unit: unitTranslationsEn,
+    item: itemTranslationsEn,
+    "item-category": itemCategoryTranslationsEn,
   },
   ar: {
     common: commonTranslationsAr,
@@ -33,6 +48,9 @@ export const resources = {
     role: roleTranslationsAr,
     "organization-invitation": organizationInvitationTranslationsAr,
     "organization-user": organizationUserTranslationsAr,
+    unit: unitTranslationsAr,
+    item: itemTranslationsAr,
+    "item-category": itemCategoryTranslationsAr,
   },
 }
 

@@ -3,7 +3,7 @@ import type { InternalAxiosRequestConfig } from "axios"
 
 import { tokenStorage } from "../auth/token-storage"
 import { API_CONFIG } from "../config"
-import i18n from "@/i18n"
+import i18n from "@/i18n/i18n"
 import { defaultLocale, isLocale } from "@avuny/i18n"
 
 export function requestInterceptor(config: InternalAxiosRequestConfig) {

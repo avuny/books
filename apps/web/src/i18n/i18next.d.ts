@@ -1,5 +1,5 @@
 import "i18next"
-import { Messages } from "./resources.ts"
+import type { Messages } from "./resources.ts"
 
 declare module "i18next" {
   interface CustomTypeOptions {
@@ -7,3 +7,4 @@ declare module "i18next" {
     resources: Messages
   }
 }
+

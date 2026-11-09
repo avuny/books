@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import i18n from "@/i18n" // Adjust this path to where your i18n.ts is located
+import i18n from "@/i18n/i18n" // Adjust this path to where your i18n.ts is located
 import { DirectionProvider } from "@workspace/ui/components/direction"
 
 const rtlLanguages = new Set(["ar", "he", "fa", "ur"])
