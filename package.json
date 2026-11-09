@@ -16,7 +16,8 @@
     "schema:generate": "turbo schema:generate",
     "codegen": "turbo routes:generate barrel:generate schema:generate",
     "seed:sidebar": "pnpm --filter @avuny/books-server seed:sidebar",
-    "print-files": "node ./scripts/print-files.js"
+    "print-files": "node ./scripts/print-files.js",
+    "diff:copy": "f() { git ls-files --others --exclude-standard -z | xargs -0 git add -N && git diff -- ${1:-.} ':(exclude)*_snapshot.json' ':(exclude)apps/web/src/routeTree.gen.ts' | pbcopy; }; f"
   },
   "devDependencies": {
     "prettier": "^3.9.9",
