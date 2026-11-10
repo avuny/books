@@ -46,7 +46,7 @@ export function AcceptMyInvitationDialog({
     try {
       await acceptMutation.mutateAsync({
         invitationId: invitation.id,
-        data: values,
+        data: values ?? {},
       })
       onSuccess?.(invitation)
     } catch (e) {
