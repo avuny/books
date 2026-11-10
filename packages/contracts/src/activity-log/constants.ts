@@ -46,6 +46,21 @@ export const ACTIVITY_LOG_ACTIONS = [
   "role.created",
   "role.updated",
   "role.deleted",
+
+  // unit
+  "unit_collection.created",
+  "unit_collection.updated",
+  "unit_collection.deleted",
+
+  // item_category
+  "item_category.created",
+  "item_category.updated",
+  "item_category.deleted",
+
+  // item
+  "item.created",
+  "item.updated",
+  "item.deleted",
 ] as const
 
 export type ActivityLogAction = (typeof ACTIVITY_LOG_ACTIONS)[number] | ItemCategoryAuditEvent | ItemAuditEvent | UnitAuditEvent
