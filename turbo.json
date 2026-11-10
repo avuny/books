@@ -51,6 +51,11 @@
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
       "outputs": ["dist/**"]
     },
+    "@avuny/books-web#build": {
+      "dependsOn": ["^build", "api:generate"],
+      "inputs": ["$TURBO_DEFAULT$", ".env*"],
+      "outputs": ["dist/**"]
+    },
     "deploy": {
       "dependsOn": ["^build"],
       "cache": false
@@ -58,14 +63,25 @@
     "lint": {
       "dependsOn": ["^build"]
     },
+    "@avuny/books-web#lint": {
+      "dependsOn": ["^build", "api:generate"]
+    },
     "format": {
       "dependsOn": ["^format"]
     },
     "typecheck": {
       "dependsOn": ["^build"]
     },
+    "@avuny/books-web#typecheck": {
+      "dependsOn": ["^build", "api:generate"]
+    },
     "dev": {
       "dependsOn": ["^build"],
+      "cache": false,
+      "persistent": true
+    },
+    "@avuny/books-web#dev": {
+      "dependsOn": ["^build", "api:generate"],
       "cache": false,
       "persistent": true
     },
@@ -73,10 +89,14 @@
       "dependsOn": ["^build"]
     },
     "openapi:generate": {
-      "dependsOn": ["db:generate", "^build"]
+      "dependsOn": ["^build"],
+      "inputs": ["$TURBO_DEFAULT$", ".env*"],
+      "outputs": ["openapi/**"]
     },
     "api:generate": {
-      "dependsOn": ["openapi:generate", "^build"]
+      "dependsOn": ["@avuny/books-server#openapi:generate", "^build"],
+      "inputs": ["$TURBO_DEFAULT$", "../server/openapi/openapi.json", "orval.config.ts"],
+      "outputs": ["src/api/**"]
     },
     "intl:generate": {
       "cache": false
