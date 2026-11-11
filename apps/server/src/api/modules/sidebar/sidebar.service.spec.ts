@@ -1,18 +1,12 @@
 import { describe, it, expect, vi } from "vitest"
-import { SidebarHeadingType, SidebarOptionName } from "@avuny/contracts"
-import { sidebarHeadingTypeEnum, sidebarOptionNameEnum } from "@avuny/db"
+import { SIDEBAR_TREE } from "@avuny/contracts"
 import {
   createSidebarService,
   SIDEBAR_CATALOG_CACHE_KEY,
   type SidebarCache,
 } from "./sidebar.service.js"
 import type { SidebarCatalogRow } from "./sidebar.repository.js"
-import {
-  createSidebarPermissionMapper,
-  sidebarOptionResources,
-} from "./sidebar.permission-map.js"
 import { createPermissionCheckerGate } from "./sidebar.permissions.js"
-import { SIDEBAR_SEED } from "./sidebar.seed.js"
 
 const row = (
   headingName: SidebarCatalogRow["headingName"],
@@ -28,12 +22,13 @@ const row = (
   optionPath: path,
 })
 
+// Deliberately NOT in sidebar order: the registry decides the order, not the database.
 const catalog: SidebarCatalogRow[] = [
-  row("users", "user"),
-  row("users", "role"),
-  row("sales", "customer"),
-  row("sales", "invoice"),
   row("inventory", "item"),
+  // row("sales", "invoice"),
+  // row("sales", "customer"),
+  row("users", "organizationUser"),
+  row("users", "role"),
 ]
 
 const input = { userId: "u1", orgId: "org1" }
@@ -50,12 +45,7 @@ function gateFor(granted: string[]) {
 function build(granted: string[], rows = catalog, cache?: SidebarCache) {
   const repository = { listActiveCatalog: vi.fn(async () => rows) }
   const gate = gateFor(granted)
-  const service = createSidebarService({
-    repository,
-    permissionMapper: createSidebarPermissionMapper(),
-    gate,
-    cache,
-  })
+  const service = createSidebarService({ repository, gate, cache })
   return { service, repository, gate }
 }
 
@@ -82,54 +72,58 @@ describe("sidebarService.getForUser", () => {
     expect(unwrap(result)[0]!.name).toBe("inventory")
   })
 
+  it("any action the module defines counts, not only create/read/update/delete", async () => {
+    const { service } = build(["deactivate:organization-user"])
+    const data = unwrap(await service.getForUser(input))
+    expect(data.flatMap((h) => h.options.map((o) => o.name))).toEqual(["organizationUser"])
+  })
+
   it("returns an empty sidebar when the user has no permissions", async () => {
     const { service } = build([])
     const result = await service.getForUser(input)
     expect(unwrap(result)).toEqual([])
   })
 
-  it("returns everything, in catalog order, for a user allowed on all resources", async () => {
-    const all = Object.values(sidebarOptionResources).map((r) => `read:${r}`)
+  it("returns everything in registry order, whatever order the database returns", async () => {
+    const all = SIDEBAR_TREE.flatMap((h) => h.options).flatMap((o) => o.permissionKeys)
     const { service } = build(all)
-    const result = await service.getForUser(input)
-    const data = unwrap(result)
+    const data = unwrap(await service.getForUser(input))
     expect(data.map((h) => h.name)).toEqual(["users", "sales", "inventory"])
     expect(data.flatMap((h) => h.options.map((o) => o.name))).toEqual([
-      "user",
       "role",
+      "organizationUser",
       "customer",
       "invoice",
       "item",
     ])
   })
 
-  it("maps option -> permission keys (kebab-case resource, every action)", async () => {
+  it("asks the gate for every grantable action of the option's module", async () => {
     const { service, gate } = build([], [row("users", "organizationUser")])
     await service.getForUser(input)
     expect(gate.hasAny).toHaveBeenCalledWith({ userId: "u1", orgId: "org1" }, [
       "read:organization-user",
-      "create:organization-user",
       "update:organization-user",
-      "delete:organization-user",
+      "deactivate:organization-user",
     ])
   })
 
   it("localizes labels and falls back to English", async () => {
-    const { service } = build(["read:user"])
-    const ar = await service.getForUser({ ...input, lang: "ar-EG" })
-    expect(unwrap(ar)[0]!.label).toBe("المستخدمون")
-    const xx = await service.getForUser({ ...input, lang: "xx" })
-    expect(unwrap(xx)[0]!.label).toBe("Users")
+    const { service } = build(["read:role"])
+    const ar = unwrap(await service.getForUser({ ...input, lang: "ar-EG" }))
+    expect(ar[0]!.label).toBe("المستخدمون")
+    expect(ar[0]!.options[0]!.label).toBe("الأدوار")
+    const xx = unwrap(await service.getForUser({ ...input, lang: "xx" }))
+    expect(xx[0]!.label).toBe("Users")
+    expect(xx[0]!.options[0]!.label).toBe("Roles")
   })
 
-  it("hides options that have no permission mapping", async () => {
-    const rows = [row("users", "user")]
-    const service = createSidebarService({
-      repository: { listActiveCatalog: vi.fn(async () => rows) },
-      permissionMapper: { keysFor: () => [] },
-      gate: gateFor(["read:user"]),
-    })
-    expect(unwrap(await service.getForUser(input))).toEqual([])
+  it("ignores catalog rows the registry no longer knows (until the next seed removes them)", async () => {
+    const stale = row("users", "legacyThing" as SidebarCatalogRow["optionName"])
+    const { service, gate } = build(["read:role"], [row("users", "role"), stale])
+    const data = unwrap(await service.getForUser(input))
+    expect(data.flatMap((h) => h.options.map((o) => o.name))).toEqual(["role"])
+    expect(gate.hasAny).toHaveBeenCalledTimes(1)
   })
 
   describe("catalog cache", () => {
@@ -145,7 +139,7 @@ describe("sidebarService.getForUser", () => {
 
     it("hits the repository once, then serves the catalog from cache", async () => {
       const cache = memoryCache()
-      const { service, repository } = build(["read:user"], catalog, cache)
+      const { service, repository } = build(["read:role"], catalog, cache)
       await service.getForUser(input)
       await service.getForUser(input)
       expect(repository.listActiveCatalog).toHaveBeenCalledTimes(1)
@@ -153,7 +147,7 @@ describe("sidebarService.getForUser", () => {
 
     it("invalidateCatalog forces a reload", async () => {
       const cache = memoryCache()
-      const { service, repository } = build(["read:user"], catalog, cache)
+      const { service, repository } = build(["read:role"], catalog, cache)
       await service.getForUser(input)
       await service.invalidateCatalog()
       expect(cache.store.has(SIDEBAR_CATALOG_CACHE_KEY)).toBe(false)
@@ -169,15 +163,15 @@ describe("sidebarService.getForUser", () => {
         set: async () => {
           throw new Error("down")
         },
-        del: async () => {},
+        del: async () => { },
       }
-      const { service } = build(["read:user"], catalog, broken)
+      const { service } = build(["read:role"], catalog, broken)
       expect(unwrap(await service.getForUser(input))).toHaveLength(1)
     })
 
     it("never caches the per-user result", async () => {
       const cache = memoryCache()
-      const { service } = build(["read:user"], catalog, cache)
+      const { service } = build(["read:role"], catalog, cache)
       await service.getForUser(input)
       expect([...cache.store.keys()]).toEqual([SIDEBAR_CATALOG_CACHE_KEY])
     })
@@ -186,13 +180,10 @@ describe("sidebarService.getForUser", () => {
 
 describe("createPermissionCheckerGate", () => {
   it("stops at the first granted key", async () => {
-    const check = vi.fn(async (_s: unknown, key: string) => key === "read:user")
+    const check = vi.fn(async (_s: unknown, key: string) => key === "read:role")
     const gate = createPermissionCheckerGate({ check } as never)
     expect(
-      await gate.hasAny({ userId: "u", orgId: "o" }, [
-        "read:user",
-        "create:user",
-      ])
+      await gate.hasAny({ userId: "u", orgId: "o" }, ["read:role", "create:role"])
     ).toBe(true)
     expect(check).toHaveBeenCalledTimes(1)
   })
@@ -201,33 +192,8 @@ describe("createPermissionCheckerGate", () => {
     const check = vi.fn(async () => false)
     const gate = createPermissionCheckerGate({ check } as never)
     expect(
-      await gate.hasAny({ userId: "u", orgId: "o" }, [
-        "read:user",
-        "create:user",
-      ])
+      await gate.hasAny({ userId: "u", orgId: "o" }, ["read:role", "create:role"])
     ).toBe(false)
     expect(check).toHaveBeenCalledTimes(2)
-  })
-})
-
-describe("catalog integrity", () => {
-  it("contract enums match the DB enums", () => {
-    expect([...SidebarHeadingType]).toEqual(sidebarHeadingTypeEnum.enumValues)
-    expect([...SidebarOptionName]).toEqual(sidebarOptionNameEnum.enumValues)
-  })
-
-  it("every seeded option has a permission resource and appears at most once", () => {
-    const seeded = SIDEBAR_SEED.flatMap((h) => h.options.map((o) => o.name))
-    const unique = new Set(seeded)
-    expect(unique.size).toBe(seeded.length)
-    for (const name of seeded) {
-      expect(sidebarOptionResources[name]).toBeTruthy()
-    }
-  })
-
-  it("seed headings cover every heading type once", () => {
-    expect(SIDEBAR_SEED.map((h) => h.name).sort()).toEqual(
-      [...SidebarHeadingType].sort()
-    )
   })
 })

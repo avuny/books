@@ -1,67 +1,6 @@
 import { notInArray } from "drizzle-orm"
+import { SIDEBAR_TREE } from "@avuny/contracts"
 import { sidebarHeadings, sidebarOptions, type DB } from "@avuny/db"
-import type { SidebarHeadingType, SidebarOptionName } from "@avuny/contracts"
-
-export interface SidebarSeedOption {
-  name: SidebarOptionName
-  /** Icon key understood by the web app (lucide names here). */
-  icon: string | null
-  /** Org-relative path; the web app prefixes it with the active organization. */
-  path: string
-}
-
-export interface SidebarSeedHeading {
-  name: SidebarHeadingType
-  icon: string
-  options: readonly SidebarSeedOption[]
-}
-
-/** Every SidebarOptionName must appear at most once in the seed. */
-export const SIDEBAR_SEED: readonly SidebarSeedHeading[] = [
-  {
-    name: "users",
-    icon: "users",
-    options: [
-      { name: "role", icon: "shield-check", path: "/roles" },
-      { name: "organizationUser", icon: "users-round", path: "/users" },
-      { name: "organizationInvitation", icon: "mail", path: "/invitations" }
-
-    ],
-  },
-  {
-    name: "purchases",
-    icon: "shopping-cart",
-    options: [
-      { name: "supplier", icon: "truck", path: "/suppliers" },
-      {
-        name: "purchaseOrder",
-        icon: "clipboard-list",
-        path: "/purchase-orders",
-      },
-    ],
-  },
-  {
-    name: "sales",
-    icon: "badge-dollar-sign",
-    options: [
-      { name: "customer", icon: "contact", path: "/customers" },
-      { name: "salesOrder", icon: "shopping-bag", path: "/sales-orders" },
-      { name: "invoice", icon: "file-text", path: "/invoices" },
-      { name: "receipt", icon: "receipt", path: "/receipts" },
-      { name: "report", icon: "chart-column", path: "/reports" },
-    ],
-  },
-  {
-    name: "inventory",
-    icon: "boxes",
-    options: [
-      { name: "item", icon: "package", path: "/items" },
-      { name: "unit", icon: "ruler", path: "/units" },
-      { name: "unitCollection", icon: "layers", path: "/unit-collections" },
-      { name: "warehouse", icon: "warehouse", path: "/warehouses" },
-    ],
-  },
-]
 
 export interface SeedSidebarSummary {
   headings: number
@@ -72,8 +11,10 @@ export interface SeedSidebarSummary {
 
 /**
  * Idempotent & synchronizing: safe to run on every deploy or manually.
+ * The data is not written here: SIDEBAR_TREE is derived from the module registry
+ * (@avuny/contracts), so a module with a `sidebar` entry is seeded automatically.
  * - Upserts seeded headings and options by unique `name`.
- * - Removes options & headings in the database that are no longer in `SIDEBAR_SEED`.
+ * - Removes options & headings in the database that are no longer in the registry.
  * - Refreshes icon / path / heading associations.
  */
 export async function seedSidebar({
@@ -86,13 +27,13 @@ export async function seedSidebar({
   let headingsRemoved = 0
   let optionsRemoved = 0
 
-  const targetHeadingNames = SIDEBAR_SEED.map((h) => h.name)
-  const targetOptionNames = SIDEBAR_SEED.flatMap((h) =>
+  const targetHeadingNames = SIDEBAR_TREE.map((h) => h.name)
+  const targetOptionNames = SIDEBAR_TREE.flatMap((h) =>
     h.options.map((o) => o.name)
   )
 
   await db.transaction(async (tx) => {
-    // 1. Delete options removed from the seed definition
+    // 1. Delete options removed from the registry
     if (targetOptionNames.length > 0) {
       const deletedOptions = await tx
         .delete(sidebarOptions)
@@ -106,7 +47,7 @@ export async function seedSidebar({
       optionsRemoved = deletedOptions.length
     }
 
-    // 2. Delete headings removed from the seed definition
+    // 2. Delete headings removed from the registry
     if (targetHeadingNames.length > 0) {
       const deletedHeadings = await tx
         .delete(sidebarHeadings)
@@ -120,8 +61,8 @@ export async function seedSidebar({
       headingsRemoved = deletedHeadings.length
     }
 
-    // 3. Upsert headings and options from the seed
-    for (const heading of SIDEBAR_SEED) {
+    // 3. Upsert headings and options from the registry
+    for (const heading of SIDEBAR_TREE) {
       const now = new Date()
       const [row] = await tx
         .insert(sidebarHeadings)

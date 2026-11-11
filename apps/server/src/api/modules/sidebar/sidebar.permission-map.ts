@@ -13,21 +13,20 @@ export const SIDEBAR_VISIBILITY_ACTIONS = ["read", "create", "update", "delete"]
  * (e.g. `read:organization-user`). Adjust any entry that differs in your permission catalog.
  */
 export const sidebarOptionResources = {
-  user: "user",
+
   role: "role",
   item: "item",
   unit: "unit",
   unitCollection: "unit-collection",
-  invoice: "invoice",
-  customer: "customer",
-  supplier: "supplier",
-  purchaseOrder: "purchase-order",
-  salesOrder: "sales-order",
-  warehouse: "warehouse",
-  organization: "organization",
+  // invoice: "invoice",
+  // customer: "customer",
+  // supplier: "supplier",
+  // purchaseOrder: "purchase-order",
+  // salesOrder: "sales-order",
+  // warehouse: "warehouse",
   organizationUser: "organization-user",
-  report: "report",
-  receipt: "receipt",
+  // report: "report",
+  // receipt: "receipt",
   organizationInvitation: "organization-invitation",
 } as const satisfies Record<SidebarOptionName, string>
 

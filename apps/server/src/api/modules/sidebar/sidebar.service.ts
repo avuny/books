@@ -1,6 +1,7 @@
 import { ok, type Result } from "@avuny/utils"
 import {
   getSidebarLabels,
+  SIDEBAR_TREE,
   type SidebarDto,
   type SidebarItemDto,
 } from "@avuny/contracts"
@@ -10,10 +11,6 @@ import {
   type SidebarCatalogRow,
   type SidebarRepository,
 } from "./sidebar.repository.js"
-import {
-  sidebarPermissionMapper,
-  type SidebarPermissionMapper,
-} from "./sidebar.permission-map.js"
 import {
   createPermissionCheckerGate,
   type SidebarPermissionGate,
@@ -40,9 +37,13 @@ export class DummyCache implements SidebarCache {
 export const SIDEBAR_CATALOG_CACHE_KEY = "sidebar:catalog"
 export const SIDEBAR_CATALOG_TTL_SECONDS = 60
 
+/** Every sidebar option in display order, from the module registry. */
+const OPTIONS = SIDEBAR_TREE.flatMap((heading) =>
+  heading.options.map((option) => ({ heading: heading.name, option }))
+)
+
 export interface SidebarServiceDeps {
   repository: Pick<SidebarRepository, "listActiveCatalog">
-  permissionMapper: SidebarPermissionMapper
   gate: SidebarPermissionGate
   cache?: SidebarCache
 }
@@ -56,7 +57,6 @@ export interface GetSidebarInput {
 
 export function createSidebarService({
   repository,
-  permissionMapper,
   gate,
   cache = new DummyCache(),
 }: SidebarServiceDeps) {
@@ -79,35 +79,42 @@ export function createSidebarService({
 
   /**
    * Sidebar for a user inside an organization:
-   *  - an option is kept if the user has at least one action (read/create/update/delete)
-   *    on its mapped resource;
+   *  - the registry decides which options exist, their order and the permissions that show
+   *    them; the database only supplies ids and the active flag (a row the registry no
+   *    longer knows is ignored until the next seed removes it);
+   *  - an option is kept if the user holds at least one of its module's grantable actions;
    *  - a heading is kept only if at least one of its options is kept.
-   * Order follows the catalog order.
    */
   async function getForUser({
     userId,
     orgId,
     lang,
   }: GetSidebarInput): Promise<Result<SidebarDto, never>> {
-    const rows = await loadCatalog()
-    const subject = { userId, orgId }
+    const rowByOption = new Map(
+      (await loadCatalog()).map((row) => [row.optionName, row] as const)
+    )
+    const candidates = OPTIONS.flatMap(({ heading, option }) => {
+      const row = rowByOption.get(option.name)
+      return row ? [{ heading, option, row }] : []
+    })
 
+    const subject = { userId, orgId }
     const allowed = await Promise.all(
-      rows.map((row) => gate.hasAny(subject, permissionMapper.keysFor(row.optionName)))
+      candidates.map(({ option }) => gate.hasAny(subject, option.permissionKeys))
     )
 
     const labels = getSidebarLabels(lang)
     const items = new Map<string, SidebarItemDto>()
 
-    rows.forEach((row, i) => {
+    candidates.forEach(({ heading, option, row }, i) => {
       if (!allowed[i]) return
 
       let item = items.get(row.headingId)
       if (!item) {
         item = {
           id: row.headingId,
-          name: row.headingName,
-          label: labels.headings[row.headingName],
+          name: heading,
+          label: labels.headings[heading],
           icon: row.headingIcon,
           options: [],
         }
@@ -116,8 +123,8 @@ export function createSidebarService({
 
       item.options.push({
         id: row.optionId,
-        name: row.optionName,
-        label: labels.options[row.optionName],
+        name: option.name,
+        label: labels.options[option.name],
         icon: row.optionIcon,
         path: row.optionPath,
       })
@@ -142,7 +149,6 @@ export type SidebarService = ReturnType<typeof createSidebarService>
 export function createDefaultSidebarService(): SidebarService {
   return createSidebarService({
     repository: createSidebarRepository({ db }),
-    permissionMapper: sidebarPermissionMapper,
     gate: createPermissionCheckerGate(),
     cache: new DummyCache(),
   })

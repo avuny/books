@@ -1,4 +1,4 @@
-import { and, asc, eq } from "drizzle-orm"
+import { and, eq } from "drizzle-orm"
 import { sidebarHeadings, sidebarOptions, type DB, type Tx } from "@avuny/db"
 import type { SidebarHeadingType, SidebarOptionName } from "@avuny/contracts"
 
@@ -17,9 +17,8 @@ export function createSidebarRepository({ db }: { db: DB }) {
   const exec = (tx?: Tx): DB | Tx => tx ?? db
 
   /**
-   * Active headings x active options.
-   * Ordering relies on Postgres enum order (declaration order of the pgEnums),
-   * so headings/options appear in the order they are listed in the enum.
+   * Active headings x active options, in no particular order: the service orders them by
+   * the module registry.
    */
   async function listActiveCatalog(tx?: Tx): Promise<SidebarCatalogRow[]> {
     return exec(tx)
@@ -38,7 +37,6 @@ export function createSidebarRepository({ db }: { db: DB }) {
         eq(sidebarOptions.sidebarHeadingId, sidebarHeadings.id)
       )
       .where(and(eq(sidebarHeadings.isActive, true), eq(sidebarOptions.isActive, true)))
-      .orderBy(asc(sidebarHeadings.name), asc(sidebarOptions.name))
   }
 
   return { listActiveCatalog }
