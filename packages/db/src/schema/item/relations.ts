@@ -4,7 +4,11 @@ import { itemCategories } from "./item-category.js"
 import { itemInventorySettings, itemWarehouseSettings, items } from "./item.js"
 import { unitCollectionUnits, unitCollections, units } from "./unit.js"
 
-export const unitsRelations = relations(units, ({ many }) => ({
+export const unitsRelations = relations(units, ({ one, many }) => ({
+    organization: one(organizations, {
+        fields: [units.orgId],
+        references: [organizations.id],
+    }),
     collectionUnits: many(unitCollectionUnits),
 }))
 

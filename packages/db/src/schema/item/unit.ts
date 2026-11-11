@@ -1,5 +1,6 @@
 import { sql } from "drizzle-orm"
 import {
+    type AnyPgColumn,
     boolean,
     check,
     index,
@@ -11,33 +12,36 @@ import {
     uuid,
 } from "drizzle-orm/pg-core"
 import {
-    UNIT_COLLECTION_NAME_MAX_LENGTH,
-    UNIT_COLLECTION_NAME_MIN_LENGTH,
     UNIT_NAME_MAX_LENGTH,
     UNIT_NAME_MIN_LENGTH,
     UNIT_SYMBOL_MAX_LENGTH,
     UNIT_SYMBOL_MIN_LENGTH,
     UNIT_TYPES,
 } from "@avuny/contracts/unit"
+import {
+    UNIT_COLLECTION_NAME_MAX_LENGTH,
+    UNIT_COLLECTION_NAME_MIN_LENGTH,
+} from "@avuny/contracts/unit-collection"
 import { conversionFactor, lengthBetween, pk, timestamps } from "../_helpers.js"
-import { orgRef } from "../organization/organizations.js"
+import { organizations, orgRef } from "../organization/organizations.js"
 
 /** What a unit measures. DERIVED from UNIT_TYPES in @avuny/contracts. */
 export const unitTypeEnum = pgEnum("unit_type", UNIT_TYPES)
 export type UnitType = (typeof unitTypeEnum.enumValues)[number]
 
 /**
- * UNITS: the global catalog of units of measure (kg, m, piece, liter...).
- * Not tenant-owned: seeded from SYSTEM_UNITS by `seed:units` and visible to every
- * organization. Nothing is deleted; retire a unit with is_active = false.
+ * UNITS: catalog of units of measure (kg, m, piece, liter...).
+ * System units have org_id = NULL (seeded from SYSTEM_UNITS by `seed:units` and visible to every organization).
+ * Custom units have org_id set to the organization that owns them.
  *
- * Name and symbol are unique across the catalog. Symbols are case-sensitive on purpose
- * ("mL" vs "ML"); names are compared case-insensitively.
+ * Name and symbol are unique per organization (and system-wide for system units).
+ * Symbols are case-sensitive on purpose ("mL" vs "ML"); names are compared case-insensitively.
  */
 export const units = pgTable(
     "units",
     {
         id: pk(),
+        orgId: uuid("org_id").references((): AnyPgColumn => organizations.id, { onDelete: "cascade" }),
         name: text("name").notNull(),
         symbol: text("symbol").notNull(),
         type: unitTypeEnum("type").notNull(),
@@ -45,8 +49,19 @@ export const units = pgTable(
         ...timestamps(),
     },
     (t) => [
-        uniqueIndex("ux_unit_symbol").on(t.symbol),
-        uniqueIndex("ux_unit_name").on(sql`lower(${t.name})`),
+        uniqueIndex("ux_unit_system_symbol")
+            .on(t.symbol)
+            .where(sql`${t.orgId} IS NULL`),
+        uniqueIndex("ux_unit_system_name")
+            .on(sql`lower(${t.name})`)
+            .where(sql`${t.orgId} IS NULL`),
+        uniqueIndex("ux_unit_org_symbol")
+            .on(t.orgId, t.symbol)
+            .where(sql`${t.orgId} IS NOT NULL`),
+        uniqueIndex("ux_unit_org_name")
+            .on(t.orgId, sql`lower(${t.name})`)
+            .where(sql`${t.orgId} IS NOT NULL`),
+        index("ix_unit_org_id").on(t.orgId),
         check(
             "ck_unit_name_len",
             lengthBetween(t.name, UNIT_NAME_MIN_LENGTH, UNIT_NAME_MAX_LENGTH)

@@ -64,6 +64,13 @@
       "when": 1794237363114,
       "tag": "0008_tiny_boom_boom",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1794339058383,
+      "tag": "0009_majestic_doomsday",
+      "breakpoints": true
     }
   ]
 }

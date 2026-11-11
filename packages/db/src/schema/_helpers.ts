@@ -8,11 +8,13 @@ import {
   type AnyPgColumn,
 } from "drizzle-orm/pg-core"
 import {
-  CONVERSION_FACTOR_PRECISION,
-  CONVERSION_FACTOR_SCALE,
   QUANTITY_PRECISION,
   QUANTITY_SCALE,
 } from "@avuny/contracts/unit"
+import {
+  CONVERSION_FACTOR_PRECISION,
+  CONVERSION_FACTOR_SCALE,
+} from "@avuny/contracts/unit-collection"
 
 /**
  * SHARED COLUMNS & UTILS: the ONLY cross-cutting file of the schema.
