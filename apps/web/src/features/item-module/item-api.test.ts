@@ -8,7 +8,17 @@ const raw = {
   name: "Royal Cement",
   categoryId: "c1",
   categoryName: "Cement",
-  baseUnit: { id: "u1", name: "Kilogram", symbol: "kg", type: "weight" as const },
+  baseUnit: {
+    id: "u1",
+    orgId: null,
+    name: "Kilogram",
+    symbol: "kg",
+    type: "weight" as const,
+    isActive: true,
+    isSystem: true,
+    createdAt: "2026-01-01T00:00:00Z",
+    updatedAt: "2026-01-01T00:00:00Z",
+  },
   unitCollectionId: "uc1",
   canAssembled: false,
   isReturnable: true,
@@ -30,7 +40,9 @@ describe("item-api normalization", () => {
   })
 
   it("keeps given values", () => {
-    expect(normalizeItem({ ...raw, description: "Bag", reorderPoint: "20.000000" })).toMatchObject({
+    expect(
+      normalizeItem({ ...raw, description: "Bag", reorderPoint: "20.000000" })
+    ).toMatchObject({
       description: "Bag",
       reorderPoint: "20.000000",
     })

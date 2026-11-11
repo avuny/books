@@ -39,10 +39,12 @@ const ItemFormShape = z.object({
   isActive: z.boolean(),
 })
 
-const batchNeedsTracking = (v: { isBatchTracked: boolean; isInventoryTracked: boolean }) =>
-  !(v.isBatchTracked && !v.isInventoryTracked)
+const batchNeedsTracking = (v: {
+  isBatchTracked: boolean
+  isInventoryTracked: boolean
+}) => !(v.isBatchTracked && !v.isInventoryTracked)
 
-/** Create: exactly one of base unit / collection (same rule as CreateItemSchema). */
+/** Create: requires unitCollectionId (or legacy baseUnitId). */
 export const CreateItemFormSchema = ItemFormShape.refine(batchNeedsTracking, {
   message: "Batch tracking requires inventory tracking",
   path: ["isBatchTracked"],
@@ -69,7 +71,9 @@ function trimQuantity(value: string): string {
   return trimmed ? `${int}.${trimmed}` : int
 }
 
-export function getCreateItemDefaults(defaultName?: string): CreateItemFormInput {
+export function getCreateItemDefaults(
+  defaultName?: string
+): CreateItemFormInput {
   return {
     name: defaultName ?? "",
     description: "",
@@ -93,7 +97,7 @@ export function getUpdateItemDefaults(item: ItemDto): UpdateItemFormInput {
     description: item.description ?? "",
     categoryId: item.categoryId,
     baseUnitId: item.baseUnit.id,
-    unitCollectionId: "",
+    unitCollectionId: item.unitCollectionId ?? "",
     canAssembled: item.canAssembled,
     isReturnable: item.isReturnable,
     isInventoryTracked: item.isInventoryTracked,
@@ -105,14 +109,18 @@ export function getUpdateItemDefaults(item: ItemDto): UpdateItemFormInput {
   }
 }
 
-export function toCreateItemInput(values: CreateItemFormValues): CreateItemInput {
+export function toCreateItemInput(
+  values: CreateItemFormValues
+): CreateItemInput {
   return {
     name: values.name,
     description: values.description || null,
     categoryId: values.categoryId,
-    ...(values.baseUnitId ? { baseUnitId: values.baseUnitId } : {}),
-    ...(!values.baseUnitId && values.unitCollectionId
+    ...(values.unitCollectionId
       ? { unitCollectionId: values.unitCollectionId }
+      : {}),
+    ...(!values.unitCollectionId && values.baseUnitId
+      ? { baseUnitId: values.baseUnitId }
       : {}),
     canAssembled: values.canAssembled,
     isReturnable: values.isReturnable,
@@ -124,12 +132,19 @@ export function toCreateItemInput(values: CreateItemFormValues): CreateItemInput
   }
 }
 
-/** The base unit is only sent when it really changed (it is locked once stock has moved). */
-export function toUpdateItemInput(values: UpdateItemFormValues, current: ItemDto): UpdateItemInput {
+/** The unit collection is sent when changed; base unit is sent if explicitly modified. */
+export function toUpdateItemInput(
+  values: UpdateItemFormValues,
+  current: ItemDto
+): UpdateItemInput {
   return {
     name: values.name,
     description: values.description || null,
     categoryId: values.categoryId,
+    ...(values.unitCollectionId &&
+    values.unitCollectionId !== current.unitCollectionId
+      ? { unitCollectionId: values.unitCollectionId }
+      : {}),
     ...(values.baseUnitId && values.baseUnitId !== current.baseUnit.id
       ? { baseUnitId: values.baseUnitId }
       : {}),

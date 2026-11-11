@@ -50,6 +50,9 @@
   "form": {
     "category": {
       "createNew": "Create new category"
+    },
+    "unitCollection": {
+      "createNew": "Create new unit collection"
     }
   },
   "fields": {
@@ -71,8 +74,8 @@
       "description": "A unit collection holding just this unit is created for the item."
     },
     "unitCollection": {
-      "label": "Or use an existing unit collection",
-      "placeholder": "Choose a collection",
+      "label": "Unit collection",
+      "placeholder": "Choose a unit collection",
       "description": "Its base unit becomes the item’s base unit."
     },
     "unitExclusive": "Choose either a base unit or a unit collection.",

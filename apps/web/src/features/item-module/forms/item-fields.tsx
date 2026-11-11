@@ -1,4 +1,4 @@
-import { useWatch, type Control } from "react-hook-form"
+import type { Control } from "react-hook-form"
 
 import {
   AsyncComboboxField,
@@ -8,10 +8,14 @@ import {
 
 import { CheckboxField } from "../../lib/forms/checkbox-field"
 import type { CreateItemFormInput } from "./item-form-schema"
-import type { ItemFormCopy, ItemPickers, ValuationOption } from "./item-form-types"
+import type {
+  ItemFormCopy,
+  ItemPickers,
+  ValuationOption,
+} from "./item-form-types"
 
 type ItemFieldsProps = {
-  /** Create and update inputs share the same shape; update just never sets a collection. */
+  /** Create and update inputs share the same shape. */
   control: Control<CreateItemFormInput, any, any>
   copy: ItemFormCopy
   pickers: ItemPickers
@@ -30,11 +34,7 @@ export function ItemFields({
   showIsActive = false,
   disabled,
 }: ItemFieldsProps) {
-  const baseUnitId = useWatch({ control, name: "baseUnitId" })
-  const unitCollectionId = useWatch({ control, name: "unitCollectionId" })
-  const hasBaseUnit = typeof baseUnitId === "string" && baseUnitId !== ""
-  const hasCollection = typeof unitCollectionId === "string" && unitCollectionId !== ""
-  const { category, baseUnit, unitCollection } = pickers
+  const { category, unitCollection } = pickers
 
   return (
     <>
@@ -65,20 +65,9 @@ export function ItemFields({
         source={category.source}
         initialOption={category.initialOption}
         createAction={category.createAction}
+        editAction={category.editAction}
         disabled={disabled}
         placeholder={copy.category.placeholder}
-      />
-
-      {/* A base unit and a unit collection exclude each other: picking one locks the other. */}
-      <AsyncComboboxField
-        control={control}
-        name="baseUnitId"
-        copy={copy.baseUnit}
-        comboboxCopy={baseUnit.copy}
-        source={baseUnit.source}
-        initialOption={baseUnit.initialOption}
-        disabled={disabled || hasCollection}
-        placeholder={copy.baseUnit.placeholder}
       />
 
       {unitCollection ? (
@@ -89,15 +78,11 @@ export function ItemFields({
           comboboxCopy={unitCollection.copy}
           source={unitCollection.source}
           initialOption={unitCollection.initialOption}
-          disabled={disabled || hasBaseUnit}
+          createAction={unitCollection.createAction}
+          editAction={unitCollection.editAction}
+          disabled={disabled}
           placeholder={copy.unitCollection.placeholder}
         />
-      ) : null}
-
-      {hasBaseUnit && hasCollection ? (
-        <p role="alert" className="text-xs text-destructive">
-          {copy.unitExclusive}
-        </p>
       ) : null}
 
       <div className="grid gap-3 sm:grid-cols-2">

@@ -22,7 +22,7 @@ export function CreateItem({ orgId, defaultName, onSuccess }: CreateItemProps) {
   const createMutation = useCreateItemMutation(orgId)
   const copy = useItemFormCopy("create")
   const valuationOptions = useValuationOptions()
-  const { pickers, createCategoryDialog } = useItemPickers(orgId)
+  const { pickers, dialogs } = useItemPickers(orgId)
 
   // Called only when Zod validation passes (react-hook-form guards the fields).
   const handleSubmit = async (values: CreateItemFormValues) => {
@@ -49,7 +49,7 @@ export function CreateItem({ orgId, defaultName, onSuccess }: CreateItemProps) {
         isPending={createMutation.isPending}
         errorMessage={serverError}
       />
-      {createCategoryDialog}
+      {dialogs}
     </>
   )
 }

@@ -3,6 +3,7 @@ import { useState } from "react"
 import { Skeleton } from "@workspace/ui/components/skeleton"
 import { parseApiError } from "@workspace/ui/lib/api-error"
 
+import { useUnitCollection } from "../../unit-collection-module"
 import { unitLabel } from "../../unit-module"
 import { normalizeItem, useItem, useUpdateItemMutation } from "../item-api"
 import type { ItemDto } from "../types"
@@ -23,13 +24,21 @@ export function UpdateItem({ orgId, itemId, onSuccess }: UpdateItemProps) {
   const [serverError, setServerError] = useState<string | null>(null)
 
   const { item, isLoading, error } = useItem(orgId, itemId)
+  const { collection } = useUnitCollection(orgId, item?.unitCollectionId ?? "")
   const updateMutation = useUpdateItemMutation(orgId)
   const copy = useItemFormCopy("update")
   const valuationOptions = useValuationOptions()
-  // The current category and base unit show their names before the lists are opened.
-  const { pickers, createCategoryDialog } = useItemPickers(orgId, {
+  // The current category and unit collection show their names before the lists are opened.
+  const { pickers, dialogs } = useItemPickers(orgId, {
     category: item ? { id: item.categoryId, name: item.categoryName } : null,
-    baseUnit: item ? { id: item.baseUnit.id, name: unitLabel(item.baseUnit) } : null,
+    unitCollection: collection
+      ? { id: collection.id, name: collection.name }
+      : item?.unitCollectionId
+        ? { id: item.unitCollectionId, name: "" }
+        : null,
+    baseUnit: item
+      ? { id: item.baseUnit.id, name: unitLabel(item.baseUnit) }
+      : null,
   })
 
   // Called only when Zod validation passes (react-hook-form guards the fields).
@@ -67,21 +76,18 @@ export function UpdateItem({ orgId, itemId, onSuccess }: UpdateItemProps) {
     )
   }
 
-  // The collection picker is create-only: an edit changes the base unit, not the collection.
-  const { unitCollection: _unitCollection, ...editPickers } = pickers
-
   return (
     <>
       <UpdateItemForm
         copy={copy}
-        pickers={editPickers}
+        pickers={pickers}
         valuationOptions={valuationOptions}
         item={item}
         onSubmit={handleSubmit}
         isPending={updateMutation.isPending}
         errorMessage={serverError}
       />
-      {createCategoryDialog}
+      {dialogs}
     </>
   )
 }

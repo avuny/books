@@ -3,6 +3,7 @@ import type {
   AsyncComboboxCopy,
   AsyncOptionsSource,
   ComboboxCreateAction,
+  ComboboxEditAction,
 } from "@workspace/ui/blocks/form"
 
 /** Localized strings shared by the create and update forms. */
@@ -15,7 +16,7 @@ export type ItemFormCopy = {
   baseUnit: FieldCopy
   unitCollection: FieldCopy
   /** Shown when both a base unit and a collection are picked. */
-  unitExclusive: string
+  unitExclusive?: string
   canAssembled: FieldCopy
   isReturnable: FieldCopy
   isInventoryTracked: FieldCopy
@@ -34,15 +35,16 @@ export type ItemCombobox = {
   source: AsyncOptionsSource
   /** Omit to hide the "Create new" footer. */
   createAction?: ComboboxCreateAction
+  /** Omit to hide the edit icon on items. */
+  editAction?: ComboboxEditAction
   /** Edit forms: the current value, so its name shows before the list loads. */
   initialOption?: { id: string; name: string } | null
 }
 
 export type ItemPickers = {
   category: ItemCombobox
-  baseUnit: ItemCombobox
-  /** Create form only: reuse an existing collection instead of picking a base unit. */
-  unitCollection?: ItemCombobox
+  unitCollection: ItemCombobox
+  baseUnit?: ItemCombobox
 }
 
 export type ValuationOption = { value: string; label: string }
