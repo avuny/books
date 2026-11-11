@@ -7,7 +7,7 @@
  * that component's props. If a prop name differs in your version, this is the one place to fix.
  */
 import * as React from "react"
-import { Loader2, Plus } from "lucide-react"
+import { Loader2, Pencil, Plus } from "lucide-react"
 
 import { Button } from "@workspace/ui/components/button"
 import {
@@ -62,6 +62,15 @@ export type ComboboxCreateAction = {
   }) => void
 }
 
+export type ComboboxEditAction = {
+  label?: string
+  /**
+   * Runs when the edit icon on an item is clicked (the list closes first).
+   * Opens the existing edit/update dialog for that option.
+   */
+  onEdit: (option: ComboboxOption) => void
+}
+
 export type AsyncComboboxProps = {
   id?: string
   /** Selected id. null or "" means nothing is selected. */
@@ -75,6 +84,8 @@ export type AsyncComboboxProps = {
   /** Label for an id that is already selected (edit forms), so it shows before any page has loaded. */
   initialOption?: ComboboxOption | null
   createAction?: ComboboxCreateAction
+  editAction?: ComboboxEditAction
+  onEditOption?: (option: ComboboxOption) => void
   disabled?: boolean
   invalid?: boolean
 }
@@ -93,6 +104,8 @@ export function AsyncCombobox({
   placeholder,
   initialOption,
   createAction,
+  editAction,
+  onEditOption,
   disabled,
   invalid,
 }: AsyncComboboxProps) {
@@ -102,6 +115,9 @@ export function AsyncCombobox({
   // The list is paged and filtered, so the chosen option may not be in `options`: remember it here.
   const [picked, setPicked] = React.useState<ComboboxOption | null>(null)
   const listRef = React.useRef<HTMLDivElement>(null)
+
+  const editHandler = editAction?.onEdit ?? onEditOption
+  const editLabel = editAction?.label ?? "Edit"
 
   const selected = React.useMemo(
     () =>
@@ -194,8 +210,42 @@ export function AsyncCombobox({
           className={cn("max-h-60", source.isSearching && "opacity-60")}
         >
           {(option: ComboboxOption) => (
-            <ComboboxItem key={option.id} value={option}>
-              {option.name}
+            <ComboboxItem
+              key={option.id}
+              value={option}
+              className="group/combobox-item justify-between"
+            >
+              <span className="flex-1 truncate">{option.name}</span>
+              {editHandler && (
+                <button
+                  type="button"
+                  aria-label={editLabel}
+                  className="inline-flex size-6 shrink-0 cursor-pointer items-center justify-center rounded text-muted-foreground opacity-70 transition-opacity group-hover/combobox-item:opacity-100 hover:bg-accent hover:text-foreground"
+                  onPointerDown={(e) => {
+                    e.stopPropagation()
+                  }}
+                  onMouseDown={(e) => {
+                    e.stopPropagation()
+                    e.preventDefault()
+                  }}
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    e.preventDefault()
+                    handleOpenChange(false)
+                    editHandler(option)
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.stopPropagation()
+                      e.preventDefault()
+                      handleOpenChange(false)
+                      editHandler(option)
+                    }
+                  }}
+                >
+                  <Pencil className="size-3.5" aria-hidden />
+                </button>
+              )}
             </ComboboxItem>
           )}
         </ComboboxList>

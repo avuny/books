@@ -24,6 +24,7 @@ import {
   type AsyncComboboxCopy,
   type AsyncOptionsSource,
   type ComboboxCreateAction,
+  type ComboboxEditAction,
   type ComboboxOption,
 } from "./async-combobox"
 
@@ -41,6 +42,9 @@ export type AsyncComboboxFieldProps<
   initialOption?: ComboboxOption | null
   /** Omit to hide the "Create new" footer button. */
   createAction?: ComboboxCreateAction
+  /** Omit to hide the edit icon on items. */
+  editAction?: ComboboxEditAction
+  onEditOption?: (option: ComboboxOption) => void
   disabled?: boolean
   className?: string
   placeholder?: string
@@ -58,6 +62,8 @@ export function AsyncComboboxField<
   source,
   initialOption,
   createAction,
+  editAction,
+  onEditOption,
   disabled = false,
   className,
   placeholder,
@@ -89,6 +95,8 @@ export function AsyncComboboxField<
             placeholder={placeholder || copy.placeholder}
             initialOption={initialOption}
             createAction={createAction}
+            editAction={editAction}
+            onEditOption={onEditOption}
             disabled={disabled}
             invalid={fieldState.invalid}
           />
