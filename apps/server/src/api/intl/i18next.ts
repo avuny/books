@@ -17,6 +17,10 @@ import roleEn from "./locales/role/en.json" with { type: "json" }
 import roleAr from "./locales/role/ar.json" with { type: "json" }
 import sidebarEn from "./locales/sidebar/en.json" with { type: "json" }
 import sidebarAr from "./locales/sidebar/ar.json" with { type: "json" }
+import unitEn from "./locales/unit/en.json" with { type: "json" }
+import unitAr from "./locales/unit/ar.json" with { type: "json" }
+import unitCollectionEn from "./locales/unit-collection/en.json" with { type: "json" }
+import unitCollectionAr from "./locales/unit-collection/ar.json" with { type: "json" }
 import usersEn from "./locales/users/en.json" with { type: "json" }
 import usersAr from "./locales/users/ar.json" with { type: "json" }
 import { Locale } from "@avuny/i18n"
@@ -34,6 +38,9 @@ export const resources = {
         otp: otpEn,
         role: roleEn,
         sidebar: sidebarEn,
+        unit: unitEn,
+        "unit-collection": unitCollectionEn,
+        unitCollection: unitCollectionEn,
         users: usersEn,
   },
   ar: {
@@ -48,6 +55,9 @@ export const resources = {
         otp: otpAr,
         role: roleAr,
         sidebar: sidebarAr,
+        unit: unitAr,
+        "unit-collection": unitCollectionAr,
+        unitCollection: unitCollectionAr,
         users: usersAr,
   },
 } as const
@@ -62,7 +72,7 @@ export function installRequestLanguage(): void {
   i18next.init({
     lng: "en",
     fallbackLng: "en",
-    ns: ["admin", "auth", "geo", "organization", "organization-invitation", "organizationInvitation", "organization-user", "organizationUser", "otp", "role", "sidebar", "users"],
+    ns: ["admin", "auth", "geo", "organization", "organization-invitation", "organizationInvitation", "organization-user", "organizationUser", "otp", "role", "sidebar", "unit", "unit-collection", "unitCollection", "users"],
     defaultNS: "otp",
     resources,
     interpolation: { escapeValue: false },

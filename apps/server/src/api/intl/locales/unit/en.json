@@ -1,0 +1,120 @@
+{
+  "errors": {
+    "UNIT_NOT_FOUND": "Unit not found.",
+    "UNIT_FORBIDDEN": "You do not have access to this unit.",
+    "UNIT_NAME_TAKEN": "A unit with this name already exists.",
+    "UNIT_SYMBOL_TAKEN": "A unit with this symbol already exists.",
+    "UNIT_SYSTEM_IMMUTABLE": "System units cannot be modified or deleted.",
+    "UNIT_IN_USE": "This unit is used in collections or items and cannot be deleted.",
+    "UNIT_TYPE_IMMUTABLE": "Unit measurement type cannot be changed."
+  },
+  "labels": {
+    "base": "Base",
+    "system": "System",
+    "custom": "Custom"
+  },
+  "msgs": {
+    "UNIT_CREATED": "Unit created.",
+    "UNIT_UPDATED": "Unit updated.",
+    "UNIT_DELETED": "Unit deleted.",
+    "UNIT_DEACTIVATED": "Unit deactivated."
+  },
+  "list": {
+    "title": "Units",
+    "description": "Units of measure used for products, inventory tracking, and conversions.",
+    "search": {
+      "placeholder": "Search units",
+      "clear": "Clear search"
+    }
+  },
+  "create": {
+    "title": "Create unit",
+    "description": "Add a new unit of measure for your organization.",
+    "submitLabel": "Create unit",
+    "submittingLabel": "Creating…"
+  },
+  "update": {
+    "title": "Edit unit",
+    "description": "Update unit details or active status.",
+    "submitLabel": "Save changes",
+    "submittingLabel": "Saving…"
+  },
+  "fields": {
+    "name": {
+      "label": "Name",
+      "placeholder": "e.g. Kilogram"
+    },
+    "symbol": {
+      "label": "Symbol",
+      "placeholder": "e.g. kg"
+    },
+    "type": {
+      "label": "Measurement type",
+      "placeholder": "Choose type",
+      "locked": "Measurement type cannot be changed."
+    },
+    "isActive": {
+      "label": "Active",
+      "description": "Inactive units cannot be chosen for new items or collections."
+    }
+  },
+  "actions": {
+    "create": "Create unit",
+    "edit": "Edit",
+    "view": "View",
+    "delete": "Delete",
+    "cancel": "Cancel",
+    "filter": "Filter",
+    "allTypes": "All types",
+    "allStatuses": "All statuses"
+  },
+  "type": {
+    "count": "Count",
+    "weight": "Weight",
+    "length": "Length",
+    "area": "Area",
+    "volume": "Volume"
+  },
+  "status": {
+    "active": "Active",
+    "inactive": "Inactive"
+  },
+  "table": {
+    "name": "Unit",
+    "symbol": "Symbol",
+    "type": "Type",
+    "status": "Status",
+    "scope": "Scope",
+    "updated": "Last updated",
+    "actions": "Actions",
+    "actionsFor": "Actions for {name}"
+  },
+  "empty": {
+    "title": "No units found",
+    "description": "Try adjusting your search or filters, or add a custom unit."
+  },
+  "delete": {
+    "title": "Delete unit?",
+    "description": "“{name}” ({symbol}) will be permanently deleted. This can’t be undone."
+  },
+  "details": {
+    "back": "Back to units",
+    "name": "Name",
+    "symbol": "Symbol",
+    "type": "Measurement type",
+    "status": "Status",
+    "scope": "Scope",
+    "createdAt": "Created",
+    "updatedAt": "Last updated",
+    "systemNotice": "This is a system-provided standard unit. It cannot be edited or removed."
+  },
+  "pagination": {
+    "nav": "Units pagination",
+    "previous": "Previous",
+    "next": "Next",
+    "rowsPerPage": "Rows per page",
+    "summary": "{from}–{to} of {total}",
+    "pageOf": "Page {page} of {pageCount}",
+    "goTo": "Go to page {page}"
+  }
+}
