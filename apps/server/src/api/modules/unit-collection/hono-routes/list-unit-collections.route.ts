@@ -22,7 +22,7 @@ export const listUnitCollectionsRoute = ({
     method: "get",
     path: "/organizations/{orgId}/unit-collections",
     operationId: "listUnitCollections",
-    tags: ["unit"],
+    tags: ["unit-collection"],
     summary: "List the organization's unit collections",
     middleware: [requireAuth, requirePermission("read:unit")] as const,
     request: {
@@ -51,3 +51,4 @@ export const listUnitCollectionsRoute = ({
 }
 
 export default listUnitCollectionsRoute
+

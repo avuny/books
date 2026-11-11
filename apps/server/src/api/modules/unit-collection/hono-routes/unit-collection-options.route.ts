@@ -22,15 +22,15 @@ export const unitCollectionOptionsRoute = ({
     method: "get",
     path: "/organizations/{orgId}/unit-collection-options",
     operationId: "listUnitCollectionOptions",
-    tags: ["unit"],
-    summary: "Search unit collections for pickers: id and name only, cursor-paginated",
+    tags: ["unit-collection"],
+    summary: "Picker options for unit collections (async combobox)",
     middleware: [requireAuth, requirePermission("read:unit")] as const,
     request: {
       params: z.object({ orgId: z.string().uuid() }),
       query: OptionListQuerySchema,
     },
     responses: {
-      200: jsonOk("Unit collection options retrieved", OptionListResponseSchema),
+      200: jsonOk("Unit collection options", OptionListResponseSchema),
       403: jsonError("Forbidden", [RoleErrorCode.ROLE_PERMISSION_DENIED]),
       ...globalErrorResponses,
     },
@@ -43,7 +43,7 @@ export const unitCollectionOptionsRoute = ({
     const query = c.req.valid("query")
 
     const result = await service.listCollectionOptions(orgId, query)
-    if (!result.success) throw new Error("listUnitCollectionOptions cannot fail")
+    if (!result.success) throw new Error("listCollectionOptions cannot fail")
     return c.json({ success: true, data: result.data }, 200)
   })
 
@@ -51,3 +51,4 @@ export const unitCollectionOptionsRoute = ({
 }
 
 export default unitCollectionOptionsRoute
+
