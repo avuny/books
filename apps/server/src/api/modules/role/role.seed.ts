@@ -12,17 +12,23 @@ export interface SeedSummary {
   rolesUpdated: number
   statementsAdded: number
   statementsRemoved: number
+  /** Statements of any role that the module registry no longer grants (removed or renamed). */
+  staleRemoved: number
 }
 
 const keyOf = (s: PermissionStatement) =>
   `${s.effect}|${s.resource}|${s.action}|${s.resourceId}`
 
 /**
- * Idempotent sync of the system roles (roles.org_id IS NULL) to SYSTEM_ROLES:
- *  - creates missing roles, refreshes descriptions,
- *  - makes each role's statements EXACTLY match its definition,
+ * Idempotent sync of permissions with the module registry (@avuny/contracts):
+ *  - deletes statements of ANY role (custom ones included) whose resource or action the
+ *    registry no longer grants, so removing or renaming a module/action leaves no dead grants,
+ *  - creates missing system roles (roles.org_id IS NULL) and refreshes descriptions,
+ *  - makes each system role's statements EXACTLY match its SYSTEM_ROLES definition,
  *  - never deletes a role (removing a definition leaves the old row; it may be assigned).
- * Safe to run on every deploy, after migrations.
+ * Adding a module or action needs nothing here: the columns are plain text, wildcard
+ * statements already cover it, and roles that list resources explicitly stay explicit.
+ * Safe to run on every deploy.
  */
 export async function syncSystemRoles(
   db: DB,
@@ -33,7 +39,7 @@ export async function syncSystemRoles(
     if (bad)
       throw new Error(
         `System role "${def.name}": statement #${bad.index} is invalid (${bad.reason}). ` +
-          `Add it to PERMISSION_CATALOG or fix the definition.`
+          `Add it to the module registry or fix the definition.`
       )
   }
 
@@ -42,9 +48,31 @@ export async function syncSystemRoles(
     rolesUpdated: 0,
     statementsAdded: 0,
     statementsRemoved: 0,
+    staleRemoved: 0,
   }
 
   await db.transaction(async (tx) => {
+    // Dead grants first: checked per distinct (resource, action) pair, not per row.
+    const pairs = await tx
+      .selectDistinct({
+        resource: rolePermissions.resource,
+        action: rolePermissions.action,
+      })
+      .from(rolePermissions)
+    for (const pair of pairs) {
+      if (!findInvalidStatement([{ ...pair, resourceId: "*" }])) continue
+      const removed = await tx
+        .delete(rolePermissions)
+        .where(
+          and(
+            eq(rolePermissions.resource, pair.resource),
+            eq(rolePermissions.action, pair.action)
+          )
+        )
+        .returning({ id: rolePermissions.id })
+      summary.staleRemoved += removed.length
+    }
+
     for (const def of definitions) {
       const [existing] = await tx
         .select({ id: roles.id })
