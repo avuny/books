@@ -1,7 +1,9 @@
+import { LOCALES, type Locale } from "../modules/index.js"
+import { SIDEBAR_TREE } from "./constants.js"
 import type { SidebarHeadingType, SidebarOptionName } from "./constants.js"
 
-export const SIDEBAR_LOCALES = ["en", "ar"] as const
-export type SidebarLocale = (typeof SIDEBAR_LOCALES)[number]
+export const SIDEBAR_LOCALES = LOCALES
+export type SidebarLocale = Locale
 export const DEFAULT_SIDEBAR_LOCALE: SidebarLocale = "en"
 
 export interface SidebarLabelSet {
@@ -9,60 +11,18 @@ export interface SidebarLabelSet {
   options: Record<SidebarOptionName, string>
 }
 
-export const SIDEBAR_LABELS: Record<SidebarLocale, SidebarLabelSet> = {
-  en: {
-    headings: {
-      users: "Users",
-      purchases: "Purchases",
-      sales: "Sales",
-      inventory: "Inventory",
+/** Derived from the labels in the module registry; add a locale to LOCALES to get a new one. */
+export const SIDEBAR_LABELS = Object.fromEntries(
+  LOCALES.map((locale) => [
+    locale,
+    {
+      headings: Object.fromEntries(SIDEBAR_TREE.map((h) => [h.name, h.label[locale]])),
+      options: Object.fromEntries(
+        SIDEBAR_TREE.flatMap((h) => h.options.map((o) => [o.name, o.label[locale]]))
+      ),
     },
-    options: {
-      user: "Users",
-      role: "Roles",
-      item: "Items",
-      unit: "Units",
-      unitCollection: "Unit collections",
-      invoice: "Invoices",
-      customer: "Customers",
-      supplier: "Suppliers",
-      purchaseOrder: "Purchase orders",
-      salesOrder: "Sales orders",
-      warehouse: "Warehouses",
-      organization: "Organization",
-      organizationUser: "Members",
-      report: "Reports",
-      receipt: "Receipts",
-      organizationInvitation: "Organization invitations",
-    },
-  },
-  ar: {
-    headings: {
-      users: "المستخدمون",
-      purchases: "المشتريات",
-      sales: "المبيعات",
-      inventory: "المخزون",
-    },
-    options: {
-      user: "المستخدمون",
-      role: "الأدوار",
-      item: "الأصناف",
-      unit: "الوحدات",
-      unitCollection: "مجموعات الوحدات",
-      invoice: "الفواتير",
-      customer: "العملاء",
-      supplier: "الموردون",
-      purchaseOrder: "أوامر الشراء",
-      salesOrder: "أوامر البيع",
-      warehouse: "المستودعات",
-      organization: "المنظمة",
-      organizationUser: "أعضاء المنظمة",
-      report: "التقارير",
-      receipt: "الإيصالات",
-      organizationInvitation: "دعوات المنظمة",
-    },
-  },
-}
+  ])
+) as Record<SidebarLocale, SidebarLabelSet>
 
 /** "ar-EG" -> "ar"; anything unknown falls back to English. */
 export function resolveSidebarLocale(lang?: string | null): SidebarLocale {

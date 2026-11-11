@@ -1,100 +1,47 @@
-import { ItemCategoryAuditEvent } from "../item-category/constants.js"
-import { ItemAuditEvent } from "../item/constants.js"
-import { UnitAuditEvent } from "../unit/constants.js"
+import { MODULE_LIST, type EventOf, type ModuleKey } from "../modules/index.js"
 
-export const ACTIVITY_LOG_RESOURCES = [
-  "organization",
-  "organization_user",
-  "organization_invitation",
-  "role",
-  "unit",
-  "unit_collection",
-  "item_category",
-  "item",
-] as const
+// ---------------------------------------------------------------------------
+// DERIVED from the module registry (modules/registry.ts): every action with an
+// `event` becomes the activity-log action `<module>.<event>`. Do not list
+// resources or actions here.
+//
+// Rows keep their action string forever (the column is plain text on purpose),
+// so never remove or rename an event that has shipped.
+// ---------------------------------------------------------------------------
 
-export type ActivityLogResource = (typeof ACTIVITY_LOG_RESOURCES)[number]
+/** Modules that log at least one event. */
+export type ActivityLogResource = {
+  [K in ModuleKey]: [EventOf<K>] extends [never] ? never : K
+}[ModuleKey]
 
-export const ActivityLogResource = {
-  ORGANIZATION: "organization",
-  ORGANIZATION_USER: "organization_user",
-  ORGANIZATION_INVITATION: "organization_invitation",
-  ROLE: "role",
-} as const
+/** "organization.created" | "organization_user.username_changed" | ... */
+export type ActivityLogAction = { [K in ModuleKey]: `${K}.${EventOf<K>}` }[ModuleKey]
 
-export const ACTIVITY_LOG_ACTIONS = [
-  // organization
-  "organization.created",
-  "organization.updated",
-  "organization.deleted",
-  "organization.ownership_transferred",
+const logged = MODULE_LIST.filter((m) => m.events.length > 0)
 
-  // organization_user
-  "organization_user.joined",
-  "organization_user.username_changed",
-  "organization_user.deactivated",
-  "organization_user.reactivated",
-  "organization_user.roles_changed",
+export const ACTIVITY_LOG_RESOURCES = logged.map((m) => m.key) as [
+  ActivityLogResource,
+  ...ActivityLogResource[],
+]
 
-  // organization_invitation
-  "organization_invitation.created",
-  "organization_invitation.resent",
-  "organization_invitation.revoked",
-  "organization_invitation.accepted",
-  "organization_invitation.declined",
+export const ACTIVITY_LOG_ACTIONS = logged.flatMap((m) =>
+  m.events.map((event) => `${m.key}.${event}`)
+) as [ActivityLogAction, ...ActivityLogAction[]]
 
-  // role
-  "role.created",
-  "role.updated",
-  "role.deleted",
+/** "organization_user.joined" -> "ORGANIZATION_USER_JOINED" */
+type ConstantName<A extends string> = A extends `${infer R}.${infer E}`
+  ? Uppercase<`${R}_${E}`>
+  : never
 
-  // unit
-  "unit.created",
-  "unit.updated",
-  "unit.deactivated",
-  "unit.deleted",
+/** `ActivityLogResource.ORGANIZATION_USER === "organization_user"` */
+export const ActivityLogResource = Object.fromEntries(
+  ACTIVITY_LOG_RESOURCES.map((r) => [r.toUpperCase(), r])
+) as { readonly [R in ActivityLogResource as Uppercase<R>]: R }
 
-  // unit_collection
-  "unit_collection.created",
-  "unit_collection.updated",
-  "unit_collection.deleted",
-
-  // item_category
-  "item_category.created",
-  "item_category.updated",
-  "item_category.deleted",
-
-  // item
-  "item.created",
-  "item.updated",
-  "item.deleted",
-] as const
-
-export type ActivityLogAction = (typeof ACTIVITY_LOG_ACTIONS)[number] | ItemCategoryAuditEvent | ItemAuditEvent | UnitAuditEvent
-
-export const ActivityLogAction = {
-  ORGANIZATION_CREATED: "organization.created",
-  ORGANIZATION_UPDATED: "organization.updated",
-  ORGANIZATION_DELETED: "organization.deleted",
-  ORGANIZATION_OWNERSHIP_TRANSFERRED: "organization.ownership_transferred",
-
-  ORGANIZATION_USER_JOINED: "organization_user.joined",
-  ORGANIZATION_USER_USERNAME_CHANGED: "organization_user.username_changed",
-  ORGANIZATION_USER_DEACTIVATED: "organization_user.deactivated",
-  ORGANIZATION_USER_REACTIVATED: "organization_user.reactivated",
-  ORGANIZATION_USER_ROLES_CHANGED: "organization_user.roles_changed",
-
-  ORGANIZATION_INVITATION_CREATED: "organization_invitation.created",
-  ORGANIZATION_INVITATION_RESENT: "organization_invitation.resent",
-  ORGANIZATION_INVITATION_REVOKED: "organization_invitation.revoked",
-  ORGANIZATION_INVITATION_ACCEPTED: "organization_invitation.accepted",
-  ORGANIZATION_INVITATION_DECLINED: "organization_invitation.declined",
-
-  ROLE_CREATED: "role.created",
-  ROLE_UPDATED: "role.updated",
-  ROLE_DELETED: "role.deleted",
-
-} as const
+/** `ActivityLogAction.ORGANIZATION_USER_JOINED === "organization_user.joined"` */
+export const ActivityLogAction = Object.fromEntries(
+  ACTIVITY_LOG_ACTIONS.map((a) => [a.replace(".", "_").toUpperCase(), a])
+) as { readonly [A in ActivityLogAction as ConstantName<A>]: A }
 
 export const ACTIVITY_LOG_DEFAULT_PAGE_SIZE = 20
 export const ACTIVITY_LOG_MAX_PAGE_SIZE = 100

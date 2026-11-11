@@ -1,4 +1,10 @@
 import { PERMISSION_WILDCARD } from "./constants.js"
+import {
+  MODULE_LIST,
+  type Hyphenate,
+  type ModuleKey,
+  type PermissionActionOf,
+} from "../modules/index.js"
 
 export interface PermissionCatalogEntry {
   /** snake_case resource token, e.g. "organization_user". */
@@ -12,44 +18,37 @@ export interface PermissionCatalogEntry {
   scopable?: boolean
 }
 
-/**
- * THE catalog of grantable permissions: what the "create role" screen lets people pick,
- * and what the server accepts. Every new module adds its resource here (and the labels in
- * role/locales: labels.resources.<resource>, labels.actions.<action>).
- *
- * The database enums `permission_resource` / `permission_action` are DERIVED from this
- * catalog (see PERMISSION_RESOURCES / PERMISSION_ACTIONS). After editing it, run
- * `drizzle-kit generate` so the enums get the new values. Never delete an entry:
- * Postgres cannot drop enum values, so deprecate instead.
- *
- * Route keys use "action:resource-with-hyphens", e.g. "update:organization-user".
- */
-export const PERMISSION_CATALOG = [
-  { resource: "organization", actions: ["read", "update", "delete"] },
-  { resource: "organization_user", actions: ["read", "update", "deactivate"] },
-  { resource: "organization_invitation", actions: ["create", "read", "update"] },
-  { resource: "role", actions: ["create", "read", "update", "delete", "assign"] },
-  { resource: "activity_log", actions: ["read"] },
-] as const satisfies readonly PermissionCatalogEntry[]
-
 // ---------------------------------------------------------------------------
-// Types and values derived from the catalog (single source of truth)
+// Everything below is DERIVED from the module registry (modules/registry.ts):
+// a module's actions marked `permission: true` are what a role can be granted.
+// Do not list resources or actions here.
+//
+// role_permissions stores resource / action as plain text typed from these lists, so
+// changing the registry needs no migration. `syncSystemRoles` (the seed) deletes
+// statements this catalog no longer grants, in every role.
+//
+// Route keys use "action:resource-with-hyphens", e.g. "update:organization-user".
 // ---------------------------------------------------------------------------
 
-type Hyphenate<S extends string> = S extends `${infer A}_${infer B}`
-  ? `${A}-${Hyphenate<B>}`
-  : S
-type CatalogEntry = (typeof PERMISSION_CATALOG)[number]
-type KeysOf<E extends PermissionCatalogEntry> = E extends unknown
-  ? `${E["actions"][number]}:${Hyphenate<E["resource"]>}`
-  : never
-
-export type PermissionResource = CatalogEntry["resource"]
-export type PermissionAction = CatalogEntry["actions"][number]
+export type PermissionResource = {
+  [K in ModuleKey]: [PermissionActionOf<K>] extends [never] ? never : K
+}[ModuleKey]
+export type PermissionAction = { [K in ModuleKey]: PermissionActionOf<K> }[ModuleKey]
 /** "create:role" | "update:organization-user" | ... only valid pairs compile. */
-export type PermissionKey = KeysOf<CatalogEntry>
+export type PermissionKey = {
+  [K in ModuleKey]: `${PermissionActionOf<K>}:${Hyphenate<K>}`
+}[ModuleKey]
 
-/** Distinct resources, as a non-empty tuple (what pgEnum / z.enum need). */
+/** What the "create role" screen lets people pick, and what the server accepts. */
+export const PERMISSION_CATALOG: readonly PermissionCatalogEntry[] = MODULE_LIST.filter(
+  (m) => m.permissions.length > 0
+).map((m) => ({
+  resource: m.key,
+  actions: m.permissions,
+  scopable: m.spec.scopable ?? false,
+}))
+
+/** Distinct resources, as a non-empty tuple (what z.enum needs). */
 export const PERMISSION_RESOURCES = [
   ...new Set(PERMISSION_CATALOG.map((e) => e.resource)),
 ] as [PermissionResource, ...PermissionResource[]]
@@ -75,8 +74,8 @@ export type StatementProblem = {
 
 /**
  * First statement that is not grantable, or null. Used by the API and by the seed script.
- * Takes plain strings on purpose: API input is untrusted. The DB enums only check each
- * value on its own; this also checks the (resource, action) pair.
+ * Takes plain strings on purpose: API input is untrusted. The database stores resource and
+ * action as plain text, so this is what checks them, and their pairing.
  */
 export function findInvalidStatement(
   statements: readonly { resource: string; action: string; resourceId: string }[]
