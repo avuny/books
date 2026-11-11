@@ -1,0 +1,122 @@
+{
+  "errors": {
+    "UNIT_NOT_FOUND": "Unit not found.",
+    "UNIT_COLLECTION_NOT_FOUND": "Unit collection not found.",
+    "UNIT_COLLECTION_IN_USE": "This unit collection is used by items and cannot be deleted.",
+    "UNIT_FEATURE_NOT_AVAILABLE": "Extra units are not available on your plan.",
+    "UNIT_TYPE_MISMATCH": "Every unit in a collection must measure the same thing as its base unit.",
+    "UNIT_DUPLICATE_IN_COLLECTION": "A unit can appear only once in a collection.",
+    "UNIT_COLLECTION_TOO_MANY_UNITS": "This collection has too many units.",
+    "UNIT_INVALID_CONVERSION_FACTOR": "The conversion factor must be a number greater than zero."
+  },
+  "labels": {
+    "base": "Base"
+  },
+  "msgs": {
+    "UNIT_COLLECTION_CREATED": "Unit collection created.",
+    "UNIT_COLLECTION_UPDATED": "Unit collection updated.",
+    "UNIT_COLLECTION_DELETED": "Unit collection deleted."
+  },
+  "list": {
+    "title": "Unit collections",
+    "description": "A base unit and the units that convert to it. Items use these to convert quantities.",
+    "search": {
+      "placeholder": "Search collections",
+      "clear": "Clear search"
+    }
+  },
+  "create": {
+    "title": "Create unit collection",
+    "description": "Pick a base unit, then add the units that convert to it.",
+    "submitLabel": "Create collection",
+    "submittingLabel": "Creating…"
+  },
+  "update": {
+    "title": "Edit unit collection",
+    "description": "Rename the collection or change the units that convert to the base unit.",
+    "submitLabel": "Save changes",
+    "submittingLabel": "Saving…"
+  },
+  "fields": {
+    "name": {
+      "label": "Name",
+      "placeholder": "Generated from the base unit when empty"
+    },
+    "baseUnit": {
+      "label": "Base unit",
+      "placeholder": "Choose a unit",
+      "locked": "The base unit cannot be changed."
+    },
+    "extraUnits": {
+      "label": "Other units",
+      "description": "Every unit must measure the same thing as the base unit.",
+      "empty": "No other units.",
+      "add": "Add unit",
+      "remove": "Remove unit",
+      "pickBaseFirst": "Choose the base unit first."
+    },
+    "unit": {
+      "label": "Unit",
+      "placeholder": "Choose a unit"
+    },
+    "conversionFactor": {
+      "label": "Conversion factor",
+      "placeholder": "e.g. 0.01",
+      "description": "How many base units one of this unit equals."
+    }
+  },
+  "actions": {
+    "create": "Create collection",
+    "edit": "Edit",
+    "view": "View",
+    "delete": "Delete",
+    "cancel": "Cancel"
+  },
+  "type": {
+    "count": "Count",
+    "weight": "Weight",
+    "length": "Length",
+    "area": "Area",
+    "volume": "Volume"
+  },
+  "table": {
+    "name": "Collection",
+    "baseUnit": "Base unit",
+    "units": "Units",
+    "items": "Items",
+    "updated": "Last updated",
+    "actions": "Actions",
+    "actionsFor": "Actions for {name}"
+  },
+  "empty": {
+    "title": "No unit collections found",
+    "description": "Collections are also created automatically when you add an item."
+  },
+  "delete": {
+    "title": "Delete unit collection?",
+    "description": "“{name}” will be permanently deleted. This can’t be undone."
+  },
+  "details": {
+    "back": "Back to unit collections",
+    "items": "Items",
+    "createdAt": "Created",
+    "updatedAt": "Last updated",
+    "unitsTitle": "Units",
+    "unit": "Unit",
+    "symbol": "Symbol",
+    "factor": "Conversion",
+    "inUseHint": "Items use this collection, so it cannot be deleted.",
+    "conversion": "1 {unit} = {factor} {base}",
+    "type": "Type"
+  },
+  "pagination": {
+    "nav": "Unit collections pagination",
+    "previous": "Previous",
+    "next": "Next",
+    "rowsPerPage": "Rows per page",
+    "summary": "{from}–{to} of {total}",
+    "pageOf": "Page {page} of {pageCount}",
+    "goTo": "Go to page {page}"
+  }
+}
+

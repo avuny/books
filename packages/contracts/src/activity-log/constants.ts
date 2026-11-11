@@ -8,6 +8,7 @@ export const ACTIVITY_LOG_RESOURCES = [
   "organization_invitation",
   "role",
   "unit",
+  "unit_collection",
   "item_category",
   "item",
 ] as const
@@ -48,6 +49,12 @@ export const ACTIVITY_LOG_ACTIONS = [
   "role.deleted",
 
   // unit
+  "unit.created",
+  "unit.updated",
+  "unit.deactivated",
+  "unit.deleted",
+
+  // unit_collection
   "unit_collection.created",
   "unit_collection.updated",
   "unit_collection.deleted",

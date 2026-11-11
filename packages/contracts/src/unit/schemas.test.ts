@@ -1,33 +1,26 @@
 import { describe, expect, it } from "vitest"
-import {
-  CreateUnitCollectionSchema,
-  UnitConversionFactorSchema,
-  UpdateUnitCollectionSchema,
-} from "./schemas.js"
+import { CreateUnitSchema, UpdateUnitSchema } from "./schemas.js"
 
-const uuid = "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a01"
-
-describe("UnitConversionFactorSchema", () => {
-  it("accepts decimal strings that fit numeric(24, 12)", () => {
-    for (const ok of ["1", "0.01", "1000000", "0.000000000001", "123456789012.5"])
-      expect(UnitConversionFactorSchema.safeParse(ok).success, ok).toBe(true)
+describe("CreateUnitSchema", () => {
+  it("accepts valid unit input", () => {
+    const valid = { name: "Kilogram", symbol: "kg", type: "weight" as const }
+    expect(CreateUnitSchema.safeParse(valid).success).toBe(true)
   })
-  it("rejects zero, negatives, exponents and too many digits", () => {
-    for (const bad of ["0", "0.000", "-1", "1e3", ".5", "1.", "abc", "1234567890123", "0.0000000000001"])
-      expect(UnitConversionFactorSchema.safeParse(bad).success, bad).toBe(false)
-  })
-})
 
-describe("CreateUnitCollectionSchema", () => {
-  it("defaults units to an empty list", () => {
-    const parsed = CreateUnitCollectionSchema.parse({ baseUnitId: uuid })
-    expect(parsed.units).toEqual([])
+  it("rejects empty name or symbol", () => {
+    expect(CreateUnitSchema.safeParse({ name: "", symbol: "kg", type: "weight" }).success).toBe(false)
+    expect(CreateUnitSchema.safeParse({ name: "Kilogram", symbol: "", type: "weight" }).success).toBe(false)
+  })
+
+  it("rejects invalid measurement type", () => {
+    expect(CreateUnitSchema.safeParse({ name: "Kilogram", symbol: "kg", type: "invalid" }).success).toBe(false)
   })
 })
 
-describe("UpdateUnitCollectionSchema", () => {
+describe("UpdateUnitSchema", () => {
   it("needs at least one field", () => {
-    expect(UpdateUnitCollectionSchema.safeParse({}).success).toBe(false)
-    expect(UpdateUnitCollectionSchema.safeParse({ units: [] }).success).toBe(true)
+    expect(UpdateUnitSchema.safeParse({}).success).toBe(false)
+    expect(UpdateUnitSchema.safeParse({ name: "New Name" }).success).toBe(true)
+    expect(UpdateUnitSchema.safeParse({ isActive: false }).success).toBe(true)
   })
 })

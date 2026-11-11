@@ -55,6 +55,11 @@
       "default": "./dist/unit/index.js",
       "types": "./dist/unit/index.d.ts"
     },
+    "./unit-collection": {
+      "import": "./dist/unit-collection/index.js",
+      "default": "./dist/unit-collection/index.js",
+      "types": "./dist/unit-collection/index.d.ts"
+    },
     "./item-category": {
       "import": "./dist/item-category/index.js",
       "default": "./dist/item-category/index.js",
