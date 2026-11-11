@@ -12,9 +12,9 @@ import {
     uuid,
 } from "drizzle-orm/pg-core"
 import {
-    PERMISSION_ACTIONS,
-    PERMISSION_RESOURCES,
     PERMISSION_WILDCARD,
+    type PermissionAction,
+    type PermissionResource,
 } from "@avuny/contracts"
 import { pk, timestamps, createdAt } from "../_helpers.js"
 import { organizations, orgRef, organizationUsers } from "../organization/organizations.js"
@@ -27,21 +27,6 @@ export const permissionEffectEnum = pgEnum("permission_effect", [
     "deny",
 ])
 export type PermissionEffect = (typeof permissionEffectEnum.enumValues)[number]
-
-/**
- * Resources / actions a statement can reference. DERIVED from PERMISSION_CATALOG in
- * @avuny/contracts, so the catalog and the database cannot drift apart. '*' is the wildcard.
- * Only each value is enforced here; the (resource, action) pairing is validated by
- * findInvalidStatement.
- */
-export const permissionResourceEnum = pgEnum("permission_resource", [
-    PERMISSION_WILDCARD,
-    ...PERMISSION_RESOURCES,
-])
-export const permissionActionEnum = pgEnum("permission_action", [
-    PERMISSION_WILDCARD,
-    ...PERMISSION_ACTIONS,
-])
 
 /**
  * ROLES: a named bundle of permissions, like an AWS IAM role/policy.
@@ -89,7 +74,11 @@ export const roles = pgTable(
  *   deny   delete  *                  *        -> may never delete anything
  *
  * Rules (implemented in ./rbac.ts and PermissionChecker):
- *  - `resource` / `action` are enums derived from PERMISSION_CATALOG; '*' is a wildcard.
+ *  - `resource` / `action` are any module / action of the registry in @avuny/contracts
+ *    (modules/registry.ts), or '*' as the wildcard. They are plain text, typed from the
+ *    registry, so adding, renaming or removing a module needs no migration: the
+ *    (resource, action) pairing is validated by findInvalidStatement on the way in, and
+ *    the seed (syncSystemRoles) deletes statements the registry no longer grants.
  *  - `resource_id` defaults to '*' (all records). A specific id narrows the statement to
  *    one record. It is text, so it can hold UUIDs or any other key.
  *  - Explicit DENY beats any ALLOW; no match = implicit deny.
@@ -104,8 +93,12 @@ export const rolePermissions = pgTable(
             .notNull()
             .references(() => roles.id, { onDelete: "cascade" }),
         effect: permissionEffectEnum("effect").notNull().default("allow"),
-        resource: permissionResourceEnum("resource").notNull(),
-        action: permissionActionEnum("action").notNull(),
+        resource: text("resource")
+            .$type<PermissionResource | typeof PERMISSION_WILDCARD>()
+            .notNull(),
+        action: text("action")
+            .$type<PermissionAction | typeof PERMISSION_WILDCARD>()
+            .notNull(),
         resourceId: text("resource_id").notNull().default("*"),
         createdAt: createdAt(),
     },

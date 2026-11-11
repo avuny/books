@@ -71,6 +71,13 @@
       "when": 1794339058383,
       "tag": "0009_majestic_doomsday",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1794397693471,
+      "tag": "0010_last_komodo",
+      "breakpoints": true
     }
   ]
 }

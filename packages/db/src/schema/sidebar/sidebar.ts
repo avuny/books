@@ -1,39 +1,15 @@
 import { relations } from "drizzle-orm";
 import {
   boolean,
-  pgEnum,
   pgTable,
   text,
   timestamp,
 } from "drizzle-orm/pg-core";
+import type { SidebarHeadingType, SidebarOptionName } from "@avuny/contracts";
 
-// Enums (keep in sync with @avuny/contracts -> sidebar/constants.ts)
-
-export const sidebarHeadingTypeEnum = pgEnum("sidebar_heading_type", [
-  "users",
-  "purchases",
-  "sales",
-  "inventory",
-]);
-
-export const sidebarOptionNameEnum = pgEnum("sidebar_option_name", [
-  "user",
-  "role",
-  "item",
-  "unit",
-  "unitCollection",
-  "invoice",
-  "customer",
-  "supplier",
-  "purchaseOrder",
-  "salesOrder",
-  "warehouse",
-  "organization",
-  "organizationUser",
-  "report",
-  "receipt",
-  "organizationInvitation",
-]);
+// `name` is plain text typed from the module registry (@avuny/contracts,
+// modules/registry.ts) on purpose: adding, renaming or removing a sidebar option or
+// heading is a registry edit plus a seed run, never a migration.
 
 // Sidebar headings
 
@@ -42,7 +18,7 @@ export const sidebarHeadings = pgTable("sidebar_headings", {
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID()),
 
-  name: sidebarHeadingTypeEnum("name").notNull().unique(),
+  name: text("name").$type<SidebarHeadingType>().notNull().unique(),
 
   icon: text("icon").notNull(),
 
@@ -64,7 +40,7 @@ export const sidebarOptions = pgTable("sidebar_options", {
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID()),
 
-  name: sidebarOptionNameEnum("name").notNull().unique(),
+  name: text("name").$type<SidebarOptionName>().notNull().unique(),
 
   icon: text("icon"),
 
