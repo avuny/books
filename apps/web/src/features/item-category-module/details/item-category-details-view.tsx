@@ -69,7 +69,9 @@ export function ItemCategoryDetailsView({
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div className="min-w-0 space-y-1">
               <div className="flex flex-wrap items-center gap-2">
-                <h1 className="text-xl font-semibold text-foreground">{category.name}</h1>
+                <h1 className="text-xl font-semibold text-foreground">
+                  {category.name}
+                </h1>
                 <ItemCategoryStatusBadge
                   isActive={category.isActive}
                   activeLabel={copy.activeLabel}
@@ -77,7 +79,9 @@ export function ItemCategoryDetailsView({
                 />
               </div>
               {category.description ? (
-                <p className="text-sm text-muted-foreground">{category.description}</p>
+                <p className="text-sm text-muted-foreground">
+                  {category.description}
+                </p>
               ) : null}
             </div>
             {editAction}
@@ -91,19 +95,31 @@ export function ItemCategoryDetailsView({
 
           <dl className="grid grid-cols-1 gap-4 text-sm sm:grid-cols-4">
             <div>
-              <dt className="text-xs text-muted-foreground">{copy.subCategoriesLabel}</dt>
-              <dd className="text-foreground tabular-nums">{category.childCount}</dd>
+              <dt className="text-xs text-muted-foreground">
+                {copy.subCategoriesLabel}
+              </dt>
+              <dd className="text-foreground tabular-nums">
+                {category.childCount}
+              </dd>
             </div>
             <div>
-              <dt className="text-xs text-muted-foreground">{copy.itemsLabel}</dt>
-              <dd className="text-foreground tabular-nums">{category.itemCount}</dd>
+              <dt className="text-xs text-muted-foreground">
+                {copy.itemsLabel}
+              </dt>
+              <dd className="text-foreground tabular-nums">
+                {category.itemCount}
+              </dd>
             </div>
             <div>
-              <dt className="text-xs text-muted-foreground">{copy.createdLabel}</dt>
+              <dt className="text-xs text-muted-foreground">
+                {copy.createdLabel}
+              </dt>
               <dd className="text-foreground">{createdAt}</dd>
             </div>
             <div>
-              <dt className="text-xs text-muted-foreground">{copy.updatedLabel}</dt>
+              <dt className="text-xs text-muted-foreground">
+                {copy.updatedLabel}
+              </dt>
               <dd className="text-foreground">{updatedAt}</dd>
             </div>
           </dl>

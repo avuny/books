@@ -46,7 +46,12 @@ export function ItemCategoryMobileCard({
         { label: copy.subCategoriesLabel, value: category.childCount },
         { label: copy.itemsLabel, value: category.itemCount },
       ]}
-      actions={<DataTableRowActions actions={actions} triggerLabel={actionsTriggerLabel} />}
+      actions={
+        <DataTableRowActions
+          actions={actions}
+          triggerLabel={actionsTriggerLabel}
+        />
+      }
       onClick={onClick}
     />
   )

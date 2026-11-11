@@ -6,7 +6,10 @@ import UserButton, {
   type UserButtonProps,
   type UserButtonCopy,
 } from "@workspace/ui/blocks/buttons/user-btn"
-import { useAuthenticatedHandler, useSignOutHandler as useDefaultSignOutHandler } from "@/features/auth"
+import {
+  useAuthenticatedHandler,
+  useSignOutHandler as useDefaultSignOutHandler,
+} from "@/features/auth"
 import { ROUTES } from "@/features/routes"
 
 export type UserButtonContainerProps = Partial<UserButtonProps>
@@ -29,8 +32,7 @@ export function UserButtonContainer({
   const user = propUser !== undefined ? propUser : auth.data?.data
   const isLoading = propIsLoading !== undefined ? propIsLoading : auth.isLoading
 
-  const useSignOutHandler =
-    propUseSignOutHandler ?? useDefaultSignOutHandler
+  const useSignOutHandler = propUseSignOutHandler ?? useDefaultSignOutHandler
 
   const copy: UserButtonCopy = {
     account: propCopy?.account ?? t("menu.account"),

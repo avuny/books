@@ -21,7 +21,11 @@ import {
 
 import { useCursorOptions } from "../lib/options/use-cursor-options"
 import { useResourceAbilities } from "../lib/permissions/use-resource-abilities"
-import type { ItemCategoryDto, ItemCategoryListItemDto, ItemCategoryStatus } from "./types"
+import type {
+  ItemCategoryDto,
+  ItemCategoryListItemDto,
+  ItemCategoryStatus,
+} from "./types"
 
 const NO_CATEGORIES: ItemCategoryListItemDto[] = []
 
@@ -52,7 +56,9 @@ export function normalizeItemCategory(data: {
 }
 
 /** The list query carries booleans as "true" / "false" strings. */
-export function statusToIsActive(status: ItemCategoryStatus): "true" | "false" | undefined {
+export function statusToIsActive(
+  status: ItemCategoryStatus
+): "true" | "false" | undefined {
   return status === "all" ? undefined : status === "active" ? "true" : "false"
 }
 
@@ -72,7 +78,12 @@ export function useItemCategoryList(
 ) {
   const query = useListItemCategories(
     orgId,
-    { page, pageSize, isActive: statusToIsActive(status), search: search || undefined },
+    {
+      page,
+      pageSize,
+      isActive: statusToIsActive(status),
+      search: search || undefined,
+    },
     { query: { placeholderData: keepPreviousData } }
   )
 
@@ -113,10 +124,16 @@ function useInvalidateItemCategories(orgId: string) {
 
   return (categoryId?: string) =>
     Promise.all([
-      queryClient.invalidateQueries({ queryKey: getListItemCategoriesQueryKey(orgId) }),
-      queryClient.invalidateQueries({ queryKey: getGetItemCategoryTreeQueryKey(orgId) }),
+      queryClient.invalidateQueries({
+        queryKey: getListItemCategoriesQueryKey(orgId),
+      }),
+      queryClient.invalidateQueries({
+        queryKey: getGetItemCategoryTreeQueryKey(orgId),
+      }),
       // the prefix covers every search term and page of the picker
-      queryClient.invalidateQueries({ queryKey: getListItemCategoryOptionsQueryKey(orgId) }),
+      queryClient.invalidateQueries({
+        queryKey: getListItemCategoryOptionsQueryKey(orgId),
+      }),
       categoryId
         ? queryClient.invalidateQueries({
             queryKey: getGetItemCategoryQueryKey(orgId, categoryId),
@@ -135,7 +152,9 @@ export function useCreateItemCategoryMutation(orgId: string) {
 export function useUpdateItemCategoryMutation(orgId: string) {
   const invalidate = useInvalidateItemCategories(orgId)
   return useUpdateItemCategory({
-    mutation: { onSuccess: (_response, variables) => invalidate(variables.categoryId) },
+    mutation: {
+      onSuccess: (_response, variables) => invalidate(variables.categoryId),
+    },
   })
 }
 
@@ -150,7 +169,13 @@ export function useItemCategoryOptions(orgId: string) {
   return useCursorOptions({
     queryKey: getListItemCategoryOptionsQueryKey(orgId),
     fetchPage: async ({ cursor, search, limit, signal }) =>
-      (await listItemCategoryOptions(orgId, { cursor, search, limit }, { signal })).data,
+      (
+        await listItemCategoryOptions(
+          orgId,
+          { cursor, search, limit },
+          { signal }
+        )
+      ).data,
     enabled: Boolean(orgId),
   })
 }

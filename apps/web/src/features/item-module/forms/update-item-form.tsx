@@ -12,7 +12,11 @@ import {
   type UpdateItemFormInput,
   type UpdateItemFormValues,
 } from "./item-form-schema"
-import type { ItemFormCopy, ItemPickers, ValuationOption } from "./item-form-types"
+import type {
+  ItemFormCopy,
+  ItemPickers,
+  ValuationOption,
+} from "./item-form-types"
 
 export type { UpdateItemFormValues }
 
@@ -44,7 +48,11 @@ export function UpdateItemForm({
   })
 
   return (
-    <FormShell title={copy.title} description={copy.description} errorMessage={errorMessage}>
+    <FormShell
+      title={copy.title}
+      description={copy.description}
+      errorMessage={errorMessage}
+    >
       <form
         onSubmit={form.handleSubmit((values) => onSubmit(values))}
         noValidate
@@ -52,7 +60,9 @@ export function UpdateItemForm({
       >
         <ItemFields
           // Create and update inputs have the same shape (the collection field is just never shown).
-          control={form.control as unknown as Control<CreateItemFormInput, any, any>}
+          control={
+            form.control as unknown as Control<CreateItemFormInput, any, any>
+          }
           copy={copy}
           pickers={pickers}
           valuationOptions={valuationOptions}

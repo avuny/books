@@ -4,7 +4,10 @@ import { AsyncComboboxField, InputField } from "@workspace/ui/blocks/form"
 
 import { CheckboxField } from "../../lib/forms/checkbox-field"
 import type { ItemCategoryFormInput } from "./item-category-form-schema"
-import type { ItemCategoryFormCopy, ItemCategoryParentPicker } from "./item-category-form-types"
+import type {
+  ItemCategoryFormCopy,
+  ItemCategoryParentPicker,
+} from "./item-category-form-types"
 
 type ItemCategoryFieldsProps = {
   control: Control<ItemCategoryFormInput, any, any>

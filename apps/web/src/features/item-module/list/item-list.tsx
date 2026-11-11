@@ -18,7 +18,11 @@ import { parseApiError } from "@workspace/ui/lib/api-error"
 
 import { unitLabel } from "../../unit-module"
 import { ItemButton, ItemDialog } from "../forms"
-import { useDeleteItemMutation, useItemAbilities, useItemList } from "../item-api"
+import {
+  useDeleteItemMutation,
+  useItemAbilities,
+  useItemList,
+} from "../item-api"
 import type { ItemListItemDto, ItemStatus } from "../types"
 import { createItemColumns } from "./item-columns"
 import { ItemMobileCard } from "./item-mobile-card"
@@ -37,7 +41,10 @@ export function ItemList({ orgId, onViewItem }: ItemListProps) {
 
   const [status, setStatus] = useState<ItemStatus>("all")
   const [search, setSearch] = useState("")
-  const [pagination, setPagination] = useState<PaginationState>({ pageIndex: 0, pageSize: 20 })
+  const [pagination, setPagination] = useState<PaginationState>({
+    pageIndex: 0,
+    pageSize: 20,
+  })
   const [itemToEdit, setItemToEdit] = useState<ItemListItemDto | null>(null)
   const [itemToDelete, setItemToDelete] = useState<ItemListItemDto | null>(null)
   const [deleteError, setDeleteError] = useState<string | null>(null)
@@ -60,7 +67,10 @@ export function ItemList({ orgId, onViewItem }: ItemListProps) {
   useEffect(() => {
     if (!isLoading && items.length === 0 && pagination.pageIndex > 0) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
-      setPagination((current) => ({ ...current, pageIndex: current.pageIndex - 1 }))
+      setPagination((current) => ({
+        ...current,
+        pageIndex: current.pageIndex - 1,
+      }))
     }
   }, [isLoading, items.length, pagination.pageIndex])
 
@@ -155,7 +165,9 @@ export function ItemList({ orgId, onViewItem }: ItemListProps) {
   return (
     <div className="flex flex-col gap-4">
       <div className="min-w-0">
-        <h1 className="text-xl font-semibold text-foreground">{t("list.title")}</h1>
+        <h1 className="text-xl font-semibold text-foreground">
+          {t("list.title")}
+        </h1>
         <p className="text-sm text-muted-foreground">{t("list.description")}</p>
       </div>
 
@@ -168,7 +180,10 @@ export function ItemList({ orgId, onViewItem }: ItemListProps) {
           setStatus(next)
           resetPage()
         }}
-        tabs={STATUSES.map((item) => ({ value: item, label: t(`list.tabs.${item}`) }))}
+        tabs={STATUSES.map((item) => ({
+          value: item,
+          label: t(`list.tabs.${item}`),
+        }))}
       />
 
       <DataTableToolbar
@@ -192,8 +207,12 @@ export function ItemList({ orgId, onViewItem }: ItemListProps) {
         onRowClick={(item) => onViewItem(item.id)}
         emptyState={
           <div className="flex flex-col items-center gap-1 px-6 py-16 text-center">
-            <p className="text-sm font-medium text-foreground">{t("empty.title")}</p>
-            <p className="text-sm text-muted-foreground">{t("empty.description")}</p>
+            <p className="text-sm font-medium text-foreground">
+              {t("empty.title")}
+            </p>
+            <p className="text-sm text-muted-foreground">
+              {t("empty.description")}
+            </p>
           </div>
         }
         renderMobileCard={(row) => (
@@ -207,7 +226,9 @@ export function ItemList({ orgId, onViewItem }: ItemListProps) {
               unitLabel,
             }}
             actions={getActions(row.original)}
-            actionsTriggerLabel={t("table.actionsFor", { name: row.original.name })}
+            actionsTriggerLabel={t("table.actionsFor", {
+              name: row.original.name,
+            })}
             onClick={() => onViewItem(row.original.id)}
           />
         )}
@@ -221,7 +242,8 @@ export function ItemList({ orgId, onViewItem }: ItemListProps) {
               rowsPerPage: t("pagination.rowsPerPage"),
               summary: ({ from, to, total: count }) =>
                 t("pagination.summary", { from, to, total: count }),
-              pageOf: (page, pageCount) => t("pagination.pageOf", { page, pageCount }),
+              pageOf: (page, pageCount) =>
+                t("pagination.pageOf", { page, pageCount }),
               pageLabel: (page) => t("pagination.goTo", { page }),
             }}
           />
@@ -245,7 +267,9 @@ export function ItemList({ orgId, onViewItem }: ItemListProps) {
           if (!open) closeDeleteDialog()
         }}
         title={t("delete.title")}
-        description={deleteError ?? t("delete.description", { name: itemToDelete?.name })}
+        description={
+          deleteError ?? t("delete.description", { name: itemToDelete?.name })
+        }
         confirmLabel={t("actions.delete")}
         cancelLabel={t("actions.cancel")}
         isLoading={deleteMutation.isPending}

@@ -2,7 +2,9 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router"
 
 import { ItemCategoryDetails } from "@/features/item-category-module"
 
-export const Route = createFileRoute("/organization/$orgId/item-categories/$categoryId")({
+export const Route = createFileRoute(
+  "/organization/$orgId/item-categories/$categoryId"
+)({
   component: ItemCategoryDetailsPage,
 })
 
@@ -15,7 +17,10 @@ function ItemCategoryDetailsPage() {
       orgId={orgId}
       categoryId={categoryId}
       onBack={() =>
-        navigate({ to: "/organization/$orgId/item-categories", params: { orgId } })
+        navigate({
+          to: "/organization/$orgId/item-categories",
+          params: { orgId },
+        })
       }
     />
   )

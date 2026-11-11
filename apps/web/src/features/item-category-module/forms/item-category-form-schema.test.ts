@@ -17,19 +17,31 @@ describe("ItemCategoryFormSchema", () => {
   })
 
   it("rejects an empty name and a malformed parent id", () => {
-    expect(ItemCategoryFormSchema.safeParse({ ...base, name: "  " }).success).toBe(false)
-    expect(ItemCategoryFormSchema.safeParse({ ...base, parentId: "nope" }).success).toBe(false)
+    expect(
+      ItemCategoryFormSchema.safeParse({ ...base, name: "  " }).success
+    ).toBe(false)
+    expect(
+      ItemCategoryFormSchema.safeParse({ ...base, parentId: "nope" }).success
+    ).toBe(false)
   })
 })
 
 describe("form values -> API input", () => {
   it("create: blank description becomes null, parent is kept", () => {
     const values = ItemCategoryFormSchema.parse({ ...base, parentId: uuid })
-    expect(toCreateItemCategoryInput(values)).toEqual({ name: "Cement", description: null, parentId: uuid })
+    expect(toCreateItemCategoryInput(values)).toEqual({
+      name: "Cement",
+      description: null,
+      parentId: uuid,
+    })
   })
 
   it("update: sends every editable field, including isActive and a null parent", () => {
-    const values = ItemCategoryFormSchema.parse({ ...base, description: "Bags", isActive: false })
+    const values = ItemCategoryFormSchema.parse({
+      ...base,
+      description: "Bags",
+      isActive: false,
+    })
     expect(toUpdateItemCategoryInput(values)).toEqual({
       name: "Cement",
       description: "Bags",

@@ -14,13 +14,19 @@ type ItemCategoryDetailsProps = {
 }
 
 // Composition only: strings + API behavior wired into the pure view.
-export function ItemCategoryDetails({ orgId, categoryId, onBack }: ItemCategoryDetailsProps) {
+export function ItemCategoryDetails({
+  orgId,
+  categoryId,
+  onBack,
+}: ItemCategoryDetailsProps) {
   const { t, i18n } = useTranslation("item-category")
   const { category, isLoading, error } = useItemCategory(orgId, categoryId)
   const abilities = useItemCategoryAbilities(orgId)
 
   const formatDate = (iso: string) =>
-    new Intl.DateTimeFormat(i18n.language, { dateStyle: "medium" }).format(new Date(iso))
+    new Intl.DateTimeFormat(i18n.language, { dateStyle: "medium" }).format(
+      new Date(iso)
+    )
 
   return (
     <ItemCategoryDetailsView

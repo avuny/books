@@ -40,14 +40,18 @@ export function createItemColumns({
       accessorKey: "name",
       header: copy.name,
       enableSorting: false,
-      cell: ({ row }) => <div className="font-medium text-foreground">{row.original.name}</div>,
+      cell: ({ row }) => (
+        <div className="font-medium text-foreground">{row.original.name}</div>
+      ),
     },
     {
       accessorKey: "categoryName",
       header: copy.category,
       enableSorting: false,
       cell: ({ row }) => (
-        <span className="text-muted-foreground">{row.original.categoryName}</span>
+        <span className="text-muted-foreground">
+          {row.original.categoryName}
+        </span>
       ),
     },
     {
@@ -55,7 +59,9 @@ export function createItemColumns({
       header: copy.baseUnit,
       enableSorting: false,
       cell: ({ row }) => (
-        <span className="text-muted-foreground">{copy.unitLabel(row.original.baseUnit)}</span>
+        <span className="text-muted-foreground">
+          {copy.unitLabel(row.original.baseUnit)}
+        </span>
       ),
     },
     {

@@ -14,7 +14,10 @@ function ItemsPage() {
     <ItemList
       orgId={orgId}
       onViewItem={(itemId) =>
-        navigate({ to: "/organization/$orgId/items/$itemId", params: { orgId, itemId } })
+        navigate({
+          to: "/organization/$orgId/items/$itemId",
+          params: { orgId, itemId },
+        })
       }
     />
   )

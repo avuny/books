@@ -89,7 +89,9 @@ export function ItemDetailsView({
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div className="min-w-0 space-y-1">
               <div className="flex flex-wrap items-center gap-2">
-                <h1 className="text-xl font-semibold text-foreground">{item.name}</h1>
+                <h1 className="text-xl font-semibold text-foreground">
+                  {item.name}
+                </h1>
                 <ItemStatusBadge
                   isActive={item.isActive}
                   activeLabel={copy.activeLabel}
@@ -97,7 +99,9 @@ export function ItemDetailsView({
                 />
               </div>
               {item.description ? (
-                <p className="text-sm text-muted-foreground">{item.description}</p>
+                <p className="text-sm text-muted-foreground">
+                  {item.description}
+                </p>
               ) : null}
             </div>
             {editAction}
@@ -105,47 +109,67 @@ export function ItemDetailsView({
 
           <dl className="grid grid-cols-1 gap-4 text-sm sm:grid-cols-3">
             <div>
-              <dt className="text-xs text-muted-foreground">{copy.categoryLabel}</dt>
+              <dt className="text-xs text-muted-foreground">
+                {copy.categoryLabel}
+              </dt>
               <dd className="text-foreground">{item.categoryName}</dd>
             </div>
             <div>
-              <dt className="text-xs text-muted-foreground">{copy.baseUnitLabel}</dt>
+              <dt className="text-xs text-muted-foreground">
+                {copy.baseUnitLabel}
+              </dt>
               <dd className="text-foreground">{baseUnitText}</dd>
             </div>
             <div>
-              <dt className="text-xs text-muted-foreground">{copy.createdLabel}</dt>
+              <dt className="text-xs text-muted-foreground">
+                {copy.createdLabel}
+              </dt>
               <dd className="text-foreground">{createdAt}</dd>
             </div>
             <div>
-              <dt className="text-xs text-muted-foreground">{copy.updatedLabel}</dt>
+              <dt className="text-xs text-muted-foreground">
+                {copy.updatedLabel}
+              </dt>
               <dd className="text-foreground">{updatedAt}</dd>
             </div>
           </dl>
 
           <section className="grid gap-3">
-            <h2 className="text-sm font-medium text-foreground">{copy.settingsTitle}</h2>
+            <h2 className="text-sm font-medium text-foreground">
+              {copy.settingsTitle}
+            </h2>
             <dl className="grid grid-cols-1 gap-4 text-sm sm:grid-cols-3">
               <div>
-                <dt className="text-xs text-muted-foreground">{copy.valuationLabel}</dt>
+                <dt className="text-xs text-muted-foreground">
+                  {copy.valuationLabel}
+                </dt>
                 <dd className="text-foreground">{valuationText}</dd>
               </div>
               <div>
-                <dt className="text-xs text-muted-foreground">{copy.reorderPointLabel}</dt>
+                <dt className="text-xs text-muted-foreground">
+                  {copy.reorderPointLabel}
+                </dt>
                 <dd className="text-foreground tabular-nums">
                   {item.reorderPoint ?? copy.noneLabel}
                 </dd>
               </div>
               <div>
-                <dt className="text-xs text-muted-foreground">{copy.negativeStockLabel}</dt>
+                <dt className="text-xs text-muted-foreground">
+                  {copy.negativeStockLabel}
+                </dt>
                 <dd className="text-foreground">
-                  {item.allowNegativeStock ? copy.allowedLabel : copy.notAllowedLabel}
+                  {item.allowNegativeStock
+                    ? copy.allowedLabel
+                    : copy.notAllowedLabel}
                 </dd>
               </div>
             </dl>
           </section>
 
           <section className="grid gap-2">
-            <h2 className="text-sm font-medium text-foreground">{copy.flagsTitle}</h2>
+            <h2 className="text-sm font-medium text-foreground">
+              {copy.flagsTitle}
+            </h2>
             <div className="flex flex-wrap gap-2">
               <ItemTrackingBadges
                 isInventoryTracked={item.isInventoryTracked}
@@ -154,8 +178,12 @@ export function ItemDetailsView({
                 untrackedLabel={copy.untrackedLabel}
                 batchLabel={copy.batchLabel}
               />
-              {item.canAssembled ? <Badge variant="outline">{copy.assemblableLabel}</Badge> : null}
-              {item.isReturnable ? <Badge variant="outline">{copy.returnableLabel}</Badge> : null}
+              {item.canAssembled ? (
+                <Badge variant="outline">{copy.assemblableLabel}</Badge>
+              ) : null}
+              {item.isReturnable ? (
+                <Badge variant="outline">{copy.returnableLabel}</Badge>
+              ) : null}
             </div>
           </section>
         </>

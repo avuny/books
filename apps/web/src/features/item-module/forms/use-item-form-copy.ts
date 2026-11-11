@@ -10,7 +10,10 @@ export function useItemFormCopy(mode: "create" | "update"): ItemFormCopy {
   return {
     title: t(`${mode}.title`),
     description: t(`${mode}.description`),
-    name: { label: t("fields.name.label"), placeholder: t("fields.name.placeholder") },
+    name: {
+      label: t("fields.name.label"),
+      placeholder: t("fields.name.placeholder"),
+    },
     itemDescription: {
       label: t("fields.description.label"),
       placeholder: t("fields.description.placeholder"),

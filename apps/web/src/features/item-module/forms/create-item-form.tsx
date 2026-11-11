@@ -10,7 +10,11 @@ import {
   type CreateItemFormInput,
   type CreateItemFormValues,
 } from "./item-form-schema"
-import type { ItemFormCopy, ItemPickers, ValuationOption } from "./item-form-types"
+import type {
+  ItemFormCopy,
+  ItemPickers,
+  ValuationOption,
+} from "./item-form-types"
 
 export type { CreateItemFormValues }
 
@@ -41,7 +45,11 @@ export function CreateItemForm({
   })
 
   return (
-    <FormShell title={copy.title} description={copy.description} errorMessage={errorMessage}>
+    <FormShell
+      title={copy.title}
+      description={copy.description}
+      errorMessage={errorMessage}
+    >
       <form
         onSubmit={form.handleSubmit((values) => onSubmit(values))}
         noValidate

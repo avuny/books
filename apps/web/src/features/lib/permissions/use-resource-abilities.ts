@@ -7,7 +7,12 @@ import {
 
 import { useGetMyPermissions } from "@/api"
 
-const NONE = { canRead: false, canCreate: false, canUpdate: false, canDelete: false }
+const NONE = {
+  canRead: false,
+  canCreate: false,
+  canUpdate: false,
+  canDelete: false,
+}
 
 function normalizeStatement(s: {
   effect?: "allow" | "deny" | string

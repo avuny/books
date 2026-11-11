@@ -60,7 +60,11 @@ export function ItemCategoryDialog({
             onSuccess={handleSuccess}
           />
         ) : (
-          <CreateItemCategory orgId={orgId} defaultName={defaultName} onSuccess={handleSuccess} />
+          <CreateItemCategory
+            orgId={orgId}
+            defaultName={defaultName}
+            onSuccess={handleSuccess}
+          />
         )}
       </DialogContent>
     </Dialog>

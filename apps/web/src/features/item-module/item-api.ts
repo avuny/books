@@ -24,10 +24,12 @@ import type { ItemDto, ItemListItemDto, ItemStatus } from "./types"
 
 const NO_ITEMS: ItemListItemDto[] = []
 
-export function normalizeItem(data: Omit<ItemDto, "description" | "reorderPoint"> & {
-  description?: string | null
-  reorderPoint?: string | null
-}): ItemDto {
+export function normalizeItem(
+  data: Omit<ItemDto, "description" | "reorderPoint"> & {
+    description?: string | null
+    reorderPoint?: string | null
+  }
+): ItemDto {
   return {
     ...data,
     description: data.description ?? null,
@@ -36,7 +38,9 @@ export function normalizeItem(data: Omit<ItemDto, "description" | "reorderPoint"
 }
 
 /** The list query carries booleans as "true" / "false" strings. */
-export function statusToIsActive(status: ItemStatus): "true" | "false" | undefined {
+export function statusToIsActive(
+  status: ItemStatus
+): "true" | "false" | undefined {
   return status === "all" ? undefined : status === "active" ? "true" : "false"
 }
 
@@ -50,10 +54,18 @@ export type ItemListParams = {
   search: string
 }
 
-export function useItemList(orgId: string, { page, pageSize, status, search }: ItemListParams) {
+export function useItemList(
+  orgId: string,
+  { page, pageSize, status, search }: ItemListParams
+) {
   const query = useListItems(
     orgId,
-    { page, pageSize, isActive: statusToIsActive(status), search: search || undefined },
+    {
+      page,
+      pageSize,
+      isActive: statusToIsActive(status),
+      search: search || undefined,
+    },
     { query: { placeholderData: keepPreviousData } }
   )
 
@@ -67,7 +79,10 @@ export function useItemList(orgId: string, { page, pageSize, status, search }: I
 export function useItem(orgId: string, itemId: string) {
   const query = useGetItem(orgId, itemId)
   const data = query.data?.data
-  const item = useMemo<ItemDto | null>(() => (data ? normalizeItem(data) : null), [data])
+  const item = useMemo<ItemDto | null>(
+    () => (data ? normalizeItem(data) : null),
+    [data]
+  )
 
   return { item, isLoading: query.isLoading, error: query.error }
 }
@@ -85,9 +100,13 @@ function useInvalidateItems(orgId: string) {
   return (itemId?: string) =>
     Promise.all([
       queryClient.invalidateQueries({ queryKey: getListItemsQueryKey(orgId) }),
-      queryClient.invalidateQueries({ queryKey: getListItemOptionsQueryKey(orgId) }),
+      queryClient.invalidateQueries({
+        queryKey: getListItemOptionsQueryKey(orgId),
+      }),
       itemId
-        ? queryClient.invalidateQueries({ queryKey: getGetItemQueryKey(orgId, itemId) })
+        ? queryClient.invalidateQueries({
+            queryKey: getGetItemQueryKey(orgId, itemId),
+          })
         : Promise.resolve(),
     ])
 }
@@ -102,7 +121,9 @@ export function useCreateItemMutation(orgId: string) {
 export function useUpdateItemMutation(orgId: string) {
   const invalidate = useInvalidateItems(orgId)
   return useUpdateItem({
-    mutation: { onSuccess: (_response, variables) => invalidate(variables.itemId) },
+    mutation: {
+      onSuccess: (_response, variables) => invalidate(variables.itemId),
+    },
   })
 }
 
@@ -117,7 +138,8 @@ export function useItemOptions(orgId: string) {
   return useCursorOptions({
     queryKey: getListItemOptionsQueryKey(orgId),
     fetchPage: async ({ cursor, search, limit, signal }) =>
-      (await listItemOptions(orgId, { cursor, search, limit }, { signal })).data,
+      (await listItemOptions(orgId, { cursor, search, limit }, { signal }))
+        .data,
     enabled: Boolean(orgId),
   })
 }

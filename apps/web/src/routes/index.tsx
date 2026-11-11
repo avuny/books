@@ -5,7 +5,6 @@ import { Navbar } from "@workspace/ui/blocks/layout/navbar"
 import ModeSwitcherBtn from "@workspace/ui/blocks/buttons/mode-switcher-btn"
 import { UserButtonContainer } from "@/components/buttons/user-button"
 
-
 import DashboardButton from "@/components/buttons/dashboard-button"
 import { HomeButton } from "@/components/buttons/home-button"
 import { LanguageSwitcherButton } from "@/components/buttons/language-button"
@@ -18,10 +17,7 @@ export const Route = createFileRoute("/")({
 function Index() {
   const { t } = useTranslation("common")
 
-
-
   const { data, isLoading } = useAuthenticatedHandler()
-
 
   return (
     <>
@@ -34,11 +30,7 @@ function Index() {
         }
         end={
           <>
-            <UserButtonContainer
-              user={data?.data}
-              isLoading={isLoading}
-
-            />
+            <UserButtonContainer user={data?.data} isLoading={isLoading} />
 
             <ModeSwitcherBtn />
             <LanguageSwitcherButton />

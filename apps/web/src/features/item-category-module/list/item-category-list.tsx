@@ -35,14 +35,22 @@ type ItemCategoryListProps = {
 }
 
 // Composition only: strings + API behavior wired into the pure data-table kit.
-export function ItemCategoryList({ orgId, onViewCategory }: ItemCategoryListProps) {
+export function ItemCategoryList({
+  orgId,
+  onViewCategory,
+}: ItemCategoryListProps) {
   const { t } = useTranslation("item-category")
 
   const [status, setStatus] = useState<ItemCategoryStatus>("all")
   const [search, setSearch] = useState("")
-  const [pagination, setPagination] = useState<PaginationState>({ pageIndex: 0, pageSize: 20 })
-  const [categoryToEdit, setCategoryToEdit] = useState<ItemCategoryListItemDto | null>(null)
-  const [categoryToDelete, setCategoryToDelete] = useState<ItemCategoryListItemDto | null>(null)
+  const [pagination, setPagination] = useState<PaginationState>({
+    pageIndex: 0,
+    pageSize: 20,
+  })
+  const [categoryToEdit, setCategoryToEdit] =
+    useState<ItemCategoryListItemDto | null>(null)
+  const [categoryToDelete, setCategoryToDelete] =
+    useState<ItemCategoryListItemDto | null>(null)
   const [deleteError, setDeleteError] = useState<string | null>(null)
 
   const resetPage = useCallback(
@@ -63,7 +71,10 @@ export function ItemCategoryList({ orgId, onViewCategory }: ItemCategoryListProp
   useEffect(() => {
     if (!isLoading && categories.length === 0 && pagination.pageIndex > 0) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
-      setPagination((current) => ({ ...current, pageIndex: current.pageIndex - 1 }))
+      setPagination((current) => ({
+        ...current,
+        pageIndex: current.pageIndex - 1,
+      }))
     }
   }, [isLoading, categories.length, pagination.pageIndex])
 
@@ -144,7 +155,10 @@ export function ItemCategoryList({ orgId, onViewCategory }: ItemCategoryListProp
     if (!categoryToDelete) return
     setDeleteError(null)
     try {
-      await deleteMutation.mutateAsync({ orgId, categoryId: categoryToDelete.id })
+      await deleteMutation.mutateAsync({
+        orgId,
+        categoryId: categoryToDelete.id,
+      })
       closeDeleteDialog()
     } catch (e) {
       setDeleteError(parseApiError(e).message || null)
@@ -154,7 +168,9 @@ export function ItemCategoryList({ orgId, onViewCategory }: ItemCategoryListProp
   return (
     <div className="flex flex-col gap-4">
       <div className="min-w-0">
-        <h1 className="text-xl font-semibold text-foreground">{t("list.title")}</h1>
+        <h1 className="text-xl font-semibold text-foreground">
+          {t("list.title")}
+        </h1>
         <p className="text-sm text-muted-foreground">{t("list.description")}</p>
       </div>
 
@@ -167,7 +183,10 @@ export function ItemCategoryList({ orgId, onViewCategory }: ItemCategoryListProp
           setStatus(next)
           resetPage()
         }}
-        tabs={STATUSES.map((item) => ({ value: item, label: t(`list.tabs.${item}`) }))}
+        tabs={STATUSES.map((item) => ({
+          value: item,
+          label: t(`list.tabs.${item}`),
+        }))}
       />
 
       <DataTableToolbar
@@ -182,7 +201,9 @@ export function ItemCategoryList({ orgId, onViewCategory }: ItemCategoryListProp
             clearLabel={t("list.search.clear")}
           />
         }
-        actions={abilities.canCreate ? <ItemCategoryButton orgId={orgId} /> : null}
+        actions={
+          abilities.canCreate ? <ItemCategoryButton orgId={orgId} /> : null
+        }
       />
 
       <DataTable
@@ -191,8 +212,12 @@ export function ItemCategoryList({ orgId, onViewCategory }: ItemCategoryListProp
         onRowClick={(category) => onViewCategory(category.id)}
         emptyState={
           <div className="flex flex-col items-center gap-1 px-6 py-16 text-center">
-            <p className="text-sm font-medium text-foreground">{t("empty.title")}</p>
-            <p className="text-sm text-muted-foreground">{t("empty.description")}</p>
+            <p className="text-sm font-medium text-foreground">
+              {t("empty.title")}
+            </p>
+            <p className="text-sm text-muted-foreground">
+              {t("empty.description")}
+            </p>
           </div>
         }
         renderMobileCard={(row) => (
@@ -205,7 +230,9 @@ export function ItemCategoryList({ orgId, onViewCategory }: ItemCategoryListProp
               itemsLabel: t("table.items"),
             }}
             actions={getActions(row.original)}
-            actionsTriggerLabel={t("table.actionsFor", { name: row.original.name })}
+            actionsTriggerLabel={t("table.actionsFor", {
+              name: row.original.name,
+            })}
             onClick={() => onViewCategory(row.original.id)}
           />
         )}
@@ -219,7 +246,8 @@ export function ItemCategoryList({ orgId, onViewCategory }: ItemCategoryListProp
               rowsPerPage: t("pagination.rowsPerPage"),
               summary: ({ from, to, total: count }) =>
                 t("pagination.summary", { from, to, total: count }),
-              pageOf: (page, pageCount) => t("pagination.pageOf", { page, pageCount }),
+              pageOf: (page, pageCount) =>
+                t("pagination.pageOf", { page, pageCount }),
               pageLabel: (page) => t("pagination.goTo", { page }),
             }}
           />
@@ -243,7 +271,10 @@ export function ItemCategoryList({ orgId, onViewCategory }: ItemCategoryListProp
           if (!open) closeDeleteDialog()
         }}
         title={t("delete.title")}
-        description={deleteError ?? t("delete.description", { name: categoryToDelete?.name })}
+        description={
+          deleteError ??
+          t("delete.description", { name: categoryToDelete?.name })
+        }
         confirmLabel={t("actions.delete")}
         cancelLabel={t("actions.cancel")}
         isLoading={deleteMutation.isPending}

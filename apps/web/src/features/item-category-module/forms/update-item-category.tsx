@@ -27,7 +27,11 @@ type UpdateItemCategoryProps = {
 }
 
 // Composition only: loads the category and its parent, wires strings + API into the pure form.
-export function UpdateItemCategory({ orgId, categoryId, onSuccess }: UpdateItemCategoryProps) {
+export function UpdateItemCategory({
+  orgId,
+  categoryId,
+  onSuccess,
+}: UpdateItemCategoryProps) {
   const [serverError, setServerError] = useState<string | null>(null)
 
   const { category, isLoading, error } = useItemCategory(orgId, categoryId)

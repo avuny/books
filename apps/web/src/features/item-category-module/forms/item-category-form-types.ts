@@ -1,5 +1,8 @@
 import type { FieldCopy } from "@workspace/ui/blocks/types"
-import type { AsyncComboboxCopy, AsyncOptionsSource } from "@workspace/ui/blocks/form"
+import type {
+  AsyncComboboxCopy,
+  AsyncOptionsSource,
+} from "@workspace/ui/blocks/form"
 
 /** Localized strings shared by the create and update forms. */
 export type ItemCategoryFormCopy = {

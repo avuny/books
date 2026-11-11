@@ -53,9 +53,18 @@ export function ItemDialog({
         </DialogHeader>
 
         {itemId ? (
-          <UpdateItem key={itemId} orgId={orgId} itemId={itemId} onSuccess={handleSuccess} />
+          <UpdateItem
+            key={itemId}
+            orgId={orgId}
+            itemId={itemId}
+            onSuccess={handleSuccess}
+          />
         ) : (
-          <CreateItem orgId={orgId} defaultName={defaultName} onSuccess={handleSuccess} />
+          <CreateItem
+            orgId={orgId}
+            defaultName={defaultName}
+            onSuccess={handleSuccess}
+          />
         )}
       </DialogContent>
     </Dialog>

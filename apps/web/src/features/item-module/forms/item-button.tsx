@@ -15,7 +15,12 @@ type ItemButtonProps = {
   className?: string
 }
 
-export function ItemButton({ orgId, itemId, display = "text", className }: ItemButtonProps) {
+export function ItemButton({
+  orgId,
+  itemId,
+  display = "text",
+  className,
+}: ItemButtonProps) {
   const { t } = useTranslation("item")
   const [open, setOpen] = useState(false)
 
@@ -48,7 +53,12 @@ export function ItemButton({ orgId, itemId, display = "text", className }: ItemB
         </Button>
       )}
 
-      <ItemDialog orgId={orgId} itemId={itemId} open={open} onOpenChange={setOpen} />
+      <ItemDialog
+        orgId={orgId}
+        itemId={itemId}
+        open={open}
+        onOpenChange={setOpen}
+      />
     </>
   )
 }

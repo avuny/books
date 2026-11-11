@@ -50,7 +50,9 @@ export function createItemCategoryColumns({
       header: copy.subCategories,
       enableSorting: false,
       cell: ({ row }) => (
-        <span className="text-muted-foreground tabular-nums">{row.original.childCount}</span>
+        <span className="text-muted-foreground tabular-nums">
+          {row.original.childCount}
+        </span>
       ),
     },
     {
@@ -58,7 +60,9 @@ export function createItemCategoryColumns({
       header: copy.items,
       enableSorting: false,
       cell: ({ row }) => (
-        <span className="text-muted-foreground tabular-nums">{row.original.itemCount}</span>
+        <span className="text-muted-foreground tabular-nums">
+          {row.original.itemCount}
+        </span>
       ),
     },
     {

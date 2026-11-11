@@ -2,7 +2,10 @@ import { useState } from "react"
 
 import { parseApiError } from "@workspace/ui/lib/api-error"
 
-import { normalizeItemCategory, useCreateItemCategoryMutation } from "../item-category-api"
+import {
+  normalizeItemCategory,
+  useCreateItemCategoryMutation,
+} from "../item-category-api"
 import type { ItemCategoryDto } from "../types"
 import {
   CreateItemCategoryForm,
@@ -22,7 +25,11 @@ type CreateItemCategoryProps = {
 }
 
 // Composition only: strings + API behavior wired into the pure form.
-export function CreateItemCategory({ orgId, defaultName, onSuccess }: CreateItemCategoryProps) {
+export function CreateItemCategory({
+  orgId,
+  defaultName,
+  onSuccess,
+}: CreateItemCategoryProps) {
   const [serverError, setServerError] = useState<string | null>(null)
 
   const createMutation = useCreateItemCategoryMutation(orgId)

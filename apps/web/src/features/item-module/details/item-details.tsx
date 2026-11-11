@@ -21,7 +21,9 @@ export function ItemDetails({ orgId, itemId, onBack }: ItemDetailsProps) {
   const abilities = useItemAbilities(orgId)
 
   const formatDate = (iso: string) =>
-    new Intl.DateTimeFormat(i18n.language, { dateStyle: "medium" }).format(new Date(iso))
+    new Intl.DateTimeFormat(i18n.language, { dateStyle: "medium" }).format(
+      new Date(iso)
+    )
 
   return (
     <ItemDetailsView
@@ -51,12 +53,16 @@ export function ItemDetails({ orgId, itemId, onBack }: ItemDetailsProps) {
         notAllowedLabel: t("details.no"),
       }}
       baseUnitText={item ? unitLabel(item.baseUnit) : ""}
-      valuationText={item ? t(`labels.valuation.${item.inventoryValuationMethod}`) : ""}
+      valuationText={
+        item ? t(`labels.valuation.${item.inventoryValuationMethod}`) : ""
+      }
       createdAt={item ? formatDate(item.createdAt) : ""}
       updatedAt={item ? formatDate(item.updatedAt) : ""}
       onBack={onBack}
       editAction={
-        abilities.canUpdate && item ? <ItemButton orgId={orgId} itemId={itemId} /> : undefined
+        abilities.canUpdate && item ? (
+          <ItemButton orgId={orgId} itemId={itemId} />
+        ) : undefined
       }
     />
   )

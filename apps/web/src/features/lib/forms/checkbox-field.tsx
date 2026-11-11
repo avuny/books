@@ -44,7 +44,10 @@ export function CheckboxField<T extends FieldValues>({
               className="mt-0.5"
             />
             <div className="grid gap-0.5 leading-none">
-              <label htmlFor={id} className="text-sm font-medium text-foreground">
+              <label
+                htmlFor={id}
+                className="text-sm font-medium text-foreground"
+              >
                 {label}
               </label>
               {description ? (

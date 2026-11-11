@@ -14,7 +14,9 @@ function ItemDetailsPage() {
     <ItemDetails
       orgId={orgId}
       itemId={itemId}
-      onBack={() => navigate({ to: "/organization/$orgId/items", params: { orgId } })}
+      onBack={() =>
+        navigate({ to: "/organization/$orgId/items", params: { orgId } })
+      }
     />
   )
 }

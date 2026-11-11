@@ -9,7 +9,10 @@ import {
   type ItemCategoryFormInput,
   type ItemCategoryFormValues,
 } from "./item-category-form-schema"
-import type { ItemCategoryFormCopy, ItemCategoryParentPicker } from "./item-category-form-types"
+import type {
+  ItemCategoryFormCopy,
+  ItemCategoryParentPicker,
+} from "./item-category-form-types"
 
 export type CreateItemCategoryFormValues = ItemCategoryFormValues
 
@@ -34,11 +37,20 @@ export function CreateItemCategoryForm({
 }: CreateItemCategoryFormProps) {
   const form = useForm<ItemCategoryFormInput, unknown, ItemCategoryFormValues>({
     resolver: zodResolver(ItemCategoryFormSchema),
-    defaultValues: { name: defaultName ?? "", description: "", parentId: "", isActive: true },
+    defaultValues: {
+      name: defaultName ?? "",
+      description: "",
+      parentId: "",
+      isActive: true,
+    },
   })
 
   return (
-    <FormShell title={copy.title} description={copy.description} errorMessage={errorMessage}>
+    <FormShell
+      title={copy.title}
+      description={copy.description}
+      errorMessage={errorMessage}
+    >
       <form
         onSubmit={form.handleSubmit((values) => onSubmit(values))}
         noValidate

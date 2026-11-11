@@ -2,10 +2,15 @@ import { useTranslation } from "react-i18next"
 
 import { useAsyncComboboxCopy } from "../../lib/options/use-async-combobox-copy"
 import { useItemCategoryOptions } from "../item-category-api"
-import type { ItemCategoryFormCopy, ItemCategoryParentPicker } from "./item-category-form-types"
+import type {
+  ItemCategoryFormCopy,
+  ItemCategoryParentPicker,
+} from "./item-category-form-types"
 
 /** Builds the localized strings for the create or update form. */
-export function useItemCategoryFormCopy(mode: "create" | "update"): ItemCategoryFormCopy {
+export function useItemCategoryFormCopy(
+  mode: "create" | "update"
+): ItemCategoryFormCopy {
   const { t } = useTranslation("item-category")
 
   return {
