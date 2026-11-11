@@ -5,29 +5,10 @@ export { UnitErrorCode }
 
 export const unitErrorsHttpMap = {
   UNIT_NOT_FOUND: { statusCode: 404, responseMessage: "Unit not found" },
-  UNIT_COLLECTION_NOT_FOUND: { statusCode: 404, responseMessage: "Unit collection not found" },
-  UNIT_COLLECTION_IN_USE: {
-    statusCode: 409,
-    responseMessage: "This unit collection is used by items and cannot be deleted",
-  },
-  UNIT_FEATURE_NOT_AVAILABLE: {
-    statusCode: 403,
-    responseMessage: "Extra units are not available on your plan",
-  },
-  UNIT_TYPE_MISMATCH: {
-    statusCode: 422,
-    responseMessage: "Every unit in a collection must measure the same thing as its base unit",
-  },
-  UNIT_DUPLICATE_IN_COLLECTION: {
-    statusCode: 422,
-    responseMessage: "A unit can appear only once in a collection",
-  },
-  UNIT_COLLECTION_TOO_MANY_UNITS: {
-    statusCode: 422,
-    responseMessage: "This collection has too many units",
-  },
-  UNIT_INVALID_CONVERSION_FACTOR: {
-    statusCode: 422,
-    responseMessage: "The conversion factor must be a number greater than zero",
-  },
+  UNIT_FORBIDDEN: { statusCode: 403, responseMessage: "You do not have access to this unit" },
+  UNIT_NAME_TAKEN: { statusCode: 409, responseMessage: "A unit with this name already exists" },
+  UNIT_SYMBOL_TAKEN: { statusCode: 409, responseMessage: "A unit with this symbol already exists" },
+  UNIT_SYSTEM_IMMUTABLE: { statusCode: 400, responseMessage: "System units cannot be modified or deleted" },
+  UNIT_IN_USE: { statusCode: 409, responseMessage: "This unit is used and cannot be deleted" },
+  UNIT_TYPE_IMMUTABLE: { statusCode: 422, responseMessage: "Unit measurement type cannot be changed" },
 } as const satisfies Record<UnitErrorCode, ErrorMeta>

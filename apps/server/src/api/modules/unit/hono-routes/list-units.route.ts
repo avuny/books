@@ -23,7 +23,7 @@ export const listUnitsRoute = ({
     path: "/organizations/{orgId}/units",
     operationId: "listUnits",
     tags: ["unit"],
-    summary: "List the global catalog of units of measure",
+    summary: "List units of measure for the organization (system + custom)",
     middleware: [requireAuth, requirePermission("read:unit")] as const,
     request: {
       params: z.object({ orgId: z.string().uuid() }),
@@ -42,7 +42,7 @@ export const listUnitsRoute = ({
     const { orgId } = c.req.valid("param")
     const query = c.req.valid("query")
 
-    const result = await service.listUnits(query)
+    const result = await service.listUnits(orgId, query)
     if (!result.success) throw new Error("listUnits cannot fail")
     return c.json({ success: true, data: result.data }, 200)
   })

@@ -3,14 +3,14 @@ import type { MiddlewareHandler } from "hono"
 import { createOpenAPIRouter } from "@avuny/hono"
 import { fail, ok } from "@avuny/utils"
 import { UnitErrorCode } from "@avuny/contracts"
-import { listUnitCollectionsRoute } from "../hono-routes/list-unit-collections.route.js"
-import { getUnitCollectionRoute } from "../hono-routes/get-unit-collection.route.js"
-import { createUnitCollectionRoute } from "../hono-routes/create-unit-collection.route.js"
-import { deleteUnitCollectionRoute } from "../hono-routes/delete-unit-collection.route.js"
+import { listUnitsRoute } from "../hono-routes/list-units.route.js"
+import { getUnitRoute } from "../hono-routes/get-unit.route.js"
+import { createUnitRoute } from "../hono-routes/create-unit.route.js"
+import { updateUnitRoute } from "../hono-routes/update-unit.route.js"
+import { deleteUnitRoute } from "../hono-routes/delete-unit.route.js"
 
 describe("unit routes", () => {
   const orgId = "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a02"
-  const collectionId = "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a03"
   const unitId = "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a04"
   const iso = new Date().toISOString()
 
@@ -25,54 +25,60 @@ describe("unit routes", () => {
     return app
   }
 
-  const collectionDto = {
-    id: collectionId,
+  const unitDto = {
+    id: unitId,
     orgId,
-    name: "Meter (m)",
-    baseUnitId: unitId,
-    units: [{ id: unitId, name: "Meter", symbol: "m", type: "length", conversionFactor: "1", isBase: true }],
-    itemCount: 0,
+    name: "Kilogram",
+    symbol: "kg",
+    type: "weight" as const,
+    isActive: true,
+    isSystem: false,
     createdAt: iso,
     updatedAt: iso,
   }
 
-  it("lists collections", async () => {
+  it("lists units (200)", async () => {
     const service: any = {
-      listCollections: vi.fn().mockResolvedValue(ok({ data: { items: [], page: 1, pageSize: 20, total: 0 }, msg: "ok" })),
+      listUnits: vi.fn().mockResolvedValue(ok({ data: { items: [unitDto], page: 1, pageSize: 50, total: 1 }, msg: "ok" })),
     }
-    const app = mount(listUnitCollectionsRoute({ service, requireAuth, requirePermission: allow }))
-    const res = await app.request(`/organizations/${orgId}/unit-collections`)
+    const app = mount(listUnitsRoute({ service, requireAuth, requirePermission: allow }))
+    const res = await app.request(`/organizations/${orgId}/units`)
     expect(res.status).toBe(200)
-    expect(service.listCollections).toHaveBeenCalledWith(orgId, { page: 1, pageSize: 20 })
+    expect(service.listUnits).toHaveBeenCalledWith(orgId, { page: 1, pageSize: 50 })
   })
 
-  it("creates a collection (201) and passes the validated body on", async () => {
-    const service: any = { createCollection: vi.fn().mockResolvedValue(ok({ data: collectionDto, msg: "created" })) }
-    const app = mount(createUnitCollectionRoute({ service, requireAuth, requirePermission: allow }))
-    const res = await app.request(`/organizations/${orgId}/unit-collections`, {
+  it("creates a unit (201)", async () => {
+    const service: any = {
+      createUnit: vi.fn().mockResolvedValue(ok({ data: unitDto, msg: "created" })),
+    }
+    const app = mount(createUnitRoute({ service, requireAuth, requirePermission: allow }))
+    const res = await app.request(`/organizations/${orgId}/units`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ baseUnitId: unitId }),
+      body: JSON.stringify({ name: "Kilogram", symbol: "kg", type: "weight" }),
     })
     expect(res.status).toBe(201)
-    expect(service.createCollection).toHaveBeenCalledWith(expect.any(String), orgId, { baseUnitId: unitId, units: [] })
   })
 
-  it("maps UNIT_COLLECTION_NOT_FOUND to 404", async () => {
+  it("maps UNIT_NAME_TAKEN to 409", async () => {
     const service: any = {
-      getCollection: vi.fn().mockResolvedValue(fail({ error: UnitErrorCode.UNIT_COLLECTION_NOT_FOUND, msg: "nope" })),
+      createUnit: vi.fn().mockResolvedValue(fail({ error: UnitErrorCode.UNIT_NAME_TAKEN, msg: "taken" })),
     }
-    const app = mount(getUnitCollectionRoute({ service, requireAuth, requirePermission: allow }))
-    const res = await app.request(`/organizations/${orgId}/unit-collections/${collectionId}`)
-    expect(res.status).toBe(404)
-  })
-
-  it("maps UNIT_COLLECTION_IN_USE to 409", async () => {
-    const service: any = {
-      deleteCollection: vi.fn().mockResolvedValue(fail({ error: UnitErrorCode.UNIT_COLLECTION_IN_USE, msg: "used" })),
-    }
-    const app = mount(deleteUnitCollectionRoute({ service, requireAuth, requirePermission: allow }))
-    const res = await app.request(`/organizations/${orgId}/unit-collections/${collectionId}`, { method: "DELETE" })
+    const app = mount(createUnitRoute({ service, requireAuth, requirePermission: allow }))
+    const res = await app.request(`/organizations/${orgId}/units`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name: "Kilogram", symbol: "kg", type: "weight" }),
+    })
     expect(res.status).toBe(409)
+  })
+
+  it("maps UNIT_SYSTEM_IMMUTABLE to 400", async () => {
+    const service: any = {
+      deleteUnit: vi.fn().mockResolvedValue(fail({ error: UnitErrorCode.UNIT_SYSTEM_IMMUTABLE, msg: "immutable" })),
+    }
+    const app = mount(deleteUnitRoute({ service, requireAuth, requirePermission: allow }))
+    const res = await app.request(`/organizations/${orgId}/units/${unitId}`, { method: "DELETE" })
+    expect(res.status).toBe(400)
   })
 })

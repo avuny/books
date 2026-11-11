@@ -1,11 +1,8 @@
-import type { ActivityLog, UnitPlanFeatures } from "./unit.types.js"
-
-export class DummyUnitPlanFeatures implements UnitPlanFeatures {
-  async has(): Promise<boolean> {
-    return true
-  }
-}
+import type { ActivityLog, ActivityLogEntry } from "./unit.types.js"
 
 export class DummyUnitActivityLog implements ActivityLog {
-  async log(): Promise<void> {}
+  readonly entries: ActivityLogEntry[] = []
+  async log(entry: ActivityLogEntry): Promise<void> {
+    this.entries.push(entry)
+  }
 }

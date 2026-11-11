@@ -4,75 +4,41 @@
 
 ## 1. Purpose
 
-Units of measure and unit collections. The unit catalog is global (seeded from `SYSTEM_UNITS`, read-only for tenants). A **unit collection** belongs to one organization: a base unit plus other units of the same type that convert to it. Items point at a collection; every stored quantity is normalized to the item's base unit.
+The unit catalog holds standard units of measure (system units seeded from `SYSTEM_UNITS`) plus custom units defined per organization. Used for inventory tracking, sales/purchase conversions, and items.
 
 ## 2. Domain model
 
 | Table | Owner | Notes |
 |---|---|---|
-| `units` | global | `symbol` is the identity (case-sensitive), `type` ∈ `UNIT_TYPES`, retired with `is_active = false` |
-| `unit_collections` | organization | `base_unit_id` is immutable once any item uses it; **name is not unique** |
-| `unit_collection_units` | via collection | one row per unit, `conversion_factor` = base units per 1 of this unit (`numeric(24,12)`, string in the API) |
+| `units` | system (`org_id IS NULL`) or org (`org_id IS NOT NULL`) | `symbol` is unique (case-sensitive); `name` is unique (case-insensitive); type immutable; system units cannot be edited or deleted |
 
 ## 3. Business rules (all in `unit.rules.ts`, pure)
 
-- The base unit's own row always exists with factor exactly `"1"` and is never edited or removed by an update.
-- Every unit must have the same `type` as the base unit (`UNIT_TYPE_MISMATCH`).
-- A unit appears at most once; listing the base unit again is a duplicate (`UNIT_DUPLICATE_IN_COLLECTION`).
-- Factors are decimal strings, > 0, at most 12 integer and 12 fraction digits (`UNIT_INVALID_CONVERSION_FACTOR`).
-- At most `UNIT_COLLECTION_MAX_UNITS` rows including the base unit (`UNIT_COLLECTION_TOO_MANY_UNITS`).
-- Units must exist and be active (`UNIT_NOT_FOUND`).
-- Extra units (anything besides the base unit) need the `extraUnits` plan feature (`UNIT_FEATURE_NOT_AVAILABLE`).
-- `PATCH` with `units` **replaces** the non-base units; only the difference is written (factors compared as normalized decimals).
-- A collection used by items cannot be deleted (`UNIT_COLLECTION_IN_USE`). The FK is the safety net.
-- Collections are also created automatically by the item module (base unit only). Changing a factor never rewrites history: documents keep their own factor snapshot.
+- System units (`org_id IS NULL`) are immutable and cannot be updated or deleted (`UNIT_SYSTEM_IMMUTABLE`).
+- Custom units must have a unique name (case-insensitive) and symbol within the organization and among system units (`UNIT_NAME_TAKEN`, `UNIT_SYMBOL_TAKEN`).
+- Unit measurement type (`count`, `weight`, `length`, `area`, `volume`) cannot be changed after creation.
+- A unit used in collections (`unit_collection_units`) or as an item base unit cannot be deleted (`UNIT_IN_USE`).
+- Deactivation (`isActive = false`) is available for custom units instead of deletion when in use.
 
 ## 4. Routes (permission resource `unit`)
 
 | Method | Path | Permission | Notes |
 |---|---|---|---|
-| GET | `/organizations/{orgId}/units` | `read:unit` | active catalog, filter `type`, `search`, offset paging |
-| GET | `/organizations/{orgId}/unit-collections` | `read:unit` | with `unitCount`, `itemCount` |
-| GET | `/organizations/{orgId}/unit-options` | `read:unit` | picker: active units labelled `Meter (m)`, id + name, cursor paging, optional `sameTypeAs=<unitId>` |
-| GET | `/organizations/{orgId}/unit-collection-options` | `read:unit` | picker: collections, id + name, cursor paging |
-| GET | `/organizations/{orgId}/unit-collections/{collectionId}` | `read:unit` | base unit first |
-| POST | `/organizations/{orgId}/unit-collections` | `create:unit` | name optional (generated) |
-| PATCH | `/organizations/{orgId}/unit-collections/{collectionId}` | `update:unit` | `name` and/or `units` |
-| DELETE | `/organizations/{orgId}/unit-collections/{collectionId}` | `delete:unit` | |
-
-A missing permission answers `ROLE_PERMISSION_DENIED` (403) from the role middleware.
+| GET | `/organizations/{orgId}/units` | `read:unit` | list system + custom units; search, filter by type/isActive, offset paging |
+| GET | `/organizations/{orgId}/unit-options` | `read:unit` | picker: active units labelled `Name (symbol)`, cursor paging, optional `sameTypeAs` |
+| GET | `/organizations/{orgId}/units/{unitId}` | `read:unit` | unit details by ID |
+| POST | `/organizations/{orgId}/units` | `create:unit` | create custom unit for organization |
+| PATCH | `/organizations/{orgId}/units/{unitId}` | `update:unit` | rename, change symbol, or toggle active status |
+| DELETE | `/organizations/{orgId}/units/{unitId}` | `delete:unit` | delete custom unit (fails if in use) |
 
 ## 5. Error codes
 
 | Code | HTTP | Description |
 |---|---|---|
-| `UNIT_NOT_FOUND` | 404 | Unit missing or inactive |
-| `UNIT_COLLECTION_NOT_FOUND` | 404 | Collection missing or in another organization |
-| `UNIT_COLLECTION_IN_USE` | 409 | Items still use the collection |
-| `UNIT_FEATURE_NOT_AVAILABLE` | 403 | Plan does not allow extra units |
-| `UNIT_TYPE_MISMATCH` | 422 | Unit type differs from the base unit |
-| `UNIT_DUPLICATE_IN_COLLECTION` | 422 | Same unit twice (or base unit listed again) |
-| `UNIT_COLLECTION_TOO_MANY_UNITS` | 422 | Over `UNIT_COLLECTION_MAX_UNITS` |
-| `UNIT_INVALID_CONVERSION_FACTOR` | 422 | Not a positive decimal that fits numeric(24,12) |
-
-## 6. Files
-
-```
-unit/
-├── SPEC.md
-├── deps.ts                 # DI wiring (lazy singletons)
-├── index.ts                # public barrel
-├── testing.ts              # DummyUnitPlanFeatures, DummyUnitActivityLog
-├── unit.errors.ts          # code -> HTTP status/message
-├── unit.error-map.ts       # full map
-├── unit.mapper.ts          # rows -> DTOs
-├── unit.repository.ts      # Drizzle queries and locks
-├── unit.rules.ts           # PURE rules injected into the service
-├── unit.seed.ts            # syncSystemUnits (upsert by symbol)
-├── unit.service.ts         # orchestration only
-├── unit.types.ts
-├── unit.rules.spec.ts
-├── unit.service.spec.ts
-├── hono-routes/            # one file per route + index + module-routes.types
-└── __tests__/unit.routes.test.ts
-```
+| `UNIT_NOT_FOUND` | 404 | Unit not found |
+| `UNIT_FORBIDDEN` | 403 | You do not have access to this unit |
+| `UNIT_NAME_TAKEN` | 409 | Unit name already exists |
+| `UNIT_SYMBOL_TAKEN` | 409 | Unit symbol already exists |
+| `UNIT_SYSTEM_IMMUTABLE` | 400 | System units cannot be modified or deleted |
+| `UNIT_IN_USE` | 409 | Unit is in use and cannot be deleted |
+| `UNIT_TYPE_IMMUTABLE` | 422 | Unit measurement type cannot be changed |
