@@ -4,9 +4,14 @@ import type { ItemRow } from "./item.repository.js"
 
 const toUnit = (unit: Unit): UnitDto => ({
   id: unit.id,
+  orgId: unit.orgId ?? null,
   name: unit.name,
   symbol: unit.symbol,
   type: unit.type,
+  isActive: unit.isActive,
+  isSystem: unit.orgId === null,
+  createdAt: unit.createdAt.toISOString(),
+  updatedAt: unit.updatedAt.toISOString(),
 })
 
 export function toItemDto(row: ItemRow): ItemDto {

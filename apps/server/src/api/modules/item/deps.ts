@@ -1,7 +1,7 @@
 import { db } from "../../db.js"
 import { activityLogService } from "../activity-log/index.js"
 import { getItemCategoryRepository } from "../item-category/deps.js"
-import { getUnitRepository } from "../unit/deps.js"
+import { getUnitCollectionRepository } from "../unit-collection/deps.js"
 import { createItemRepository } from "./item.repository.js"
 import { createItemService } from "./item.service.js"
 import { DummyStockHistory } from "./testing.js"
@@ -19,7 +19,7 @@ export function getItemService(): ItemService {
   if (!_serviceInstance) {
     _serviceInstance = createItemService({
       repository: getItemRepository(),
-      unitRepository: getUnitRepository(),
+      unitRepository: getUnitCollectionRepository(),
       categoryRepository: getItemCategoryRepository(),
       // TODO: replace with the inventory module's adapter once stock movements exist.
       stockHistory: new DummyStockHistory(),

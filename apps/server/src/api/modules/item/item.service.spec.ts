@@ -25,6 +25,7 @@ const item = (o: Partial<Item> = {}): Item => ({
 })
 const unit = (o: Partial<Unit> = {}): Unit => ({
   id: "u-kg",
+  orgId: null,
   name: "Kilogram",
   symbol: "kg",
   type: "weight",

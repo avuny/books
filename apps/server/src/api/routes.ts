@@ -24,6 +24,7 @@ import { otpRoutes } from "./modules/otp/index.js"
 import { roleRoutes } from "./modules/role/index.js"
 import { sidebarRoutes } from "./modules/sidebar/index.js"
 import { unitRoutes } from "./modules/unit/index.js"
+import { unitCollectionRoutes } from "./modules/unit-collection/index.js"
 import { usersRoutes } from "./modules/users/index.js"
 // [codegen:imports:end]
 import { config } from "./index.js"
@@ -95,7 +96,8 @@ app.route("/organization-users", organizationUserRoutes)
 app.route("/otp", otpRoutes)
 app.route("/roles", roleRoutes)
 app.route("/sidebar", sidebarRoutes)
-app.route("/unit", unitRoutes)
+app.route("/units", unitRoutes)
+app.route("/unit-collections", unitCollectionRoutes)
 app.route("/users", usersRoutes)
 // [codegen:routes:end]
 

@@ -1,5 +1,5 @@
 import type { ItemCategoryRepository } from "../item-category/item-category.repository.js"
-import type { UnitRepository } from "../unit/unit.repository.js"
+import type { UnitCollectionRepository } from "../unit-collection/unit-collection.repository.js"
 import type { ItemRepository } from "./item.repository.js"
 import type { ItemRules } from "./item.rules.js"
 import type { createItemService } from "./item.service.js"
@@ -22,7 +22,7 @@ export interface ItemServiceDeps {
   repository: ItemRepository
   /** Only what item creation needs from the unit module. */
   unitRepository: Pick<
-    UnitRepository,
+    UnitCollectionRepository,
     "findUnitsByIds" | "findCollection" | "insertCollection" | "insertCollectionUnits"
   >
   /** Only what the item needs from the category module. */
