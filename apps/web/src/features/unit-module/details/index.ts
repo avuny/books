@@ -1,2 +1,3 @@
-export * from "./unit-collection-details"
-export * from "./unit-collection-details-view"
+export * from "./unit-details-view"
+export * from "./unit-details"
+

@@ -1,7 +1,25 @@
-export * from "./components"
 export * from "./details"
 export * from "./forms"
+export * from "./lib"
 export * from "./list"
-// Cross-module use: item forms pick a base unit or a unit collection.
-export { unitLabel, useUnitAbilities, useUnitCollectionOptions, useUnitOptions } from "./unit-api"
-export type { UnitCollectionDto, UnitCollectionListItemDto, UnitDto } from "./types"
+export {
+  normalizeUnit,
+  unitLabel,
+  useCreateUnitMutation,
+  useDeleteUnitMutation,
+  useUnit,
+  useUnitAbilities,
+  useUnitList,
+  useUnitOptions,
+  useUpdateUnitMutation,
+} from "./unit-api"
+export type {
+  CreateUnitInput,
+  UnitDto,
+  UnitErrorCode,
+  UnitListItemDto,
+  UnitOffsetListQuery,
+  UnitOffsetListResponse,
+  UnitType,
+  UpdateUnitInput,
+} from "./types"

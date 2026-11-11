@@ -1,164 +1,177 @@
 /**
  * The only file in this module that knows the shape of the generated API
- * client (@/api). Everything else consumes the normalized values returned here,
- * so if a hook name or response shape differs, this is the one place to fix.
+ * client (@/api). Everything else consumes the normalized values returned here.
  */
 import { useMemo } from "react"
 import { keepPreviousData, useQueryClient } from "@tanstack/react-query"
 
 import {
-  getGetUnitCollectionQueryKey,
-  getListUnitCollectionOptionsQueryKey,
-  getListUnitCollectionsQueryKey,
+  getGetUnitQueryKey,
   getListUnitOptionsQueryKey,
-  listUnitCollectionOptions,
+  getListUnitsQueryKey,
   listUnitOptions,
-  useCreateUnitCollection,
-  useDeleteUnitCollection,
-  useGetUnitCollection,
-  useListUnitCollections,
-  useUpdateUnitCollection,
+  useCreateUnit,
+  useDeleteUnit,
+  useGetUnit,
+  useListUnits,
+  useUpdateUnit,
 } from "@/api"
 
 import { useCursorOptions } from "../lib/options/use-cursor-options"
 import { useResourceAbilities } from "../lib/permissions/use-resource-abilities"
-import type { UnitCollectionDto, UnitCollectionListItemDto, UnitDto } from "./types"
+import type {
+  UnitDto,
+  UnitListItemDto,
+  UnitOffsetListQuery,
+  UnitType,
+} from "./types"
 
-const NO_COLLECTIONS: UnitCollectionListItemDto[] = []
+const NO_UNITS: UnitListItemDto[] = []
 
-export function normalizeUnitCollection(data: {
+export function normalizeUnit(data: {
   id: string
-  orgId: string
+  orgId: string | null
   name: string
-  baseUnitId: string
-  units: Array<UnitDto & { conversionFactor: string; isBase: boolean }>
-  itemCount: number
+  symbol: string
+  type: UnitType
+  isActive: boolean
+  isSystem: boolean
   createdAt: string
   updatedAt: string
-}): UnitCollectionDto {
+}): UnitDto {
   return {
     id: data.id,
-    orgId: data.orgId,
+    orgId: data.orgId ?? null,
     name: data.name,
-    baseUnitId: data.baseUnitId,
-    units: data.units.map((u) => ({
-      id: u.id,
-      name: u.name,
-      symbol: u.symbol,
-      type: u.type,
-      conversionFactor: u.conversionFactor,
-      isBase: u.isBase,
-    })),
-    itemCount: data.itemCount,
+    symbol: data.symbol,
+    type: data.type,
+    isActive: data.isActive,
+    isSystem: data.isSystem,
     createdAt: data.createdAt,
     updatedAt: data.updatedAt,
   }
 }
 
-/** "Meter (m)": the label the pickers show for a unit. */
-export const unitLabel = (unit: { name: string; symbol: string }) =>
-  `${unit.name} (${unit.symbol})`
-
 /* --------------------------------- queries -------------------------------- */
 
-export type UnitCollectionListParams = {
-  /** 1-based. */
-  page: number
-  pageSize: number
-  search: string
-}
-
-export function useUnitCollectionList(
-  orgId: string,
-  { page, pageSize, search }: UnitCollectionListParams
-) {
-  const query = useListUnitCollections(
+export function useUnitList(orgId: string, params: UnitOffsetListQuery) {
+  const query = useListUnits(
     orgId,
-    { page, pageSize, search: search || undefined },
-    { query: { placeholderData: keepPreviousData } }
+    {
+      page: params.page,
+      pageSize: params.pageSize,
+      search: params.search,
+      type: params.type,
+      isActive: params.isActive,
+    },
+    {
+      query: {
+        placeholderData: keepPreviousData,
+      },
+    }
+  )
+
+  const raw = query.data?.data
+  const items = useMemo<UnitListItemDto[]>(
+    () => (raw?.items ? raw.items.map(normalizeUnit) : NO_UNITS),
+    [raw]
   )
 
   return {
-    collections: query.data?.data.items ?? NO_COLLECTIONS,
-    total: query.data?.data.total ?? 0,
+    items,
+    total: raw?.total ?? 0,
+    page: raw?.page ?? params.page,
+    pageSize: raw?.pageSize ?? params.pageSize,
     isLoading: query.isLoading,
+    isPlaceholderData: query.isPlaceholderData,
+    error: query.error,
   }
 }
 
-export function useUnitCollection(orgId: string, collectionId: string) {
-  const query = useGetUnitCollection(orgId, collectionId)
+export function useUnit(orgId: string, unitId: string) {
+  const query = useGetUnit(orgId, unitId)
   const data = query.data?.data
-  const collection = useMemo<UnitCollectionDto | null>(
-    () => (data ? normalizeUnitCollection(data) : null),
+  const unit = useMemo<UnitDto | null>(
+    () => (data ? normalizeUnit(data) : null),
     [data]
   )
 
-  return { collection, isLoading: query.isLoading, error: query.error }
+  return { unit, isLoading: query.isLoading, error: query.error }
 }
 
-/** What the signed-in user may do with units and unit collections; used to show or hide buttons. */
 export function useUnitAbilities(orgId: string) {
   return useResourceAbilities(orgId, "unit")
 }
 
 /* -------------------------------- mutations ------------------------------- */
 
-function useInvalidateUnitCollections(orgId: string) {
+function useInvalidateUnits(orgId: string) {
   const queryClient = useQueryClient()
 
-  return (collectionId?: string) =>
+  return (unitId?: string) =>
     Promise.all([
-      queryClient.invalidateQueries({ queryKey: getListUnitCollectionsQueryKey(orgId) }),
-      queryClient.invalidateQueries({ queryKey: getListUnitCollectionOptionsQueryKey(orgId) }),
-      collectionId
+      queryClient.invalidateQueries({
+        queryKey: getListUnitsQueryKey(orgId),
+      }),
+      queryClient.invalidateQueries({
+        queryKey: getListUnitOptionsQueryKey(orgId),
+      }),
+      unitId
         ? queryClient.invalidateQueries({
-            queryKey: getGetUnitCollectionQueryKey(orgId, collectionId),
+            queryKey: getGetUnitQueryKey(orgId, unitId),
           })
         : Promise.resolve(),
     ])
 }
 
 /** `mutateAsync({ orgId, data })` */
-export function useCreateUnitCollectionMutation(orgId: string) {
-  const invalidate = useInvalidateUnitCollections(orgId)
-  return useCreateUnitCollection({ mutation: { onSuccess: () => invalidate() } })
-}
-
-/** `mutateAsync({ orgId, collectionId, data })` */
-export function useUpdateUnitCollectionMutation(orgId: string) {
-  const invalidate = useInvalidateUnitCollections(orgId)
-  return useUpdateUnitCollection({
-    mutation: { onSuccess: (_response, variables) => invalidate(variables.collectionId) },
+export function useCreateUnitMutation(orgId: string) {
+  const invalidate = useInvalidateUnits(orgId)
+  return useCreateUnit({
+    mutation: { onSuccess: () => invalidate() },
   })
 }
 
-/** `mutateAsync({ orgId, collectionId })` */
-export function useDeleteUnitCollectionMutation(orgId: string) {
-  const invalidate = useInvalidateUnitCollections(orgId)
-  return useDeleteUnitCollection({ mutation: { onSuccess: () => invalidate() } })
+/** `mutateAsync({ orgId, unitId, data })` */
+export function useUpdateUnitMutation(orgId: string) {
+  const invalidate = useInvalidateUnits(orgId)
+  return useUpdateUnit({
+    mutation: {
+      onSuccess: (_data, variables) => invalidate(variables.unitId),
+    },
+  })
 }
 
-/* --------------------------------- pickers -------------------------------- */
+/** `mutateAsync({ orgId, unitId })` */
+export function useDeleteUnitMutation(orgId: string) {
+  const invalidate = useInvalidateUnits(orgId)
+  return useDeleteUnit({
+    mutation: {
+      onSuccess: (_data, variables) => invalidate(variables.unitId),
+    },
+  })
+}
 
-/**
- * Units picker (async combobox). `sameTypeAs` narrows it to units measuring the same thing
- * as that unit: it is part of the query key, so two filters never share a cache entry.
- */
-export function useUnitOptions(orgId: string, filter: { sameTypeAs?: string } = {}) {
-  const { sameTypeAs } = filter
+/* ----------------------------- combobox picker ---------------------------- */
+
+export function useUnitOptions(
+  orgId: string,
+  filter: { type?: UnitType; sameTypeAs?: string } = {}
+) {
+  const { type, sameTypeAs } = filter
   return useCursorOptions({
-    queryKey: [...getListUnitOptionsQueryKey(orgId), { sameTypeAs }],
+    queryKey: [...getListUnitOptionsQueryKey(orgId), { type, sameTypeAs }],
     fetchPage: async ({ cursor, search, limit, signal }) =>
-      (await listUnitOptions(orgId, { cursor, search, limit, sameTypeAs }, { signal })).data,
+      (
+        await listUnitOptions(
+          orgId,
+          { cursor, search, limit, type, sameTypeAs },
+          { signal }
+        )
+      ).data,
     enabled: Boolean(orgId),
   })
 }
 
-export function useUnitCollectionOptions(orgId: string) {
-  return useCursorOptions({
-    queryKey: getListUnitCollectionOptionsQueryKey(orgId),
-    fetchPage: async ({ cursor, search, limit, signal }) =>
-      (await listUnitCollectionOptions(orgId, { cursor, search, limit }, { signal })).data,
-    enabled: Boolean(orgId),
-  })
-}
+export { unitLabel } from "./lib/unit-label"
+

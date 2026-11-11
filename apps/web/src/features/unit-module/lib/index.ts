@@ -1,1 +1,2 @@
-export * from "./decimal"
+export * from "./unit-label"
+
