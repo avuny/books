@@ -28,7 +28,8 @@
     "openapi:generate": "tsx ./scripts/generate-openapi.ts",
     "routes:generate": "tsx ./scripts/generate-routes.ts",
     "routes:watch": "tsx ./scripts/generate-routes.ts --watch",
-    "seed:sidebar": "tsx src/api/modules/sidebar/sidebar.seed.ts"
+    "seed:sidebar": "tsx src/api/modules/sidebar/sidebar.seed.ts",
+    "seed": "tsx src/api/seed.ts"
   },
   "dependencies": {
     "@avuny/contracts": "workspace:*",

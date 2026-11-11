@@ -16,6 +16,7 @@
     "schema:generate": "turbo schema:generate",
     "codegen": "turbo routes:generate barrel:generate schema:generate",
     "seed:sidebar": "pnpm --filter @avuny/books-server seed:sidebar",
+    "seed": "pnpm --filter @avuny/books-server seed",
     "print-files": "node ./scripts/print-files.js",
     "diff:copy": "bash scripts/diff-copy.sh"
   },
