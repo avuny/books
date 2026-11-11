@@ -21,7 +21,7 @@ export function UnitCollectionButton({
   display = "text",
   className,
 }: UnitCollectionButtonProps) {
-  const { t } = useTranslation("unit")
+  const { t } = useTranslation("unit-collection")
   const [open, setOpen] = useState(false)
 
   const isUpdate = collectionId !== undefined

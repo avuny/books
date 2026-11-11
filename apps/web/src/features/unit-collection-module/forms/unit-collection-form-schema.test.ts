@@ -20,11 +20,20 @@ describe("UnitCollectionFormSchema", () => {
   })
 
   it("rejects a missing base unit and bad factors", () => {
-    expect(UnitCollectionFormSchema.safeParse({ name: "", baseUnitId: "", units: [] }).success).toBe(false)
+    expect(
+      UnitCollectionFormSchema.safeParse({
+        name: "",
+        baseUnitId: "",
+        units: [],
+      }).success
+    ).toBe(false)
     for (const conversionFactor of ["", "0", "-1", "1e3", "abc"])
       expect(
-        UnitCollectionFormSchema.safeParse({ name: "", baseUnitId: meter, units: [{ unitId: cm, conversionFactor }] })
-          .success,
+        UnitCollectionFormSchema.safeParse({
+          name: "",
+          baseUnitId: meter,
+          units: [{ unitId: cm, conversionFactor }],
+        }).success,
         conversionFactor
       ).toBe(false)
   })
@@ -48,7 +57,14 @@ describe("form values -> API input", () => {
     expect(toUpdateUnitCollectionInput(values)).toEqual({
       units: [{ unitId: cm, conversionFactor: "0.01" }],
     })
-    const named = UnitCollectionFormSchema.parse({ name: "Sand", baseUnitId: meter, units: [] })
-    expect(toUpdateUnitCollectionInput(named)).toEqual({ name: "Sand", units: [] })
+    const named = UnitCollectionFormSchema.parse({
+      name: "Sand",
+      baseUnitId: meter,
+      units: [],
+    })
+    expect(toUpdateUnitCollectionInput(named)).toEqual({
+      name: "Sand",
+      units: [],
+    })
   })
 })

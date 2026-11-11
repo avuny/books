@@ -1,5 +1,10 @@
 import type { FieldCopy } from "@workspace/ui/blocks/types"
-import type { AsyncComboboxCopy, AsyncOptionsSource } from "@workspace/ui/blocks/form"
+import type {
+  AsyncComboboxCopy,
+  AsyncOptionsSource,
+  ComboboxCreateAction,
+  ComboboxEditAction,
+} from "@workspace/ui/blocks/form"
 
 export type UnitCollectionExtraUnitsCopy = {
   label: string
@@ -31,6 +36,25 @@ export type UnitCollectionFormCopy = {
 export type UnitPicker = {
   copy: AsyncComboboxCopy
   source: AsyncOptionsSource
+  /** Omit to hide the "Create new" footer. */
+  createAction?: ComboboxCreateAction
+  /** Omit to hide the edit icon on items. */
+  editAction?: ComboboxEditAction
+}
+
+/**
+ * Config passed to the extra-units field so it can create an independent
+ * AsyncOptionsSource per row (avoids shared open/search state across rows).
+ */
+export type ExtraUnitPickerConfig = {
+  orgId: string
+  /** Narrows the unit list to units of the same type as the base unit. */
+  sameTypeAs?: string
+  copy: AsyncComboboxCopy
+  /** Omit to hide the "Create new" footer in each row's picker. */
+  createAction?: ComboboxCreateAction
+  /** Omit to hide the edit icon in each row's picker. */
+  editAction?: ComboboxEditAction
 }
 
 /** Known option labels, so existing rows show a name before the list is opened. */

@@ -28,6 +28,7 @@ i18n
       "organization-invitation",
       "organization-user",
       "unit",
+      "unit-collection",
       "item",
       "item-category",
     ],

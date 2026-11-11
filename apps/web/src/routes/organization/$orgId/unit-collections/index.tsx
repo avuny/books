@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router"
 
-import { UnitCollectionList } from "@/features/unit-module"
+import { UnitCollectionList } from "@/features/unit-collection-module"
 
 export const Route = createFileRoute("/organization/$orgId/unit-collections/")({
   component: UnitCollectionsPage,

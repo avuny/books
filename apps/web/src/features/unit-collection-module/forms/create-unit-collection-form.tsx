@@ -2,7 +2,12 @@ import { useEffect, useRef } from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 
-import { AsyncComboboxField, FormShell, InputField, SubmitButton } from "@workspace/ui/blocks/form"
+import {
+  AsyncComboboxField,
+  FormShell,
+  InputField,
+  SubmitButton,
+} from "@workspace/ui/blocks/form"
 
 import { UnitCollectionExtraUnitsField } from "./unit-collection-extra-units-field"
 import {
@@ -10,16 +15,23 @@ import {
   type UnitCollectionFormInput,
   type UnitCollectionFormValues,
 } from "./unit-collection-form-schema"
-import type { UnitCollectionFormCopy, UnitPicker } from "./unit-collection-form-types"
+import type {
+  ExtraUnitPickerConfig,
+  UnitCollectionFormCopy,
+  UnitPicker,
+} from "./unit-collection-form-types"
 
 export type CreateUnitCollectionFormValues = UnitCollectionFormValues
 
 type CreateUnitCollectionFormProps = {
   copy: UnitCollectionFormCopy
   baseUnitPicker: UnitPicker
-  /** Narrowed to units of the chosen base unit's type. */
-  extraUnitPicker: UnitPicker
-  /** Lets the composition component narrow `extraUnitPicker` to the base unit's type. */
+  /**
+   * Config for the extra-unit pickers. Each row creates its own independent
+   * source; `sameTypeAs` is updated whenever the base unit changes.
+   */
+  extraUnitPickerConfig: ExtraUnitPickerConfig
+  /** Lets the composition component narrow `extraUnitPickerConfig.sameTypeAs` to the base unit's type. */
   onBaseUnitChange?: (baseUnitId: string | undefined) => void
   onSubmit: (values: CreateUnitCollectionFormValues) => void
   isPending: boolean
@@ -31,13 +43,17 @@ type CreateUnitCollectionFormProps = {
 export function CreateUnitCollectionForm({
   copy,
   baseUnitPicker,
-  extraUnitPicker,
+  extraUnitPickerConfig,
   onBaseUnitChange,
   onSubmit,
   isPending,
   errorMessage,
 }: CreateUnitCollectionFormProps) {
-  const form = useForm<UnitCollectionFormInput, unknown, UnitCollectionFormValues>({
+  const form = useForm<
+    UnitCollectionFormInput,
+    unknown,
+    UnitCollectionFormValues
+  >({
     resolver: zodResolver(UnitCollectionFormSchema),
     defaultValues: { name: "", baseUnitId: "", units: [] },
   })
@@ -54,7 +70,11 @@ export function CreateUnitCollectionForm({
   }, [baseUnitId, form, onBaseUnitChange])
 
   return (
-    <FormShell title={copy.title} description={copy.description} errorMessage={errorMessage}>
+    <FormShell
+      title={copy.title}
+      description={copy.description}
+      errorMessage={errorMessage}
+    >
       <form
         onSubmit={form.handleSubmit((values) => onSubmit(values))}
         noValidate
@@ -76,6 +96,8 @@ export function CreateUnitCollectionForm({
           copy={copy.baseUnit}
           comboboxCopy={baseUnitPicker.copy}
           source={baseUnitPicker.source}
+          createAction={baseUnitPicker.createAction}
+          editAction={baseUnitPicker.editAction}
           disabled={isPending}
           placeholder={copy.baseUnit.placeholder}
         />
@@ -83,7 +105,7 @@ export function CreateUnitCollectionForm({
         <UnitCollectionExtraUnitsField
           control={form.control}
           copy={copy.extraUnits}
-          picker={extraUnitPicker}
+          pickerConfig={extraUnitPickerConfig}
           canAdd={Boolean(baseUnitId)}
           disabled={isPending}
         />

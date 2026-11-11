@@ -1,12 +1,18 @@
 import { useTranslation } from "react-i18next"
 
 import { useAsyncComboboxCopy } from "../../lib/options/use-async-combobox-copy"
-import { useUnitOptions } from "../unit-api"
-import type { UnitCollectionFormCopy, UnitPicker } from "./unit-collection-form-types"
+import { useUnitOptions } from "../unit-collection-api"
+import type {
+  ExtraUnitPickerConfig,
+  UnitCollectionFormCopy,
+  UnitPicker,
+} from "./unit-collection-form-types"
 
 /** Builds the localized strings for the create or update form. */
-export function useUnitCollectionFormCopy(mode: "create" | "update"): UnitCollectionFormCopy {
-  const { t } = useTranslation("unit")
+export function useUnitCollectionFormCopy(
+  mode: "create" | "update"
+): UnitCollectionFormCopy {
+  const { t } = useTranslation("unit-collection")
 
   return {
     title: t(`${mode}.title`),
@@ -43,9 +49,27 @@ export function useUnitCollectionFormCopy(mode: "create" | "update"): UnitCollec
 }
 
 /** Async combobox pieces for a unit picker; `sameTypeAs` narrows it to one unit type. */
-export function useUnitPicker(orgId: string, filter: { sameTypeAs?: string } = {}): UnitPicker {
+export function useUnitPicker(
+  orgId: string,
+  filter: { sameTypeAs?: string } = {}
+): UnitPicker {
   return {
     copy: useAsyncComboboxCopy(),
     source: useUnitOptions(orgId, filter),
+  }
+}
+
+/**
+ * Config for the extra-unit picker rows. Pass this to `UnitCollectionExtraUnitsField`
+ * so each row creates its own independent AsyncOptionsSource.
+ */
+export function useExtraUnitPickerConfig(
+  orgId: string,
+  filter: { sameTypeAs?: string } = {}
+): ExtraUnitPickerConfig {
+  return {
+    orgId,
+    sameTypeAs: filter.sameTypeAs,
+    copy: useAsyncComboboxCopy(),
   }
 }

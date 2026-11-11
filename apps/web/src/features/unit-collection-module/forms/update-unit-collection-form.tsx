@@ -12,9 +12,9 @@ import {
   type UnitCollectionFormValues,
 } from "./unit-collection-form-schema"
 import type {
+  ExtraUnitPickerConfig,
   UnitCollectionFormCopy,
   UnitInitialOptions,
-  UnitPicker,
 } from "./unit-collection-form-types"
 
 export type UpdateUnitCollectionFormValues = UnitCollectionFormValues
@@ -25,8 +25,11 @@ type UpdateUnitCollectionFormProps = {
   collection: UnitCollectionDto
   /** Already localized, e.g. "Meter (m)". The base unit cannot change. */
   baseUnitLabel: string
-  /** Narrowed to units of the base unit's type. */
-  extraUnitPicker: UnitPicker
+  /**
+   * Config for the extra-unit pickers. Each row creates its own independent
+   * source narrowed to the base unit's type.
+   */
+  extraUnitPickerConfig: ExtraUnitPickerConfig
   /** Labels of the units already in the collection. */
   initialOptions: UnitInitialOptions
   onSubmit: (values: UpdateUnitCollectionFormValues) => void
@@ -40,25 +43,36 @@ export function UpdateUnitCollectionForm({
   copy,
   collection,
   baseUnitLabel,
-  extraUnitPicker,
+  extraUnitPickerConfig,
   initialOptions,
   onSubmit,
   isPending,
   errorMessage,
 }: UpdateUnitCollectionFormProps) {
-  const form = useForm<UnitCollectionFormInput, unknown, UnitCollectionFormValues>({
+  const form = useForm<
+    UnitCollectionFormInput,
+    unknown,
+    UnitCollectionFormValues
+  >({
     resolver: zodResolver(UnitCollectionFormSchema),
     defaultValues: {
       name: collection.name,
       baseUnitId: collection.baseUnitId,
       units: collection.units
         .filter((unit) => !unit.isBase)
-        .map((unit) => ({ unitId: unit.id, conversionFactor: trimDecimal(unit.conversionFactor) })),
+        .map((unit) => ({
+          unitId: unit.id,
+          conversionFactor: trimDecimal(unit.conversionFactor),
+        })),
     },
   })
 
   return (
-    <FormShell title={copy.title} description={copy.description} errorMessage={errorMessage}>
+    <FormShell
+      title={copy.title}
+      description={copy.description}
+      errorMessage={errorMessage}
+    >
       <form
         onSubmit={form.handleSubmit((values) => onSubmit(values))}
         noValidate
@@ -75,7 +89,9 @@ export function UpdateUnitCollectionForm({
         />
 
         <div className="grid gap-1">
-          <span className="text-sm font-medium text-foreground">{copy.baseUnit.label}</span>
+          <span className="text-sm font-medium text-foreground">
+            {copy.baseUnit.label}
+          </span>
           <p className="text-sm text-foreground">{baseUnitLabel}</p>
           <p className="text-xs text-muted-foreground">{copy.baseUnitLocked}</p>
         </div>
@@ -83,7 +99,7 @@ export function UpdateUnitCollectionForm({
         <UnitCollectionExtraUnitsField
           control={form.control}
           copy={copy.extraUnits}
-          picker={extraUnitPicker}
+          pickerConfig={extraUnitPickerConfig}
           initialOptions={initialOptions}
           canAdd
           disabled={isPending}

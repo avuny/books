@@ -36,14 +36,18 @@ export function createUnitCollectionColumns({
       accessorKey: "name",
       header: copy.name,
       enableSorting: false,
-      cell: ({ row }) => <div className="font-medium text-foreground">{row.original.name}</div>,
+      cell: ({ row }) => (
+        <div className="font-medium text-foreground">{row.original.name}</div>
+      ),
     },
     {
       id: "baseUnit",
       header: copy.baseUnit,
       enableSorting: false,
       cell: ({ row }) => (
-        <span className="text-muted-foreground">{copy.unitLabel(row.original.baseUnit)}</span>
+        <span className="text-muted-foreground">
+          {copy.unitLabel(row.original.baseUnit)}
+        </span>
       ),
     },
     {
@@ -51,7 +55,9 @@ export function createUnitCollectionColumns({
       header: copy.units,
       enableSorting: false,
       cell: ({ row }) => (
-        <span className="text-muted-foreground tabular-nums">{row.original.unitCount}</span>
+        <span className="text-muted-foreground tabular-nums">
+          {row.original.unitCount}
+        </span>
       ),
     },
     {
@@ -59,7 +65,9 @@ export function createUnitCollectionColumns({
       header: copy.items,
       enableSorting: false,
       cell: ({ row }) => (
-        <span className="text-muted-foreground tabular-nums">{row.original.itemCount}</span>
+        <span className="text-muted-foreground tabular-nums">
+          {row.original.itemCount}
+        </span>
       ),
     },
     {
@@ -67,7 +75,9 @@ export function createUnitCollectionColumns({
       header: copy.updated,
       enableSorting: false,
       cell: ({ row }) => (
-        <span className="text-muted-foreground">{copy.formatDate(row.original.updatedAt)}</span>
+        <span className="text-muted-foreground">
+          {copy.formatDate(row.original.updatedAt)}
+        </span>
       ),
     },
     createActionsColumn<UnitCollectionListItemDto>({

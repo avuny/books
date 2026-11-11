@@ -21,7 +21,7 @@ import {
   useDeleteUnitCollectionMutation,
   useUnitAbilities,
   useUnitCollectionList,
-} from "../unit-api"
+} from "../unit-collection-api"
 import type { UnitCollectionListItemDto } from "../types"
 import { createUnitCollectionColumns } from "./unit-collection-columns"
 import { UnitCollectionMobileCard } from "./unit-collection-mobile-card"
@@ -33,13 +33,21 @@ type UnitCollectionListProps = {
 }
 
 // Composition only: strings + API behavior wired into the pure data-table kit.
-export function UnitCollectionList({ orgId, onViewCollection }: UnitCollectionListProps) {
-  const { t, i18n } = useTranslation("unit")
+export function UnitCollectionList({
+  orgId,
+  onViewCollection,
+}: UnitCollectionListProps) {
+  const { t, i18n } = useTranslation("unit-collection")
 
   const [search, setSearch] = useState("")
-  const [pagination, setPagination] = useState<PaginationState>({ pageIndex: 0, pageSize: 20 })
-  const [collectionToEdit, setCollectionToEdit] = useState<UnitCollectionListItemDto | null>(null)
-  const [collectionToDelete, setCollectionToDelete] = useState<UnitCollectionListItemDto | null>(null)
+  const [pagination, setPagination] = useState<PaginationState>({
+    pageIndex: 0,
+    pageSize: 20,
+  })
+  const [collectionToEdit, setCollectionToEdit] =
+    useState<UnitCollectionListItemDto | null>(null)
+  const [collectionToDelete, setCollectionToDelete] =
+    useState<UnitCollectionListItemDto | null>(null)
   const [deleteError, setDeleteError] = useState<string | null>(null)
 
   const resetPage = useCallback(
@@ -59,13 +67,18 @@ export function UnitCollectionList({ orgId, onViewCollection }: UnitCollectionLi
   useEffect(() => {
     if (!isLoading && collections.length === 0 && pagination.pageIndex > 0) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
-      setPagination((current) => ({ ...current, pageIndex: current.pageIndex - 1 }))
+      setPagination((current) => ({
+        ...current,
+        pageIndex: current.pageIndex - 1,
+      }))
     }
   }, [isLoading, collections.length, pagination.pageIndex])
 
   const formatDate = useCallback(
     (iso: string) =>
-      new Intl.DateTimeFormat(i18n.language, { dateStyle: "medium" }).format(new Date(iso)),
+      new Intl.DateTimeFormat(i18n.language, { dateStyle: "medium" }).format(
+        new Date(iso)
+      ),
     [i18n.language]
   )
 
@@ -147,7 +160,10 @@ export function UnitCollectionList({ orgId, onViewCollection }: UnitCollectionLi
     if (!collectionToDelete) return
     setDeleteError(null)
     try {
-      await deleteMutation.mutateAsync({ orgId, collectionId: collectionToDelete.id })
+      await deleteMutation.mutateAsync({
+        orgId,
+        collectionId: collectionToDelete.id,
+      })
       closeDeleteDialog()
     } catch (e) {
       setDeleteError(parseApiError(e).message || null)
@@ -157,7 +173,9 @@ export function UnitCollectionList({ orgId, onViewCollection }: UnitCollectionLi
   return (
     <div className="flex flex-col gap-4">
       <div className="min-w-0">
-        <h1 className="text-xl font-semibold text-foreground">{t("list.title")}</h1>
+        <h1 className="text-xl font-semibold text-foreground">
+          {t("list.title")}
+        </h1>
         <p className="text-sm text-muted-foreground">{t("list.description")}</p>
       </div>
 
@@ -173,7 +191,9 @@ export function UnitCollectionList({ orgId, onViewCollection }: UnitCollectionLi
             clearLabel={t("list.search.clear")}
           />
         }
-        actions={abilities.canCreate ? <UnitCollectionButton orgId={orgId} /> : null}
+        actions={
+          abilities.canCreate ? <UnitCollectionButton orgId={orgId} /> : null
+        }
       />
 
       <DataTable
@@ -182,8 +202,12 @@ export function UnitCollectionList({ orgId, onViewCollection }: UnitCollectionLi
         onRowClick={(collection) => onViewCollection(collection.id)}
         emptyState={
           <div className="flex flex-col items-center gap-1 px-6 py-16 text-center">
-            <p className="text-sm font-medium text-foreground">{t("empty.title")}</p>
-            <p className="text-sm text-muted-foreground">{t("empty.description")}</p>
+            <p className="text-sm font-medium text-foreground">
+              {t("empty.title")}
+            </p>
+            <p className="text-sm text-muted-foreground">
+              {t("empty.description")}
+            </p>
           </div>
         }
         renderMobileCard={(row) => (
@@ -196,7 +220,9 @@ export function UnitCollectionList({ orgId, onViewCollection }: UnitCollectionLi
               unitLabel,
             }}
             actions={getActions(row.original)}
-            actionsTriggerLabel={t("table.actionsFor", { name: row.original.name })}
+            actionsTriggerLabel={t("table.actionsFor", {
+              name: row.original.name,
+            })}
             onClick={() => onViewCollection(row.original.id)}
           />
         )}
@@ -210,7 +236,8 @@ export function UnitCollectionList({ orgId, onViewCollection }: UnitCollectionLi
               rowsPerPage: t("pagination.rowsPerPage"),
               summary: ({ from, to, total: count }) =>
                 t("pagination.summary", { from, to, total: count }),
-              pageOf: (page, pageCount) => t("pagination.pageOf", { page, pageCount }),
+              pageOf: (page, pageCount) =>
+                t("pagination.pageOf", { page, pageCount }),
               pageLabel: (page) => t("pagination.goTo", { page }),
             }}
           />
@@ -234,7 +261,10 @@ export function UnitCollectionList({ orgId, onViewCollection }: UnitCollectionLi
           if (!open) closeDeleteDialog()
         }}
         title={t("delete.title")}
-        description={deleteError ?? t("delete.description", { name: collectionToDelete?.name })}
+        description={
+          deleteError ??
+          t("delete.description", { name: collectionToDelete?.name })
+        }
         confirmLabel={t("actions.delete")}
         cancelLabel={t("actions.cancel")}
         isLoading={deleteMutation.isPending}

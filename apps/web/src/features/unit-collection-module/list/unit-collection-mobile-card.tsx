@@ -35,11 +35,19 @@ export function UnitCollectionMobileCard({
     <DataTableMobileCard
       title={collection.name}
       fields={[
-        { label: copy.baseUnitLabel, value: copy.unitLabel(collection.baseUnit) },
+        {
+          label: copy.baseUnitLabel,
+          value: copy.unitLabel(collection.baseUnit),
+        },
         { label: copy.unitsLabel, value: collection.unitCount },
         { label: copy.itemsLabel, value: collection.itemCount },
       ]}
-      actions={<DataTableRowActions actions={actions} triggerLabel={actionsTriggerLabel} />}
+      actions={
+        <DataTableRowActions
+          actions={actions}
+          triggerLabel={actionsTriggerLabel}
+        />
+      }
       onClick={onClick}
     />
   )

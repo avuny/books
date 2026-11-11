@@ -8,7 +8,7 @@ import {
   unitLabel,
   useUnitCollection,
   useUpdateUnitCollectionMutation,
-} from "../unit-api"
+} from "../unit-collection-api"
 import type { UnitCollectionDto } from "../types"
 import { toUpdateUnitCollectionInput } from "./unit-collection-form-schema"
 import {
@@ -16,7 +16,10 @@ import {
   type UpdateUnitCollectionFormValues,
 } from "./update-unit-collection-form"
 import type { UnitInitialOptions } from "./unit-collection-form-types"
-import { useUnitCollectionFormCopy, useUnitPicker } from "./use-unit-collection-form-copy"
+import {
+  useExtraUnitPickerConfig,
+  useUnitCollectionFormCopy,
+} from "./use-unit-collection-form-copy"
 
 type UpdateUnitCollectionProps = {
   orgId: string
@@ -26,18 +29,30 @@ type UpdateUnitCollectionProps = {
 }
 
 // Composition only: loads the collection, wires strings + API behavior into the pure form.
-export function UpdateUnitCollection({ orgId, collectionId, onSuccess }: UpdateUnitCollectionProps) {
+export function UpdateUnitCollection({
+  orgId,
+  collectionId,
+  onSuccess,
+}: UpdateUnitCollectionProps) {
   const [serverError, setServerError] = useState<string | null>(null)
 
-  const { collection, isLoading, error } = useUnitCollection(orgId, collectionId)
+  const { collection, isLoading, error } = useUnitCollection(
+    orgId,
+    collectionId
+  )
   const updateMutation = useUpdateUnitCollectionMutation(orgId)
   const copy = useUnitCollectionFormCopy("update")
-  const extraUnitPicker = useUnitPicker(orgId, { sameTypeAs: collection?.baseUnitId })
+  const extraUnitPickerConfig = useExtraUnitPickerConfig(orgId, {
+    sameTypeAs: collection?.baseUnitId,
+  })
 
   const initialOptions = useMemo<UnitInitialOptions>(
     () =>
       Object.fromEntries(
-        (collection?.units ?? []).map((unit) => [unit.id, { id: unit.id, name: unitLabel(unit) }])
+        (collection?.units ?? []).map((unit) => [
+          unit.id,
+          { id: unit.id, name: unitLabel(unit) },
+        ])
       ),
     [collection]
   )
@@ -82,7 +97,7 @@ export function UpdateUnitCollection({ orgId, collectionId, onSuccess }: UpdateU
       copy={copy}
       collection={collection}
       baseUnitLabel={baseUnit ? unitLabel(baseUnit) : ""}
-      extraUnitPicker={extraUnitPicker}
+      extraUnitPickerConfig={extraUnitPickerConfig}
       initialOptions={initialOptions}
       onSubmit={handleSubmit}
       isPending={updateMutation.isPending}

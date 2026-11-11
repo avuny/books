@@ -33,7 +33,7 @@ export function UnitCollectionDialog({
   onOpenChange,
   onSuccess,
 }: UnitCollectionDialogProps) {
-  const { t } = useTranslation("unit")
+  const { t } = useTranslation("unit-collection")
   const mode = collectionId ? "update" : "create"
   const handleSuccess = (collection: UnitCollectionDto) => {
     onSuccess?.(collection)

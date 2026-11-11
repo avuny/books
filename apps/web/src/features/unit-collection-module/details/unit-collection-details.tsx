@@ -4,7 +4,7 @@ import { parseApiError } from "@workspace/ui/lib/api-error"
 
 import { UnitCollectionButton } from "../forms"
 import { trimDecimal } from "../lib"
-import { useUnitAbilities, useUnitCollection } from "../unit-api"
+import { useUnitAbilities, useUnitCollection } from "../unit-collection-api"
 import { UnitCollectionDetailsView } from "./unit-collection-details-view"
 
 type UnitCollectionDetailsProps = {
@@ -15,13 +15,22 @@ type UnitCollectionDetailsProps = {
 }
 
 // Composition only: strings + API behavior wired into the pure view.
-export function UnitCollectionDetails({ orgId, collectionId, onBack }: UnitCollectionDetailsProps) {
-  const { t, i18n } = useTranslation("unit")
-  const { collection, isLoading, error } = useUnitCollection(orgId, collectionId)
+export function UnitCollectionDetails({
+  orgId,
+  collectionId,
+  onBack,
+}: UnitCollectionDetailsProps) {
+  const { t, i18n } = useTranslation("unit-collection")
+  const { collection, isLoading, error } = useUnitCollection(
+    orgId,
+    collectionId
+  )
   const abilities = useUnitAbilities(orgId)
 
   const formatDate = (iso: string) =>
-    new Intl.DateTimeFormat(i18n.language, { dateStyle: "medium" }).format(new Date(iso))
+    new Intl.DateTimeFormat(i18n.language, { dateStyle: "medium" }).format(
+      new Date(iso)
+    )
 
   const baseUnit = collection?.units.find((unit) => unit.isBase)
 

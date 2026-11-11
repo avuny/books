@@ -76,7 +76,9 @@ export function UnitCollectionDetailsView({
       ) : (
         <>
           <div className="flex flex-wrap items-start justify-between gap-3">
-            <h1 className="min-w-0 text-xl font-semibold text-foreground">{collection.name}</h1>
+            <h1 className="min-w-0 text-xl font-semibold text-foreground">
+              {collection.name}
+            </h1>
             {editAction}
           </div>
 
@@ -88,29 +90,47 @@ export function UnitCollectionDetailsView({
 
           <dl className="grid grid-cols-1 gap-4 text-sm sm:grid-cols-3">
             <div>
-              <dt className="text-xs text-muted-foreground">{copy.itemsLabel}</dt>
-              <dd className="text-foreground tabular-nums">{collection.itemCount}</dd>
+              <dt className="text-xs text-muted-foreground">
+                {copy.itemsLabel}
+              </dt>
+              <dd className="text-foreground tabular-nums">
+                {collection.itemCount}
+              </dd>
             </div>
             <div>
-              <dt className="text-xs text-muted-foreground">{copy.createdLabel}</dt>
+              <dt className="text-xs text-muted-foreground">
+                {copy.createdLabel}
+              </dt>
               <dd className="text-foreground">{createdAt}</dd>
             </div>
             <div>
-              <dt className="text-xs text-muted-foreground">{copy.updatedLabel}</dt>
+              <dt className="text-xs text-muted-foreground">
+                {copy.updatedLabel}
+              </dt>
               <dd className="text-foreground">{updatedAt}</dd>
             </div>
           </dl>
 
           <section className="grid gap-3">
-            <h2 className="text-sm font-medium text-foreground">{copy.unitsTitle}</h2>
+            <h2 className="text-sm font-medium text-foreground">
+              {copy.unitsTitle}
+            </h2>
             <div className="overflow-x-auto rounded-lg border border-border">
               <table className="w-full text-sm">
                 <thead className="bg-muted/50 text-start text-xs text-muted-foreground">
                   <tr>
-                    <th className="px-3 py-2 text-start font-medium">{copy.unitHeader}</th>
-                    <th className="px-3 py-2 text-start font-medium">{copy.symbolHeader}</th>
-                    <th className="px-3 py-2 text-start font-medium">{copy.typeHeader}</th>
-                    <th className="px-3 py-2 text-start font-medium">{copy.factorHeader}</th>
+                    <th className="px-3 py-2 text-start font-medium">
+                      {copy.unitHeader}
+                    </th>
+                    <th className="px-3 py-2 text-start font-medium">
+                      {copy.symbolHeader}
+                    </th>
+                    <th className="px-3 py-2 text-start font-medium">
+                      {copy.typeHeader}
+                    </th>
+                    <th className="px-3 py-2 text-start font-medium">
+                      {copy.factorHeader}
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
@@ -118,10 +138,16 @@ export function UnitCollectionDetailsView({
                     <tr key={unit.id} className="border-t border-border">
                       <td className="px-3 py-2 text-foreground">
                         <span className="me-2">{unit.name}</span>
-                        {unit.isBase ? <BaseUnitBadge label={copy.baseLabel} /> : null}
+                        {unit.isBase ? (
+                          <BaseUnitBadge label={copy.baseLabel} />
+                        ) : null}
                       </td>
-                      <td className="px-3 py-2 text-muted-foreground">{unit.symbol}</td>
-                      <td className="px-3 py-2 text-muted-foreground">{getTypeLabel(unit.type)}</td>
+                      <td className="px-3 py-2 text-muted-foreground">
+                        {unit.symbol}
+                      </td>
+                      <td className="px-3 py-2 text-muted-foreground">
+                        {getTypeLabel(unit.type)}
+                      </td>
                       <td className="px-3 py-2 text-muted-foreground tabular-nums">
                         {getConversionLabel(unit)}
                       </td>

@@ -1,8 +1,10 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router"
 
-import { UnitCollectionDetails } from "@/features/unit-module"
+import { UnitCollectionDetails } from "@/features/unit-collection-module"
 
-export const Route = createFileRoute("/organization/$orgId/unit-collections/$collectionId")({
+export const Route = createFileRoute(
+  "/organization/$orgId/unit-collections/$collectionId"
+)({
   component: UnitCollectionDetailsPage,
 })
 
@@ -15,7 +17,10 @@ function UnitCollectionDetailsPage() {
       orgId={orgId}
       collectionId={collectionId}
       onBack={() =>
-        navigate({ to: "/organization/$orgId/unit-collections", params: { orgId } })
+        navigate({
+          to: "/organization/$orgId/unit-collections",
+          params: { orgId },
+        })
       }
     />
   )
