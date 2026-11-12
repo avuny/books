@@ -1,5 +1,6 @@
 import { db } from "../../db.js"
 import { activityLogService } from "../activity-log/index.js"
+import { permissionChecker } from "../role/index.js"
 import { createItemCategoryRepository } from "./item-category.repository.js"
 import { createItemCategoryService } from "./item-category.service.js"
 import type { ItemCategoryRepository, ItemCategoryService } from "./item-category.types.js"
@@ -17,6 +18,7 @@ export function getItemCategoryService(): ItemCategoryService {
     _serviceInstance = createItemCategoryService({
       repository: getItemCategoryRepository(),
       activityLog: activityLogService,
+      permissions: permissionChecker,
     })
   }
   return _serviceInstance

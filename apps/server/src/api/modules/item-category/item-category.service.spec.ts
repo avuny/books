@@ -31,11 +31,13 @@ function setup() {
     deleteCategory: vi.fn(),
   }
   const activityLog = { log: vi.fn(async () => {}) }
+  const permissions = { check: vi.fn(async () => true) }
   const service = createItemCategoryService({
     repository: repository as unknown as ItemCategoryRepository,
     activityLog,
+    permissions,
   })
-  return { repository, activityLog, service }
+  return { repository, activityLog, permissions, service }
 }
 
 describe("itemCategoryService", () => {
@@ -45,6 +47,12 @@ describe("itemCategoryService", () => {
   })
 
   describe("create", () => {
+    it("rejects caller without permission", async () => {
+      t.permissions.check.mockResolvedValueOnce(false)
+      const res = await t.service.create("u1", "org-1", { name: "White" })
+      expect(res).toMatchObject({ success: false, error: "ITEM_CATEGORY_FORBIDDEN" })
+    })
+
     it("rejects an unknown parent, under the lock", async () => {
       const res = await t.service.create("u1", "org-1", { name: "White", parentId: "ghost" })
       expect(res).toMatchObject({ success: false, error: "ITEM_CATEGORY_PARENT_NOT_FOUND" })

@@ -5,6 +5,10 @@ export { ItemCategoryErrorCode }
 
 export const itemCategoryErrorsHttpMap = {
   ITEM_CATEGORY_NOT_FOUND: { statusCode: 404, responseMessage: "Category not found" },
+  ITEM_CATEGORY_FORBIDDEN: {
+    statusCode: 403,
+    responseMessage: "You do not have access to this category",
+  },
   ITEM_CATEGORY_PARENT_NOT_FOUND: {
     statusCode: 422,
     responseMessage: "The parent category does not exist",

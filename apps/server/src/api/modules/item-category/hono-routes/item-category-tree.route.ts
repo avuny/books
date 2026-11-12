@@ -37,9 +37,10 @@ export const itemCategoryTreeRoute = ({
   router.use(honoPath(route.path), requireAuth)
 
   router.openapi(route, async (c) => {
+    const user = c.get("user") as { id: string } | undefined
     const { orgId } = c.req.valid("param")
 
-    const result = await service.tree(orgId)
+    const result = await service.tree(orgId, user?.id)
     if (!result.success) throw new Error("getItemCategoryTree cannot fail")
     return c.json({ success: true, data: result.data }, 200)
   })

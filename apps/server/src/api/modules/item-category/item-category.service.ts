@@ -8,6 +8,7 @@ import {
   type ItemCategoryTreeResponse,
   type OptionListQuery,
   type OptionListResponse,
+  type PermissionKey,
   type UpdateItemCategoryInput,
 } from "@avuny/contracts"
 import { decodeCursor, fail, ok, toCursorPage, type Result } from "@avuny/utils"
@@ -15,16 +16,17 @@ import { createFailureKit } from "../shared/service-helpers.js"
 import { ItemCategoryErrorCode, type ItemCategoryErrorCode as Code } from "./item-category.errors.js"
 import { toItemCategoryDto, toTreeNode } from "./item-category.mapper.js"
 import { itemCategoryRules } from "./item-category.rules.js"
-import { DummyItemCategoryActivityLog } from "./testing.js"
+import { DummyItemCategoryActivityLog, DummyPermissionChecker } from "./testing.js"
 import type { ItemCategoryServiceDeps } from "./item-category.types.js"
 
-export { DummyItemCategoryActivityLog }
+export { DummyItemCategoryActivityLog, DummyPermissionChecker }
 
 const Err = ItemCategoryErrorCode
 const { failure, fromViolation, isFailure, toFail } = createFailureKit<Code>()
 
 const MSG = {
   notFound: "Category not found",
+  forbidden: "You do not have access to this category",
   parentNotFound: "The parent category does not exist",
   nameTaken: "A category with this name already exists at this level",
 } as const
@@ -43,14 +45,26 @@ const writeFailure = (reason: "name_taken" | "not_found" | "parent_not_found") =
  */
 export function createItemCategoryService(deps: ItemCategoryServiceDeps) {
   const repo = deps.repository
+  const permissions = deps.permissions ?? new DummyPermissionChecker()
   const activityLog = deps.activityLog ?? new DummyItemCategoryActivityLog()
   const rules = deps.rules ?? itemCategoryRules
+
+  const can = (
+    actorId: string,
+    action: PermissionKey | readonly [PermissionKey, ...PermissionKey[]],
+    orgId: string
+  ) => permissions.check({ userId: actorId }, action, { orgId })
+
+  const forbidden = () =>
+    fail({ error: Err.ITEM_CATEGORY_FORBIDDEN, msg: MSG.forbidden })
 
   return {
     async list(
       orgId: string,
-      query: ItemCategoryOffsetListQuery
+      query: ItemCategoryOffsetListQuery,
+      actorId?: string
     ): Promise<Result<ItemCategoryOffsetListResponse, Code>> {
+      if (actorId && !(await can(actorId, ["read:item-category"], orgId))) return forbidden()
       const { rows, total } = await repo.list(orgId, {
         search: query.search || undefined,
         isActive: query.isActive,
@@ -71,8 +85,10 @@ export function createItemCategoryService(deps: ItemCategoryServiceDeps) {
 
     async listOptions(
       orgId: string,
-      query: OptionListQuery
+      query: OptionListQuery,
+      actorId?: string
     ): Promise<Result<OptionListResponse, Code>> {
+      if (actorId && !(await can(actorId, "read:item-category", orgId))) return forbidden()
       const rows = await repo.listOptions(orgId, {
         search: query.search,
         after: decodeCursor(query.cursor, itemCategoryOptionCursorSchema),
@@ -88,12 +104,14 @@ export function createItemCategoryService(deps: ItemCategoryServiceDeps) {
       })
     },
 
-    async tree(orgId: string): Promise<Result<ItemCategoryTreeResponse, Code>> {
+    async tree(orgId: string, actorId?: string): Promise<Result<ItemCategoryTreeResponse, Code>> {
+      if (actorId && !(await can(actorId, "read:item-category", orgId))) return forbidden()
       const nodes = await repo.listNodes(orgId)
       return ok({ data: { nodes: nodes.map(toTreeNode) }, msg: "Category tree retrieved successfully" })
     },
 
-    async getById(orgId: string, id: string): Promise<Result<ItemCategoryDto, Code>> {
+    async getById(orgId: string, id: string, actorId?: string): Promise<Result<ItemCategoryDto, Code>> {
+      if (actorId && !(await can(actorId, "read:item-category", orgId))) return forbidden()
       const row = await repo.findById(orgId, id)
       if (!row) return fail({ error: Err.ITEM_CATEGORY_NOT_FOUND, msg: MSG.notFound })
       const counts = await repo.counts(orgId, id)
@@ -105,6 +123,7 @@ export function createItemCategoryService(deps: ItemCategoryServiceDeps) {
       orgId: string,
       input: CreateItemCategoryInput
     ): Promise<Result<ItemCategoryDto, Code>> {
+      if (!(await can(actorId, "create:item-category", orgId))) return forbidden()
       const parentId = input.parentId ?? null
 
       const outcome = await repo.transaction(async (tx) => {
@@ -142,6 +161,7 @@ export function createItemCategoryService(deps: ItemCategoryServiceDeps) {
       id: string,
       input: UpdateItemCategoryInput
     ): Promise<Result<ItemCategoryDto, Code>> {
+      if (!(await can(actorId, "update:item-category", orgId))) return forbidden()
       const outcome = await repo.transaction(async (tx) => {
         await repo.lockOrgCategories(orgId, tx)
         const current = await repo.findById(orgId, id, tx)
@@ -197,6 +217,7 @@ export function createItemCategoryService(deps: ItemCategoryServiceDeps) {
       orgId: string,
       id: string
     ): Promise<Result<{ id: string }, Code>> {
+      if (!(await can(actorId, "delete:item-category", orgId))) return forbidden()
       const outcome = await repo.transaction(async (tx) => {
         await repo.lockOrgCategories(orgId, tx)
         const current = await repo.findById(orgId, id, tx)

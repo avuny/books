@@ -48,9 +48,10 @@ export const getItemCategoryRoute = ({
 
   router.openapi(route, async (c) => {
     const errorTrans = trans({ lang: getRequestLocale() })
+    const user = c.get("user") as { id: string } | undefined
     const { orgId, categoryId } = c.req.valid("param")
 
-    const result = await service.getById(orgId, categoryId)
+    const result = await service.getById(orgId, categoryId, user?.id)
     return handleResult({
       c,
       result,

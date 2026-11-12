@@ -39,10 +39,11 @@ export const itemCategoryOptionsRoute = ({
   router.use(honoPath(route.path), requireAuth)
 
   router.openapi(route, async (c) => {
+    const user = c.get("user") as { id: string } | undefined
     const { orgId } = c.req.valid("param")
     const query = c.req.valid("query")
 
-    const result = await service.listOptions(orgId, query)
+    const result = await service.listOptions(orgId, query, user?.id)
     if (!result.success) throw new Error("listItemCategoryOptions cannot fail")
     return c.json({ success: true, data: result.data }, 200)
   })

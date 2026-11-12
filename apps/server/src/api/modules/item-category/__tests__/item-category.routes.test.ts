@@ -35,7 +35,11 @@ describe("item category routes", () => {
     const app = mount(listItemCategoriesRoute({ service, requireAuth, requirePermission: allow }))
     const res = await app.request(`/organizations/${orgId}/item-categories?isActive=true&parentId=root`)
     expect(res.status).toBe(200)
-    expect(service.list).toHaveBeenCalledWith(orgId, { page: 1, pageSize: 20, isActive: true, parentId: "root" })
+    expect(service.list).toHaveBeenCalledWith(
+      orgId,
+      { page: 1, pageSize: 20, isActive: true, parentId: "root" },
+      "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a01"
+    )
   })
 
   it("serves the tree at /tree", async () => {

@@ -3,6 +3,7 @@ import { itemCategoryErrorsHttpMap as errors } from "./item-category.errors.js"
 
 export const itemCategoryErrorMap = {
   ITEM_CATEGORY_NOT_FOUND: errors.ITEM_CATEGORY_NOT_FOUND,
+  ITEM_CATEGORY_FORBIDDEN: errors.ITEM_CATEGORY_FORBIDDEN,
   ITEM_CATEGORY_PARENT_NOT_FOUND: errors.ITEM_CATEGORY_PARENT_NOT_FOUND,
   ITEM_CATEGORY_NAME_TAKEN: errors.ITEM_CATEGORY_NAME_TAKEN,
   ITEM_CATEGORY_CYCLE: errors.ITEM_CATEGORY_CYCLE,

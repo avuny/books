@@ -3,6 +3,7 @@ export { itemCategoryErrorMap } from "./item-category.error-map.js"
 export {
   createItemCategoryService,
   DummyItemCategoryActivityLog,
+  DummyPermissionChecker,
 } from "./item-category.service.js"
 export { createItemCategoryRepository } from "./item-category.repository.js"
 export { itemCategoryRules, type ItemCategoryRules } from "./item-category.rules.js"
