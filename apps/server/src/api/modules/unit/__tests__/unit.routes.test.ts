@@ -10,12 +10,13 @@ import { updateUnitRoute } from "../hono-routes/update-unit.route.js"
 import { deleteUnitRoute } from "../hono-routes/delete-unit.route.js"
 
 describe("unit routes", () => {
+  const userId = "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a01"
   const orgId = "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a02"
   const unitId = "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a04"
   const iso = new Date().toISOString()
 
   const requireAuth: MiddlewareHandler = async (c, next) => {
-    c.set("user", { id: "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a01" })
+    c.set("user", { id: userId })
     await next()
   }
   const allow = () => (async (_c: any, next: any) => next()) as MiddlewareHandler
@@ -44,7 +45,7 @@ describe("unit routes", () => {
     const app = mount(listUnitsRoute({ service, requireAuth, requirePermission: allow }))
     const res = await app.request(`/organizations/${orgId}/units`)
     expect(res.status).toBe(200)
-    expect(service.listUnits).toHaveBeenCalledWith(orgId, { page: 1, pageSize: 50 })
+    expect(service.listUnits).toHaveBeenCalledWith(orgId, { page: 1, pageSize: 50 }, userId)
   })
 
   it("creates a unit (201)", async () => {

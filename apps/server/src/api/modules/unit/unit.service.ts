@@ -3,6 +3,7 @@ import {
   unitOptionCursorSchema,
   type CreateUnitInput,
   type OptionListResponse,
+  type PermissionKey,
   type UnitDto,
   type UnitOffsetListQuery,
   type UnitOffsetListResponse,
@@ -14,10 +15,10 @@ import { createFailureKit } from "../shared/service-helpers.js"
 import { UnitErrorCode, type UnitErrorCode as Code } from "./unit.errors.js"
 import { toUnitDto } from "./unit.mapper.js"
 import { unitRules } from "./unit.rules.js"
-import { DummyUnitActivityLog } from "./testing.js"
+import { DummyPermissionChecker, DummyUnitActivityLog } from "./testing.js"
 import type { UnitServiceDeps } from "./unit.types.js"
 
-export { DummyUnitActivityLog }
+export { DummyPermissionChecker, DummyUnitActivityLog }
 
 const Err = UnitErrorCode
 const { failWith } = createFailureKit<Code>()
@@ -30,14 +31,25 @@ const MSG = {
 
 export function createUnitService(deps: UnitServiceDeps) {
   const repo = deps.repository
+  const permissions = deps.permissions ?? new DummyPermissionChecker()
   const activityLog = deps.activityLog ?? new DummyUnitActivityLog()
   const rules = deps.rules ?? unitRules
+
+  const can = (
+    actorId: string,
+    action: PermissionKey | readonly [PermissionKey, ...PermissionKey[]],
+    orgId: string
+  ) => permissions.check({ userId: actorId }, action, { orgId })
+
+  const forbidden = () => fail({ error: Err.UNIT_FORBIDDEN, msg: MSG.forbidden })
 
   return {
     async listUnits(
       orgId: string,
-      query: UnitOffsetListQuery
+      query: UnitOffsetListQuery,
+      actorId?: string
     ): Promise<Result<UnitOffsetListResponse, Code>> {
+      if (actorId && !(await can(actorId, "read:unit", orgId))) return forbidden()
       const { rows, total } = await repo.listUnits(orgId, {
         type: query.type,
         isActive: query.isActive,
@@ -58,8 +70,10 @@ export function createUnitService(deps: UnitServiceDeps) {
 
     async listUnitOptions(
       orgId: string,
-      query: UnitOptionListQuery
+      query: UnitOptionListQuery,
+      actorId?: string
     ): Promise<Result<OptionListResponse, Code>> {
+      if (actorId && !(await can(actorId, "read:unit", orgId))) return forbidden()
       const rows = await repo.listUnitOptions(orgId, {
         search: query.search,
         sameTypeAs: query.sameTypeAs,
@@ -77,7 +91,12 @@ export function createUnitService(deps: UnitServiceDeps) {
       })
     },
 
-    async getUnit(orgId: string, id: string): Promise<Result<UnitDto, Code>> {
+    async getUnit(
+      orgId: string,
+      id: string,
+      actorId?: string
+    ): Promise<Result<UnitDto, Code>> {
+      if (actorId && !(await can(actorId, "read:unit", orgId))) return forbidden()
       const unit = await repo.findUnit(orgId, id)
       if (!unit) {
         return fail({ error: Err.UNIT_NOT_FOUND, msg: MSG.unitNotFound })
@@ -93,6 +112,7 @@ export function createUnitService(deps: UnitServiceDeps) {
       orgId: string,
       input: CreateUnitInput
     ): Promise<Result<UnitDto, Code>> {
+      if (!(await can(actorId, "create:unit", orgId))) return forbidden()
       const existing = await repo.findUnitsInScope(orgId)
       const uniqueness = rules.checkUniqueness(
         { name: input.name, symbol: input.symbol },
@@ -127,6 +147,9 @@ export function createUnitService(deps: UnitServiceDeps) {
       id: string,
       input: UpdateUnitInput
     ): Promise<Result<UnitDto, Code>> {
+      const perm: PermissionKey =
+        input.isActive === false ? "deactivate:unit" : "update:unit"
+      if (!(await can(actorId, [perm, "update:unit"], orgId))) return forbidden()
       const unit = await repo.findUnit(orgId, id)
       if (!unit) {
         return fail({ error: Err.UNIT_NOT_FOUND, msg: MSG.unitNotFound })
@@ -179,6 +202,7 @@ export function createUnitService(deps: UnitServiceDeps) {
       orgId: string,
       id: string
     ): Promise<Result<{ id: string }, Code>> {
+      if (!(await can(actorId, "delete:unit", orgId))) return forbidden()
       const unit = await repo.findUnit(orgId, id)
       if (!unit) {
         return fail({ error: Err.UNIT_NOT_FOUND, msg: MSG.unitNotFound })

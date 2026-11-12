@@ -12,4 +12,4 @@ export {
 export * from "./unit.types.js"
 export * from "./unit.errors.js"
 export * from "./unit.error-map.js"
-export { DummyUnitActivityLog } from "./testing.js"
+export { DummyUnitActivityLog, DummyPermissionChecker } from "./testing.js"

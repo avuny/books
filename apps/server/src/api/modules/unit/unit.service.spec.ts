@@ -30,17 +30,32 @@ function setup() {
     deleteUnit: vi.fn(async () => true),
   }
   const activityLog = { log: vi.fn(async () => {}) }
+  const permissions = { check: vi.fn(async () => true) }
   const service = createUnitService({
     repository: repository as unknown as UnitRepository,
     activityLog,
+    permissions,
   })
-  return { repository, activityLog, service }
+  return { repository, activityLog, permissions, service }
 }
 
 describe("unitService", () => {
   let t: ReturnType<typeof setup>
   beforeEach(() => {
     t = setup()
+  })
+
+  it("rejects caller without permission", async () => {
+    t.permissions.check.mockResolvedValueOnce(false)
+    const res = await t.service.createUnit("actor-1", "org-1", {
+      name: "Box",
+      symbol: "bx",
+      type: "count",
+    })
+    expect(res).toMatchObject({
+      success: false,
+      error: "UNIT_FORBIDDEN",
+    })
   })
 
   it("createUnit: creates a custom unit and logs an audit event", async () => {

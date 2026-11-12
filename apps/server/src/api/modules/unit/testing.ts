@@ -6,3 +6,5 @@ export class DummyUnitActivityLog implements ActivityLog {
     this.entries.push(entry)
   }
 }
+
+export { DummyPermissionChecker } from "../role/index.js"

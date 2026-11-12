@@ -54,9 +54,10 @@ export const getUnitRoute = ({
 
   router.openapi(route, async (c) => {
     const errorTrans = trans({ lang: getRequestLocale() })
+    const user = c.get("user") as { id: string } | undefined
     const { orgId, unitId } = c.req.valid("param")
 
-    const result = await service.getUnit(orgId, unitId)
+    const result = await service.getUnit(orgId, unitId, user?.id)
     return handleResult({
       c,
       result,
