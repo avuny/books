@@ -5,7 +5,7 @@ import { parsePermissionKey } from "@avuny/contracts"
 import { trans } from "../../intl/i18next.js"
 import { RoleErrorCode, roleErrorsHttpMap } from "./role.errors.js"
 import { permissionChecker } from "./deps.js"
-import type { PermissionChecker } from "./role.types.js"
+import type { PermissionChecker, PermissionKey } from "./role.types.js"
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
@@ -29,7 +29,7 @@ export interface RequirePermissionOptions {
  * envelope (ROLE_PERMISSION_DENIED, 403).
  */
 export function requirePermission(
-  key: string,
+  key: PermissionKey,
   options: RequirePermissionOptions = {}
 ): MiddlewareHandler {
   parsePermissionKey(key) // a malformed key fails at startup, not at the first request

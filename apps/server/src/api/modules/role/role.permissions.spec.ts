@@ -118,6 +118,7 @@ describe("RBAC permission checker", () => {
   it("owners pass every check, and a malformed key throws", async () => {
     t.repository.findMembership.mockResolvedValue(member({ type: "owner" }))
     expect(await t.checker.check({ userId: "u1" }, "delete:role", { orgId: "org-1" })).toBe(true)
+    // @ts-expect-error — intentional: "oops" is not a valid PermissionKey
     await expect(t.checker.check({ userId: "u1" }, "oops", { orgId: "org-1" })).rejects.toThrow()
   })
 })

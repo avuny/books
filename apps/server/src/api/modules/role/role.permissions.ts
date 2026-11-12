@@ -2,6 +2,7 @@ import {
   canAccess,
   parsePermissionKey,
   type EffectivePermissions,
+  type PermissionKey,
   type PermissionStatement,
 } from "@avuny/contracts"
 import type {
@@ -62,22 +63,53 @@ export function createPermissionResolver(deps: PermissionResolverDeps) {
 
 /* ---------- checker: the PermissionChecker the rest of the server injects ---------- */
 
+type CheckCtx = { orgId?: string; resourceId?: string }
+
+function resolveOrgId(key: PermissionKey, ctx?: CheckCtx): string | undefined {
+  const { resource } = parsePermissionKey(key)
+  return ctx?.orgId ?? (resource === "organization" ? ctx?.resourceId : undefined)
+}
+
 export function createRbacPermissionChecker({
   resolver,
 }: {
   resolver: PermissionResolver
 }): PermissionChecker {
+  async function checkOne(
+    subject: { userId: string },
+    key: PermissionKey,
+    effective: EffectivePermissions,
+    ctx?: CheckCtx
+  ): Promise<boolean> {
+    const { action, resource } = parsePermissionKey(key)
+    return canAccess(effective, {
+      action,
+      resource,
+      resourceId: ctx?.orgId ? ctx.resourceId : undefined,
+    })
+  }
+
   return {
-    async check(subject, key, ctx) {
-      const { action, resource } = parsePermissionKey(key)
-      const orgId = ctx?.orgId ?? (resource === "organization" ? ctx?.resourceId : undefined)
+    async check(
+      subject: { userId: string },
+      keyOrKeys: PermissionKey | readonly [PermissionKey, ...PermissionKey[]],
+      ctx?: CheckCtx
+    ): Promise<boolean> {
+      const keys: readonly PermissionKey[] = Array.isArray(keyOrKeys)
+        ? (keyOrKeys as readonly PermissionKey[])
+        : [keyOrKeys as PermissionKey]
+
+      // Resolve orgId from the first key that can derive one (all keys share the same ctx)
+      const orgId = keys.map((k) => resolveOrgId(k, ctx)).find(Boolean)
       if (!orgId) return false
+
       const effective = await resolver.resolve(orgId, subject.userId)
-      return canAccess(effective, {
-        action,
-        resource,
-        resourceId: ctx?.orgId ? ctx.resourceId : undefined,
-      })
+
+      // any-of: short-circuit on first granted key
+      for (const key of keys) {
+        if (await checkOne(subject, key, effective, ctx)) return true
+      }
+      return false
     },
   }
 }
