@@ -9,3 +9,5 @@ export class DummyStockHistory implements ItemStockHistory {
 export class DummyItemActivityLog implements ActivityLog {
   async log(): Promise<void> {}
 }
+
+export { DummyPermissionChecker } from "../role/index.js"

@@ -3,6 +3,7 @@ import { itemErrorsHttpMap as errors } from "./item.errors.js"
 
 export const itemErrorMap = {
   ITEM_NOT_FOUND: errors.ITEM_NOT_FOUND,
+  ITEM_FORBIDDEN: errors.ITEM_FORBIDDEN,
   ITEM_NAME_TAKEN: errors.ITEM_NAME_TAKEN,
   ITEM_CATEGORY_INVALID: errors.ITEM_CATEGORY_INVALID,
   ITEM_UNIT_INVALID: errors.ITEM_UNIT_INVALID,

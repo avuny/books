@@ -1,5 +1,6 @@
 import { db } from "../../db.js"
 import { activityLogService } from "../activity-log/index.js"
+import { permissionChecker } from "../role/index.js"
 import { getItemCategoryRepository } from "../item-category/deps.js"
 import { getUnitCollectionRepository } from "../unit-collection/deps.js"
 import { createItemRepository } from "./item.repository.js"
@@ -24,6 +25,7 @@ export function getItemService(): ItemService {
       // TODO: replace with the inventory module's adapter once stock movements exist.
       stockHistory: new DummyStockHistory(),
       activityLog: activityLogService,
+      permissions: permissionChecker,
     })
   }
   return _serviceInstance

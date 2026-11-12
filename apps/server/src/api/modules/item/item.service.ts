@@ -8,6 +8,7 @@ import {
   type ItemOffsetListResponse,
   type OptionListQuery,
   type OptionListResponse,
+  type PermissionKey,
   type UpdateItemInput,
 } from "@avuny/contracts"
 import type { Tx } from "@avuny/db"
@@ -16,10 +17,10 @@ import { createFailureKit, type Failure } from "../shared/service-helpers.js"
 import { ItemErrorCode, type ItemErrorCode as Code } from "./item.errors.js"
 import { toItemDto, toItemListItemDto } from "./item.mapper.js"
 import { itemRules, type UnitSource } from "./item.rules.js"
-import { DummyItemActivityLog, DummyStockHistory } from "./testing.js"
+import { DummyItemActivityLog, DummyPermissionChecker, DummyStockHistory } from "./testing.js"
 import type { ItemServiceDeps } from "./item.types.js"
 
-export { DummyItemActivityLog, DummyStockHistory }
+export { DummyItemActivityLog, DummyPermissionChecker, DummyStockHistory }
 
 const Err = ItemErrorCode
 const { failure, fromViolation, isFailure, toFail, failWith, abort, abortable } =
@@ -27,6 +28,7 @@ const { failure, fromViolation, isFailure, toFail, failWith, abort, abortable } 
 
 const MSG = {
   notFound: "Item not found",
+  forbidden: "You do not have access to this item",
   nameTaken: "An item with this name already exists",
   unitRequired: "Provide a base unit or a unit collection",
   collectionInvalid: "The selected unit collection does not exist",
@@ -45,11 +47,20 @@ type ResolvedUnit = { baseUnitId: string; unitCollectionId: string }
  */
 export function createItemService(deps: ItemServiceDeps) {
   const repo = deps.repository
+  const permissions = deps.permissions ?? new DummyPermissionChecker()
   const unitRepo = deps.unitRepository
   const categoryRepo = deps.categoryRepository
   const stock = deps.stockHistory ?? new DummyStockHistory()
   const activityLog = deps.activityLog ?? new DummyItemActivityLog()
   const rules = deps.rules ?? itemRules
+
+  const can = (
+    actorId: string,
+    action: PermissionKey | readonly [PermissionKey, ...PermissionKey[]],
+    orgId: string
+  ) => permissions.check({ userId: actorId }, action, { orgId })
+
+  const forbidden = () => fail({ error: Err.ITEM_FORBIDDEN, msg: MSG.forbidden })
 
   /** Turns "which unit" into a (base unit, collection) pair, creating the collection if needed. */
   async function resolveUnit(
@@ -86,7 +97,12 @@ export function createItemService(deps: ItemServiceDeps) {
   }
 
   return {
-    async list(orgId: string, query: ItemOffsetListQuery): Promise<Result<ItemOffsetListResponse, Code>> {
+    async list(
+      orgId: string,
+      query: ItemOffsetListQuery,
+      actorId?: string
+    ): Promise<Result<ItemOffsetListResponse, Code>> {
+      if (actorId && !(await can(actorId, "read:item", orgId))) return forbidden()
       const { rows, total } = await repo.list(orgId, {
         search: query.search || undefined,
         categoryId: query.categoryId,
@@ -108,8 +124,10 @@ export function createItemService(deps: ItemServiceDeps) {
 
     async listOptions(
       orgId: string,
-      query: OptionListQuery
+      query: OptionListQuery,
+      actorId?: string
     ): Promise<Result<OptionListResponse, Code>> {
+      if (actorId && !(await can(actorId, "read:item", orgId))) return forbidden()
       const rows = await repo.listOptions(orgId, {
         search: query.search,
         after: decodeCursor(query.cursor, itemOptionCursorSchema),
@@ -125,13 +143,15 @@ export function createItemService(deps: ItemServiceDeps) {
       })
     },
 
-    async getById(orgId: string, id: string): Promise<Result<ItemDto, Code>> {
+    async getById(orgId: string, id: string, actorId?: string): Promise<Result<ItemDto, Code>> {
+      if (actorId && !(await can(actorId, "read:item", orgId))) return forbidden()
       const dto = await loadDetail(orgId, id)
       if (!dto) return fail({ error: Err.ITEM_NOT_FOUND, msg: MSG.notFound })
       return ok({ data: dto, msg: "Item retrieved" })
     },
 
     async create(actorId: string, orgId: string, input: CreateItemInput): Promise<Result<ItemDto, Code>> {
+      if (!(await can(actorId, "create:item", orgId))) return forbidden()
       const trackingViolation = rules.checkTracking(input)
       if (trackingViolation) return failWith(trackingViolation)
       const source = rules.selectUnitSource(input)
@@ -196,6 +216,7 @@ export function createItemService(deps: ItemServiceDeps) {
       itemId: string,
       input: UpdateItemInput
     ): Promise<Result<ItemDto, Code>> {
+      if (!(await can(actorId, "update:item", orgId))) return forbidden()
       const outcome = await abortable(() =>
         repo.transaction(async (tx) => {
           await repo.lockOrgItems(orgId, tx)
@@ -290,6 +311,7 @@ export function createItemService(deps: ItemServiceDeps) {
     },
 
     async remove(actorId: string, orgId: string, itemId: string): Promise<Result<{ id: string }, Code>> {
+      if (!(await can(actorId, "delete:item", orgId))) return forbidden()
       const outcome = await repo.transaction(async (tx) => {
         await repo.lockOrgItems(orgId, tx)
         const item = await repo.findById(orgId, itemId, tx)

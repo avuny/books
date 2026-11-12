@@ -1,6 +1,11 @@
 export { ItemErrorCode, itemErrorsHttpMap } from "./item.errors.js"
 export { itemErrorMap } from "./item.error-map.js"
-export { createItemService, DummyStockHistory, DummyItemActivityLog } from "./item.service.js"
+export {
+  createItemService,
+  DummyStockHistory,
+  DummyItemActivityLog,
+  DummyPermissionChecker,
+} from "./item.service.js"
 export { createItemRepository } from "./item.repository.js"
 export { itemRules, type ItemRules } from "./item.rules.js"
 export { itemService, getItemService, getItemRepository } from "./deps.js"

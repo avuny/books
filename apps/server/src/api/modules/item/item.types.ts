@@ -4,8 +4,9 @@ import type { ItemRepository } from "./item.repository.js"
 import type { ItemRules } from "./item.rules.js"
 import type { createItemService } from "./item.service.js"
 import type { ActivityLog, ActivityLogEntry } from "../activity-log/activity-log.port.js"
+import type { PermissionChecker } from "../role/index.js"
 
-export type { ItemRepository }
+export type { ItemRepository, PermissionChecker }
 export type ItemService = ReturnType<typeof createItemService>
 
 /**
@@ -20,6 +21,7 @@ export type { ActivityLog, ActivityLogEntry }
 
 export interface ItemServiceDeps {
   repository: ItemRepository
+  permissions?: PermissionChecker
   /** Only what item creation needs from the unit module. */
   unitRepository: Pick<
     UnitCollectionRepository,

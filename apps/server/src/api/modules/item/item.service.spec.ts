@@ -84,14 +84,16 @@ function setup() {
   const categoryRepository = { findById: vi.fn(async () => category()) }
   const stockHistory = { hasMovements: vi.fn(async () => false) }
   const activityLog = { log: vi.fn(async () => {}) }
+  const permissions = { check: vi.fn(async () => true) }
   const service = createItemService({
     repository: repository as unknown as ItemRepository,
     unitRepository: unitRepository as unknown as ItemServiceDeps["unitRepository"],
     categoryRepository: categoryRepository as unknown as ItemServiceDeps["categoryRepository"],
     stockHistory,
     activityLog,
+    permissions,
   })
-  return { repository, unitRepository, categoryRepository, stockHistory, activityLog, service }
+  return { repository, unitRepository, categoryRepository, stockHistory, activityLog, permissions, service }
 }
 
 const createInput = {
@@ -113,6 +115,12 @@ describe("itemService", () => {
   })
 
   describe("create", () => {
+    it("rejects caller without permission", async () => {
+      t.permissions.check.mockResolvedValueOnce(false)
+      const res = await t.service.create("u1", "org-1", createInput)
+      expect(res).toMatchObject({ success: false, error: "ITEM_FORBIDDEN" })
+    })
+
     it("batch tracking without inventory tracking fails before any query", async () => {
       const res = await t.service.create("u1", "org-1", { ...createInput, isInventoryTracked: false, isBatchTracked: true })
       expect(res).toMatchObject({ success: false, error: "ITEM_BATCH_REQUIRES_TRACKING" })

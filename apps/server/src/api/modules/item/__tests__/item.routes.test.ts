@@ -41,7 +41,11 @@ describe("item routes", () => {
     const app = mount(listItemsRoute({ service, requireAuth, requirePermission: allow }))
     const res = await app.request(`/organizations/${orgId}/items?categoryId=${categoryId}`)
     expect(res.status).toBe(200)
-    expect(service.list).toHaveBeenCalledWith(orgId, { page: 1, pageSize: 20, categoryId, includeSubcategories: true })
+    expect(service.list).toHaveBeenCalledWith(
+      orgId,
+      { page: 1, pageSize: 20, categoryId, includeSubcategories: true },
+      "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a01"
+    )
   })
 
   it("creates an item (201) with defaults filled in", async () => {

@@ -48,9 +48,10 @@ export const getItemRoute = ({
 
   router.openapi(route, async (c) => {
     const errorTrans = trans({ lang: getRequestLocale() })
+    const user = c.get("user") as { id: string } | undefined
     const { orgId, itemId } = c.req.valid("param")
 
-    const result = await service.getById(orgId, itemId)
+    const result = await service.getById(orgId, itemId, user?.id)
     return handleResult({
       c,
       result,

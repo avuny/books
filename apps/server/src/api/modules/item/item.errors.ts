@@ -5,6 +5,10 @@ export { ItemErrorCode }
 
 export const itemErrorsHttpMap = {
   ITEM_NOT_FOUND: { statusCode: 404, responseMessage: "Item not found" },
+  ITEM_FORBIDDEN: {
+    statusCode: 403,
+    responseMessage: "You do not have access to this item",
+  },
   ITEM_NAME_TAKEN: { statusCode: 409, responseMessage: "An item with this name already exists" },
   ITEM_CATEGORY_INVALID: {
     statusCode: 422,
