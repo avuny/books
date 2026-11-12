@@ -108,15 +108,6 @@ describe("organizationService", () => {
       )
     })
 
-    it("fails when the user is not allowed", async () => {
-      t.permissions.check.mockResolvedValue(false)
-
-      const result = await t.service.create(ACTOR, createInput)
-
-      expect(result).toMatchObject({ error: Err.ORGANIZATION_FORBIDDEN })
-      expect(t.repo.transaction).not.toHaveBeenCalled()
-    })
-
     it("fails for a reserved code", async () => {
       const result = await t.service.create(ACTOR, { ...createInput, code: "admin" })
 

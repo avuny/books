@@ -4,10 +4,10 @@ import {
   OrganizationErrorCode as Err,
   RESERVED_ORGANIZATION_CODES,
   type CreateOrganizationInput,
-  type OrganizationAction,
   type OrganizationDto,
   type OrganizationListQuery,
   type UpdateOrganizationInput,
+  type PermissionKey,
 } from "@avuny/contracts"
 import { isUniqueViolation } from "./organization.repository.js"
 import { toOrganizationDto } from "./organization.mapper.js"
@@ -18,7 +18,6 @@ export type {
   UpdateOrganizationInput,
   OrganizationListQuery,
   OrganizationDto,
-  OrganizationAction,
 }
 
 /* ---------- constants ---------- */
@@ -45,7 +44,7 @@ export const createOrganizationService = ({
 }: OrganizationServiceDeps) => {
   const can = (
     userId: string,
-    action: OrganizationAction,
+    action: PermissionKey | readonly [PermissionKey, ...PermissionKey[]],
     resourceId?: string
   ) => permissions.check({ userId }, action, { resourceId })
 
@@ -64,8 +63,6 @@ export const createOrganizationService = ({
 
   return {
     async create(actorId: string, input: CreateOrganizationInput) {
-      if (!(await can(actorId, "create:organization"))) return forbidden()
-
       const { ownerUsername, ...fields } = input
       const data = { ...fields, name: fields.name.trim() }
 

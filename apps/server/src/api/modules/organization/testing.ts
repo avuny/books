@@ -3,14 +3,9 @@ import type {
   ActivityLog,
   Cache,
   OrganizationLimits,
-  PermissionChecker,
 } from "./organization.types.js"
 
-export class DummyPermissionChecker implements PermissionChecker {
-  async check(): Promise<boolean> {
-    return true
-  }
-}
+export { DummyPermissionChecker } from "../role/index.js"
 
 export class DummyCache implements Cache {
   async get<T>(): Promise<T | null> {

@@ -1,5 +1,5 @@
-import type { ActivityLogAction } from "@avuny/contracts"
 import type { ActivityLog, ActivityLogEntry } from "../activity-log/activity-log.port.js"
+import type { PermissionChecker } from "../role/index.js"
 import type { Tx } from "@avuny/db"
 import type { createOrganizationRepository } from "./organization.repository.js"
 import type { createOrganizationService } from "./organization.service.js"
@@ -7,13 +7,7 @@ import type { createOrganizationService } from "./organization.service.js"
 export type OrganizationService = ReturnType<typeof createOrganizationService>
 export type OrganizationRepository = ReturnType<typeof createOrganizationRepository>
 
-export interface PermissionChecker {
-  check(
-    subject: { userId: string },
-    action: ActivityLogAction | string,
-    options?: { resourceId?: string; orgId?: string }
-  ): Promise<boolean>
-}
+export type { PermissionChecker }
 
 export interface Cache {
   get<T>(key: string): Promise<T | null>
