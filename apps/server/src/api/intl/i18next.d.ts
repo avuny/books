@@ -1,6 +1,8 @@
 import type adminEn from "./locales/admin/en.json"
 import type authEn from "./locales/auth/en.json"
 import type geoEn from "./locales/geo/en.json"
+import type itemEn from "./locales/item/en.json"
+import type itemCategoryEn from "./locales/item-category/en.json"
 import type organizationEn from "./locales/organization/en.json"
 import type organizationInvitationEn from "./locales/organization-invitation/en.json"
 import type organizationUserEn from "./locales/organization-user/en.json"
@@ -14,6 +16,8 @@ import type usersEn from "./locales/users/en.json"
 type AdminMessages = typeof adminEn
 type AuthMessages = typeof authEn
 type GeoMessages = typeof geoEn
+type ItemMessages = typeof itemEn
+type ItemCategoryMessages = typeof itemCategoryEn
 type OrganizationMessages = typeof organizationEn
 type OrganizationInvitationMessages = typeof organizationInvitationEn
 type OrganizationUserMessages = typeof organizationUserEn
@@ -31,6 +35,9 @@ declare module "i18next" {
       admin: AdminMessages
       auth: AuthMessages
       geo: GeoMessages
+      item: ItemMessages
+      "item-category": ItemCategoryMessages
+      itemCategory: ItemCategoryMessages
       organization: OrganizationMessages
       "organization-invitation": OrganizationInvitationMessages
       organizationInvitation: OrganizationInvitationMessages

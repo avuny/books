@@ -1,0 +1,13 @@
+{
+  "errors": {
+    "ITEM_NOT_FOUND": "الصنف غير موجود.",
+    "ITEM_FORBIDDEN": "ليس لديك صلاحية للوصول إلى هذا الصنف.",
+    "ITEM_NAME_TAKEN": "يوجد صنف بهذا الاسم بالفعل.",
+    "ITEM_CATEGORY_INVALID": "اختر فئة نشطة من هذه المؤسسة.",
+    "ITEM_UNIT_INVALID": "اختر وحدة أساسية نشطة.",
+    "ITEM_UNIT_COLLECTION_INVALID": "مجموعة الوحدات المحددة غير موجودة.",
+    "ITEM_BATCH_REQUIRES_TRACKING": "تتبع الدفعات يتطلب تتبع المخزون.",
+    "ITEM_LOCKED_FIELD": "لا يمكن تغيير هذه الإعدادات بعد وجود حركات مخزون للصنف.",
+    "ITEM_HAS_HISTORY": "لهذا الصنف سجل مخزون. عطّله بدلاً من حذفه."
+  }
+}

@@ -5,6 +5,10 @@ import authEn from "./locales/auth/en.json" with { type: "json" }
 import authAr from "./locales/auth/ar.json" with { type: "json" }
 import geoEn from "./locales/geo/en.json" with { type: "json" }
 import geoAr from "./locales/geo/ar.json" with { type: "json" }
+import itemEn from "./locales/item/en.json" with { type: "json" }
+import itemAr from "./locales/item/ar.json" with { type: "json" }
+import itemCategoryEn from "./locales/item-category/en.json" with { type: "json" }
+import itemCategoryAr from "./locales/item-category/ar.json" with { type: "json" }
 import organizationEn from "./locales/organization/en.json" with { type: "json" }
 import organizationAr from "./locales/organization/ar.json" with { type: "json" }
 import organizationInvitationEn from "./locales/organization-invitation/en.json" with { type: "json" }
@@ -30,6 +34,9 @@ export const resources = {
         admin: adminEn,
         auth: authEn,
         geo: geoEn,
+        item: itemEn,
+        "item-category": itemCategoryEn,
+        itemCategory: itemCategoryEn,
         organization: organizationEn,
         "organization-invitation": organizationInvitationEn,
         organizationInvitation: organizationInvitationEn,
@@ -47,6 +54,9 @@ export const resources = {
         admin: adminAr,
         auth: authAr,
         geo: geoAr,
+        item: itemAr,
+        "item-category": itemCategoryAr,
+        itemCategory: itemCategoryAr,
         organization: organizationAr,
         "organization-invitation": organizationInvitationAr,
         organizationInvitation: organizationInvitationAr,
@@ -72,7 +82,7 @@ export function installRequestLanguage(): void {
   i18next.init({
     lng: "en",
     fallbackLng: "en",
-    ns: ["admin", "auth", "geo", "organization", "organization-invitation", "organizationInvitation", "organization-user", "organizationUser", "otp", "role", "sidebar", "unit", "unit-collection", "unitCollection", "users"],
+    ns: ["admin", "auth", "geo", "item", "item-category", "itemCategory", "organization", "organization-invitation", "organizationInvitation", "organization-user", "organizationUser", "otp", "role", "sidebar", "unit", "unit-collection", "unitCollection", "users"],
     defaultNS: "otp",
     resources,
     interpolation: { escapeValue: false },
