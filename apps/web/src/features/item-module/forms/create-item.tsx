@@ -34,6 +34,7 @@ export function CreateItem({ orgId, defaultName, onSuccess }: CreateItemProps) {
       })
       onSuccess?.(normalizeItem(response.data))
     } catch (e) {
+      console.error("Error creating item:", parseApiError(e))
       setServerError(parseApiError(e).message || null)
     }
   }
