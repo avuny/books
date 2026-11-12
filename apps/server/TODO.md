@@ -14,6 +14,57 @@ Work proceeds strictly **module by module**.
 
 ## Done
 
+### Shared PermissionChecker Standardization & Service Authorization (Completed: 2026-11-12 15:42)
+- [x] Module `role`:
+  - [x] Extended canonical `PermissionChecker` in `role.types.ts` to accept `keyOrKeys: PermissionKey | readonly [PermissionKey, ...PermissionKey[]]`.
+- [x] Module `organization`:
+  - [x] Removed `ActivityLogAction | string` from `organization.types.ts`; imported shared `PermissionChecker` from `../role/index.js`.
+  - [x] Removed erroneous `create:organization` permission check from `organization.service.ts` (creation is governed by auth and plan limit `maxOwnedPerUser()`, as defined in module registry).
+  - [x] Re-exported canonical `DummyPermissionChecker` from `../role/index.js`.
+  - [x] Verified unit and route tests pass (31 tests).
+- [x] Module `organization-user`:
+  - [x] Updated `organization-user.types.ts`: Replaced local `PermissionChecker` with shared `PermissionChecker` from `../role/index.js`.
+  - [x] Updated `organization-user.service.ts`: Strictly typed action parameter with `PermissionKey`.
+  - [x] Updated `testing.ts`: Re-exported canonical `DummyPermissionChecker` from `../role/index.js`.
+  - [x] Verified unit and route tests pass (25 tests).
+- [x] Module `organization-invitation`:
+  - [x] Updated `organization-invitation.types.ts`: Replaced ad-hoc `permissions: { check(...) }` with shared `PermissionChecker` from `../role/index.js`.
+  - [x] Verified unit and route tests pass (34 tests).
+- [x] Module `unit`:
+  - [x] Updated `unit.types.ts`: Added `permissions?: PermissionChecker` (imported from `../role/index.js`).
+  - [x] Updated `unit.service.ts`: Injected `permissions` and enforced checks for `read:unit`, `create:unit`, `update:unit`, `deactivate:unit`, `delete:unit`, returning `UNIT_FORBIDDEN`.
+  - [x] Updated `deps.ts`: Wired `permissionChecker` from `../role/index.js`.
+  - [x] Updated `testing.ts`: Re-exported `DummyPermissionChecker` from `../role/index.js`.
+  - [x] Updated routes and tests to pass `user.id` and assert permission denial (14 tests).
+- [x] Module `unit-collection`:
+  - [x] Added `UNIT_COLLECTION_FORBIDDEN` error code to contracts, locales (en, ar), errors, and error-map.
+  - [x] Updated `unit-collection.types.ts`: Added `permissions?: PermissionChecker` from `../role/index.js`.
+  - [x] Updated `unit-collection.service.ts`: Enforced permission checks for `read:unit-collection`, `create:unit-collection`, `update:unit-collection`, `delete:unit-collection`.
+  - [x] Updated `deps.ts`: Wired `permissionChecker` from `../role/index.js`.
+  - [x] Updated `testing.ts`: Re-exported `DummyPermissionChecker` from `../role/index.js`.
+  - [x] Updated routes and tests (23 tests).
+- [x] Module `item-category`:
+  - [x] Added `ITEM_CATEGORY_FORBIDDEN` error code to contracts, locales (en, ar), errors, and error-map.
+  - [x] Updated `item-category.types.ts`: Added `permissions?: PermissionChecker` from `../role/index.js`.
+  - [x] Updated `item-category.service.ts`: Enforced permission checks for `read:item-category`, `create:item-category`, `update:item-category`, `delete:item-category`.
+  - [x] Updated `deps.ts`: Wired `permissionChecker` from `../role/index.js`.
+  - [x] Updated `testing.ts`: Re-exported `DummyPermissionChecker` from `../role/index.js`.
+  - [x] Updated routes and tests (25 tests).
+- [x] Module `item`:
+  - [x] Added `ITEM_FORBIDDEN` error code to contracts, locales (en, ar), errors, and error-map.
+  - [x] Updated `item.types.ts`: Added `permissions?: PermissionChecker` from `../role/index.js`.
+  - [x] Updated `item.service.ts`: Enforced permission checks for `read:item`, `create:item`, `update:item`, `delete:item`.
+  - [x] Updated `deps.ts`: Wired `permissionChecker` from `../role/index.js`.
+  - [x] Updated `testing.ts`: Re-exported `DummyPermissionChecker` from `../role/index.js`.
+  - [x] Updated routes and tests (32 tests).
+- [x] Module `activity-log`:
+  - [x] Updated `activity-log.service.ts` and `deps.ts` to use shared `PermissionChecker`.
+  - [x] Verified tests pass (8 tests).
+
+---
+
+## Done
+
 ### Module 1: `organization` (Completed: 2026-11-05 13:06)
 - [x] Create `organization.types.ts` (Service, Repository, port interfaces: PermissionChecker, Cache, ActivityLog, OrganizationLimits, deps bag).
 - [x] Extract and verify `organization.mapper.ts`.
