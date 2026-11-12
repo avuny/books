@@ -1,6 +1,7 @@
 // ASSUMPTION: role/index.ts re-exports `permissionChecker` and `PermissionChecker`
 // (they live in role.permissions.ts). If not, export them from the role module's index.
 import { permissionChecker, type PermissionChecker } from "../role/index.js"
+import type { PermissionKey } from "../role/role.types.js"
 
 export interface SidebarPermissionSubject {
   userId: string
@@ -30,7 +31,7 @@ export function createPermissionCheckerGate(
   return {
     async hasAny({ userId, orgId }, keys) {
       for (const key of keys) {
-        if (await checker.check({ userId }, key, { orgId })) return true
+        if (await checker.check({ userId }, key as PermissionKey, { orgId })) return true
       }
       return false
     },
