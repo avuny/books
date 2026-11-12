@@ -8,6 +8,7 @@ import {
   type SetOrganizationUserStatusInput,
   type TransferOrganizationOwnershipInput,
   type UpdateOrganizationUserInput,
+  type PermissionKey,
 } from "@avuny/contracts"
 import { fail, ok, type Result } from "@avuny/utils"
 import type { OrganizationUser } from "@avuny/db"
@@ -94,7 +95,11 @@ export function createOrganizationUserService(
   const limits = deps.limits ?? new DummyLimits()
   const clock = deps.now ?? (() => new Date())
 
-  const can = (actorId: string, action: string, orgId: string) =>
+  const can = (
+    actorId: string,
+    action: PermissionKey | readonly [PermissionKey, ...PermissionKey[]],
+    orgId: string
+  ) =>
     permissions.check({ userId: actorId }, action, { resourceId: orgId, orgId })
 
   return {

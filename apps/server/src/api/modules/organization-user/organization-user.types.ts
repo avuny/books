@@ -1,3 +1,4 @@
+import type { PermissionChecker } from "../role/index.js"
 import type { createOrganizationUserRepository } from "./organization-user.repository.js"
 import type { createOrganizationUserService } from "./organization-user.service.js"
 import type { ActivityLog, ActivityLogEntry } from "../activity-log/activity-log.port.js"
@@ -9,13 +10,7 @@ export type OrganizationUserRepository = ReturnType<
   typeof createOrganizationUserRepository
 >
 
-export interface PermissionChecker {
-  check(
-    subject: { userId: string },
-    action: string,
-    ctx?: { resourceId?: string; orgId?: string }
-  ): Promise<boolean>
-}
+export type { PermissionChecker }
 
 export type { ActivityLog, ActivityLogEntry }
 

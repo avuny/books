@@ -1,14 +1,9 @@
 import type {
   ActivityLog,
   Limits,
-  PermissionChecker,
 } from "./organization-user.types.js"
 
-export class DummyPermissionChecker implements PermissionChecker {
-  async check(): Promise<boolean> {
-    return true
-  }
-}
+export { DummyPermissionChecker } from "../role/index.js"
 
 export class DummyActivityLog implements ActivityLog {
   async log(): Promise<void> {}
