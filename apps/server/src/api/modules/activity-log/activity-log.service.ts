@@ -16,23 +16,11 @@ import {
 import { toActivityLogDto } from "./activity-log.mapper.js"
 import type { ActivityLogEntry, ActivityLogOptions } from "./activity-log.port.js"
 import type { ActivityLogRepository } from "./activity-log.repository.js"
+import type { PermissionChecker } from "../role/index.js"
 
 const Err = ActivityLogErrorCode
 
-/* ---------- ports ---------- */
-
-/**
- * What this module needs from the permission system. Declared here (not imported from
- * another module) so modules do not depend on each other; the real DB-backed
- * PermissionChecker satisfies it structurally.
- */
-interface PermissionChecker {
-  check(
-    actor: { userId: string; orgId: string },
-    action: PermissionKey,
-    opts?: { resourceId?: string }
-  ): Promise<boolean>
-}
+export type { PermissionChecker }
 
 /* ---------- internals ---------- */
 
@@ -128,7 +116,7 @@ export function createActivityLogService(deps: ActivityLogServiceDeps) {
       orgId: string,
       query: ActivityLogOffsetListQuery
     ): Promise<Result<ActivityLogOffsetListResponse, Code>> {
-      if (!(await permissions.check({ userId: actorId, orgId }, PERM.read)))
+      if (!(await permissions.check({ userId: actorId }, PERM.read, { orgId })))
         return fail({
           error: Err.ACTIVITY_LOG_FORBIDDEN,
           msg: "You are not allowed to view the activity log",

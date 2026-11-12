@@ -21,13 +21,9 @@ export function getActivityLogService(): ActivityLogService {
     _serviceInstance = createActivityLogService({
       repository: repo,
       permissions: {
-        async check(actor, action, opts) {
+        async check(subject, key, ctx) {
           const checker = await getPermissionChecker()
-          return checker.check(
-            { userId: actor.userId },
-            action,
-            { orgId: actor.orgId, resourceId: opts?.resourceId }
-          )
+          return checker.check(subject, key, ctx)
         },
       },
     })
