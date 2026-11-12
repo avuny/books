@@ -2,6 +2,7 @@
   "errors": {
     "UNIT_NOT_FOUND": "الوحدة غير موجودة.",
     "UNIT_COLLECTION_NOT_FOUND": "مجموعة الوحدات غير موجودة.",
+    "UNIT_COLLECTION_FORBIDDEN": "ليس لديك صلاحية الوصول إلى مجموعة الوحدات هذه.",
     "UNIT_COLLECTION_IN_USE": "مجموعة الوحدات هذه مستخدمة في أصناف ولا يمكن حذفها.",
     "UNIT_FEATURE_NOT_AVAILABLE": "الوحدات الإضافية غير متاحة في باقتك.",
     "UNIT_TYPE_MISMATCH": "يجب أن تقيس كل وحدات المجموعة نفس ما تقيسه الوحدة الأساسية.",

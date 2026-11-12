@@ -1,6 +1,7 @@
 {
   "errors": {
     "ITEM_NOT_FOUND": "الصنف غير موجود.",
+    "ITEM_FORBIDDEN": "ليس لديك صلاحية الوصول إلى هذا الصنف.",
     "ITEM_NAME_TAKEN": "يوجد صنف بهذا الاسم بالفعل.",
     "ITEM_CATEGORY_INVALID": "اختر فئة نشطة من هذه المؤسسة.",
     "ITEM_UNIT_INVALID": "اختر وحدة أساسية نشطة.",

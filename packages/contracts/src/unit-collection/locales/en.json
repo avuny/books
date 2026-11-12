@@ -2,6 +2,7 @@
   "errors": {
     "UNIT_NOT_FOUND": "Unit not found.",
     "UNIT_COLLECTION_NOT_FOUND": "Unit collection not found.",
+    "UNIT_COLLECTION_FORBIDDEN": "You do not have access to this unit collection.",
     "UNIT_COLLECTION_IN_USE": "This unit collection is used by items and cannot be deleted.",
     "UNIT_FEATURE_NOT_AVAILABLE": "Extra units are not available on your plan.",
     "UNIT_TYPE_MISMATCH": "Every unit in a collection must measure the same thing as its base unit.",
