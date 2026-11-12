@@ -31,6 +31,7 @@ export function CreateUnit({ orgId, onSuccess, onCancel }: CreateUnitProps) {
       }
     } catch (err) {
       const parsed = parseApiError(err)
+
       setErrorMessage(parsed.message || null)
     }
   }
