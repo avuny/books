@@ -21,7 +21,7 @@ import type {
 import type { Result } from "@avuny/utils"
 import type { SQL } from "drizzle-orm"
 import type { OrganizationUserService } from "../organization-user/index.js"
-import type { RoleService } from "../role/index.js"
+import type { RoleService, PermissionChecker } from "../role/index.js"
 import type { ActivityLog } from "../activity-log/activity-log.port.js"
 import type { createOrganizationInvitationService } from "./organization-invitation.service.js"
 import type { createOrganizationInvitationRepository } from "./organization-invitation.repository.js"
@@ -80,13 +80,7 @@ export interface OrganizationInvitationServiceDeps {
   repo: OrganizationInvitationRepository
   organizationUserService: OrganizationUserService
   roleService: RoleService
-  permissions: {
-    check(
-      actor: { userId: string },
-      action: string,
-      context: { orgId: string }
-    ): Promise<boolean>
-  }
+  permissions: PermissionChecker
   activityLog: ActivityLog
   limits: {
     getMax(orgId: string, resource: "managedUsers"): Promise<number | null>
