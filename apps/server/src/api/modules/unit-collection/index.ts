@@ -14,5 +14,9 @@ export {
 export * from "./unit-collection.types.js"
 export * from "./unit-collection.errors.js"
 export * from "./unit-collection.error-map.js"
-export { DummyUnitCollectionActivityLog, DummyUnitCollectionPlanFeatures } from "./testing.js"
+export {
+  DummyUnitCollectionActivityLog,
+  DummyUnitCollectionPlanFeatures,
+  DummyPermissionChecker,
+} from "./testing.js"
 

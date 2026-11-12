@@ -4,6 +4,7 @@ import { unitCollectionErrorsHttpMap as errors } from "./unit-collection.errors.
 export const unitCollectionErrorMap = {
   UNIT_NOT_FOUND: errors.UNIT_NOT_FOUND,
   UNIT_COLLECTION_NOT_FOUND: errors.UNIT_COLLECTION_NOT_FOUND,
+  UNIT_COLLECTION_FORBIDDEN: errors.UNIT_COLLECTION_FORBIDDEN,
   UNIT_COLLECTION_IN_USE: errors.UNIT_COLLECTION_IN_USE,
   UNIT_FEATURE_NOT_AVAILABLE: errors.UNIT_FEATURE_NOT_AVAILABLE,
   UNIT_TYPE_MISMATCH: errors.UNIT_TYPE_MISMATCH,

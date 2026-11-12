@@ -56,9 +56,10 @@ export const getUnitCollectionRoute = ({
 
   router.openapi(route, async (c) => {
     const errorTrans = trans({ lang: getRequestLocale() })
+    const user = c.get("user") as { id: string } | undefined
     const { orgId, collectionId } = c.req.valid("param")
 
-    const result = await service.getCollection(orgId, collectionId)
+    const result = await service.getCollection(orgId, collectionId, user?.id)
     return handleResult({
       c,
       result,

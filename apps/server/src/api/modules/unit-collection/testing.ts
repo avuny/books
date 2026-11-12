@@ -14,3 +14,5 @@ export class DummyUnitCollectionActivityLog implements ActivityLog {
   }
 }
 
+export { DummyPermissionChecker } from "../role/index.js"
+

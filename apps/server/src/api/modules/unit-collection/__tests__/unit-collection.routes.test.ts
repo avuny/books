@@ -42,8 +42,9 @@ describe("unit collection routes", () => {
     }
     const app = mount(listUnitCollectionsRoute({ service, requireAuth, requirePermission: allow }))
     const res = await app.request(`/organizations/${orgId}/unit-collections`)
+    const userId = "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a01"
     expect(res.status).toBe(200)
-    expect(service.listCollections).toHaveBeenCalledWith(orgId, { page: 1, pageSize: 20 })
+    expect(service.listCollections).toHaveBeenCalledWith(orgId, { page: 1, pageSize: 20 }, userId)
   })
 
   it("creates a collection (201) and passes the validated body on", async () => {

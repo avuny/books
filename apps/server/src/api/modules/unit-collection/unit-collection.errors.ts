@@ -6,6 +6,10 @@ export { UnitCollectionErrorCode }
 export const unitCollectionErrorsHttpMap = {
   UNIT_NOT_FOUND: { statusCode: 404, responseMessage: "Unit not found" },
   UNIT_COLLECTION_NOT_FOUND: { statusCode: 404, responseMessage: "Unit collection not found" },
+  UNIT_COLLECTION_FORBIDDEN: {
+    statusCode: 403,
+    responseMessage: "You do not have access to this unit collection",
+  },
   UNIT_COLLECTION_IN_USE: {
     statusCode: 409,
     responseMessage: "This unit collection is used by items and cannot be deleted",

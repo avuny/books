@@ -45,18 +45,32 @@ function setup() {
   }
   const features = { has: vi.fn(async () => true) }
   const activityLog = { log: vi.fn(async () => {}) }
+  const permissions = { check: vi.fn(async () => true) }
   const service = createUnitCollectionService({
     repository: repository as unknown as UnitCollectionRepository,
     features,
     activityLog,
+    permissions,
   })
-  return { repository, features, activityLog, service }
+  return { repository, features, activityLog, permissions, service }
 }
 
 describe("unitCollectionService", () => {
   let t: ReturnType<typeof setup>
   beforeEach(() => {
     t = setup()
+  })
+
+  it("rejects caller without permission", async () => {
+    t.permissions.check.mockResolvedValueOnce(false)
+    const res = await t.service.createCollection("actor-1", "org-1", {
+      baseUnitId: "u-m",
+      units: [],
+    })
+    expect(res).toMatchObject({
+      success: false,
+      error: "UNIT_COLLECTION_FORBIDDEN",
+    })
   })
 
   it("createCollection: validates the draft, inserts the collection + units, and logs an audit event", async () => {

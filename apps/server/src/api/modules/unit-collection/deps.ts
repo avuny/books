@@ -1,5 +1,6 @@
 import { db } from "../../db.js"
 import { activityLogService } from "../activity-log/index.js"
+import { permissionChecker } from "../role/index.js"
 import { createUnitCollectionRepository } from "./unit-collection.repository.js"
 import { createUnitCollectionService } from "./unit-collection.service.js"
 import type { UnitCollectionRepository, UnitCollectionService } from "./unit-collection.types.js"
@@ -14,6 +15,7 @@ export const getUnitCollectionService = (): UnitCollectionService =>
   (serviceInstance ??= createUnitCollectionService({
     repository: getUnitCollectionRepository(),
     activityLog: activityLogService,
+    permissions: permissionChecker,
   }))
 
 export const unitCollectionRepository = new Proxy({} as UnitCollectionRepository, {

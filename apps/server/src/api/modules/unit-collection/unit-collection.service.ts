@@ -4,6 +4,7 @@ import {
   type CreateUnitCollectionInput,
   type OptionListQuery,
   type OptionListResponse,
+  type PermissionKey,
   type UnitCollectionDto,
   type UnitCollectionOffsetListQuery,
   type UnitCollectionOffsetListResponse,
@@ -15,10 +16,18 @@ import { createFailureKit } from "../shared/service-helpers.js"
 import { UnitCollectionErrorCode, type UnitCollectionErrorCode as Code } from "./unit-collection.errors.js"
 import { toCollectionDto, toCollectionListItemDto } from "./unit-collection.mapper.js"
 import { unitCollectionRules } from "./unit-collection.rules.js"
-import { DummyUnitCollectionActivityLog, DummyUnitCollectionPlanFeatures } from "./testing.js"
+import {
+  DummyPermissionChecker,
+  DummyUnitCollectionActivityLog,
+  DummyUnitCollectionPlanFeatures,
+} from "./testing.js"
 import type { UnitCollectionServiceDeps } from "./unit-collection.types.js"
 
-export { DummyUnitCollectionActivityLog, DummyUnitCollectionPlanFeatures }
+export {
+  DummyPermissionChecker,
+  DummyUnitCollectionActivityLog,
+  DummyUnitCollectionPlanFeatures,
+}
 
 const Err = UnitCollectionErrorCode
 const { failWith } = createFailureKit<Code>()
@@ -26,13 +35,24 @@ const { failWith } = createFailureKit<Code>()
 const MSG = {
   collectionNotFound: "Unit collection not found",
   featureUnavailable: "Extra units are not available on your plan",
+  forbidden: "You do not have access to this unit collection",
 } as const
 
 export function createUnitCollectionService(deps: UnitCollectionServiceDeps) {
   const repo = deps.repository
+  const permissions = deps.permissions ?? new DummyPermissionChecker()
   const features = deps.features ?? new DummyUnitCollectionPlanFeatures()
   const activityLog = deps.activityLog ?? new DummyUnitCollectionActivityLog()
   const rules = deps.rules ?? unitCollectionRules
+
+  const can = (
+    actorId: string,
+    action: PermissionKey | readonly [PermissionKey, ...PermissionKey[]],
+    orgId: string
+  ) => permissions.check({ userId: actorId }, action, { orgId })
+
+  const forbidden = () =>
+    fail({ error: Err.UNIT_COLLECTION_FORBIDDEN, msg: MSG.forbidden })
 
   const loadCollection = async (
     orgId: string,
@@ -47,8 +67,10 @@ export function createUnitCollectionService(deps: UnitCollectionServiceDeps) {
   return {
     async listCollections(
       orgId: string,
-      query: UnitCollectionOffsetListQuery
+      query: UnitCollectionOffsetListQuery,
+      actorId?: string
     ): Promise<Result<UnitCollectionOffsetListResponse, Code>> {
+      if (actorId && !(await can(actorId, "read:unit-collection", orgId))) return forbidden()
       const { rows, total } = await repo.listCollections(orgId, {
         search: query.search || undefined,
         page: query.page,
@@ -67,8 +89,10 @@ export function createUnitCollectionService(deps: UnitCollectionServiceDeps) {
 
     async listCollectionOptions(
       orgId: string,
-      query: OptionListQuery
+      query: OptionListQuery,
+      actorId?: string
     ): Promise<Result<OptionListResponse, Code>> {
+      if (actorId && !(await can(actorId, "read:unit-collection", orgId))) return forbidden()
       const rows = await repo.listCollectionOptions(orgId, {
         search: query.search,
         after: decodeCursor(query.cursor, unitCollectionOptionCursorSchema),
@@ -84,7 +108,12 @@ export function createUnitCollectionService(deps: UnitCollectionServiceDeps) {
       })
     },
 
-    async getCollection(orgId: string, id: string): Promise<Result<UnitCollectionDto, Code>> {
+    async getCollection(
+      orgId: string,
+      id: string,
+      actorId?: string
+    ): Promise<Result<UnitCollectionDto, Code>> {
+      if (actorId && !(await can(actorId, "read:unit-collection", orgId))) return forbidden()
       const collection = await repo.findCollection(orgId, id)
       if (!collection)
         return fail({ error: Err.UNIT_COLLECTION_NOT_FOUND, msg: MSG.collectionNotFound })
@@ -99,6 +128,7 @@ export function createUnitCollectionService(deps: UnitCollectionServiceDeps) {
       orgId: string,
       input: CreateUnitCollectionInput
     ): Promise<Result<UnitCollectionDto, Code>> {
+      if (!(await can(actorId, "create:unit-collection", orgId))) return forbidden()
       if (input.units.length > 0 && !(await features.has(orgId, "extraUnits")))
         return fail({ error: Err.UNIT_FEATURE_NOT_AVAILABLE, msg: MSG.featureUnavailable })
 
@@ -140,6 +170,7 @@ export function createUnitCollectionService(deps: UnitCollectionServiceDeps) {
       id: string,
       input: UpdateUnitCollectionInput
     ): Promise<Result<UnitCollectionDto, Code>> {
+      if (!(await can(actorId, "update:unit-collection", orgId))) return forbidden()
       if (input.units !== undefined && input.units.length > 0 && !(await features.has(orgId, "extraUnits")))
         return fail({ error: Err.UNIT_FEATURE_NOT_AVAILABLE, msg: MSG.featureUnavailable })
 
@@ -197,6 +228,7 @@ export function createUnitCollectionService(deps: UnitCollectionServiceDeps) {
       orgId: string,
       id: string
     ): Promise<Result<{ id: string }, Code>> {
+      if (!(await can(actorId, "delete:unit-collection", orgId))) return forbidden()
       return repo.transaction(async (tx) => {
         await repo.lockOrgUnits(orgId, tx)
 

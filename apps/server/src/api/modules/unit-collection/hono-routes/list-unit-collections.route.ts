@@ -39,10 +39,11 @@ export const listUnitCollectionsRoute = ({
   router.use(honoPath(route.path), requireAuth)
 
   router.openapi(route, async (c) => {
+    const user = c.get("user") as { id: string } | undefined
     const { orgId } = c.req.valid("param")
     const query = c.req.valid("query")
 
-    const result = await service.listCollections(orgId, query)
+    const result = await service.listCollections(orgId, query, user?.id)
     if (!result.success) throw new Error("listUnitCollections cannot fail")
     return c.json({ success: true, data: result.data }, 200)
   })
