@@ -26,6 +26,8 @@ import { sidebarRoutes } from "./modules/sidebar/index.js"
 import { unitRoutes } from "./modules/unit/index.js"
 import { unitCollectionRoutes } from "./modules/unit-collection/index.js"
 import { usersRoutes } from "./modules/users/index.js"
+import { warehouseRoutes } from "./modules/warehouse/index.js"
+import { warehouseLocationRoutes } from "./modules/warehouse-location/index.js"
 // [codegen:imports:end]
 import { config } from "./index.js"
 
@@ -89,16 +91,18 @@ app.route("/admin", adminRoutes)
 app.route("/auth", authRoutes)
 app.route("/geo", geoRoutes)
 app.route("/item", itemRoutes)
-app.route("/item-categories", itemCategoryRoutes)
+app.route("/itemCategory", itemCategoryRoutes)
 app.route("/organizations", organizationRoutes)
 app.route("/organization-invitations", organizationInvitationRoutes)
 app.route("/organization-users", organizationUserRoutes)
 app.route("/otp", otpRoutes)
 app.route("/roles", roleRoutes)
 app.route("/sidebar", sidebarRoutes)
-app.route("/units", unitRoutes)
-app.route("/unit-collections", unitCollectionRoutes)
+app.route("/unit", unitRoutes)
+app.route("/unitCollection", unitCollectionRoutes)
 app.route("/users", usersRoutes)
+app.route("/warehouse", warehouseRoutes)
+app.route("/warehouseLocation", warehouseLocationRoutes)
 // [codegen:routes:end]
 
 app.notFound((c) =>
