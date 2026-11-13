@@ -12,7 +12,9 @@
     "typecheck": "tsc -b --noEmit",
     "preview": "vite preview",
     "test": "vitest run",
-    "api:generate": "orval --config orval.config.ts"
+    "api:generate": "orval --config orval.config.ts",
+    "sync:i18n": "node --experimental-strip-types scripts/sync-i18n.ts",
+    "sync:i18n:check": "node --experimental-strip-types scripts/sync-i18n.ts --check"
   },
   "dependencies": {
     "@avuny/contracts": "workspace:*",
