@@ -11,64 +11,99 @@
   },
   "exports": {
     ".": {
+      "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
-      "default": "./dist/index.js",
-      "types": "./dist/index.d.ts"
+      "default": "./dist/index.js"
     },
-    "./user": {
-      "import": "./dist/user/index.js",
-      "default": "./dist/user/index.js",
-      "types": "./dist/user/index.d.ts"
-    },
-    "./organization": {
-      "import": "./dist/organization/index.js",
-      "default": "./dist/organization/index.js",
-      "types": "./dist/organization/index.d.ts"
+    "./activity-log": {
+      "types": "./dist/activity-log/index.d.ts",
+      "import": "./dist/activity-log/index.js",
+      "default": "./dist/activity-log/index.js"
     },
     "./common": {
+      "types": "./dist/common/index.d.ts",
       "import": "./dist/common/index.js",
-      "default": "./dist/common/index.js",
-      "types": "./dist/common/index.d.ts"
+      "default": "./dist/common/index.js"
     },
     "./errors": {
+      "types": "./dist/errors/index.d.ts",
       "import": "./dist/errors/index.js",
-      "default": "./dist/errors/index.js",
-      "types": "./dist/errors/index.d.ts"
+      "default": "./dist/errors/index.js"
     },
-    "./organization-invitation": {
-      "import": "./dist/organization-invitation/index.js",
-      "default": "./dist/organization-invitation/index.js",
-      "types": "./dist/organization-invitation/index.d.ts"
-    },
-    "./organization-user": {
-      "import": "./dist/organization-user/index.js",
-      "default": "./dist/organization-user/index.js",
-      "types": "./dist/organization-user/index.d.ts"
+    "./geo": {
+      "types": "./dist/geo/index.d.ts",
+      "import": "./dist/geo/index.js",
+      "default": "./dist/geo/index.js"
     },
     "./item": {
+      "types": "./dist/item/index.d.ts",
       "import": "./dist/item/index.js",
-      "default": "./dist/item/index.js",
-      "types": "./dist/item/index.d.ts"
-    },
-    "./unit": {
-      "import": "./dist/unit/index.js",
-      "default": "./dist/unit/index.js",
-      "types": "./dist/unit/index.d.ts"
-    },
-    "./unit-collection": {
-      "import": "./dist/unit-collection/index.js",
-      "default": "./dist/unit-collection/index.js",
-      "types": "./dist/unit-collection/index.d.ts"
+      "default": "./dist/item/index.js"
     },
     "./item-category": {
+      "types": "./dist/item-category/index.d.ts",
       "import": "./dist/item-category/index.js",
-      "default": "./dist/item-category/index.js",
-      "types": "./dist/item-category/index.d.ts"
+      "default": "./dist/item-category/index.js"
+    },
+    "./modules": {
+      "types": "./dist/modules/index.d.ts",
+      "import": "./dist/modules/index.js",
+      "default": "./dist/modules/index.js"
+    },
+    "./organization": {
+      "types": "./dist/organization/index.d.ts",
+      "import": "./dist/organization/index.js",
+      "default": "./dist/organization/index.js"
+    },
+    "./organization-invitation": {
+      "types": "./dist/organization-invitation/index.d.ts",
+      "import": "./dist/organization-invitation/index.js",
+      "default": "./dist/organization-invitation/index.js"
+    },
+    "./organization-user": {
+      "types": "./dist/organization-user/index.d.ts",
+      "import": "./dist/organization-user/index.js",
+      "default": "./dist/organization-user/index.js"
+    },
+    "./role": {
+      "types": "./dist/role/index.d.ts",
+      "import": "./dist/role/index.js",
+      "default": "./dist/role/index.js"
+    },
+    "./sidebar": {
+      "types": "./dist/sidebar/index.d.ts",
+      "import": "./dist/sidebar/index.js",
+      "default": "./dist/sidebar/index.js"
+    },
+    "./unit": {
+      "types": "./dist/unit/index.d.ts",
+      "import": "./dist/unit/index.js",
+      "default": "./dist/unit/index.js"
+    },
+    "./unit-collection": {
+      "types": "./dist/unit-collection/index.d.ts",
+      "import": "./dist/unit-collection/index.js",
+      "default": "./dist/unit-collection/index.js"
+    },
+    "./user": {
+      "types": "./dist/user/index.d.ts",
+      "import": "./dist/user/index.js",
+      "default": "./dist/user/index.js"
+    },
+    "./warehouse": {
+      "types": "./dist/warehouse/index.d.ts",
+      "import": "./dist/warehouse/index.js",
+      "default": "./dist/warehouse/index.js"
+    },
+    "./warehouse-location": {
+      "types": "./dist/warehouse-location/index.d.ts",
+      "import": "./dist/warehouse-location/index.js",
+      "default": "./dist/warehouse-location/index.js"
     }
   },
   "scripts": {
     "dev": "tsc -p tsconfig.build.json --watch --preserveWatchOutput",
-    "build": "tsc -p tsconfig.build.json",
+    "build": "tsx ./scripts/generate-barrel.ts && tsc -p tsconfig.build.json",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
@@ -81,7 +116,9 @@
     "clean:modules": "rm -rf node_modules",
     "clean:all": "pnpm clean:modules && pnpm clean:build",
     "barrel:generate": "tsx ./scripts/generate-barrel.ts",
-    "barrel:watch": "tsx ./scripts/generate-barrel.ts --watch"
+    "barrel:watch": "tsx ./scripts/generate-barrel.ts --watch",
+    "sync": "tsx ./scripts/generate-barrel.ts",
+    "sync:watch": "tsx ./scripts/generate-barrel.ts --watch"
   },
   "devDependencies": {
     "@changesets/cli": "^2.29.7",
