@@ -1,0 +1,294 @@
+{
+  "errors": {
+    "WAREHOUSE_LOCATION_NOT_FOUND": "الموقع غير موجود",
+    "WAREHOUSE_LOCATION_WAREHOUSE_NOT_FOUND": "المستودع غير موجود",
+    "WAREHOUSE_LOCATION_PARENT_NOT_FOUND": "الموقع الأب غير موجود",
+    "WAREHOUSE_LOCATION_CODE_TAKEN": "يوجد موقع بنفس الرمز في هذا المستوى",
+    "WAREHOUSE_LOCATION_BARCODE_TAKEN": "الباركود مستخدم في موقع آخر",
+    "WAREHOUSE_LOCATION_PARENT_WAREHOUSE_MISMATCH": "الموقع الأب يتبع مستودعاً مختلفاً",
+    "WAREHOUSE_LOCATION_INVALID_PLACEMENT": "لا يمكن وضع هذا النوع من المواقع تحت هذا الموقع الأب",
+    "WAREHOUSE_LOCATION_NOT_STOCKABLE_TYPE": "هذا النوع من المواقع لا يمكنه حمل المخزون",
+    "WAREHOUSE_LOCATION_FLAGS_INVALID": "يجب أن يكون الموقع القابل للانتقاء أو الاستلام قابلاً للتخزين",
+    "WAREHOUSE_LOCATION_VIRTUAL_TYPE_MISMATCH": "هذا النوع من المواقع غير مسموح في هذا النوع من المستودعات",
+    "WAREHOUSE_LOCATION_CYCLE_DETECTED": "لا يمكن نقل الموقع تحت نفسه أو تحت أحد فروعه",
+    "WAREHOUSE_LOCATION_BULK_LIMIT_EXCEEDED": "سيؤدي الطلب إلى إنشاء عدد كبير جداً من المواقع",
+    "WAREHOUSE_LOCATION_TREE_TOO_LARGE": "الشجرة كبيرة جداً للتحميل دفعة واحدة؛ حمّلها مستوى بمستوى",
+    "WAREHOUSE_LOCATION_PARENT_IS_STOCKABLE": "لا يمكن أن يكون للموقع القابل للتخزين مواقع فرعية",
+    "WAREHOUSE_LOCATION_PARENT_INACTIVE": "الموقع الأب غير نشط",
+    "WAREHOUSE_LOCATION_WAREHOUSE_INACTIVE": "المستودع غير نشط",
+    "WAREHOUSE_LOCATION_SYSTEM_PROTECTED": "لا يمكن تعديل مواقع مستودعات النظام",
+    "WAREHOUSE_LOCATION_STOCKABLE_REQUIRES_LEAF": "يجب ألا يكون للموقع القابل للتخزين مواقع فرعية",
+    "WAREHOUSE_LOCATION_NOT_EMPTY": "لا يزال الموقع يحتوي على مخزون",
+    "WAREHOUSE_LOCATION_IN_USE": "الموقع مستخدم في سجلات أخرى",
+    "WAREHOUSE_LOCATION_HAS_CHILDREN": "للموقع مواقع فرعية",
+    "WAREHOUSE_LOCATION_HAS_ACTIVE_CHILDREN": "للموقع مواقع فرعية نشطة؛ عطّلها أولاً أو استخدم التعطيل المتسلسل",
+    "WAREHOUSE_LOCATION_ALREADY_ACTIVE": "الموقع نشط بالفعل",
+    "WAREHOUSE_LOCATION_ALREADY_INACTIVE": "الموقع غير نشط بالفعل",
+    "WAREHOUSE_LOCATION_ALREADY_BLOCKED": "الموقع محظور بالفعل",
+    "WAREHOUSE_LOCATION_NOT_BLOCKED": "الموقع غير محظور",
+    "WAREHOUSE_LOCATION_INACTIVE": "الموقع غير نشط",
+    "WAREHOUSE_LOCATION_BLOCKED": "الموقع محظور",
+    "WAREHOUSE_LOCATION_NOT_STOCKABLE": "لا يمكن للموقع حمل المخزون",
+    "WAREHOUSE_LOCATION_NOT_RECEIVABLE": "لا يمكن للموقع استلام المخزون",
+    "WAREHOUSE_LOCATION_NOT_PICKABLE": "لا يمكن انتقاء المخزون من هذا الموقع",
+    "WAREHOUSE_LOCATION_BULK_CODE_COLLISION": "بعض الرموز المولّدة موجودة بالفعل تحت الموقع الأب"
+  },
+  "labels": {
+    "types": {
+      "zone": "منطقة",
+      "area": "ساحة",
+      "dock": "رصيف",
+      "aisle": "ممر",
+      "rack": "حامل أرفف",
+      "bay": "قسم",
+      "level": "مستوى",
+      "shelf": "رف",
+      "bin": "خانة تخزين",
+      "virtual_bin": "خانة افتراضية"
+    },
+    "purposes": {
+      "storage": "تخزين",
+      "receiving": "استلام",
+      "picking": "انتقاء",
+      "shipping": "شحن",
+      "staging": "تجهيز",
+      "quarantine": "حجر",
+      "in_transit": "قيد النقل",
+      "production": "إنتاج"
+    },
+    "states": {
+      "active": "نشط",
+      "inactive": "غير نشط",
+      "blocked": "محظور"
+    }
+  },
+  "msgs": {
+    "WAREHOUSE_LOCATION_CREATED": "تم إنشاء الموقع",
+    "WAREHOUSE_LOCATION_BULK_CREATED": "تم إنشاء المواقع",
+    "WAREHOUSE_LOCATION_UPDATED": "تم تحديث الموقع",
+    "WAREHOUSE_LOCATION_MOVED": "تم نقل الموقع",
+    "WAREHOUSE_LOCATION_BLOCKED": "تم حظر الموقع",
+    "WAREHOUSE_LOCATION_UNBLOCKED": "تم إلغاء حظر الموقع",
+    "WAREHOUSE_LOCATION_DEACTIVATED": "تم تعطيل الموقع",
+    "WAREHOUSE_LOCATION_REACTIVATED": "تم إعادة تفعيل الموقع",
+    "WAREHOUSE_LOCATION_BARCODE_CHANGED": "تم تغيير الباركود",
+    "WAREHOUSE_LOCATION_DELETED": "تم حذف الموقع"
+  },
+  "actions": {
+    "create": "موقع جديد",
+    "bulk": "توليد المواقع",
+    "addChild": "إضافة موقع فرعي",
+    "edit": "تعديل",
+    "view": "عرض",
+    "move": "نقل",
+    "block": "حظر",
+    "unblock": "إلغاء الحظر",
+    "deactivate": "تعطيل",
+    "reactivate": "إعادة التفعيل",
+    "changeBarcode": "تغيير الباركود",
+    "delete": "حذف",
+    "cancel": "إلغاء",
+    "more": "المزيد من الإجراءات"
+  },
+  "create": {
+    "title": "إنشاء موقع",
+    "description": "أضف منطقة أو ممراً أو حاملاً أو خانة أو أي مكان آخر يمكن حفظ المخزون فيه.",
+    "submitLabel": "إنشاء",
+    "submittingLabel": "جارٍ الإنشاء…"
+  },
+  "update": {
+    "title": "تعديل الموقع",
+    "description": "غيّر تسمية هذا الموقع واستخدامه وقياساته.",
+    "submitLabel": "حفظ",
+    "submittingLabel": "جارٍ الحفظ…"
+  },
+  "move": {
+    "title": "نقل الموقع",
+    "description": "اختر موقعاً أباً جديداً. يجب أن يكون الموقع وكل ما بداخله فارغاً.",
+    "submitLabel": "نقل",
+    "submittingLabel": "جارٍ النقل…"
+  },
+  "block": {
+    "title": "حظر الموقع",
+    "description": "يحتفظ الموقع المحظور بمخزونه لكنه لا يستقبل ولا يصرف منه. وكل ما بداخله محظور أيضاً.",
+    "submitLabel": "حظر",
+    "submittingLabel": "جارٍ الحظر…"
+  },
+  "barcode": {
+    "title": "تغيير الباركود",
+    "description": "اترك الحقل فارغاً لتوليد باركود جديد. تتوقف الملصقات المطبوعة بالباركود القديم عن العمل.",
+    "submitLabel": "حفظ",
+    "submittingLabel": "جارٍ الحفظ…"
+  },
+  "bulk": {
+    "title": "توليد المواقع",
+    "description": "ابنِ فرعاً كاملاً دفعة واحدة. يُنشأ كل مستوى داخل كل موقع من المستوى الذي فوقه.",
+    "submitLabel": "إنشاء المواقع",
+    "submittingLabel": "جارٍ الإنشاء…",
+    "preview": "معاينة",
+    "previewing": "جارٍ الفحص…",
+    "total": "عدد المواقع التي ستُنشأ: {{count}}",
+    "created": "عدد المواقع التي أُنشئت: {{count}}",
+    "tooMany": "هذا أكثر من {{max}} موقع. قلّل الأعداد.",
+    "badOrder": "يجب أن يكون كل مستوى أسفل المستوى الذي قبله.",
+    "examples": "أمثلة",
+    "level": "المستوى {{number}}"
+  },
+  "fields": {
+    "parent": {
+      "label": "الموقع الأب",
+      "placeholder": "اختر موقعاً أباً (اتركه فارغاً للمستوى الأعلى)",
+      "fixed": "داخل"
+    },
+    "code": {
+      "label": "الرمز",
+      "placeholder": "مثال: BIN-04",
+      "suggest": "اقتراح الرمز التالي"
+    },
+    "name": {
+      "label": "الاسم",
+      "placeholder": "يكون الرمز افتراضياً"
+    },
+    "type": {
+      "label": "النوع",
+      "placeholder": "اختر النوع"
+    },
+    "purpose": {
+      "label": "الغرض",
+      "placeholder": "اختر الغرض"
+    },
+    "isStockable": {
+      "label": "يمكنه حمل المخزون",
+      "description": "يمكن لأدنى مستوى في الفرع فقط أن يحمل المخزون."
+    },
+    "isPickable": {
+      "label": "قابل للانتقاء",
+      "description": "يُحتسب المخزون هنا ضمن المتاح."
+    },
+    "isReceivable": {
+      "label": "قابل للاستلام",
+      "description": "يمكن استلام المشتريات والمرتجعات هنا."
+    },
+    "applyToDescendants": {
+      "label": "تطبيق الغرض على كل ما بداخله",
+      "description": "يعيد أيضاً ضبط القابلية للانتقاء والاستلام في تلك المواقع."
+    },
+    "barcode": {
+      "label": "الباركود",
+      "placeholder": "اتركه فارغاً للتوليد"
+    },
+    "reason": {
+      "label": "السبب",
+      "placeholder": "مثال: حامل تالف"
+    },
+    "cascade": {
+      "label": "تعطيل كل ما بداخله أيضاً",
+      "description": "تُعطَّل المواقع النشطة داخل هذا الموقع أيضاً."
+    },
+    "measures": {
+      "title": "الحجم والسعة",
+      "width": "العرض (مم)",
+      "height": "الارتفاع (مم)",
+      "depth": "العمق (مم)",
+      "maxWeight": "أقصى وزن (كجم)",
+      "maxVolume": "أقصى حجم (م³)"
+    },
+    "level": {
+      "type": "النوع",
+      "prefix": "البادئة",
+      "start": "البدء من",
+      "count": "العدد",
+      "pad": "عدد الخانات",
+      "add": "إضافة مستوى",
+      "remove": "حذف المستوى"
+    }
+  },
+  "list": {
+    "title": "المواقع",
+    "back": "العودة إلى المستودع",
+    "description": "الأماكن داخل هذا المستودع التي يمكن حفظ المخزون فيها.",
+    "tabs": {
+      "aria": "تصفية المواقع",
+      "all": "الكل",
+      "stockable": "تحمل المخزون",
+      "blocked": "محظور",
+      "inactive": "غير نشط"
+    },
+    "search": {
+      "placeholder": "ابحث بالرمز أو الاسم أو الباركود",
+      "clear": "مسح البحث"
+    },
+    "view": {
+      "aria": "اختر طريقة العرض",
+      "table": "جدول",
+      "tree": "شجرة"
+    }
+  },
+  "table": {
+    "fullCode": "الموقع",
+    "name": "الاسم",
+    "type": "النوع",
+    "purpose": "الغرض",
+    "status": "الحالة",
+    "actions": "الإجراءات",
+    "actionsFor": "إجراءات {{name}}"
+  },
+  "empty": {
+    "title": "لا توجد مواقع بعد",
+    "description": "أنشئ موقعاً أو ولّد فرعاً كاملاً لبدء تنظيم هذا المستودع."
+  },
+  "delete": {
+    "title": "حذف الموقع؟",
+    "description": "سيتم حذف «{{name}}» نهائياً. ينجح ذلك فقط مع المواقع التي لم تُستخدم من قبل."
+  },
+  "deactivate": {
+    "title": "تعطيل الموقع؟",
+    "description": "لن يقبل «{{name}}» مخزوناً بعد الآن. يجب أن يكون فارغاً وغير مستخدم في مستندات مفتوحة.",
+    "submitLabel": "تعطيل"
+  },
+  "tree": {
+    "aria": "شجرة المواقع",
+    "expand": "توسيع {{name}}",
+    "collapse": "طي {{name}}",
+    "loading": "جارٍ التحميل…",
+    "empty": "لا توجد مواقع بعد",
+    "error": "تعذّر تحميل هذا المستوى"
+  },
+  "details": {
+    "back": "العودة إلى المواقع",
+    "fullCode": "الموقع",
+    "name": "الاسم",
+    "type": "النوع",
+    "purpose": "الغرض",
+    "barcode": "الباركود",
+    "noBarcode": "لا يوجد باركود",
+    "warehouse": "المستودع",
+    "path": "المسار",
+    "pathAria": "مسار الموقع",
+    "status": "الحالة",
+    "capabilities": "الإمكانات",
+    "measures": "الحجم والسعة",
+    "blockedReason": "سبب الحظر",
+    "createdAt": "تاريخ الإنشاء",
+    "updatedAt": "آخر تحديث",
+    "none": "—"
+  },
+  "badges": {
+    "stockable": "يحمل المخزون",
+    "pickable": "قابل للانتقاء",
+    "receivable": "قابل للاستلام",
+    "blocked": "محظور",
+    "inheritedBlock": "محظور بسبب الموقع الأب",
+    "inactive": "غير نشط",
+    "active": "نشط"
+  },
+  "pagination": {
+    "nav": "ترقيم الصفحات",
+    "previous": "السابق",
+    "next": "التالي",
+    "rowsPerPage": "عدد الصفوف في الصفحة",
+    "summary": "{{from}}–{{to}} من {{total}}",
+    "pageOf": "الصفحة {{page}} من {{pageCount}}",
+    "goTo": "الانتقال إلى الصفحة {{page}}"
+  }
+}

@@ -1,0 +1,294 @@
+{
+  "errors": {
+    "WAREHOUSE_LOCATION_NOT_FOUND": "Location not found",
+    "WAREHOUSE_LOCATION_WAREHOUSE_NOT_FOUND": "Warehouse not found",
+    "WAREHOUSE_LOCATION_PARENT_NOT_FOUND": "Parent location not found",
+    "WAREHOUSE_LOCATION_CODE_TAKEN": "A location with this code already exists at this level",
+    "WAREHOUSE_LOCATION_BARCODE_TAKEN": "This barcode is already used by another location",
+    "WAREHOUSE_LOCATION_PARENT_WAREHOUSE_MISMATCH": "The parent location belongs to a different warehouse",
+    "WAREHOUSE_LOCATION_INVALID_PLACEMENT": "This location type cannot be placed under that parent",
+    "WAREHOUSE_LOCATION_NOT_STOCKABLE_TYPE": "This location type cannot hold stock",
+    "WAREHOUSE_LOCATION_FLAGS_INVALID": "Pickable and receivable locations must be stockable",
+    "WAREHOUSE_LOCATION_VIRTUAL_TYPE_MISMATCH": "This location type is not allowed in this kind of warehouse",
+    "WAREHOUSE_LOCATION_CYCLE_DETECTED": "A location cannot be moved under itself or its own descendants",
+    "WAREHOUSE_LOCATION_BULK_LIMIT_EXCEEDED": "The request would create too many locations",
+    "WAREHOUSE_LOCATION_TREE_TOO_LARGE": "The tree is too large to load at once; load it level by level",
+    "WAREHOUSE_LOCATION_PARENT_IS_STOCKABLE": "A stockable location cannot have child locations",
+    "WAREHOUSE_LOCATION_PARENT_INACTIVE": "The parent location is inactive",
+    "WAREHOUSE_LOCATION_WAREHOUSE_INACTIVE": "The warehouse is inactive",
+    "WAREHOUSE_LOCATION_SYSTEM_PROTECTED": "Locations of system warehouses cannot be changed",
+    "WAREHOUSE_LOCATION_STOCKABLE_REQUIRES_LEAF": "Only a location without children can be stockable",
+    "WAREHOUSE_LOCATION_NOT_EMPTY": "The location still holds stock",
+    "WAREHOUSE_LOCATION_IN_USE": "The location is used by other records",
+    "WAREHOUSE_LOCATION_HAS_CHILDREN": "The location has child locations",
+    "WAREHOUSE_LOCATION_HAS_ACTIVE_CHILDREN": "The location has active child locations; deactivate them first or cascade",
+    "WAREHOUSE_LOCATION_ALREADY_ACTIVE": "The location is already active",
+    "WAREHOUSE_LOCATION_ALREADY_INACTIVE": "The location is already inactive",
+    "WAREHOUSE_LOCATION_ALREADY_BLOCKED": "The location is already blocked",
+    "WAREHOUSE_LOCATION_NOT_BLOCKED": "The location is not blocked",
+    "WAREHOUSE_LOCATION_INACTIVE": "The location is inactive",
+    "WAREHOUSE_LOCATION_BLOCKED": "The location is blocked",
+    "WAREHOUSE_LOCATION_NOT_STOCKABLE": "The location cannot hold stock",
+    "WAREHOUSE_LOCATION_NOT_RECEIVABLE": "The location cannot receive stock",
+    "WAREHOUSE_LOCATION_NOT_PICKABLE": "Stock cannot be picked from this location",
+    "WAREHOUSE_LOCATION_BULK_CODE_COLLISION": "Some generated codes already exist under the parent"
+  },
+  "labels": {
+    "types": {
+      "zone": "Zone",
+      "area": "Area",
+      "dock": "Dock",
+      "aisle": "Aisle",
+      "rack": "Rack",
+      "bay": "Bay",
+      "level": "Level",
+      "shelf": "Shelf",
+      "bin": "Bin",
+      "virtual_bin": "Virtual bin"
+    },
+    "purposes": {
+      "storage": "Storage",
+      "receiving": "Receiving",
+      "picking": "Picking",
+      "shipping": "Shipping",
+      "staging": "Staging",
+      "quarantine": "Quarantine",
+      "in_transit": "In transit",
+      "production": "Production"
+    },
+    "states": {
+      "active": "Active",
+      "inactive": "Inactive",
+      "blocked": "Blocked"
+    }
+  },
+  "msgs": {
+    "WAREHOUSE_LOCATION_CREATED": "Location created",
+    "WAREHOUSE_LOCATION_BULK_CREATED": "Locations created",
+    "WAREHOUSE_LOCATION_UPDATED": "Location updated",
+    "WAREHOUSE_LOCATION_MOVED": "Location moved",
+    "WAREHOUSE_LOCATION_BLOCKED": "Location blocked",
+    "WAREHOUSE_LOCATION_UNBLOCKED": "Location unblocked",
+    "WAREHOUSE_LOCATION_DEACTIVATED": "Location deactivated",
+    "WAREHOUSE_LOCATION_REACTIVATED": "Location reactivated",
+    "WAREHOUSE_LOCATION_BARCODE_CHANGED": "Barcode changed",
+    "WAREHOUSE_LOCATION_DELETED": "Location deleted"
+  },
+  "actions": {
+    "create": "New location",
+    "bulk": "Generate locations",
+    "addChild": "Add child location",
+    "edit": "Edit",
+    "view": "View",
+    "move": "Move",
+    "block": "Block",
+    "unblock": "Unblock",
+    "deactivate": "Deactivate",
+    "reactivate": "Reactivate",
+    "changeBarcode": "Change barcode",
+    "delete": "Delete",
+    "cancel": "Cancel",
+    "more": "More actions"
+  },
+  "create": {
+    "title": "Create location",
+    "description": "Add a zone, aisle, rack, bin or any other place where stock can be kept.",
+    "submitLabel": "Create",
+    "submittingLabel": "Creating…"
+  },
+  "update": {
+    "title": "Edit location",
+    "description": "Change how this location is named, used and measured.",
+    "submitLabel": "Save",
+    "submittingLabel": "Saving…"
+  },
+  "move": {
+    "title": "Move location",
+    "description": "Choose a new parent. The location and everything inside it must be empty.",
+    "submitLabel": "Move",
+    "submittingLabel": "Moving…"
+  },
+  "block": {
+    "title": "Block location",
+    "description": "A blocked location keeps its stock but cannot receive or release it. Everything inside it is blocked too.",
+    "submitLabel": "Block",
+    "submittingLabel": "Blocking…"
+  },
+  "barcode": {
+    "title": "Change barcode",
+    "description": "Leave the field empty to generate a new barcode. Labels printed with the old barcode stop working.",
+    "submitLabel": "Save",
+    "submittingLabel": "Saving…"
+  },
+  "bulk": {
+    "title": "Generate locations",
+    "description": "Build a whole branch at once. Every level is created inside each location of the level above.",
+    "submitLabel": "Create locations",
+    "submittingLabel": "Creating…",
+    "preview": "Preview",
+    "previewing": "Checking…",
+    "total": "Locations to create: {{count}}",
+    "created": "Locations created: {{count}}",
+    "tooMany": "That is more than {{max}} locations. Reduce the counts.",
+    "badOrder": "Each level must sit below the one before it.",
+    "examples": "Examples",
+    "level": "Level {{number}}"
+  },
+  "fields": {
+    "parent": {
+      "label": "Parent location",
+      "placeholder": "Choose a parent (leave empty for the top level)",
+      "fixed": "Inside"
+    },
+    "code": {
+      "label": "Code",
+      "placeholder": "e.g. BIN-04",
+      "suggest": "Suggest next code"
+    },
+    "name": {
+      "label": "Name",
+      "placeholder": "Defaults to the code"
+    },
+    "type": {
+      "label": "Type",
+      "placeholder": "Choose a type"
+    },
+    "purpose": {
+      "label": "Purpose",
+      "placeholder": "Choose a purpose"
+    },
+    "isStockable": {
+      "label": "Can hold stock",
+      "description": "Only the lowest level of a branch can hold stock."
+    },
+    "isPickable": {
+      "label": "Pickable",
+      "description": "Stock here counts as available."
+    },
+    "isReceivable": {
+      "label": "Receivable",
+      "description": "Purchases and returns can be received here."
+    },
+    "applyToDescendants": {
+      "label": "Apply the purpose to everything inside",
+      "description": "Also resets pickable and receivable on those locations."
+    },
+    "barcode": {
+      "label": "Barcode",
+      "placeholder": "Leave empty to generate"
+    },
+    "reason": {
+      "label": "Reason",
+      "placeholder": "e.g. Damaged rack"
+    },
+    "cascade": {
+      "label": "Also deactivate everything inside",
+      "description": "Active locations inside this one are deactivated too."
+    },
+    "measures": {
+      "title": "Size and capacity",
+      "width": "Width (mm)",
+      "height": "Height (mm)",
+      "depth": "Depth (mm)",
+      "maxWeight": "Max weight (kg)",
+      "maxVolume": "Max volume (m³)"
+    },
+    "level": {
+      "type": "Type",
+      "prefix": "Prefix",
+      "start": "Start at",
+      "count": "How many",
+      "pad": "Digits",
+      "add": "Add level",
+      "remove": "Remove level"
+    }
+  },
+  "list": {
+    "title": "Locations",
+    "back": "Back to warehouse",
+    "description": "The places inside this warehouse where stock can be kept.",
+    "tabs": {
+      "aria": "Filter locations",
+      "all": "All",
+      "stockable": "Can hold stock",
+      "blocked": "Blocked",
+      "inactive": "Inactive"
+    },
+    "search": {
+      "placeholder": "Search by code, name or barcode",
+      "clear": "Clear search"
+    },
+    "view": {
+      "aria": "Choose a view",
+      "table": "Table",
+      "tree": "Tree"
+    }
+  },
+  "table": {
+    "fullCode": "Location",
+    "name": "Name",
+    "type": "Type",
+    "purpose": "Purpose",
+    "status": "Status",
+    "actions": "Actions",
+    "actionsFor": "Actions for {{name}}"
+  },
+  "empty": {
+    "title": "No locations yet",
+    "description": "Create a location or generate a whole branch to start organizing this warehouse."
+  },
+  "delete": {
+    "title": "Delete location?",
+    "description": "“{{name}}” will be permanently deleted. This only works for locations that were never used."
+  },
+  "deactivate": {
+    "title": "Deactivate location?",
+    "description": "“{{name}}” will stop accepting stock. It must be empty and not used by open documents.",
+    "submitLabel": "Deactivate"
+  },
+  "tree": {
+    "aria": "Location tree",
+    "expand": "Expand {{name}}",
+    "collapse": "Collapse {{name}}",
+    "loading": "Loading…",
+    "empty": "No locations yet",
+    "error": "Could not load this level"
+  },
+  "details": {
+    "back": "Back to locations",
+    "fullCode": "Location",
+    "name": "Name",
+    "type": "Type",
+    "purpose": "Purpose",
+    "barcode": "Barcode",
+    "noBarcode": "No barcode",
+    "warehouse": "Warehouse",
+    "path": "Path",
+    "pathAria": "Location path",
+    "status": "Status",
+    "capabilities": "Capabilities",
+    "measures": "Size and capacity",
+    "blockedReason": "Block reason",
+    "createdAt": "Created",
+    "updatedAt": "Updated",
+    "none": "—"
+  },
+  "badges": {
+    "stockable": "Stockable",
+    "pickable": "Pickable",
+    "receivable": "Receivable",
+    "blocked": "Blocked",
+    "inheritedBlock": "Blocked by a parent",
+    "inactive": "Inactive",
+    "active": "Active"
+  },
+  "pagination": {
+    "nav": "Pagination",
+    "previous": "Previous",
+    "next": "Next",
+    "rowsPerPage": "Rows per page",
+    "summary": "{{from}}–{{to}} of {{total}}",
+    "pageOf": "Page {{page}} of {{pageCount}}",
+    "goTo": "Go to page {{page}}"
+  }
+}

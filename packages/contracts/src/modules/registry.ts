@@ -227,13 +227,30 @@ export const MODULES = {
     },
     actions: CRUD,
   },
-  // warehouse: {
-  //   sidebar: {
-  //     group: "inventory",
-  //     icon: "warehouse",
-  //     path: "/warehouses",
-  //     label: { en: "Warehouses", ar: "المستودعات" },
-  //   },
-  //   actions: CRUD,
-  // },
+  warehouse: {
+    sidebar: {
+      group: "inventory",
+      icon: "warehouse",
+      path: "/warehouses",
+      label: { en: "Warehouses", ar: "المستودعات" },
+    },
+    actions: {
+      ...CRUD,
+      deactivate: { permission: true, event: "deactivated" },
+      reactivate: { event: "reactivated" },
+      set_default: { event: "default_changed" },
+    },
+  },
+  warehouse_location: {
+    actions: {
+      ...CRUD,
+      bulk_create: { event: "bulk_created" },
+      move: { permission: true, event: "moved" },
+      block: { permission: true, event: "blocked" },
+      unblock: { event: "unblocked" },
+      deactivate: { permission: true, event: "deactivated" },
+      reactivate: { event: "reactivated" },
+      change_barcode: { permission: true, event: "barcode_changed" },
+    },
+  },
 } as const satisfies Record<string, ModuleSpec>

@@ -1,0 +1,161 @@
+{
+  "errors": {
+    "WAREHOUSE_NOT_FOUND": "المستودع غير موجود",
+    "WAREHOUSE_CODE_TAKEN": "يوجد مستودع بنفس الرمز بالفعل",
+    "WAREHOUSE_CODE_RESERVED": "هذا الرمز محجوز لمستودعات النظام",
+    "WAREHOUSE_ADDRESS_NOT_ALLOWED": "لا يمكن أن يكون للمستودعات الافتراضية عنوان",
+    "WAREHOUSE_SYSTEM_PROTECTED": "لا يمكن تعديل مستودعات النظام",
+    "WAREHOUSE_ALREADY_ACTIVE": "المستودع نشط بالفعل",
+    "WAREHOUSE_ALREADY_INACTIVE": "المستودع غير نشط بالفعل",
+    "WAREHOUSE_NOT_EMPTY": "لا يزال المستودع يحتوي على مخزون",
+    "WAREHOUSE_IN_USE": "المستودع مستخدم في سجلات أخرى",
+    "WAREHOUSE_DEFAULT_NOT_ELIGIBLE": "يجب أن يكون المستودع الافتراضي مادياً ونشطاً",
+    "WAREHOUSE_DEFAULT_PROTECTED": "لا يمكن تعطيل المستودع الافتراضي أو حذفه؛ اختر مستودعاً افتراضياً آخر أولاً"
+  },
+  "labels": {
+    "types": {
+      "physical": "مادي",
+      "virtual": "افتراضي"
+    },
+    "states": {
+      "active": "نشط",
+      "inactive": "غير نشط",
+      "default": "افتراضي",
+      "system": "نظام"
+    }
+  },
+  "msgs": {
+    "WAREHOUSE_CREATED": "تم إنشاء المستودع",
+    "WAREHOUSE_UPDATED": "تم تحديث المستودع",
+    "WAREHOUSE_DELETED": "تم حذف المستودع",
+    "WAREHOUSE_DEACTIVATED": "تم تعطيل المستودع",
+    "WAREHOUSE_REACTIVATED": "تم إعادة تفعيل المستودع",
+    "WAREHOUSE_DEFAULT_CHANGED": "تم تغيير المستودع الافتراضي"
+  },
+  "actions": {
+    "create": "مستودع جديد",
+    "edit": "تعديل",
+    "view": "عرض",
+    "deactivate": "تعطيل",
+    "reactivate": "إعادة التفعيل",
+    "setDefault": "تعيين كافتراضي",
+    "delete": "حذف",
+    "cancel": "إلغاء",
+    "viewLocations": "إدارة المواقع",
+    "more": "المزيد من الإجراءات"
+  },
+  "create": {
+    "title": "إنشاء مستودع",
+    "description": "أضف موقعاً فعلياً أو حاوية افتراضية للمخزون.",
+    "submitLabel": "إنشاء",
+    "submittingLabel": "جارٍ الإنشاء…"
+  },
+  "update": {
+    "title": "تعديل المستودع",
+    "description": "غيّر بيانات هذا المستودع.",
+    "submitLabel": "حفظ",
+    "submittingLabel": "جارٍ الحفظ…"
+  },
+  "fields": {
+    "code": {
+      "label": "الرمز",
+      "placeholder": "مثال: WH-01"
+    },
+    "name": {
+      "label": "الاسم",
+      "placeholder": "مثال: المستودع الرئيسي"
+    },
+    "description": {
+      "label": "الوصف",
+      "placeholder": "اختياري"
+    },
+    "type": {
+      "label": "النوع",
+      "placeholder": "اختر النوع"
+    },
+    "addressLine": {
+      "label": "العنوان",
+      "placeholder": "الشارع والرقم"
+    },
+    "city": {
+      "label": "المدينة",
+      "placeholder": "المدينة"
+    },
+    "region": {
+      "label": "المنطقة",
+      "placeholder": "المنطقة أو المحافظة"
+    },
+    "postalCode": {
+      "label": "الرمز البريدي",
+      "placeholder": "الرمز البريدي"
+    },
+    "countryCode": {
+      "label": "رمز الدولة",
+      "placeholder": "مثال: EG"
+    },
+    "createDefaultLocation": {
+      "label": "إنشاء خانة تخزين افتراضية (MAIN)",
+      "description": "تتيح لك تسجيل المخزون فوراً دون تصميم المواقع أولاً."
+    }
+  },
+  "list": {
+    "title": "المستودعات",
+    "description": "المواقع والحاويات الافتراضية التي يوجد فيها مخزونك.",
+    "tabs": {
+      "aria": "التصفية حسب الحالة",
+      "all": "الكل",
+      "active": "نشط",
+      "inactive": "غير نشط"
+    },
+    "search": {
+      "placeholder": "ابحث في المستودعات",
+      "clear": "مسح البحث"
+    }
+  },
+  "table": {
+    "code": "الرمز",
+    "name": "الاسم",
+    "type": "النوع",
+    "status": "الحالة",
+    "actions": "الإجراءات",
+    "actionsFor": "إجراءات {{name}}"
+  },
+  "empty": {
+    "title": "لا توجد مستودعات بعد",
+    "description": "أنشئ أول مستودع لبدء تنظيم المخزون."
+  },
+  "delete": {
+    "title": "حذف المستودع؟",
+    "description": "سيتم حذف «{{name}}» نهائياً. ينجح ذلك فقط مع المستودعات التي لم تُستخدم من قبل."
+  },
+  "deactivate": {
+    "title": "تعطيل المستودع؟",
+    "description": "لن يقبل «{{name}}» مخزوناً بعد الآن. يجب أن يكون فارغاً وبلا مستندات مفتوحة."
+  },
+  "details": {
+    "back": "العودة إلى المستودعات",
+    "code": "الرمز",
+    "type": "النوع",
+    "status": "الحالة",
+    "description": "الوصف",
+    "address": "العنوان",
+    "none": "—",
+    "createdAt": "تاريخ الإنشاء",
+    "updatedAt": "آخر تحديث"
+  },
+  "badges": {
+    "default": "افتراضي",
+    "system": "نظام",
+    "inactive": "غير نشط",
+    "active": "نشط"
+  },
+  "pagination": {
+    "nav": "ترقيم الصفحات",
+    "previous": "السابق",
+    "next": "التالي",
+    "rowsPerPage": "عدد الصفوف في الصفحة",
+    "summary": "{{from}}–{{to}} من {{total}}",
+    "pageOf": "الصفحة {{page}} من {{pageCount}}",
+    "goTo": "الانتقال إلى الصفحة {{page}}"
+  }
+}

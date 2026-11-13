@@ -1,0 +1,161 @@
+{
+  "errors": {
+    "WAREHOUSE_NOT_FOUND": "Warehouse not found",
+    "WAREHOUSE_CODE_TAKEN": "A warehouse with this code already exists",
+    "WAREHOUSE_CODE_RESERVED": "This code is reserved for system warehouses",
+    "WAREHOUSE_ADDRESS_NOT_ALLOWED": "Virtual warehouses cannot have an address",
+    "WAREHOUSE_SYSTEM_PROTECTED": "System warehouses cannot be changed",
+    "WAREHOUSE_ALREADY_ACTIVE": "The warehouse is already active",
+    "WAREHOUSE_ALREADY_INACTIVE": "The warehouse is already inactive",
+    "WAREHOUSE_NOT_EMPTY": "The warehouse still holds stock",
+    "WAREHOUSE_IN_USE": "The warehouse is used by other records",
+    "WAREHOUSE_DEFAULT_NOT_ELIGIBLE": "Only an active physical warehouse can be the default",
+    "WAREHOUSE_DEFAULT_PROTECTED": "The default warehouse cannot be deactivated or deleted; choose another default first"
+  },
+  "labels": {
+    "types": {
+      "physical": "Physical",
+      "virtual": "Virtual"
+    },
+    "states": {
+      "active": "Active",
+      "inactive": "Inactive",
+      "default": "Default",
+      "system": "System"
+    }
+  },
+  "msgs": {
+    "WAREHOUSE_CREATED": "Warehouse created",
+    "WAREHOUSE_UPDATED": "Warehouse updated",
+    "WAREHOUSE_DELETED": "Warehouse deleted",
+    "WAREHOUSE_DEACTIVATED": "Warehouse deactivated",
+    "WAREHOUSE_REACTIVATED": "Warehouse reactivated",
+    "WAREHOUSE_DEFAULT_CHANGED": "Default warehouse changed"
+  },
+  "actions": {
+    "create": "New warehouse",
+    "edit": "Edit",
+    "view": "View",
+    "deactivate": "Deactivate",
+    "reactivate": "Reactivate",
+    "setDefault": "Make default",
+    "delete": "Delete",
+    "cancel": "Cancel",
+    "viewLocations": "Manage locations",
+    "more": "More actions"
+  },
+  "create": {
+    "title": "Create warehouse",
+    "description": "Add a physical site or a virtual container for stock.",
+    "submitLabel": "Create",
+    "submittingLabel": "Creating…"
+  },
+  "update": {
+    "title": "Edit warehouse",
+    "description": "Change the details of this warehouse.",
+    "submitLabel": "Save",
+    "submittingLabel": "Saving…"
+  },
+  "fields": {
+    "code": {
+      "label": "Code",
+      "placeholder": "e.g. WH-01"
+    },
+    "name": {
+      "label": "Name",
+      "placeholder": "e.g. Main warehouse"
+    },
+    "description": {
+      "label": "Description",
+      "placeholder": "Optional"
+    },
+    "type": {
+      "label": "Type",
+      "placeholder": "Choose a type"
+    },
+    "addressLine": {
+      "label": "Address",
+      "placeholder": "Street and number"
+    },
+    "city": {
+      "label": "City",
+      "placeholder": "City"
+    },
+    "region": {
+      "label": "Region",
+      "placeholder": "Region or state"
+    },
+    "postalCode": {
+      "label": "Postal code",
+      "placeholder": "Postal code"
+    },
+    "countryCode": {
+      "label": "Country code",
+      "placeholder": "e.g. EG"
+    },
+    "createDefaultLocation": {
+      "label": "Create a default bin (MAIN)",
+      "description": "Lets you post stock right away without designing locations first."
+    }
+  },
+  "list": {
+    "title": "Warehouses",
+    "description": "Sites and virtual containers where your stock lives.",
+    "tabs": {
+      "aria": "Filter by status",
+      "all": "All",
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "search": {
+      "placeholder": "Search warehouses",
+      "clear": "Clear search"
+    }
+  },
+  "table": {
+    "code": "Code",
+    "name": "Name",
+    "type": "Type",
+    "status": "Status",
+    "actions": "Actions",
+    "actionsFor": "Actions for {{name}}"
+  },
+  "empty": {
+    "title": "No warehouses yet",
+    "description": "Create your first warehouse to start organizing stock."
+  },
+  "delete": {
+    "title": "Delete warehouse?",
+    "description": "“{{name}}” will be permanently deleted. This only works for warehouses that were never used."
+  },
+  "deactivate": {
+    "title": "Deactivate warehouse?",
+    "description": "“{{name}}” will stop accepting stock. It must be empty and have no open documents."
+  },
+  "details": {
+    "back": "Back to warehouses",
+    "code": "Code",
+    "type": "Type",
+    "status": "Status",
+    "description": "Description",
+    "address": "Address",
+    "none": "—",
+    "createdAt": "Created",
+    "updatedAt": "Updated"
+  },
+  "badges": {
+    "default": "Default",
+    "system": "System",
+    "inactive": "Inactive",
+    "active": "Active"
+  },
+  "pagination": {
+    "nav": "Pagination",
+    "previous": "Previous",
+    "next": "Next",
+    "rowsPerPage": "Rows per page",
+    "summary": "{{from}}–{{to}} of {{total}}",
+    "pageOf": "Page {{page}} of {{pageCount}}",
+    "goTo": "Go to page {{page}}"
+  }
+}
