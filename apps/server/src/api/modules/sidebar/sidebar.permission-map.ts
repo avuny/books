@@ -23,7 +23,7 @@ export const sidebarOptionResources = {
   // supplier: "supplier",
   // purchaseOrder: "purchase-order",
   // salesOrder: "sales-order",
-  // warehouse: "warehouse",
+  warehouse: "warehouse",
   organizationUser: "organization-user",
   // report: "report",
   // receipt: "receipt",
