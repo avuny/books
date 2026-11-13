@@ -1,0 +1,15 @@
+{
+  "errors": {
+    "WAREHOUSE_NOT_FOUND": "Warehouse not found",
+    "WAREHOUSE_CODE_TAKEN": "A warehouse with this code already exists",
+    "WAREHOUSE_CODE_RESERVED": "This code is reserved for system warehouses",
+    "WAREHOUSE_ADDRESS_NOT_ALLOWED": "Virtual warehouses cannot have an address",
+    "WAREHOUSE_SYSTEM_PROTECTED": "System warehouses cannot be changed",
+    "WAREHOUSE_ALREADY_ACTIVE": "The warehouse is already active",
+    "WAREHOUSE_ALREADY_INACTIVE": "The warehouse is already inactive",
+    "WAREHOUSE_NOT_EMPTY": "The warehouse still holds stock",
+    "WAREHOUSE_IN_USE": "The warehouse is used by other records",
+    "WAREHOUSE_DEFAULT_NOT_ELIGIBLE": "Only an active physical warehouse can be the default",
+    "WAREHOUSE_DEFAULT_PROTECTED": "The default warehouse cannot be deactivated or deleted; choose another default first"
+  }
+}

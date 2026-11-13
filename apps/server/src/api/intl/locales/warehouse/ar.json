@@ -1,0 +1,15 @@
+{
+  "errors": {
+    "WAREHOUSE_NOT_FOUND": "المستودع غير موجود",
+    "WAREHOUSE_CODE_TAKEN": "يوجد مستودع بنفس الرمز بالفعل",
+    "WAREHOUSE_CODE_RESERVED": "هذا الرمز محجوز لمستودعات النظام",
+    "WAREHOUSE_ADDRESS_NOT_ALLOWED": "لا يمكن أن يكون للمستودعات الافتراضية عنوان",
+    "WAREHOUSE_SYSTEM_PROTECTED": "لا يمكن تعديل مستودعات النظام",
+    "WAREHOUSE_ALREADY_ACTIVE": "المستودع نشط بالفعل",
+    "WAREHOUSE_ALREADY_INACTIVE": "المستودع غير نشط بالفعل",
+    "WAREHOUSE_NOT_EMPTY": "لا يزال المستودع يحتوي على مخزون",
+    "WAREHOUSE_IN_USE": "المستودع مستخدم في سجلات أخرى",
+    "WAREHOUSE_DEFAULT_NOT_ELIGIBLE": "يجب أن يكون المستودع الافتراضي مادياً ونشطاً",
+    "WAREHOUSE_DEFAULT_PROTECTED": "لا يمكن تعطيل المستودع الافتراضي أو حذفه؛ اختر مستودعاً افتراضياً آخر أولاً"
+  }
+}
