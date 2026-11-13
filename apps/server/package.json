@@ -12,7 +12,7 @@
     "deploy:dry": "wrangler deploy --dry-run --minify --outdir dist",
     "typecheck": "tsx ./scripts/generate-intl.ts && tsc --noEmit",
     "dev:node": "concurrently \"tsc -p tsconfig.build.json --watch --preserveWatchOutput\" \"tsx watch src/node-server.ts\"",
-    "build": "tsx ./scripts/generate-intl.ts && tsc -p tsconfig.build.json",
+    "build": "pnpm intl:generate && pnpm routes:generate && pnpm openapi:generate && tsc -p tsconfig.build.json",
     "lint": "eslint .",
     "test": "vitest run",
     "test:watch": "vitest",

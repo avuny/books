@@ -84,7 +84,16 @@ function findRoutesExport(moduleDir: string): string | null {
       .filter(Boolean)
   )
 
-  return exportedNames.find((n) => n.endsWith("Routes")) ?? null
+  // Prefer a plain instance (e.g. `unitRoutes`) over a factory function
+  // (e.g. `createUnitRoutes`). Both end with "Routes", but factories start
+  // with "create" and return a router only when called — passing them directly
+  // to app.route() causes a runtime crash.
+  const allRoutes = exportedNames.filter((n) => n.endsWith("Routes"))
+  return (
+    allRoutes.find((n) => !n.startsWith("create")) ??
+    allRoutes[0] ??
+    null
+  )
 }
 
 // ---------------------------------------------------------------------------
