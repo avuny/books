@@ -78,6 +78,13 @@
       "when": 1794397693471,
       "tag": "0010_last_komodo",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1794572555269,
+      "tag": "0011_sparkling_vanisher",
+      "breakpoints": true
     }
   ]
 }
