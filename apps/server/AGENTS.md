@@ -181,6 +181,15 @@ export type WarehouseDto = z.infer<typeof WarehouseDtoSchema>
 
 Also add the audit actions to `ActivityLogAction` (`WAREHOUSE_CREATED = "warehouse.created"`, …).
 
+> [!IMPORTANT]
+> **Single Source of Truth for Permissions & Audit Events**:
+> Every new domain module MUST be registered in `packages/contracts/src/modules/registry.ts` under `MODULES`.
+> `PermissionKey`, `ActivityLogAction`, and `SIDEBAR_TREE` are all automatically derived from `registry.ts`.
+> If you do not register the module in `registry.ts`:
+> 1. `PermissionKey` will not contain `<action>:<module>` (e.g. `"create:warehouse"`).
+> 2. `ActivityLogAction` will not contain `<module>.<event>` (e.g. `"warehouse.created"`).
+> 3. TypeScript will fail on `permissions.check` and `activityLog.log`.
+
 > There is **no** `WAREHOUSE_PERMISSION_DENIED`. `requirePermission` is shared and always answers with `RoleErrorCode.ROLE_PERMISSION_DENIED` (403). Document that code in each route's 403 response.
 
 ### Step 3 — Errors
@@ -202,6 +211,12 @@ export const warehouseErrorsHttpMap = {
 } as const satisfies Record<WarehouseErrorCode, ErrorMeta>
 ```
 
+> [!WARNING]
+> **`ErrorMeta` Schema (`statusCode` + `responseMessage`)**:
+> `ErrorMeta` in `@avuny/utils` requires `{ statusCode: ClientErrorStatusCode, responseMessage: string }`.
+> - **NEVER** use `{ status: 404 }`. This causes TS2353 on every error entry.
+> - **Always use `as const`**: preserving numeric literal types (`404`, `409`) prevents status widening to `ClientErrorStatusCode`.
+
 `warehouse.error-map.ts`:
 
 ```ts
@@ -213,6 +228,10 @@ export const warehouseErrorMap = {
   WAREHOUSE_NAME_TAKEN: errors.WAREHOUSE_NAME_TAKEN,
 } as const satisfies Record<Code, (typeof errors)[keyof typeof errors]>
 ```
+
+> [!WARNING]
+> **Never widen error-map to `Record<..., ErrorMeta>`**:
+> Do NOT type error maps as `Record<Code, ErrorMeta>`. Casting to `ErrorMeta` widens literal status codes to `ClientErrorStatusCode` (`400 | 401 | 402 | ...`). When passed to `handleResult`, it breaks OpenAPI route handler type-checking. Always use `as const satisfies Record<Code, (typeof errors)[keyof typeof errors]>` or simple `as const`.
 
 ### Step 4 — Repository
 
@@ -525,6 +544,7 @@ export default createWarehouseRoute
 
 Route checklist:
 
+* **Scoped `rawErrorMap = { ... } as const` per route**: List ONLY the error codes that this specific endpoint can return. Every code's HTTP status MUST match a status explicitly listed in `responses` of `createRoute`. Never pass the full module error map unless the endpoint can produce every single code and every status is declared.
 * `middleware: [requireAuth, requirePermission("<action>:<resource>")] as const` — auth first, permission second.
 * Every status the route can return appears in `responses`; each domain code listed under the status its `errorsHttpMap` entry declares.
 * Handler body: read validated input → one service call → `handleResult`. Nothing else.
@@ -919,6 +939,7 @@ Rules:
 * Pure logic (evaluators, mappers) gets its own `*.spec.ts` without mocks.
 * `vi.mock("../../db.js", () => ({ db: {} }))` at the top of any spec that imports something reaching `db`.
 * Mock data must use the **real DTO field names** from the contracts.
+* **Schema validation rejection status:** In route tests, `@hono/zod-openapi` rejects invalid request bodies or invalid query parameters with HTTP `422` (Unprocessable Entity), NOT `400`. Always assert `expect(res.status).toBe(422)` when sending malformed inputs.
 
 ---
 
@@ -929,14 +950,17 @@ Run through this list before you say a task is finished.
 - [ ] Layering respected: no DB in routes, no Hono in services, no HTTP in repositories.
 - [ ] Every tenant query filtered by `orgId`.
 - [ ] Relative imports end in `.js`; no `any` outside `deps.ts`/test mocks; no semicolons, double quotes.
-- [ ] New/changed error codes: contracts + `errorsHttpMap` + `error-map` + route `responses` + (translations if applicable).
-- [ ] Routes: `[requireAuth, requirePermission(...)] as const`, `router.use(honoPath(route.path), requireAuth)`, correct `successStatus`, `...globalErrorResponses` last.
-- [ ] Writes use `actorId`, log to the activity log **after** commit, and invalidate caches after commit.
+- [ ] Module registered in `packages/contracts/src/modules/registry.ts` under `MODULES` with grantable actions (`permission: true`) and audit events.
+- [ ] If the module has a sidebar entry in `registry.ts`, it is mapped in `apps/server/src/api/modules/sidebar/sidebar.permission-map.ts`.
+- [ ] New/changed error codes: contracts + `errorsHttpMap` (`{ statusCode, responseMessage }`) + `error-map` (`as const`) + route `responses` + (translations if applicable).
+- [ ] Routes: `[requireAuth, requirePermission(...)] as const`, `router.use(honoPath(route.path), requireAuth)`, correct `successStatus`, scoped `rawErrorMap = { ... } as const` matching route `responses`, `...globalErrorResponses` last.
+- [ ] Writes use `actorId`, log to the activity log **after** commit (`action: ActivityLogAction`), and invalidate caches after commit.
+- [ ] Service authorization helper `can(...)` strictly types `action: PermissionKey`.
 - [ ] Check-then-write flows are in a transaction with `lockOrg` and backed by a named unique index.
 - [ ] Permission keys exist in `PERMISSION_CATALOG`; system roles updated if needed.
 - [ ] `index.ts` barrel exports updated; router mounted in the app.
 - [ ] `SPEC.md` updated (rules, error codes, file tree).
-- [ ] Tests added/updated and passing; typecheck and lint pass (use the scripts in `apps/server/package.json`).
+- [ ] Tests added/updated and passing; route validation failure tests assert `422`; typecheck and lint pass (`pnpm --filter=books-server typecheck` & `build`).
 - [ ] For refactors: behavior parity confirmed (paths, methods, status codes) or deviations documented in the PR.
 
 ---
@@ -952,3 +976,46 @@ Run through this list before you say a task is finished.
 | `role/SPEC.md` lists an `is_system` column; code derives `isSystem` from `orgId === null` | Code is truth: system role ⇔ `orgId === null`. Fix the SPEC when you touch the module. |
 | `role.routes.test.ts` sample DTO uses `assignedCount`, mapper returns `memberCount` | Mock-only drift. In new tests use the real DTO fields. |
 | `RequirePermissionOptions` is not exported from `role/index.ts` | Add `export type { RequirePermissionOptions } from "./role.middleware.js"` when first needed. |
+
+---
+
+## 13. Critical Pitfalls & TypeScript Traps (Avoid These Errors)
+
+These are the most common mistakes that cause build and typecheck failures during module creation:
+
+### 1. Missing Registry Entry in `@avuny/contracts`
+- **Mistake**: Defining constants or schemas in `packages/contracts/src/<module>/` without registering the module in `packages/contracts/src/modules/registry.ts`.
+- **Symptom**: `TS2769: Argument of type 'string' is not assignable to parameter of type 'PermissionKey'`, and `TS2345: Type 'string' is not assignable to type 'ActivityLogAction'` in `deps.ts` and `service.ts`.
+- **Rule**: `PermissionKey`, `ActivityLogAction`, and `SIDEBAR_TREE` are derived entirely from `MODULES` in `packages/contracts/src/modules/registry.ts`. Whenever you add a module, immediately register it in `registry.ts` with its actions (`permission: true`) and audit event names.
+
+### 2. Using `{ status: number }` instead of `{ statusCode, responseMessage }` in `errorsHttpMap`
+- **Mistake**: Declaring `export const <module>ErrorsHttpMap = { ERROR_CODE: { status: 404 } }`.
+- **Symptom**: `TS2353: Object literal may only specify known properties, and 'status' does not exist in type 'ErrorMeta'`.
+- **Rule**: `ErrorMeta` in `@avuny/utils` strictly requires `{ statusCode: ClientErrorStatusCode, responseMessage: string }`. Always provide both.
+
+### 3. Error Map Status Widening & OpenAPI Handler Mismatch (TS2345)
+- **Mistake**:
+  1. Casting the module error map `as Record<Code, ErrorMeta>`.
+  2. Passing the broad module-wide `errorMap` to `handleResult` in a route whose `responses` only declares a subset of status codes (e.g., passing a map containing `404` to `createRoute` that only declared `201`, `403`, `409`, `422`).
+- **Symptom**: `TS2345: Argument of type '(c) => Promise<...>' is not assignable to parameter of type 'Handler<...>' ... Type 'ClientErrorStatusCode' (or '400') is not assignable to type '403'`.
+- **Rule**:
+  1. In each route file, always declare a scoped `rawErrorMap = { ... } as const` that contains **ONLY** the error codes that specific endpoint can produce.
+  2. Every status code in `rawErrorMap` MUST be declared in `responses: { ... }` of `createRoute`.
+  3. Never type error maps as `Record<..., ErrorMeta>`. Use `as const satisfies Record<Code, ...>` or `as const` to keep exact numeric literal types (`404`, `409`, etc.).
+
+### 4. Permissive / Untyped Service Authorization and Audit Logging
+- **Mistake**: Declaring `can = (actorId: string, action: string, orgId: string)` or `audit = (..., action: string, ...)`.
+- **Symptom**: `TS2769` on `permissions.check` and `TS2345` on `activityLog.record`.
+- **Rule**:
+  - `permissions.check` takes `PermissionKey | readonly PermissionKey[]`. Type the `action` parameter as `PermissionKey` (or use constants typed with `satisfies Record<string, PermissionKey>`).
+  - `activityLog.log` takes `ActivityLogEntry` where `action` is `ActivityLogAction`. Type audit actions strictly as `ActivityLogAction`.
+
+### 5. Sidebar Permission Map Missing Entry
+- **Mistake**: Adding a module with `sidebar: { ... }` to `registry.ts` without mapping it in `apps/server/src/api/modules/sidebar/sidebar.permission-map.ts`.
+- **Symptom**: `TS1360: Property '<module>' is missing in type '...' but required in type 'Record<SidebarOptionName, string>'`.
+- **Rule**: If a module has a sidebar configuration in `registry.ts`, add its camelCase option name to `sidebarOptionResources` in `sidebar.permission-map.ts` (e.g. `warehouse: "warehouse"`).
+
+### 6. Expecting 400 instead of 422 for Request Validation in Route Tests
+- **Mistake**: In route tests, expecting `expect(res.status).toBe(400)` when passing an invalid body or invalid query parameters.
+- **Symptom**: Test failure `expected 422 to be 400`.
+- **Rule**: Hono's `@hono/zod-openapi` validation middleware responds with HTTP `422` (Unprocessable Entity) on Zod schema validation errors. Route tests must assert `expect(res.status).toBe(422)`.
