@@ -58,6 +58,7 @@ const makeService = () => {
   }
   const activityLog = { log: vi.fn().mockResolvedValue(undefined) }
   const limits = { maxOwnedPerUser: vi.fn().mockResolvedValue(2) }
+  const seedDefaults = vi.fn().mockResolvedValue(undefined)
 
   const service = createOrganizationService({
     repo: repo as unknown as OrganizationRepository,
@@ -65,8 +66,9 @@ const makeService = () => {
     cache,
     activityLog,
     limits,
+    seedDefaults,
   })
-  return { service, repo, permissions, cache, activityLog, limits }
+  return { service, repo, permissions, cache, activityLog, limits, seedDefaults }
 }
 
 describe("organizationService", () => {
@@ -96,6 +98,7 @@ describe("organizationService", () => {
         }),
         { tx }
       )
+      expect(t.seedDefaults).toHaveBeenCalledWith(tx, ORG_ID)
     })
 
     it("takes the owner lock before checking the limit and the name", async () => {

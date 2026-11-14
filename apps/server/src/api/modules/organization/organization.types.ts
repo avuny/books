@@ -28,5 +28,6 @@ export interface OrganizationServiceDeps {
   cache: Cache
   activityLog: ActivityLog
   limits: OrganizationLimits
+  seedDefaults?: (tx: Tx, orgId: string) => Promise<void>
 }
 

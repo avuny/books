@@ -11,6 +11,7 @@ import {
 } from "@avuny/contracts"
 import { isUniqueViolation } from "./organization.repository.js"
 import { toOrganizationDto } from "./organization.mapper.js"
+import { seedInventoryDefaults } from "../warehouse/warehouse.defaults.js"
 import type { OrganizationServiceDeps } from "./organization.types.js"
 
 export type {
@@ -41,6 +42,7 @@ export const createOrganizationService = ({
   cache,
   activityLog,
   limits,
+  seedDefaults = seedInventoryDefaults,
 }: OrganizationServiceDeps) => {
   const can = (
     userId: string,
@@ -99,6 +101,9 @@ export const createOrganizationService = ({
             ownerUsername,
             tx,
           })
+          if (seedDefaults) {
+            await seedDefaults(tx, org.id)
+          }
           await activityLog.log(
             {
               action: ActivityLogAction.ORGANIZATION_CREATED,
