@@ -17,6 +17,7 @@ const item = (o: Partial<Item> = {}): Item => ({
   isReturnable: true,
   isInventoryTracked: true,
   isBatchTracked: false,
+  isExpiryTracked: false,
   inventoryValuationMethod: "fifo",
   isActive: true,
   createdAt: NOW,
@@ -57,6 +58,7 @@ const collection = (o: Partial<UnitCollection> = {}): UnitCollection => ({
 const detail = (o: Partial<Item> = {}): ItemRow => ({
   item: item(o),
   settings: null,
+  expirySettings: null,
   categoryName: "Cement",
   unit: unit(),
 })
@@ -73,6 +75,8 @@ function setup() {
     insertItem: vi.fn(async () => ({ ok: true as const, row: item() })),
     updateItem: vi.fn(async () => ({ ok: true as const, row: item() })),
     upsertSettings: vi.fn(async () => {}),
+    upsertExpirySettings: vi.fn(async () => {}),
+    findStockPolicies: vi.fn(async () => new Map()),
     deleteItem: vi.fn(async () => ({ ok: true as const })),
   }
   const unitRepository = {
@@ -104,6 +108,7 @@ const createInput = {
   isReturnable: true,
   isInventoryTracked: true,
   isBatchTracked: false,
+  isExpiryTracked: false,
   inventoryValuationMethod: "fifo" as const,
   allowNegativeStock: false,
 }

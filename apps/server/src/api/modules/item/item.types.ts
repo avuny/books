@@ -5,6 +5,7 @@ import type { ItemRules } from "./item.rules.js"
 import type { createItemService } from "./item.service.js"
 import type { ActivityLog, ActivityLogEntry } from "../activity-log/activity-log.port.js"
 import type { PermissionChecker } from "../role/index.js"
+import type { ItemOpeningStockDeps } from "./item-opening-stock.js"
 
 export type { ItemRepository, PermissionChecker }
 export type ItemService = ReturnType<typeof createItemService>
@@ -33,4 +34,5 @@ export interface ItemServiceDeps {
   activityLog?: ActivityLog
   /** Pure business rules. Defaults to the real ones; inject a fake to test orchestration alone. */
   rules?: ItemRules
+  openingStock?: ItemOpeningStockDeps
 }

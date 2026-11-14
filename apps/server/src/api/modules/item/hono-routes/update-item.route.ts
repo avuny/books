@@ -17,6 +17,7 @@ import type { RouteDeps } from "./module-routes.types.js"
 const rawErrorMap = {
   ITEM_BATCH_REQUIRES_TRACKING: errors.ITEM_BATCH_REQUIRES_TRACKING,
   ITEM_CATEGORY_INVALID: errors.ITEM_CATEGORY_INVALID,
+  ITEM_EXPIRY_REQUIRES_BATCH_AND_TRACKING: errors.ITEM_EXPIRY_REQUIRES_BATCH_AND_TRACKING,
   ITEM_LOCKED_FIELD: errors.ITEM_LOCKED_FIELD,
   ITEM_NAME_TAKEN: errors.ITEM_NAME_TAKEN,
   ITEM_NOT_FOUND: errors.ITEM_NOT_FOUND,
@@ -49,7 +50,13 @@ export const updateItemRoute = ({
       403: jsonError("Forbidden", [RoleErrorCode.ROLE_PERMISSION_DENIED]),
       404: jsonError("Not found", [Code.ITEM_NOT_FOUND]),
       409: jsonError("Conflict", [Code.ITEM_NAME_TAKEN, Code.ITEM_LOCKED_FIELD]),
-      422: jsonError("Invalid request", [Code.ITEM_CATEGORY_INVALID, Code.ITEM_UNIT_INVALID, Code.ITEM_UNIT_COLLECTION_INVALID, Code.ITEM_BATCH_REQUIRES_TRACKING]),
+      422: jsonError("Invalid request", [
+        Code.ITEM_CATEGORY_INVALID,
+        Code.ITEM_UNIT_INVALID,
+        Code.ITEM_UNIT_COLLECTION_INVALID,
+        Code.ITEM_BATCH_REQUIRES_TRACKING,
+        Code.ITEM_EXPIRY_REQUIRES_BATCH_AND_TRACKING,
+      ]),
       ...globalErrorResponses,
     },
   })

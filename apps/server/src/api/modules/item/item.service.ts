@@ -16,6 +16,8 @@ import { decodeCursor, fail, ok, toCursorPage, type Result } from "@avuny/utils"
 import { createFailureKit, type Failure } from "../shared/service-helpers.js"
 import { ItemErrorCode, type ItemErrorCode as Code } from "./item.errors.js"
 import { toItemDto, toItemListItemDto } from "./item.mapper.js"
+import { checkOpeningStock } from "./item-opening-stock.rules.js"
+import { postOpeningStock } from "./item-opening-stock.js"
 import { itemRules, type UnitSource } from "./item.rules.js"
 import { DummyItemActivityLog, DummyPermissionChecker, DummyStockHistory } from "./testing.js"
 import type { ItemServiceDeps } from "./item.types.js"
@@ -150,15 +152,26 @@ export function createItemService(deps: ItemServiceDeps) {
       return ok({ data: dto, msg: "Item retrieved" })
     },
 
-    async create(actorId: string, orgId: string, input: CreateItemInput): Promise<Result<ItemDto, Code>> {
+    async create(
+      actorId: string,
+      orgId: string,
+      input: CreateItemInput,
+      outerTx?: Tx
+    ): Promise<Result<ItemDto, Code>> {
       if (!(await can(actorId, "create:item", orgId))) return forbidden()
       const trackingViolation = rules.checkTracking(input)
       if (trackingViolation) return failWith(trackingViolation)
+      const openingStockViolation = checkOpeningStock(input)
+      if (openingStockViolation)
+        return fail({ error: openingStockViolation.error, msg: openingStockViolation.msg })
       const source = rules.selectUnitSource(input)
       if (!source) return fail({ error: Err.ITEM_UNIT_INVALID, msg: MSG.unitRequired })
 
+      const executeTx = <T>(fn: (tx: Tx) => Promise<T>): Promise<T> =>
+        outerTx ? fn(outerTx) : repo.transaction(fn)
+
       const outcome = await abortable(() =>
-        repo.transaction(async (tx) => {
+        executeTx(async (tx) => {
           await repo.lockOrgItems(orgId, tx)
 
           // checks first (reads only) ...
@@ -182,6 +195,7 @@ export function createItemService(deps: ItemServiceDeps) {
               isReturnable: input.isReturnable,
               isInventoryTracked: input.isInventoryTracked,
               isBatchTracked: input.isBatchTracked,
+              isExpiryTracked: input.isExpiryTracked,
               inventoryValuationMethod: input.inventoryValuationMethod,
             },
             tx
@@ -193,6 +207,33 @@ export function createItemService(deps: ItemServiceDeps) {
             { allowNegativeStock: input.allowNegativeStock, reorderPoint: input.reorderPoint ?? null },
             tx
           )
+          if (input.expirySettings) {
+            await repo.upsertExpirySettings(
+              orgId,
+              res.row.id,
+              {
+                defaultShelfLifeValue: input.expirySettings.defaultShelfLifeValue ?? null,
+                defaultShelfLifeUnit: input.expirySettings.defaultShelfLifeUnit ?? null,
+              },
+              tx
+            )
+          }
+
+          if (input.openingStock && deps.openingStock) {
+            const posted = await postOpeningStock(deps.openingStock, {
+              tx,
+              actorId,
+              orgId,
+              itemId: res.row.id,
+              itemName: res.row.name,
+              isBatchTracked: input.isBatchTracked,
+              opening: input.openingStock,
+            })
+            if (!posted.ok) {
+              return abort(failure(Err.ITEM_OPENING_STOCK_NOT_TRACKED, posted.msg))
+            }
+          }
+
           return { id: res.row.id, name: res.row.name }
         })
       )
@@ -267,6 +308,7 @@ export function createItemService(deps: ItemServiceDeps) {
                 isInventoryTracked: input.isInventoryTracked,
               }),
               ...(input.isBatchTracked !== undefined && { isBatchTracked: input.isBatchTracked }),
+              ...(input.isExpiryTracked !== undefined && { isExpiryTracked: input.isExpiryTracked }),
               ...(input.inventoryValuationMethod !== undefined && {
                 inventoryValuationMethod: input.inventoryValuationMethod,
               }),
@@ -290,6 +332,17 @@ export function createItemService(deps: ItemServiceDeps) {
                   allowNegativeStock: input.allowNegativeStock,
                 }),
                 ...(input.reorderPoint !== undefined && { reorderPoint: input.reorderPoint }),
+              },
+              tx
+            )
+
+          if (input.expirySettings !== undefined)
+            await repo.upsertExpirySettings(
+              orgId,
+              itemId,
+              {
+                defaultShelfLifeValue: input.expirySettings?.defaultShelfLifeValue ?? null,
+                defaultShelfLifeUnit: input.expirySettings?.defaultShelfLifeUnit ?? null,
               },
               tx
             )
