@@ -85,6 +85,20 @@
       "when": 1794572555269,
       "tag": "0011_sparkling_vanisher",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1794654976371,
+      "tag": "0012_illegal_nova",
+      "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1794666129398,
+      "tag": "0013_odd_ozymandias",
+      "breakpoints": true
     }
   ]
 }

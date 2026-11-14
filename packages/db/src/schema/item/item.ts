@@ -4,6 +4,7 @@ import {
     check,
     foreignKey,
     index,
+    integer,
     pgEnum,
     pgTable,
     text,
@@ -17,6 +18,7 @@ import {
     ITEM_NAME_MAX_LENGTH,
     ITEM_NAME_MIN_LENGTH,
 } from "@avuny/contracts/item"
+import { SHELF_LIFE_UNITS } from "@avuny/contracts/batch"
 import { lengthBetween, pk, quantity, timestamps } from "../_helpers.js"
 import { orgRef } from "../organization/organizations.js"
 import { itemCategories } from "./item-category.js"
@@ -29,6 +31,9 @@ export const inventoryValuationMethodEnum = pgEnum(
 )
 export type InventoryValuationMethod =
     (typeof inventoryValuationMethodEnum.enumValues)[number]
+
+export const shelfLifeUnitEnum = pgEnum("shelf_life_unit", SHELF_LIFE_UNITS)
+export type ShelfLifeUnit = (typeof shelfLifeUnitEnum.enumValues)[number]
 
 /**
  * ITEMS: what the organization buys, sells, stores and assembles.
@@ -70,6 +75,7 @@ export const items = pgTable(
         isReturnable: boolean("is_returnable").notNull().default(true),
         isInventoryTracked: boolean("is_inventory_tracked").notNull().default(true),
         isBatchTracked: boolean("is_batch_tracked").notNull().default(false),
+        isExpiryTracked: boolean("is_expiry_tracked").notNull().default(false),
 
         inventoryValuationMethod: inventoryValuationMethodEnum(
             "inventory_valuation_method"
@@ -106,6 +112,10 @@ export const items = pgTable(
         check(
             "ck_item_batch_requires_tracking",
             sql`NOT ${t.isBatchTracked} OR ${t.isInventoryTracked}`
+        ),
+        check(
+            "ck_item_expiry_requires_batch_and_tracking",
+            sql`NOT ${t.isExpiryTracked} OR (${t.isInventoryTracked} AND ${t.isBatchTracked})`
         ),
     ]
 )
@@ -191,6 +201,36 @@ export const itemWarehouseSettings = pgTable(
     ]
 )
 
+export const itemExpirySettings = pgTable(
+    "item_expiry_settings",
+    {
+        id: pk(),
+        orgId: orgRef(),
+        itemId: uuid("item_id").notNull(),
+        defaultShelfLifeValue: integer("default_shelf_life_value"),
+        defaultShelfLifeUnit: shelfLifeUnitEnum("default_shelf_life_unit"),
+        ...timestamps(),
+    },
+    (t) => [
+        unique("ux_item_expiry_settings_item").on(t.itemId),
+        foreignKey({
+            name: "fk_item_expiry_settings_item",
+            columns: [t.orgId, t.itemId],
+            foreignColumns: [items.orgId, items.id],
+        }).onDelete("cascade"),
+        check(
+            "ck_item_expiry_settings_unit_and_value",
+            sql`(${t.defaultShelfLifeValue} IS NULL AND ${t.defaultShelfLifeUnit} IS NULL) OR (${t.defaultShelfLifeValue} IS NOT NULL AND ${t.defaultShelfLifeUnit} IS NOT NULL)`
+        ),
+        check(
+            "ck_item_expiry_settings_positive_value",
+            sql`${t.defaultShelfLifeValue} IS NULL OR ${t.defaultShelfLifeValue} > 0`
+        ),
+    ]
+)
+
 export type Item = typeof items.$inferSelect
 export type ItemInventorySettings = typeof itemInventorySettings.$inferSelect
 export type ItemWarehouseSettings = typeof itemWarehouseSettings.$inferSelect
+export type ItemExpirySettings = typeof itemExpirySettings.$inferSelect
+export type NewItemExpirySettings = typeof itemExpirySettings.$inferInsert

@@ -43,6 +43,7 @@ import {
     WAREHOUSE_LOCATION_NAME_MIN_LENGTH,
     WAREHOUSE_LOCATION_PURPOSES,
     WAREHOUSE_LOCATION_STOCKABLE_TYPES,
+    WAREHOUSE_LOCATION_SYSTEM_ROLES,
     WAREHOUSE_LOCATION_TYPES,
 } from "@avuny/contracts/warehouse-location"
 import { pk, timestamps, lengthBetween } from "../_helpers.js"
@@ -55,6 +56,11 @@ export const warehouseLocationPurposeEnum = pgEnum(
     "warehouse_location_purpose",
     WAREHOUSE_LOCATION_PURPOSES
 )
+export const warehouseLocationSystemRoleEnum = pgEnum(
+    "warehouse_location_system_role",
+    WAREHOUSE_LOCATION_SYSTEM_ROLES
+)
+export type WarehouseLocationSystemRole = (typeof warehouseLocationSystemRoleEnum.enumValues)[number]
 
 /** SQL list of quoted constants, e.g. 'bin', 'shelf'. Only ever fed contracts constants. */
 const sqlList = (values: readonly string[]) => sql.raw(values.map((v) => `'${v}'`).join(", "))
@@ -160,6 +166,7 @@ export const warehouseLocations = pgTable(
         name: text("name").notNull(),
         type: warehouseLocationTypeEnum("type").notNull(),
         purpose: warehouseLocationPurposeEnum("purpose").notNull().default(WAREHOUSE_LOCATION_DEFAULT_PURPOSE),
+        systemRole: warehouseLocationSystemRoleEnum("system_role"),
         pathIds: uuid("path_ids").array().notNull(),
         treeDepth: smallint("tree_depth").notNull(),
         barcode: text("barcode"),
@@ -198,6 +205,9 @@ export const warehouseLocations = pgTable(
             .on(t.orgId, t.parentId, sql`lower(${t.code})`)
             .where(sql`${t.parentId} is not null`),
         uniqueIndex("ux_warehouse_location_full_code").on(t.orgId, t.warehouseId, sql`lower(${t.fullCode})`),
+        uniqueIndex("ux_warehouse_location_org_system_role")
+            .on(t.orgId, t.systemRole)
+            .where(sql`${t.systemRole} is not null`),
         uniqueIndex("ux_warehouse_location_org_barcode")
             .on(t.orgId, sql`lower(${t.barcode})`)
             .where(sql`${t.barcode} is not null`),
