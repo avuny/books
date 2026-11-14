@@ -24,6 +24,8 @@ const raw = {
   isReturnable: true,
   isInventoryTracked: true,
   isBatchTracked: false,
+  isExpiryTracked: false,
+  expirySettings: null,
   inventoryValuationMethod: "fifo" as const,
   isActive: true,
   allowNegativeStock: false,

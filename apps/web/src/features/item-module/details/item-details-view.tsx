@@ -15,6 +15,7 @@ export type ItemDetailsViewCopy = {
   trackedLabel: string
   untrackedLabel: string
   batchLabel: string
+  expiryLabel: string
   categoryLabel: string
   baseUnitLabel: string
   valuationLabel: string
@@ -174,9 +175,11 @@ export function ItemDetailsView({
               <ItemTrackingBadges
                 isInventoryTracked={item.isInventoryTracked}
                 isBatchTracked={item.isBatchTracked}
+                isExpiryTracked={item.isExpiryTracked}
                 trackedLabel={copy.trackedLabel}
                 untrackedLabel={copy.untrackedLabel}
                 batchLabel={copy.batchLabel}
+                expiryLabel={copy.expiryLabel}
               />
               {item.canAssembled ? (
                 <Badge variant="outline">{copy.assemblableLabel}</Badge>

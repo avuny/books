@@ -37,6 +37,7 @@ export function ItemDetails({ orgId, itemId, onBack }: ItemDetailsProps) {
         trackedLabel: t("type.tracked"),
         untrackedLabel: t("type.untracked"),
         batchLabel: t("type.batch"),
+        expiryLabel: t("type.expiry"),
         categoryLabel: t("details.category"),
         baseUnitLabel: t("details.baseUnit"),
         valuationLabel: t("details.valuation"),
