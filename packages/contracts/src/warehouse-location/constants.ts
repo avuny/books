@@ -123,6 +123,19 @@ export const WAREHOUSE_LOCATION_POSTING_INTENTS = [
 ] as const
 export type WarehouseLocationPostingIntent = (typeof WAREHOUSE_LOCATION_POSTING_INTENTS)[number]
 
+/**
+ * System location roles for virtual counterparties outside regular physical storage.
+ * Used by stock movements (e.g. supplier receipts, customer deliveries, inventory adjustments, production, in-transit).
+ */
+export const WAREHOUSE_LOCATION_SYSTEM_ROLES = [
+  "supplier",
+  "customer",
+  "adjustment",
+  "production",
+  "transit",
+] as const
+export type WarehouseLocationSystemRole = (typeof WAREHOUSE_LOCATION_SYSTEM_ROLES)[number]
+
 /** Must match the events declared for the `warehouse_location` module in the MODULES registry. */
 export const WAREHOUSE_LOCATION_AUDIT_EVENTS = {
   CREATED: "warehouse_location.created",
