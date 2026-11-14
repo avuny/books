@@ -15,6 +15,7 @@ import {
 const current = {
   isInventoryTracked: true,
   isBatchTracked: false,
+  isExpiryTracked: false,
   inventoryValuationMethod: "fifo" as const,
 }
 
@@ -26,10 +27,26 @@ describe("tracking", () => {
       error: "ITEM_BATCH_REQUIRES_TRACKING",
     })
   })
+  it("expiry tracking requires both batch and inventory tracking", () => {
+    expect(
+      checkTracking({ isInventoryTracked: true, isBatchTracked: true, isExpiryTracked: true })
+    ).toBeNull()
+    expect(
+      checkTracking({ isInventoryTracked: true, isBatchTracked: false, isExpiryTracked: true })
+    ).toMatchObject({
+      error: "ITEM_EXPIRY_REQUIRES_BATCH_AND_TRACKING",
+    })
+    expect(
+      checkTracking({ isInventoryTracked: false, isBatchTracked: false, isExpiryTracked: true })
+    ).toMatchObject({
+      error: "ITEM_EXPIRY_REQUIRES_BATCH_AND_TRACKING",
+    })
+  })
   it("effectiveTracking applies a patch over the current flags", () => {
     expect(effectiveTracking({ isInventoryTracked: true, isBatchTracked: true }, { isInventoryTracked: false })).toEqual({
       isInventoryTracked: false,
       isBatchTracked: true,
+      isExpiryTracked: false,
     })
   })
 })

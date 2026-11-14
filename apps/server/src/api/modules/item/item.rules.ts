@@ -15,8 +15,10 @@ const Err = ItemErrorCode
 export interface TrackingFlags {
   isInventoryTracked: boolean
   isBatchTracked: boolean
+  isExpiryTracked?: boolean
 }
 export interface ItemTrackingSnapshot extends TrackingFlags {
+  isExpiryTracked: boolean
   inventoryValuationMethod: InventoryValuationMethod
 }
 export type UnitSource =
@@ -24,13 +26,25 @@ export type UnitSource =
   | { kind: "collection"; collectionId: string }
 
 /** Fields that stored quantities and costs depend on: frozen once stock has moved. */
-export type LockedField = "unit" | "isInventoryTracked" | "isBatchTracked" | "inventoryValuationMethod"
+export type LockedField =
+  | "unit"
+  | "isInventoryTracked"
+  | "isBatchTracked"
+  | "isExpiryTracked"
+  | "inventoryValuationMethod"
 
 /** Batch tracking only makes sense for items whose inventory is tracked (ck_item_batch_requires_tracking). */
 export function checkTracking(flags: TrackingFlags): RuleViolation<Code> | null {
-  return flags.isBatchTracked && !flags.isInventoryTracked
-    ? violation(Err.ITEM_BATCH_REQUIRES_TRACKING, "Batch tracking requires inventory tracking")
-    : null
+  if (flags.isBatchTracked && !flags.isInventoryTracked) {
+    return violation(Err.ITEM_BATCH_REQUIRES_TRACKING, "Batch tracking requires inventory tracking")
+  }
+  if (flags.isExpiryTracked && (!flags.isBatchTracked || !flags.isInventoryTracked)) {
+    return violation(
+      Err.ITEM_EXPIRY_REQUIRES_BATCH_AND_TRACKING,
+      "Expiry tracking requires both inventory tracking and batch tracking"
+    )
+  }
+  return null
 }
 
 /** The tracking flags the item will have after `patch` is applied. */
@@ -41,6 +55,7 @@ export function effectiveTracking(
   return {
     isInventoryTracked: patch.isInventoryTracked ?? current.isInventoryTracked,
     isBatchTracked: patch.isBatchTracked ?? current.isBatchTracked,
+    isExpiryTracked: patch.isExpiryTracked ?? current.isExpiryTracked ?? false,
   }
 }
 
@@ -107,6 +122,8 @@ export function changedLockedFields(
     changed.push("isInventoryTracked")
   if (patch.isBatchTracked !== undefined && patch.isBatchTracked !== current.isBatchTracked)
     changed.push("isBatchTracked")
+  if (patch.isExpiryTracked !== undefined && patch.isExpiryTracked !== current.isExpiryTracked)
+    changed.push("isExpiryTracked")
   if (
     patch.inventoryValuationMethod !== undefined &&
     patch.inventoryValuationMethod !== current.inventoryValuationMethod

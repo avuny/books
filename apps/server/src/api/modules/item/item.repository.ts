@@ -1,16 +1,18 @@
-import { and, asc, eq, ilike, ne, sql, type SQL } from "drizzle-orm"
+import { and, asc, eq, ilike, inArray, ne, sql, type SQL } from "drizzle-orm"
 import {
   itemCategories,
+  itemExpirySettings,
   itemInventorySettings,
   items,
   units,
   type DB,
   type Item,
+  type ItemExpirySettings,
   type ItemInventorySettings,
   type Tx,
   type Unit,
 } from "@avuny/db"
-import type { InventoryValuationMethod } from "@avuny/contracts"
+import type { InventoryValuationMethod, ShelfLifeUnit } from "@avuny/contracts"
 import { isForeignKeyViolation, isUniqueViolation } from "../shared/pg-errors.js"
 
 // Index name from the items schema
@@ -23,6 +25,7 @@ type NewItem = typeof items.$inferInsert
 export type ItemRow = {
   item: Item
   settings: ItemInventorySettings | null
+  expirySettings: ItemExpirySettings | null
   categoryName: string
   unit: Unit
 }
@@ -51,10 +54,15 @@ export type ItemPatch = {
   isReturnable?: boolean
   isInventoryTracked?: boolean
   isBatchTracked?: boolean
+  isExpiryTracked?: boolean
   inventoryValuationMethod?: InventoryValuationMethod
   isActive?: boolean
 }
 export type ItemSettingsPatch = { allowNegativeStock?: boolean; reorderPoint?: string | null }
+export type ItemExpirySettingsPatch = {
+  defaultShelfLifeValue?: number | null
+  defaultShelfLifeUnit?: ShelfLifeUnit | null
+}
 
 /** Items under `categoryId` and all of its sub-categories (recursive CTE, same as the schema docs). */
 const inCategoryTree = (orgId: string, categoryId: string): SQL => sql`${items.categoryId} in (
@@ -68,12 +76,13 @@ const inCategoryTree = (orgId: string, categoryId: string): SQL => sql`${items.c
 export function createItemRepository({ db }: { db: DB }) {
   const exec = (tx?: Tx): DB | Tx => tx ?? db
 
-  /** items + category name + base unit + inventory settings (may be missing). */
+  /** items + category name + base unit + inventory settings + expiry settings (may be missing). */
   const rowQuery = (e: DB | Tx) =>
     e
       .select({
         item: items,
         settings: itemInventorySettings,
+        expirySettings: itemExpirySettings,
         categoryName: itemCategories.name,
         unit: units,
       })
@@ -86,6 +95,10 @@ export function createItemRepository({ db }: { db: DB }) {
       .leftJoin(
         itemInventorySettings,
         and(eq(itemInventorySettings.orgId, items.orgId), eq(itemInventorySettings.itemId, items.id))
+      )
+      .leftJoin(
+        itemExpirySettings,
+        and(eq(itemExpirySettings.orgId, items.orgId), eq(itemExpirySettings.itemId, items.id))
       )
 
   return {
@@ -218,6 +231,79 @@ export function createItemRepository({ db }: { db: DB }) {
           target: itemInventorySettings.itemId,
           set: { ...patch, updatedAt: new Date() },
         })
+    },
+
+    /** Item default shelf-life configuration. */
+    async upsertExpirySettings(
+      orgId: string,
+      itemId: string,
+      patch: ItemExpirySettingsPatch,
+      tx?: Tx
+    ): Promise<void> {
+      await exec(tx)
+        .insert(itemExpirySettings)
+        .values({
+          orgId,
+          itemId,
+          defaultShelfLifeValue: patch.defaultShelfLifeValue ?? null,
+          defaultShelfLifeUnit: patch.defaultShelfLifeUnit ?? null,
+        })
+        .onConflictDoUpdate({
+          target: itemExpirySettings.itemId,
+          set: {
+            defaultShelfLifeValue: patch.defaultShelfLifeValue ?? null,
+            defaultShelfLifeUnit: patch.defaultShelfLifeUnit ?? null,
+            updatedAt: new Date(),
+          },
+        })
+    },
+
+    /** What the stock movement service asks when checking item policies. */
+    async findStockPolicies(
+      orgId: string,
+      itemIds: readonly string[],
+      tx?: Tx
+    ): Promise<
+      Map<
+        string,
+        {
+          isActive: boolean
+          tracksStock: boolean
+          isBatchTracked: boolean
+          isExpiryTracked: boolean
+          allowNegativeStock: boolean
+        }
+      >
+    > {
+      if (itemIds.length === 0) return new Map()
+      const rows = await exec(tx)
+        .select({
+          id: items.id,
+          isActive: items.isActive,
+          tracksStock: items.isInventoryTracked,
+          isBatchTracked: items.isBatchTracked,
+          isExpiryTracked: items.isExpiryTracked,
+          allowNegativeStock: itemInventorySettings.allowNegativeStock,
+        })
+        .from(items)
+        .leftJoin(
+          itemInventorySettings,
+          and(eq(itemInventorySettings.orgId, items.orgId), eq(itemInventorySettings.itemId, items.id))
+        )
+        .where(and(eq(items.orgId, orgId), inArray(items.id, [...itemIds])))
+
+      return new Map(
+        rows.map((r) => [
+          r.id,
+          {
+            isActive: r.isActive,
+            tracksStock: r.tracksStock,
+            isBatchTracked: r.isBatchTracked,
+            isExpiryTracked: r.isExpiryTracked,
+            allowNegativeStock: r.allowNegativeStock ?? false,
+          },
+        ])
+      )
     },
 
     async deleteItem(orgId: string, id: string, tx?: Tx): Promise<ItemDeleteResult> {

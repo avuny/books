@@ -23,6 +23,26 @@ export const itemErrorsHttpMap = {
     statusCode: 422,
     responseMessage: "Batch tracking requires inventory tracking",
   },
+  ITEM_EXPIRY_REQUIRES_BATCH_AND_TRACKING: {
+    statusCode: 422,
+    responseMessage: "Expiry tracking requires both inventory tracking and batch tracking",
+  },
+  ITEM_OPENING_STOCK_NOT_TRACKED: {
+    statusCode: 422,
+    responseMessage: "Opening stock needs an inventory-tracked item",
+  },
+  ITEM_OPENING_STOCK_BATCH_REQUIRED: {
+    statusCode: 422,
+    responseMessage: "Opening stock requires a batch for batch-tracked items",
+  },
+  ITEM_OPENING_STOCK_BATCH_NOT_TRACKED: {
+    statusCode: 422,
+    responseMessage: "Opening stock cannot have a batch for non-batch-tracked items",
+  },
+  ITEM_EXPIRY_DATE_REQUIRED: {
+    statusCode: 422,
+    responseMessage: "Expiry date is required for expiry-tracked items",
+  },
   ITEM_LOCKED_FIELD: {
     statusCode: 409,
     responseMessage: "These settings cannot change after the item has stock movements",

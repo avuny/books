@@ -15,7 +15,7 @@ const toUnit = (unit: Unit): UnitDto => ({
 })
 
 export function toItemDto(row: ItemRow): ItemDto {
-  const { item, settings } = row
+  const { item, settings, expirySettings } = row
   return {
     id: item.id,
     orgId: item.orgId,
@@ -29,6 +29,13 @@ export function toItemDto(row: ItemRow): ItemDto {
     isReturnable: item.isReturnable,
     isInventoryTracked: item.isInventoryTracked,
     isBatchTracked: item.isBatchTracked,
+    isExpiryTracked: item.isExpiryTracked,
+    expirySettings: expirySettings
+      ? {
+          defaultShelfLifeValue: expirySettings.defaultShelfLifeValue,
+          defaultShelfLifeUnit: expirySettings.defaultShelfLifeUnit,
+        }
+      : null,
     inventoryValuationMethod: item.inventoryValuationMethod,
     isActive: item.isActive,
     allowNegativeStock: settings?.allowNegativeStock ?? false,
@@ -48,6 +55,7 @@ export function toItemListItemDto(row: ItemRow): ItemListItemDto {
     baseUnit: toUnit(row.unit),
     isInventoryTracked: item.isInventoryTracked,
     isBatchTracked: item.isBatchTracked,
+    isExpiryTracked: item.isExpiryTracked,
     isActive: item.isActive,
     createdAt: item.createdAt.toISOString(),
     updatedAt: item.updatedAt.toISOString(),
