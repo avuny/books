@@ -25,8 +25,6 @@ const row = (
 // Deliberately NOT in sidebar order: the registry decides the order, not the database.
 const catalog: SidebarCatalogRow[] = [
   row("inventory", "item"),
-  // row("sales", "invoice"),
-  // row("sales", "customer"),
   row("users", "organizationUser"),
   row("users", "role"),
 ]
@@ -56,13 +54,13 @@ const unwrap = <T>(r: { success: boolean; data?: T }): T => {
 
 describe("sidebarService.getForUser", () => {
   it("keeps only permitted options and drops headings left with none", async () => {
-    const { service } = build(["read:role", "create:invoice"])
+    const { service } = build(["read:role", "delete:item"])
     const result = await service.getForUser(input)
     const data = unwrap(result)
 
-    expect(data.map((h) => h.name)).toEqual(["users", "sales"])
+    expect(data.map((h) => h.name)).toEqual(["users", "inventory"])
     expect(data[0]!.options.map((o) => o.name)).toEqual(["role"])
-    expect(data[1]!.options.map((o) => o.name)).toEqual(["invoice"])
+    expect(data[1]!.options.map((o) => o.name)).toEqual(["item"])
   })
 
   it("a single action (even delete) is enough to show an option", async () => {
@@ -88,12 +86,10 @@ describe("sidebarService.getForUser", () => {
     const all = SIDEBAR_TREE.flatMap((h) => h.options).flatMap((o) => o.permissionKeys)
     const { service } = build(all)
     const data = unwrap(await service.getForUser(input))
-    expect(data.map((h) => h.name)).toEqual(["users", "sales", "inventory"])
+    expect(data.map((h) => h.name)).toEqual(["users", "inventory"])
     expect(data.flatMap((h) => h.options.map((o) => o.name))).toEqual([
       "role",
       "organizationUser",
-      "customer",
-      "invoice",
       "item",
     ])
   })

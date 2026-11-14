@@ -28,8 +28,7 @@ export type Localized = Record<Locale, string>
 /** Sidebar headings. Their order is the order of the sidebar. */
 export const SIDEBAR_GROUPS = {
   users: { icon: "users", label: { en: "Users", ar: "المستخدمون" } },
-  purchases: { icon: "shopping-cart", label: { en: "Purchases", ar: "المشتريات" } },
-  sales: { icon: "badge-dollar-sign", label: { en: "Sales", ar: "المبيعات" } },
+  // purchases and sales groups are defined here when their first module is uncommented
   inventory: { icon: "boxes", label: { en: "Inventory", ar: "المخزون" } },
 } as const satisfies Record<string, { icon: string; label: Localized }>
 
@@ -251,6 +250,19 @@ export const MODULES = {
       deactivate: { permission: true, event: "deactivated" },
       reactivate: { event: "reactivated" },
       change_barcode: { permission: true, event: "barcode_changed" },
+    },
+  },
+  batch: {
+    actions: {
+      ...CRUD,
+      change_status: { permission: true, event: "status_changed" },
+    },
+  },
+  stock_movement: {
+    actions: {
+      ...CRUD,
+      post: { permission: true, event: "posted" },
+      reverse: { permission: true, event: "reversed" },
     },
   },
 } as const satisfies Record<string, ModuleSpec>
