@@ -9,7 +9,11 @@ import { normalizeItem, useItem, useUpdateItemMutation } from "../item-api"
 import type { ItemDto } from "../types"
 import { toUpdateItemInput } from "./item-form-schema"
 import { UpdateItemForm, type UpdateItemFormValues } from "./update-item-form"
-import { useItemFormCopy, useValuationOptions } from "./use-item-form-copy"
+import {
+  useItemFormCopy,
+  useShelfLifeUnitOptions,
+  useValuationOptions,
+} from "./use-item-form-copy"
 import { useItemPickers } from "./use-item-pickers"
 
 type UpdateItemProps = {
@@ -28,6 +32,7 @@ export function UpdateItem({ orgId, itemId, onSuccess }: UpdateItemProps) {
   const updateMutation = useUpdateItemMutation(orgId)
   const copy = useItemFormCopy("update")
   const valuationOptions = useValuationOptions()
+  const shelfLifeUnitOptions = useShelfLifeUnitOptions()
   // The current category and unit collection show their names before the lists are opened.
   const { pickers, dialogs } = useItemPickers(orgId, {
     category: item ? { id: item.categoryId, name: item.categoryName } : null,
@@ -82,6 +87,7 @@ export function UpdateItem({ orgId, itemId, onSuccess }: UpdateItemProps) {
         copy={copy}
         pickers={pickers}
         valuationOptions={valuationOptions}
+        shelfLifeUnitOptions={shelfLifeUnitOptions}
         item={item}
         onSubmit={handleSubmit}
         isPending={updateMutation.isPending}

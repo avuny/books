@@ -15,6 +15,7 @@ import {
   type UnitCollectionDto,
 } from "../../unit-collection-module"
 import { useUnitAbilities, useUnitOptions } from "../../unit-module"
+import { useLocationOptions } from "../../warehouse-location-module/warehouse-location-api"
 import type { ItemPickers } from "./item-form-types"
 
 type Option = { id: string; name: string } | null | undefined
@@ -37,6 +38,7 @@ export function useItemPickers(
   const categorySource = useItemCategoryOptions(orgId)
   const baseUnitSource = useUnitOptions(orgId)
   const collectionSource = useUnitCollectionOptions(orgId)
+  const locationSource = useLocationOptions(orgId, { stockableOnly: true })
 
   const categoryAbilities = useItemCategoryAbilities(orgId)
   const categoryAction = useComboboxAction<ItemCategoryDto>((category) => ({
@@ -81,6 +83,10 @@ export function useItemPickers(
       copy: comboboxCopy,
       source: baseUnitSource,
       initialOption: initial.baseUnit,
+    },
+    openingStockLocation: {
+      copy: comboboxCopy,
+      source: locationSource,
     },
   }
 

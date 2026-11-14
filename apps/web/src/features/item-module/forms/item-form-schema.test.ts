@@ -40,6 +40,8 @@ const item: ItemDto = {
   isReturnable: true,
   isInventoryTracked: true,
   isBatchTracked: false,
+  isExpiryTracked: false,
+  expirySettings: null,
   inventoryValuationMethod: "fifo",
   isActive: true,
   allowNegativeStock: false,

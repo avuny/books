@@ -1,7 +1,7 @@
 import { useTranslation } from "react-i18next"
-import { INVENTORY_VALUATION_METHODS } from "@avuny/contracts"
+import { INVENTORY_VALUATION_METHODS, SHELF_LIFE_UNITS } from "@avuny/contracts"
 
-import type { ItemFormCopy, ValuationOption } from "./item-form-types"
+import type { ItemFormCopy, ShelfLifeUnitOption, ValuationOption } from "./item-form-types"
 
 /** Builds the localized strings for the create or update form. */
 export function useItemFormCopy(mode: "create" | "update"): ItemFormCopy {
@@ -40,6 +40,18 @@ export function useItemFormCopy(mode: "create" | "update"): ItemFormCopy {
       label: t("fields.isBatchTracked.label"),
       description: t("fields.isBatchTracked.description"),
     },
+    isExpiryTracked: {
+      label: t("fields.isExpiryTracked.label"),
+      description: t("fields.isExpiryTracked.description"),
+    },
+    shelfLifeValue: {
+      label: t("fields.shelfLifeValue.label"),
+      placeholder: t("fields.shelfLifeValue.placeholder"),
+    },
+    shelfLifeUnit: {
+      label: t("fields.shelfLifeUnit.label"),
+      placeholder: t("fields.shelfLifeUnit.placeholder"),
+    },
     valuationMethod: {
       label: t("fields.valuationMethod.label"),
       placeholder: t("fields.valuationMethod.placeholder"),
@@ -53,6 +65,42 @@ export function useItemFormCopy(mode: "create" | "update"): ItemFormCopy {
     isActive: { label: t("fields.isActive.label") },
     submitLabel: t(`${mode}.submitLabel`),
     submittingLabel: t(`${mode}.submittingLabel`),
+    openingStock: {
+      sectionTitle: t("fields.openingStock.sectionTitle"),
+      sectionDescription: t("fields.openingStock.sectionDescription"),
+      postedAt: {
+        label: t("fields.openingStock.postedAt.label"),
+        placeholder: t("fields.openingStock.postedAt.placeholder"),
+        description: t("fields.openingStock.postedAt.description"),
+      },
+      addLine: t("fields.openingStock.addLine"),
+      removeLine: t("fields.openingStock.removeLine"),
+      line: {
+        location: {
+          label: t("fields.openingStock.line.location.label"),
+          placeholder: t("fields.openingStock.line.location.placeholder"),
+        },
+        quantity: {
+          label: t("fields.openingStock.line.quantity.label"),
+          placeholder: t("fields.openingStock.line.quantity.placeholder"),
+        },
+      },
+      batch: {
+        toggle: t("fields.openingStock.batch.toggle"),
+        number: {
+          label: t("fields.openingStock.batch.number.label"),
+          placeholder: t("fields.openingStock.batch.number.placeholder"),
+        },
+        manufacturedOn: {
+          label: t("fields.openingStock.batch.manufacturedOn.label"),
+          placeholder: t("fields.openingStock.batch.manufacturedOn.placeholder"),
+        },
+        expiresOn: {
+          label: t("fields.openingStock.batch.expiresOn.label"),
+          placeholder: t("fields.openingStock.batch.expiresOn.placeholder"),
+        },
+      },
+    },
   }
 }
 
@@ -62,5 +110,14 @@ export function useValuationOptions(): ValuationOption[] {
   return INVENTORY_VALUATION_METHODS.map((method) => ({
     value: method,
     label: t(`labels.valuation.${method}`),
+  }))
+}
+
+/** The fixed shelf life units with their localized names. */
+export function useShelfLifeUnitOptions(): ShelfLifeUnitOption[] {
+  const { t } = useTranslation("item")
+  return SHELF_LIFE_UNITS.map((unit) => ({
+    value: unit,
+    label: t(`labels.shelfLifeUnit.${unit}`),
   }))
 }

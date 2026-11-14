@@ -21,12 +21,32 @@ export type ItemFormCopy = {
   isReturnable: FieldCopy
   isInventoryTracked: FieldCopy
   isBatchTracked: FieldCopy
+  isExpiryTracked: FieldCopy
+  shelfLifeValue: FieldCopy
+  shelfLifeUnit: FieldCopy
   valuationMethod: FieldCopy
   allowNegativeStock: FieldCopy
   reorderPoint: FieldCopy
   isActive: FieldCopy
   submitLabel: string
   submittingLabel: string
+  openingStock: {
+    sectionTitle: string
+    sectionDescription: string
+    postedAt: FieldCopy
+    addLine: string
+    removeLine: string
+    line: {
+      location: FieldCopy
+      quantity: FieldCopy
+    }
+    batch: {
+      toggle: string
+      number: FieldCopy
+      manufacturedOn: FieldCopy
+      expiresOn: FieldCopy
+    }
+  }
 }
 
 /** Everything one async combobox needs, injected by the composition component. */
@@ -45,6 +65,8 @@ export type ItemPickers = {
   category: ItemCombobox
   unitCollection: ItemCombobox
   baseUnit?: ItemCombobox
+  openingStockLocation: ItemCombobox
 }
 
 export type ValuationOption = { value: string; label: string }
+export type ShelfLifeUnitOption = { value: string; label: string }

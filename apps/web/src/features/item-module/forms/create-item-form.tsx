@@ -1,7 +1,12 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 
-import { FormShell, SubmitButton } from "@workspace/ui/blocks/form"
+import {
+  FormShell,
+  SubmitButton,
+  type AsyncComboboxCopy,
+  type AsyncOptionsSource,
+} from "@workspace/ui/blocks/form"
 
 import { ItemFields } from "./item-fields"
 import {
@@ -13,6 +18,7 @@ import {
 import type {
   ItemFormCopy,
   ItemPickers,
+  ShelfLifeUnitOption,
   ValuationOption,
 } from "./item-form-types"
 
@@ -22,11 +28,14 @@ type CreateItemFormProps = {
   copy: ItemFormCopy
   pickers: ItemPickers
   valuationOptions: ValuationOption[]
+  shelfLifeUnitOptions: ShelfLifeUnitOption[]
   defaultName?: string
   onSubmit: (values: CreateItemFormValues) => void
   isPending: boolean
   /** Already localized. Shown in the form-level alert. */
   errorMessage?: string | null
+  locationSource: AsyncOptionsSource
+  comboboxCopy: AsyncComboboxCopy
 }
 
 // UI + validation only. No i18n, API, auth or navigation knowledge.
@@ -34,10 +43,13 @@ export function CreateItemForm({
   copy,
   pickers,
   valuationOptions,
+  shelfLifeUnitOptions,
   defaultName,
   onSubmit,
   isPending,
   errorMessage,
+  locationSource,
+  comboboxCopy,
 }: CreateItemFormProps) {
   const form = useForm<CreateItemFormInput, unknown, CreateItemFormValues>({
     resolver: zodResolver(CreateItemFormSchema),
@@ -60,7 +72,10 @@ export function CreateItemForm({
           copy={copy}
           pickers={pickers}
           valuationOptions={valuationOptions}
+          shelfLifeUnitOptions={shelfLifeUnitOptions}
           disabled={isPending}
+          locationSource={locationSource}
+          comboboxCopy={comboboxCopy}
         />
 
         <SubmitButton

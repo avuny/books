@@ -5,6 +5,7 @@ import {
   ITEM_DESCRIPTION_MAX_LENGTH,
   ITEM_NAME_MAX_LENGTH,
   ITEM_NAME_MIN_LENGTH,
+  SHELF_LIFE_UNITS,
   UNIT_QUANTITY_PATTERN,
 } from "@avuny/contracts"
 
@@ -30,6 +31,15 @@ const ItemFormShape = z.object({
   isReturnable: z.boolean(),
   isInventoryTracked: z.boolean(),
   isBatchTracked: z.boolean(),
+  isExpiryTracked: z.boolean(),
+  defaultShelfLifeValue: z.preprocess(
+    blankToUndefined,
+    z.coerce.number().int().positive().optional()
+  ),
+  defaultShelfLifeUnit: z.preprocess(
+    blankToUndefined,
+    z.enum(SHELF_LIFE_UNITS).optional()
+  ),
   inventoryValuationMethod: z.enum(INVENTORY_VALUATION_METHODS),
   allowNegativeStock: z.boolean(),
   reorderPoint: z
@@ -37,6 +47,19 @@ const ItemFormShape = z.object({
     .trim()
     .refine((v) => v === "" || UNIT_QUANTITY_PATTERN.test(v), "Invalid number"),
   isActive: z.boolean(),
+  openingStockPostedAt: z.string().trim().optional(),
+  openingStockLines: z
+    .array(
+      z.object({
+        locationId: optionalId,
+        quantity: z.string().trim(),
+        includeBatch: z.boolean(),
+        batchNumber: z.string().trim(),
+        manufacturedOn: z.string().trim(),
+        expiresOn: z.string().trim(),
+      })
+    )
+    .optional(),
 })
 
 const batchNeedsTracking = (v: {
@@ -44,20 +67,50 @@ const batchNeedsTracking = (v: {
   isInventoryTracked: boolean
 }) => !(v.isBatchTracked && !v.isInventoryTracked)
 
+const expiryNeedsBatchAndTracking = (v: {
+  isExpiryTracked: boolean
+  isBatchTracked: boolean
+  isInventoryTracked: boolean
+}) => !(v.isExpiryTracked && (!v.isBatchTracked || !v.isInventoryTracked))
+
+const shelfLifePairCheck = (v: {
+  defaultShelfLifeValue?: number
+  defaultShelfLifeUnit?: string
+}) =>
+  (v.defaultShelfLifeValue === undefined && v.defaultShelfLifeUnit === undefined) ||
+  (v.defaultShelfLifeValue !== undefined && v.defaultShelfLifeUnit !== undefined)
+
 /** Create: requires unitCollectionId (or legacy baseUnitId). */
 export const CreateItemFormSchema = ItemFormShape.refine(batchNeedsTracking, {
   message: "Batch tracking requires inventory tracking",
   path: ["isBatchTracked"],
-}).refine((v) => (v.baseUnitId === undefined) !== (v.unitCollectionId === undefined), {
-  message: "Choose either a base unit or a unit collection",
-  path: ["baseUnitId"],
 })
+  .refine(expiryNeedsBatchAndTracking, {
+    message: "Expiry tracking requires both inventory tracking and batch tracking",
+    path: ["isExpiryTracked"],
+  })
+  .refine(shelfLifePairCheck, {
+    message: "Shelf life value and unit must either both be provided or both be empty",
+    path: ["defaultShelfLifeUnit"],
+  })
+  .refine((v) => (v.baseUnitId === undefined) !== (v.unitCollectionId === undefined), {
+    message: "Choose either a base unit or a unit collection",
+    path: ["baseUnitId"],
+  })
 
 /** Update: the base unit may change; the unit collection is not editable here. */
 export const UpdateItemFormSchema = ItemFormShape.refine(batchNeedsTracking, {
   message: "Batch tracking requires inventory tracking",
   path: ["isBatchTracked"],
 })
+  .refine(expiryNeedsBatchAndTracking, {
+    message: "Expiry tracking requires both inventory tracking and batch tracking",
+    path: ["isExpiryTracked"],
+  })
+  .refine(shelfLifePairCheck, {
+    message: "Shelf life value and unit must either both be provided or both be empty",
+    path: ["defaultShelfLifeUnit"],
+  })
 
 export type CreateItemFormInput = z.input<typeof CreateItemFormSchema>
 export type CreateItemFormValues = z.output<typeof CreateItemFormSchema>
@@ -84,10 +137,15 @@ export function getCreateItemDefaults(
     isReturnable: true,
     isInventoryTracked: true,
     isBatchTracked: false,
+    isExpiryTracked: false,
+    defaultShelfLifeValue: undefined,
+    defaultShelfLifeUnit: undefined,
     inventoryValuationMethod: DEFAULT_INVENTORY_VALUATION_METHOD,
     allowNegativeStock: false,
     reorderPoint: "",
     isActive: true,
+    openingStockPostedAt: "",
+    openingStockLines: [],
   }
 }
 
@@ -102,6 +160,9 @@ export function getUpdateItemDefaults(item: ItemDto): UpdateItemFormInput {
     isReturnable: item.isReturnable,
     isInventoryTracked: item.isInventoryTracked,
     isBatchTracked: item.isBatchTracked,
+    isExpiryTracked: item.isExpiryTracked,
+    defaultShelfLifeValue: item.expirySettings?.defaultShelfLifeValue ?? undefined,
+    defaultShelfLifeUnit: item.expirySettings?.defaultShelfLifeUnit ?? undefined,
     inventoryValuationMethod: item.inventoryValuationMethod,
     allowNegativeStock: item.allowNegativeStock,
     reorderPoint: item.reorderPoint ? trimQuantity(item.reorderPoint) : "",
@@ -112,6 +173,21 @@ export function getUpdateItemDefaults(item: ItemDto): UpdateItemFormInput {
 export function toCreateItemInput(
   values: CreateItemFormValues
 ): CreateItemInput {
+  const validLines = (values.openingStockLines ?? [])
+    .filter((l) => l.locationId && l.quantity)
+    .map((l) => ({
+      locationId: l.locationId!,
+      quantity: l.quantity,
+      batch:
+        l.includeBatch && l.batchNumber
+          ? {
+              number: l.batchNumber,
+              manufacturedOn: l.manufacturedOn || null,
+              expiresOn: l.expiresOn || null,
+            }
+          : null,
+    }))
+
   return {
     name: values.name,
     description: values.description || null,
@@ -126,9 +202,24 @@ export function toCreateItemInput(
     isReturnable: values.isReturnable,
     isInventoryTracked: values.isInventoryTracked,
     isBatchTracked: values.isBatchTracked,
+    isExpiryTracked: values.isExpiryTracked,
+    expirySettings:
+      values.isExpiryTracked && values.defaultShelfLifeValue && values.defaultShelfLifeUnit
+        ? {
+            defaultShelfLifeValue: values.defaultShelfLifeValue,
+            defaultShelfLifeUnit: values.defaultShelfLifeUnit,
+          }
+        : null,
     inventoryValuationMethod: values.inventoryValuationMethod,
     allowNegativeStock: values.allowNegativeStock,
     reorderPoint: values.reorderPoint || null,
+    openingStock:
+      validLines.length > 0
+        ? {
+            postedAt: values.openingStockPostedAt || undefined,
+            lines: validLines,
+          }
+        : undefined,
   }
 }
 
@@ -152,6 +243,14 @@ export function toUpdateItemInput(
     isReturnable: values.isReturnable,
     isInventoryTracked: values.isInventoryTracked,
     isBatchTracked: values.isBatchTracked,
+    isExpiryTracked: values.isExpiryTracked,
+    expirySettings:
+      values.isExpiryTracked && values.defaultShelfLifeValue && values.defaultShelfLifeUnit
+        ? {
+            defaultShelfLifeValue: values.defaultShelfLifeValue,
+            defaultShelfLifeUnit: values.defaultShelfLifeUnit,
+          }
+        : null,
     inventoryValuationMethod: values.inventoryValuationMethod,
     isActive: values.isActive,
     allowNegativeStock: values.allowNegativeStock,

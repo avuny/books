@@ -4,9 +4,14 @@ import { parseApiError } from "@workspace/ui/lib/api-error"
 
 import { normalizeItem, useCreateItemMutation } from "../item-api"
 import type { ItemDto } from "../types"
+import { useAsyncComboboxCopy } from "../../lib/options/use-async-combobox-copy"
 import { CreateItemForm, type CreateItemFormValues } from "./create-item-form"
 import { toCreateItemInput } from "./item-form-schema"
-import { useItemFormCopy, useValuationOptions } from "./use-item-form-copy"
+import {
+  useItemFormCopy,
+  useShelfLifeUnitOptions,
+  useValuationOptions,
+} from "./use-item-form-copy"
 import { useItemPickers } from "./use-item-pickers"
 
 type CreateItemProps = {
@@ -22,6 +27,8 @@ export function CreateItem({ orgId, defaultName, onSuccess }: CreateItemProps) {
   const createMutation = useCreateItemMutation(orgId)
   const copy = useItemFormCopy("create")
   const valuationOptions = useValuationOptions()
+  const shelfLifeUnitOptions = useShelfLifeUnitOptions()
+  const comboboxCopy = useAsyncComboboxCopy()
   const { pickers, dialogs } = useItemPickers(orgId)
 
   // Called only when Zod validation passes (react-hook-form guards the fields).
@@ -45,10 +52,13 @@ export function CreateItem({ orgId, defaultName, onSuccess }: CreateItemProps) {
         copy={copy}
         pickers={pickers}
         valuationOptions={valuationOptions}
+        shelfLifeUnitOptions={shelfLifeUnitOptions}
         defaultName={defaultName}
         onSubmit={handleSubmit}
         isPending={createMutation.isPending}
         errorMessage={serverError}
+        locationSource={pickers.openingStockLocation.source}
+        comboboxCopy={comboboxCopy}
       />
       {dialogs}
     </>

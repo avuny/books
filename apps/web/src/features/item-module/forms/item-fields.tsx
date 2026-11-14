@@ -1,16 +1,20 @@
-import type { Control } from "react-hook-form"
+import { useWatch, type Control } from "react-hook-form"
 
 import {
   AsyncComboboxField,
   InputField,
   SelectField,
+  type AsyncComboboxCopy,
+  type AsyncOptionsSource,
 } from "@workspace/ui/blocks/form"
 
 import { CheckboxField } from "../../lib/forms/checkbox-field"
+import { OpeningStockFields } from "./opening-stock-fields"
 import type { CreateItemFormInput } from "./item-form-schema"
 import type {
   ItemFormCopy,
   ItemPickers,
+  ShelfLifeUnitOption,
   ValuationOption,
 } from "./item-form-types"
 
@@ -20,9 +24,13 @@ type ItemFieldsProps = {
   copy: ItemFormCopy
   pickers: ItemPickers
   valuationOptions: ValuationOption[]
+  shelfLifeUnitOptions: ShelfLifeUnitOption[]
   /** Only the update form offers (de)activation. */
   showIsActive?: boolean
   disabled: boolean
+  /** Opening stock location picker source — omit on the update form to hide the section entirely. */
+  locationSource?: AsyncOptionsSource
+  comboboxCopy?: AsyncComboboxCopy
 }
 
 /** The fields shared by the create and update forms. UI only. */
@@ -31,10 +39,16 @@ export function ItemFields({
   copy,
   pickers,
   valuationOptions,
+  shelfLifeUnitOptions,
   showIsActive = false,
   disabled,
+  locationSource,
+  comboboxCopy,
 }: ItemFieldsProps) {
   const { category, unitCollection } = pickers
+  const isExpiryTracked = useWatch({ control, name: "isExpiryTracked" })
+  const isInventoryTracked = useWatch({ control, name: "isInventoryTracked" })
+  const isBatchTracked = useWatch({ control, name: "isBatchTracked" })
 
   return (
     <>
@@ -102,6 +116,13 @@ export function ItemFields({
         />
         <CheckboxField
           control={control}
+          name="isExpiryTracked"
+          label={copy.isExpiryTracked.label}
+          description={copy.isExpiryTracked.description}
+          disabled={disabled}
+        />
+        <CheckboxField
+          control={control}
           name="canAssembled"
           label={copy.canAssembled.label}
           disabled={disabled}
@@ -128,6 +149,27 @@ export function ItemFields({
         ) : null}
       </div>
 
+      {isExpiryTracked ? (
+        <div className="grid gap-3 sm:grid-cols-2">
+          <InputField
+            control={control}
+            name="defaultShelfLifeValue"
+            copy={copy.shelfLifeValue}
+            type="number"
+            autoComplete="off"
+            disabled={disabled}
+          />
+          <SelectField
+            control={control}
+            name="defaultShelfLifeUnit"
+            copy={copy.shelfLifeUnit}
+            options={shelfLifeUnitOptions}
+            disabled={disabled}
+            placeholder={copy.shelfLifeUnit.placeholder}
+          />
+        </div>
+      ) : null}
+
       {/* Two fixed values: a short list stays a plain select, not an async combobox. */}
       <SelectField
         control={control}
@@ -146,6 +188,17 @@ export function ItemFields({
         autoComplete="off"
         disabled={disabled}
       />
+
+      {isInventoryTracked && locationSource && comboboxCopy ? (
+        <OpeningStockFields
+          control={control}
+          copy={copy.openingStock}
+          locationSource={locationSource}
+          comboboxCopy={comboboxCopy}
+          isBatchTracked={isBatchTracked}
+          disabled={disabled}
+        />
+      ) : null}
     </>
   )
 }

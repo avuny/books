@@ -15,6 +15,7 @@ import {
 import type {
   ItemFormCopy,
   ItemPickers,
+  ShelfLifeUnitOption,
   ValuationOption,
 } from "./item-form-types"
 
@@ -24,6 +25,7 @@ type UpdateItemFormProps = {
   copy: ItemFormCopy
   pickers: ItemPickers
   valuationOptions: ValuationOption[]
+  shelfLifeUnitOptions: ShelfLifeUnitOption[]
   /** The item being edited; its values pre-fill the form. */
   item: ItemDto
   onSubmit: (values: UpdateItemFormValues) => void
@@ -37,6 +39,7 @@ export function UpdateItemForm({
   copy,
   pickers,
   valuationOptions,
+  shelfLifeUnitOptions,
   item,
   onSubmit,
   isPending,
@@ -66,6 +69,7 @@ export function UpdateItemForm({
           copy={copy}
           pickers={pickers}
           valuationOptions={valuationOptions}
+          shelfLifeUnitOptions={shelfLifeUnitOptions}
           showIsActive
           disabled={isPending}
         />
