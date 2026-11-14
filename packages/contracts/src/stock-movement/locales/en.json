@@ -1,0 +1,23 @@
+{
+  "errors": {
+    "STOCK_MOVEMENT_NOT_FOUND": "Stock movement not found",
+    "STOCK_MOVEMENT_NO_LINES": "A stock movement needs at least one line",
+    "STOCK_MOVEMENT_TOO_MANY_LINES": "The stock movement has too many lines",
+    "STOCK_MOVEMENT_INVALID_QUANTITY": "The quantity is not valid",
+    "STOCK_MOVEMENT_INVALID_SIDES": "The source and destination locations do not fit this movement type",
+    "STOCK_MOVEMENT_SAME_LOCATION": "The source and destination cannot be the same location",
+    "STOCK_MOVEMENT_SYSTEM_LOCATION_MISSING": "A required system location does not exist for this organization",
+    "STOCK_MOVEMENT_ITEM_NOT_FOUND": "Item not found",
+    "STOCK_MOVEMENT_ITEM_INACTIVE": "The item is inactive",
+    "STOCK_MOVEMENT_ITEM_NOT_STOCKED": "The item does not track stock",
+    "STOCK_MOVEMENT_INSUFFICIENT_STOCK": "There is not enough stock available",
+    "STOCK_MOVEMENT_SOURCE_ALREADY_POSTED": "Stock has already been posted for this document",
+    "STOCK_MOVEMENT_ALREADY_REVERSED": "This stock movement has already been reversed",
+    "STOCK_MOVEMENT_CANNOT_REVERSE_REVERSAL": "A reversal cannot be reversed",
+    "STOCK_MOVEMENT_BATCH_REQUIRED": "This item is batch tracked, so a batch is required",
+    "STOCK_MOVEMENT_BATCH_NOT_TRACKED": "This item is not batch tracked, so it cannot have a batch",
+    "STOCK_MOVEMENT_BATCH_NOT_FOUND": "The batch does not exist for this item",
+    "STOCK_MOVEMENT_BATCH_NOT_AVAILABLE": "The batch status does not allow this stock movement",
+    "STOCK_MOVEMENT_EXPIRY_DATE_REQUIRED": "An expiry date is required before posting stock for this item"
+  }
+}

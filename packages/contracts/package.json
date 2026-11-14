@@ -20,6 +20,11 @@
       "import": "./dist/activity-log/index.js",
       "default": "./dist/activity-log/index.js"
     },
+    "./batch": {
+      "types": "./dist/batch/index.d.ts",
+      "import": "./dist/batch/index.js",
+      "default": "./dist/batch/index.js"
+    },
     "./common": {
       "types": "./dist/common/index.d.ts",
       "import": "./dist/common/index.js",
@@ -74,6 +79,11 @@
       "types": "./dist/sidebar/index.d.ts",
       "import": "./dist/sidebar/index.js",
       "default": "./dist/sidebar/index.js"
+    },
+    "./stock-movement": {
+      "types": "./dist/stock-movement/index.d.ts",
+      "import": "./dist/stock-movement/index.js",
+      "default": "./dist/stock-movement/index.js"
     },
     "./unit": {
       "types": "./dist/unit/index.d.ts",

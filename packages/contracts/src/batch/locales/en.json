@@ -1,0 +1,12 @@
+{
+  "errors": {
+    "BATCH_NOT_FOUND": "Batch not found",
+    "BATCH_ITEM_NOT_FOUND": "Item not found",
+    "BATCH_NUMBER_INVALID": "The batch number is not valid",
+    "BATCH_DATES_INVALID": "The batch dates are not valid",
+    "BATCH_DETAILS_CONFLICT": "The same batch is given with different details",
+    "BATCH_TOO_MANY": "Too many batches in one request",
+    "BATCH_STATUS_UNCHANGED": "The batch already has this status",
+    "BATCH_SHELF_LIFE_INVALID": "The batch shelf life is not valid"
+  }
+}

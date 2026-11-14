@@ -1,0 +1,23 @@
+{
+  "errors": {
+    "STOCK_MOVEMENT_NOT_FOUND": "حركة المخزون غير موجودة",
+    "STOCK_MOVEMENT_NO_LINES": "يجب أن تحتوي حركة المخزون على سطر واحد على الأقل",
+    "STOCK_MOVEMENT_TOO_MANY_LINES": "عدد أسطر حركة المخزون يتجاوز الحد المسموح",
+    "STOCK_MOVEMENT_INVALID_QUANTITY": "الكمية غير صالحة",
+    "STOCK_MOVEMENT_INVALID_SIDES": "موقعا المصدر والوجهة لا يناسبان نوع هذه الحركة",
+    "STOCK_MOVEMENT_SAME_LOCATION": "لا يمكن أن يكون موقع المصدر هو نفسه موقع الوجهة",
+    "STOCK_MOVEMENT_SYSTEM_LOCATION_MISSING": "موقع النظام المطلوب غير موجود لهذه المؤسسة",
+    "STOCK_MOVEMENT_ITEM_NOT_FOUND": "الصنف غير موجود",
+    "STOCK_MOVEMENT_ITEM_INACTIVE": "الصنف غير نشط",
+    "STOCK_MOVEMENT_ITEM_NOT_STOCKED": "الصنف لا يتتبع المخزون",
+    "STOCK_MOVEMENT_INSUFFICIENT_STOCK": "الكمية المتوفرة في المخزون غير كافية",
+    "STOCK_MOVEMENT_SOURCE_ALREADY_POSTED": "تم ترحيل حركة مخزون لهذا المستند مسبقًا",
+    "STOCK_MOVEMENT_ALREADY_REVERSED": "تم عكس حركة المخزون هذه مسبقًا",
+    "STOCK_MOVEMENT_CANNOT_REVERSE_REVERSAL": "لا يمكن عكس حركة عكسية",
+    "STOCK_MOVEMENT_BATCH_REQUIRED": "هذا الصنف يتتبع الدفعات، لذلك الدفعة مطلوبة",
+    "STOCK_MOVEMENT_BATCH_NOT_TRACKED": "هذا الصنف لا يتتبع الدفعات، لذلك لا يمكن أن تكون له دفعة",
+    "STOCK_MOVEMENT_BATCH_NOT_FOUND": "الدفعة غير موجودة لهذا الصنف",
+    "STOCK_MOVEMENT_BATCH_NOT_AVAILABLE": "حالة الدفعة لا تسمح بحركة المخزون هذه",
+    "STOCK_MOVEMENT_EXPIRY_DATE_REQUIRED": "تاريخ الصلاحية مطلوب قبل ترحيل مخزون لهذا الصنف"
+  }
+}

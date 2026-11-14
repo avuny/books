@@ -1,0 +1,12 @@
+{
+  "errors": {
+    "BATCH_NOT_FOUND": "الدفعة غير موجودة",
+    "BATCH_ITEM_NOT_FOUND": "الصنف غير موجود",
+    "BATCH_NUMBER_INVALID": "رقم الدفعة غير صالح",
+    "BATCH_DATES_INVALID": "تواريخ الدفعة غير صالحة",
+    "BATCH_DETAILS_CONFLICT": "تم إدخال الدفعة نفسها بتفاصيل مختلفة",
+    "BATCH_TOO_MANY": "عدد الدفعات في الطلب الواحد كبير جدًا",
+    "BATCH_STATUS_UNCHANGED": "الدفعة لها هذه الحالة بالفعل",
+    "BATCH_SHELF_LIFE_INVALID": "مدة صلاحية الدفعة غير صالحة"
+  }
+}
