@@ -27,6 +27,13 @@ export function isUniqueViolation(
 }
 
 /** 23503: e.g. deleting a role that is still referenced (ON DELETE RESTRICT). */
-export function isForeignKeyViolation(err: unknown): boolean {
-  return unwrap(err)?.code === "23503"
+export function isForeignKeyViolation(
+  err: unknown,
+  constraint?: string | readonly string[]
+): boolean {
+  const e = unwrap(err)
+  if (!e || e.code !== "23503") return false
+  if (!constraint) return true
+  const names = typeof constraint === "string" ? [constraint] : constraint
+  return !!e.constraint && names.includes(e.constraint)
 }
