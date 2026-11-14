@@ -13,6 +13,8 @@ export const ITEM_DESCRIPTION_MAX_LENGTH = 2000
 
 /* ---------- API-level constants (no database check behind them) ---------- */
 
+export const ITEM_OPENING_STOCK_SOURCE_TYPE = "item_opening" as const
+
 export const ITEM_SEARCH_MAX_LENGTH = 100
 export const ITEM_LIST_DEFAULT_PAGE_SIZE = 20
 export const ITEM_LIST_MAX_PAGE_SIZE = 100

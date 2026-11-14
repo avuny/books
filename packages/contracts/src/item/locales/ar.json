@@ -7,6 +7,11 @@
     "ITEM_UNIT_INVALID": "اختر وحدة أساسية نشطة.",
     "ITEM_UNIT_COLLECTION_INVALID": "مجموعة الوحدات المحددة غير موجودة.",
     "ITEM_BATCH_REQUIRES_TRACKING": "تتبع الدفعات يتطلب تتبع المخزون.",
+    "ITEM_EXPIRY_REQUIRES_BATCH_AND_TRACKING": "تتبع الصلاحية يتطلب تتبع المخزون وتتبع الدفعات معاً.",
+    "ITEM_OPENING_STOCK_NOT_TRACKED": "الرصيد الافتتاحي يتطلب صنفاً يتتبع المخزون.",
+    "ITEM_OPENING_STOCK_BATCH_REQUIRED": "الرصيد الافتتاحي يتطلب دفعة للأصناف متتبعة الدفعات.",
+    "ITEM_OPENING_STOCK_BATCH_NOT_TRACKED": "لا يمكن إضافة دفعة في الرصيد الافتتاحي لصنف غير متتبع للدفعات.",
+    "ITEM_EXPIRY_DATE_REQUIRED": "تاريخ الصلاحية مطلوب للأصناف متتبعة الصلاحية.",
     "ITEM_LOCKED_FIELD": "لا يمكن تغيير هذه الإعدادات بعد وجود حركات مخزون للصنف.",
     "ITEM_HAS_HISTORY": "لهذا الصنف سجل مخزون. عطّله بدلاً من حذفه."
   },
@@ -14,6 +19,11 @@
     "valuation": {
       "fifo": "الوارد أولاً يصرف أولاً (FIFO)",
       "weighted_average": "المتوسط المرجح"
+    },
+    "shelfLifeUnit": {
+      "DAY": "أيام",
+      "MONTH": "أشهر",
+      "YEAR": "سنوات"
     }
   },
   "msgs": {
@@ -93,6 +103,18 @@
       "label": "تتبع الدفعات",
       "description": "يتطلب تتبع المخزون."
     },
+    "isExpiryTracked": {
+      "label": "تتبع الصلاحية",
+      "description": "يتطلب تتبع الدفعات وتتبع المخزون."
+    },
+    "shelfLifeValue": {
+      "label": "مدة الصلاحية الافتراضية",
+      "placeholder": "مثال: 12"
+    },
+    "shelfLifeUnit": {
+      "label": "وحدة مدة الصلاحية",
+      "placeholder": "اختر الوحدة"
+    },
     "valuationMethod": {
       "label": "طريقة التقييم",
       "placeholder": "اختر طريقة"
@@ -108,7 +130,43 @@
     "isActive": {
       "label": "نشط"
     },
-    "lockedHint": "مقفل لأن للصنف حركات مخزون."
+    "lockedHint": "مقفل لأن للصنف حركات مخزون.",
+    "openingStock": {
+      "sectionTitle": "الرصيد الافتتاحي",
+      "sectionDescription": "سجّل المخزون الابتدائي عبر المواقع. اختياري.",
+      "postedAt": {
+        "label": "تاريخ الترحيل",
+        "placeholder": "YYYY-MM-DD",
+        "description": "يُعيَّن افتراضياً لتاريخ اليوم إذا تُرك فارغاً."
+      },
+      "addLine": "إضافة موقع",
+      "removeLine": "حذف",
+      "line": {
+        "location": {
+          "label": "الموقع",
+          "placeholder": "اختر موقعاً"
+        },
+        "quantity": {
+          "label": "الكمية",
+          "placeholder": "مثال: 100"
+        }
+      },
+      "batch": {
+        "toggle": "إضافة تفاصيل الدفعة",
+        "number": {
+          "label": "رقم الدفعة",
+          "placeholder": "مثال: BT-001"
+        },
+        "manufacturedOn": {
+          "label": "تاريخ الصنع",
+          "placeholder": "YYYY-MM-DD"
+        },
+        "expiresOn": {
+          "label": "تاريخ انتهاء الصلاحية",
+          "placeholder": "YYYY-MM-DD"
+        }
+      }
+    }
   },
   "actions": {
     "create": "إنشاء صنف",
@@ -121,6 +179,7 @@
     "tracked": "متتبع",
     "untracked": "غير متتبع",
     "batch": "دفعات",
+    "expiry": "صلاحية",
     "active": "نشط",
     "inactive": "غير نشط"
   },
@@ -151,6 +210,8 @@
     "createdAt": "تاريخ الإنشاء",
     "updatedAt": "آخر تحديث",
     "settingsTitle": "الإعدادات",
+    "expiryTracked": "تتبع الصلاحية",
+    "defaultShelfLife": "فترة الصلاحية الافتراضية",
     "yes": "مسموح",
     "no": "غير مسموح",
     "none": "غير محدد",

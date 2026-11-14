@@ -7,6 +7,11 @@
     "ITEM_UNIT_INVALID": "Choose an active base unit.",
     "ITEM_UNIT_COLLECTION_INVALID": "The selected unit collection does not exist.",
     "ITEM_BATCH_REQUIRES_TRACKING": "Batch tracking requires inventory tracking.",
+    "ITEM_EXPIRY_REQUIRES_BATCH_AND_TRACKING": "Expiry tracking requires both inventory tracking and batch tracking.",
+    "ITEM_OPENING_STOCK_NOT_TRACKED": "Opening stock needs an inventory-tracked item.",
+    "ITEM_OPENING_STOCK_BATCH_REQUIRED": "Opening stock requires a batch for batch-tracked items.",
+    "ITEM_OPENING_STOCK_BATCH_NOT_TRACKED": "Opening stock cannot have a batch for non-batch-tracked items.",
+    "ITEM_EXPIRY_DATE_REQUIRED": "Expiry date is required for expiry-tracked items.",
     "ITEM_LOCKED_FIELD": "These settings cannot change after the item has stock movements.",
     "ITEM_HAS_HISTORY": "This item has stock history. Deactivate it instead of deleting it."
   },
@@ -14,6 +19,11 @@
     "valuation": {
       "fifo": "First in, first out (FIFO)",
       "weighted_average": "Weighted average"
+    },
+    "shelfLifeUnit": {
+      "DAY": "Days",
+      "MONTH": "Months",
+      "YEAR": "Years"
     }
   },
   "msgs": {
@@ -93,6 +103,18 @@
       "label": "Track batches",
       "description": "Requires inventory tracking."
     },
+    "isExpiryTracked": {
+      "label": "Track expiry",
+      "description": "Requires batch tracking and inventory tracking."
+    },
+    "shelfLifeValue": {
+      "label": "Default shelf life",
+      "placeholder": "e.g. 12"
+    },
+    "shelfLifeUnit": {
+      "label": "Shelf life unit",
+      "placeholder": "Choose a unit"
+    },
     "valuationMethod": {
       "label": "Valuation method",
       "placeholder": "Choose a method"
@@ -108,7 +130,43 @@
     "isActive": {
       "label": "Active"
     },
-    "lockedHint": "Locked because the item has stock movements."
+    "lockedHint": "Locked because the item has stock movements.",
+    "openingStock": {
+      "sectionTitle": "Opening stock",
+      "sectionDescription": "Record initial inventory across locations. Optional.",
+      "postedAt": {
+        "label": "Posted date",
+        "placeholder": "YYYY-MM-DD",
+        "description": "Defaults to today if left blank."
+      },
+      "addLine": "Add location",
+      "removeLine": "Remove",
+      "line": {
+        "location": {
+          "label": "Location",
+          "placeholder": "Choose a location"
+        },
+        "quantity": {
+          "label": "Quantity",
+          "placeholder": "e.g. 100"
+        }
+      },
+      "batch": {
+        "toggle": "Add batch details",
+        "number": {
+          "label": "Batch number",
+          "placeholder": "e.g. BT-001"
+        },
+        "manufacturedOn": {
+          "label": "Manufactured on",
+          "placeholder": "YYYY-MM-DD"
+        },
+        "expiresOn": {
+          "label": "Expires on",
+          "placeholder": "YYYY-MM-DD"
+        }
+      }
+    }
   },
   "actions": {
     "create": "Create item",
@@ -121,6 +179,7 @@
     "tracked": "Tracked",
     "untracked": "Not tracked",
     "batch": "Batches",
+    "expiry": "Expiry",
     "active": "Active",
     "inactive": "Inactive"
   },
@@ -151,6 +210,8 @@
     "createdAt": "Created",
     "updatedAt": "Last updated",
     "settingsTitle": "Settings",
+    "expiryTracked": "Expiry tracking",
+    "defaultShelfLife": "Default shelf life",
     "yes": "Allowed",
     "no": "Not allowed",
     "none": "Not set",

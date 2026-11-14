@@ -11,6 +11,8 @@ import {
 } from "./constants.js"
 import { UNIT_QUANTITY_PATTERN } from "../unit/constants.js"
 import { UnitDtoSchema } from "../unit/schemas.js"
+import { SHELF_LIFE_UNITS } from "../batch/constants.js"
+import { BatchInputSchema } from "../batch/schemas.js"
 
 const id = z.string().uuid()
 const timestamp = z.string().datetime()
@@ -22,6 +24,44 @@ const quantity = z.string().trim().regex(UNIT_QUANTITY_PATTERN, "Invalid number"
 const queryBoolean = z.enum(["true", "false"]).transform((v) => v === "true")
 
 export const InventoryValuationMethodSchema = z.enum(INVENTORY_VALUATION_METHODS)
+export const ShelfLifeUnitSchema = z.enum(SHELF_LIFE_UNITS)
+
+/* ---------- expiry settings & opening stock ---------- */
+
+export const ItemExpirySettingsInputSchema = z
+  .object({
+    defaultShelfLifeValue: z.number().int().positive().nullish(),
+    defaultShelfLifeUnit: ShelfLifeUnitSchema.nullish(),
+  })
+  .refine(
+    (v) =>
+      (v.defaultShelfLifeValue == null && v.defaultShelfLifeUnit == null) ||
+      (v.defaultShelfLifeValue != null && v.defaultShelfLifeUnit != null),
+    {
+      message: "Shelf life value and unit must either both be provided or both be empty",
+      path: ["defaultShelfLifeUnit"],
+    }
+  )
+export type ItemExpirySettingsInput = z.infer<typeof ItemExpirySettingsInputSchema>
+
+export const ItemExpirySettingsDtoSchema = z.object({
+  defaultShelfLifeValue: z.number().int().nullable(),
+  defaultShelfLifeUnit: ShelfLifeUnitSchema.nullable(),
+})
+export type ItemExpirySettingsDto = z.infer<typeof ItemExpirySettingsDtoSchema>
+
+export const ItemOpeningStockLineSchema = z.object({
+  locationId: id,
+  quantity,
+  batch: BatchInputSchema.nullish(),
+})
+export type ItemOpeningStockLine = z.infer<typeof ItemOpeningStockLineSchema>
+
+export const ItemOpeningStockSchema = z.object({
+  postedAt: z.string().datetime().optional(),
+  lines: z.array(ItemOpeningStockLineSchema).min(1),
+})
+export type ItemOpeningStock = z.infer<typeof ItemOpeningStockSchema>
 
 /* ---------- input ---------- */
 
@@ -41,6 +81,9 @@ export const CreateItemSchema = z
     isReturnable: z.boolean().default(true),
     isInventoryTracked: z.boolean().default(true),
     isBatchTracked: z.boolean().default(false),
+    isExpiryTracked: z.boolean().default(false),
+    expirySettings: ItemExpirySettingsInputSchema.nullish(),
+    openingStock: ItemOpeningStockSchema.optional(),
     inventoryValuationMethod: InventoryValuationMethodSchema.default(
       DEFAULT_INVENTORY_VALUATION_METHOD
     ),
@@ -50,6 +93,10 @@ export const CreateItemSchema = z
   .refine((v) => (v.baseUnitId === undefined) !== (v.unitCollectionId === undefined), {
     message: "Provide exactly one of baseUnitId or unitCollectionId",
     path: ["baseUnitId"],
+  })
+  .refine((v) => !v.isExpiryTracked || (v.isInventoryTracked && v.isBatchTracked), {
+    message: "Expiry tracking requires both inventory tracking and batch tracking",
+    path: ["isExpiryTracked"],
   })
 export type CreateItemInput = z.infer<typeof CreateItemSchema>
 
@@ -67,6 +114,9 @@ export const UpdateItemSchema = z
     isInventoryTracked: z.boolean().optional(),
     /** Locked once the item has stock movements. */
     isBatchTracked: z.boolean().optional(),
+    /** Locked once the item has stock movements. */
+    isExpiryTracked: z.boolean().optional(),
+    expirySettings: ItemExpirySettingsInputSchema.nullish(),
     /** Locked once the item has stock movements. */
     inventoryValuationMethod: InventoryValuationMethodSchema.optional(),
     isActive: z.boolean().optional(),
@@ -97,6 +147,8 @@ export const ItemDtoSchema = z.object({
   isReturnable: z.boolean(),
   isInventoryTracked: z.boolean(),
   isBatchTracked: z.boolean(),
+  isExpiryTracked: z.boolean(),
+  expirySettings: ItemExpirySettingsDtoSchema.nullable().optional(),
   inventoryValuationMethod: InventoryValuationMethodSchema,
   isActive: z.boolean(),
   allowNegativeStock: z.boolean(),
@@ -114,6 +166,7 @@ export const ItemListItemDtoSchema = z.object({
   baseUnit: UnitDtoSchema,
   isInventoryTracked: z.boolean(),
   isBatchTracked: z.boolean(),
+  isExpiryTracked: z.boolean(),
   isActive: z.boolean(),
   createdAt: timestamp,
   updatedAt: timestamp,
