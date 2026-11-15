@@ -9,6 +9,9 @@ export async function refreshAccessToken() {
     {},
     {
       withCredentials: true,
+      headers: {
+        "X-Requested-With": "XMLHttpRequest",
+      },
     }
   )
 
