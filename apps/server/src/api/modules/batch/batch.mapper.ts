@@ -6,6 +6,8 @@ export function toBatchDto(row: Batch): BatchDto {
     id: row.id,
     itemId: row.itemId,
     batchNumber: row.batchNumber,
+    cost: row.cost,
+    quantity: row.quantity,
     manufacturedOn: row.manufacturedOn,
     expiresOn: row.expiresOn,
     shelfLifeValue: row.shelfLifeValue,

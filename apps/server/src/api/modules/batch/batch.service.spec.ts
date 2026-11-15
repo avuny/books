@@ -12,6 +12,8 @@ const batch = (o: Partial<Batch> = {}): Batch => ({
   orgId: ORG,
   itemId: ITEM,
   batchNumber: "L-01",
+  cost: null,
+  quantity: null,
   manufacturedOn: null,
   expiresOn: null,
   shelfLifeValue: null,
