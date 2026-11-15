@@ -30,7 +30,7 @@ const ItemFormShape = z.object({
   canAssembled: z.boolean(),
   isReturnable: z.boolean(),
   isInventoryTracked: z.boolean(),
-  isBatchTracked: z.boolean(),
+  isBatchTracked: z.boolean().default(true),
   isExpiryTracked: z.boolean(),
   defaultShelfLifeValue: z.preprocess(
     blankToUndefined,
@@ -52,11 +52,16 @@ const ItemFormShape = z.object({
     .array(
       z.object({
         locationId: optionalId,
-        quantity: z.string().trim(),
-        includeBatch: z.boolean(),
-        batchNumber: z.string().trim(),
-        manufacturedOn: z.string().trim(),
-        expiresOn: z.string().trim(),
+        quantity: z
+          .string()
+          .trim()
+          .refine((v) => v === "" || UNIT_QUANTITY_PATTERN.test(v), "Invalid number"),
+        cost: z
+          .string()
+          .trim()
+          .refine((v) => v === "" || UNIT_QUANTITY_PATTERN.test(v), "Invalid number")
+          .optional(),
+        manufacturedOn: z.string().trim().optional(),
       })
     )
     .optional(),
@@ -97,6 +102,32 @@ export const CreateItemFormSchema = ItemFormShape.refine(batchNeedsTracking, {
     message: "Choose either a base unit or a unit collection",
     path: ["baseUnitId"],
   })
+  .refine(
+    (v) => {
+      if (!v.openingStockLines?.length) return true
+      return v.openingStockLines.every((l) => {
+        if (!l.locationId && !l.quantity) return true
+        return Boolean(l.locationId && l.quantity && l.quantity.trim() !== "")
+      })
+    },
+    {
+      message: "Both location and quantity are required for each line",
+      path: ["openingStockLines"],
+    }
+  )
+  .refine(
+    (v) => {
+      if (!v.isExpiryTracked || !v.openingStockLines?.length) return true
+      return v.openingStockLines.every((l) => {
+        if (!l.locationId && !l.quantity) return true
+        return Boolean(l.manufacturedOn && l.manufacturedOn.trim() !== "")
+      })
+    },
+    {
+      message: "Manufacture date is required for each line when expiry tracking is enabled",
+      path: ["openingStockLines"],
+    }
+  )
 
 /** Update: the base unit may change; the unit collection is not editable here. */
 export const UpdateItemFormSchema = ItemFormShape.refine(batchNeedsTracking, {
@@ -136,7 +167,7 @@ export function getCreateItemDefaults(
     canAssembled: false,
     isReturnable: true,
     isInventoryTracked: true,
-    isBatchTracked: false,
+    isBatchTracked: true,
     isExpiryTracked: false,
     defaultShelfLifeValue: undefined,
     defaultShelfLifeUnit: undefined,
@@ -178,15 +209,17 @@ export function toCreateItemInput(
     .map((l) => ({
       locationId: l.locationId!,
       quantity: l.quantity,
-      batch:
-        l.includeBatch && l.batchNumber
-          ? {
-              number: l.batchNumber,
-              manufacturedOn: l.manufacturedOn || null,
-              expiresOn: l.expiresOn || null,
-            }
-          : null,
+      cost: l.cost?.trim() ? l.cost.trim() : null,
+      manufacturedOn: l.manufacturedOn || null,
     }))
+
+  let postedAt: string | undefined = undefined
+  if (values.openingStockPostedAt?.trim()) {
+    const d = new Date(values.openingStockPostedAt.trim())
+    if (!isNaN(d.getTime())) {
+      postedAt = d.toISOString()
+    }
+  }
 
   return {
     name: values.name,
@@ -216,7 +249,7 @@ export function toCreateItemInput(
     openingStock:
       validLines.length > 0
         ? {
-            postedAt: values.openingStockPostedAt || undefined,
+            postedAt,
             lines: validLines,
           }
         : undefined,
@@ -242,7 +275,7 @@ export function toUpdateItemInput(
     canAssembled: values.canAssembled,
     isReturnable: values.isReturnable,
     isInventoryTracked: values.isInventoryTracked,
-    isBatchTracked: values.isBatchTracked,
+    isBatchTracked: values.isInventoryTracked,
     isExpiryTracked: values.isExpiryTracked,
     expirySettings:
       values.isExpiryTracked && values.defaultShelfLifeValue && values.defaultShelfLifeUnit

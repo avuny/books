@@ -75,6 +75,8 @@ export function useItemFormCopy(mode: "create" | "update"): ItemFormCopy {
       },
       addLine: t("fields.openingStock.addLine"),
       removeLine: t("fields.openingStock.removeLine"),
+      empty: t("fields.openingStock.empty"),
+      linesHeader: t("fields.openingStock.linesHeader"),
       line: {
         location: {
           label: t("fields.openingStock.line.location.label"),
@@ -83,6 +85,10 @@ export function useItemFormCopy(mode: "create" | "update"): ItemFormCopy {
         quantity: {
           label: t("fields.openingStock.line.quantity.label"),
           placeholder: t("fields.openingStock.line.quantity.placeholder"),
+        },
+        cost: {
+          label: t("fields.openingStock.line.cost.label"),
+          placeholder: t("fields.openingStock.line.cost.placeholder"),
         },
       },
       batch: {

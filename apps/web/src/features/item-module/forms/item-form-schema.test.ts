@@ -115,6 +115,90 @@ describe("form values -> API input", () => {
     expect(viaCollection).not.toHaveProperty("baseUnitId")
   })
 
+  it("create: normalizes opening stock postedAt date to ISO datetime", () => {
+    const values = CreateItemFormSchema.parse({
+      ...filled,
+      baseUnitId: uuid(2),
+      openingStockPostedAt: "2026-11-15",
+      openingStockLines: [
+        {
+          locationId: uuid(5),
+          quantity: "50",
+          manufacturedOn: "",
+        },
+      ],
+    })
+    const input = toCreateItemInput(values)
+    expect(input.openingStock).toBeDefined()
+    expect(input.openingStock?.postedAt).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/)
+    expect(input.openingStock?.lines).toEqual([
+      {
+        locationId: uuid(5),
+        quantity: "50",
+        cost: null,
+        manufacturedOn: null,
+      },
+    ])
+  })
+
+  it("create: maps opening stock lines with cost", () => {
+    const values = CreateItemFormSchema.parse({
+      ...filled,
+      baseUnitId: uuid(2),
+      openingStockLines: [
+        {
+          locationId: uuid(5),
+          quantity: "50",
+          cost: "12.50",
+          manufacturedOn: "",
+        },
+      ],
+    })
+    const input = toCreateItemInput(values)
+    expect(input.openingStock?.lines).toEqual([
+      {
+        locationId: uuid(5),
+        quantity: "50",
+        cost: "12.50",
+        manufacturedOn: null,
+      },
+    ])
+  })
+
+  it("create: requires manufacture date on opening stock lines when expiry tracked", () => {
+    const invalid = CreateItemFormSchema.safeParse({
+      ...filled,
+      baseUnitId: uuid(2),
+      isExpiryTracked: true,
+      defaultShelfLifeValue: 12,
+      defaultShelfLifeUnit: "MONTH",
+      openingStockLines: [
+        {
+          locationId: uuid(5),
+          quantity: "50",
+          manufacturedOn: "",
+        },
+      ],
+    })
+    expect(invalid.success).toBe(false)
+
+    const valid = CreateItemFormSchema.safeParse({
+      ...filled,
+      baseUnitId: uuid(2),
+      isExpiryTracked: true,
+      defaultShelfLifeValue: 12,
+      defaultShelfLifeUnit: "MONTH",
+      openingStockLines: [
+        {
+          locationId: uuid(5),
+          quantity: "50",
+          manufacturedOn: "2026-11-15",
+        },
+      ],
+    })
+    expect(valid.success).toBe(true)
+  })
+
   it("update: pre-fills from the item and trims the padded reorder point", () => {
     const defaults = getUpdateItemDefaults(item)
     expect(defaults).toMatchObject({

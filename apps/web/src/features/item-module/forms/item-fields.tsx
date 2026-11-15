@@ -48,7 +48,6 @@ export function ItemFields({
   const { category, unitCollection } = pickers
   const isExpiryTracked = useWatch({ control, name: "isExpiryTracked" })
   const isInventoryTracked = useWatch({ control, name: "isInventoryTracked" })
-  const isBatchTracked = useWatch({ control, name: "isBatchTracked" })
 
   return (
     <>
@@ -105,13 +104,6 @@ export function ItemFields({
           name="isInventoryTracked"
           label={copy.isInventoryTracked.label}
           description={copy.isInventoryTracked.description}
-          disabled={disabled}
-        />
-        <CheckboxField
-          control={control}
-          name="isBatchTracked"
-          label={copy.isBatchTracked.label}
-          description={copy.isBatchTracked.description}
           disabled={disabled}
         />
         <CheckboxField
@@ -195,7 +187,7 @@ export function ItemFields({
           copy={copy.openingStock}
           locationSource={locationSource}
           comboboxCopy={comboboxCopy}
-          isBatchTracked={isBatchTracked}
+          isExpiryTracked={Boolean(isExpiryTracked)}
           disabled={disabled}
         />
       ) : null}

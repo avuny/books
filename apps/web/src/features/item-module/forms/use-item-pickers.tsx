@@ -6,7 +6,7 @@ import { useAsyncComboboxCopy } from "../../lib/options/use-async-combobox-copy"
 import {
   ItemCategoryDialog,
   useItemCategoryAbilities,
-  useItemCategoryOptions,
+  useItemCategoryTreeOptions,
   type ItemCategoryDto,
 } from "../../item-category-module"
 import {
@@ -35,7 +35,7 @@ export function useItemPickers(
   const { t } = useTranslation(["item", "common"])
   const comboboxCopy = useAsyncComboboxCopy()
 
-  const categorySource = useItemCategoryOptions(orgId)
+  const categorySource = useItemCategoryTreeOptions(orgId)
   const baseUnitSource = useUnitOptions(orgId)
   const collectionSource = useUnitCollectionOptions(orgId)
   const locationSource = useLocationOptions(orgId, { stockableOnly: true })

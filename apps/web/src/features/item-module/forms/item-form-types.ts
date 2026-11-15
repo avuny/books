@@ -36,9 +36,12 @@ export type ItemFormCopy = {
     postedAt: FieldCopy
     addLine: string
     removeLine: string
+    empty: string
+    linesHeader: string
     line: {
       location: FieldCopy
       quantity: FieldCopy
+      cost: FieldCopy
     }
     batch: {
       toggle: string
