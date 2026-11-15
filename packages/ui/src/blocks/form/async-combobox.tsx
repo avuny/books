@@ -20,7 +20,13 @@ import {
 } from "@workspace/ui/components/combobox"
 import { cn } from "@workspace/ui/lib/utils"
 
-export type ComboboxOption = { id: string; name: string }
+export type ComboboxOption = {
+  id: string
+  name: string
+  depth?: number
+  path?: string
+  parentName?: string
+}
 
 /** Everything the combobox needs from a data source. `useCursorOptions` builds one from any *-options endpoint. */
 export type AsyncOptionsSource = {
@@ -215,7 +221,30 @@ export function AsyncCombobox({
               value={option}
               className="group/combobox-item justify-between"
             >
-              <span className="flex-1 truncate">{option.name}</span>
+              <span className="flex-1 min-w-0 flex items-center">
+                {typeof option.depth === "number" && option.depth > 0 && (
+                  <span
+                    className="inline-flex items-center text-muted-foreground/70 shrink-0 me-1.5"
+                    style={{ paddingInlineStart: `${option.depth * 14}px` }}
+                    aria-hidden
+                  >
+                    ↳&nbsp;
+                  </span>
+                )}
+                <span
+                  className={cn(
+                    "truncate",
+                    option.depth === 0 && "font-medium text-foreground"
+                  )}
+                >
+                  {option.name}
+                </span>
+                {option.path && typeof option.depth === "number" && option.depth > 0 && (
+                  <span className="ms-2 text-xs text-muted-foreground/60 truncate">
+                    ({option.path})
+                  </span>
+                )}
+              </span>
               {editHandler && (
                 <button
                   type="button"

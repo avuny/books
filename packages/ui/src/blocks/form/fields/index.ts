@@ -5,3 +5,7 @@ export {
   type SelectFieldProps,
   type SelectOption,
 } from "./select-field"
+export {
+  DatePickerField,
+  type DatePickerFieldProps,
+} from "./date-picker-field"
