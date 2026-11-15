@@ -6,6 +6,7 @@ export * from "./list"
 export {
   useItemCategoryAbilities,
   useItemCategoryOptions,
+  useItemCategoryTreeOptions,
 } from "./item-category-api"
 export type {
   ItemCategoryDto,

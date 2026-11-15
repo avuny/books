@@ -3,23 +3,23 @@
  * client (@/api). Everything else consumes the normalized values returned here,
  * so if a hook name or response shape differs, this is the one place to fix.
  */
-import { useMemo } from "react"
+import { useMemo, useState } from "react"
 import { keepPreviousData, useQueryClient } from "@tanstack/react-query"
+import type { AsyncOptionsSource, ComboboxOption } from "@workspace/ui/blocks/form"
 
 import {
   getGetItemCategoryQueryKey,
   getGetItemCategoryTreeQueryKey,
   getListItemCategoriesQueryKey,
   getListItemCategoryOptionsQueryKey,
-  listItemCategoryOptions,
   useCreateItemCategory,
   useDeleteItemCategory,
   useGetItemCategory,
+  useGetItemCategoryTree,
   useListItemCategories,
   useUpdateItemCategory,
 } from "@/api"
 
-import { useCursorOptions } from "../lib/options/use-cursor-options"
 import { useResourceAbilities } from "../lib/permissions/use-resource-abilities"
 import type {
   ItemCategoryDto,
@@ -164,18 +164,87 @@ export function useDeleteItemCategoryMutation(orgId: string) {
   return useDeleteItemCategory({ mutation: { onSuccess: () => invalidate() } })
 }
 
-/** Source for the async combobox (parent picker, item category picker). */
-export function useItemCategoryOptions(orgId: string) {
-  return useCursorOptions({
-    queryKey: getListItemCategoryOptionsQueryKey(orgId),
-    fetchPage: async ({ cursor, search, limit, signal }) =>
-      (
-        await listItemCategoryOptions(
-          orgId,
-          { cursor, search, limit },
-          { signal }
-        )
-      ).data,
-    enabled: Boolean(orgId),
+/** Source for the async combobox with category tree hierarchy (depth & parent indicators). */
+export function useItemCategoryTreeOptions(orgId: string): AsyncOptionsSource {
+  const [search, setSearch] = useState("")
+
+  const { data, isLoading, isError, refetch } = useGetItemCategoryTree(orgId, {
+    query: {
+      enabled: Boolean(orgId),
+    },
   })
+
+  const allOptions = useMemo(() => {
+    const rawNodes = data?.data?.nodes ?? []
+    if (rawNodes.length === 0) return []
+
+    // Group active nodes by parentId
+    const childrenMap = new Map<string | null, typeof rawNodes>()
+    for (const node of rawNodes) {
+      if (!node.isActive) continue
+      const list = childrenMap.get(node.parentId) ?? []
+      list.push(node)
+      childrenMap.set(node.parentId, list)
+    }
+
+    // Sort siblings alphabetically
+    for (const list of childrenMap.values()) {
+      list.sort((a, b) => a.name.localeCompare(b.name))
+    }
+
+    const flat: ComboboxOption[] = []
+
+    function traverse(
+      parentId: string | null,
+      depth: number,
+      parentPath: string[],
+      parentName?: string
+    ) {
+      const children = childrenMap.get(parentId) ?? []
+      for (const child of children) {
+        flat.push({
+          id: child.id,
+          name: child.name,
+          depth,
+          path: parentPath.join(" > "),
+          parentName,
+        })
+        traverse(child.id, depth + 1, [...parentPath, child.name], child.name)
+      }
+    }
+
+    traverse(null, 0, [])
+    return flat
+  }, [data])
+
+  const filteredOptions = useMemo(() => {
+    const query = search.trim().toLowerCase()
+    if (!query) return allOptions
+    return allOptions.filter(
+      (opt) =>
+        opt.name.toLowerCase().includes(query) ||
+        (opt.path && opt.path.toLowerCase().includes(query))
+    )
+  }, [allOptions, search])
+
+  return {
+    options: filteredOptions,
+    isLoading: isLoading && allOptions.length === 0,
+    isSearching: false,
+    isError,
+    hasNextPage: false,
+    isFetchingNextPage: false,
+    fetchNextPage: () => {},
+    retry: () => refetch(),
+    search,
+    onSearchChange: setSearch,
+    onOpenChange: (open) => {
+      if (!open) setSearch("")
+    },
+  }
+}
+
+/** Source for the async combobox (parent picker, item category picker). Uses the tree structure. */
+export function useItemCategoryOptions(orgId: string): AsyncOptionsSource {
+  return useItemCategoryTreeOptions(orgId)
 }
