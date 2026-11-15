@@ -62,14 +62,13 @@ export function useUnitPicker(
 /**
  * Config for the extra-unit picker rows. Pass this to `UnitCollectionExtraUnitsField`
  * so each row creates its own independent AsyncOptionsSource.
+ * Units of any type are allowed — conversions are product-specific scalar multipliers.
  */
 export function useExtraUnitPickerConfig(
-  orgId: string,
-  filter: { sameTypeAs?: string } = {}
+  orgId: string
 ): ExtraUnitPickerConfig {
   return {
     orgId,
-    sameTypeAs: filter.sameTypeAs,
     copy: useAsyncComboboxCopy(),
   }
 }

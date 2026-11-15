@@ -42,9 +42,7 @@ export function UpdateUnitCollection({
   )
   const updateMutation = useUpdateUnitCollectionMutation(orgId)
   const copy = useUnitCollectionFormCopy("update")
-  const extraUnitPickerConfig = useExtraUnitPickerConfig(orgId, {
-    sameTypeAs: collection?.baseUnitId,
-  })
+  const extraUnitPickerConfig = useExtraUnitPickerConfig(orgId)
 
   const initialOptions = useMemo<UnitInitialOptions>(
     () =>

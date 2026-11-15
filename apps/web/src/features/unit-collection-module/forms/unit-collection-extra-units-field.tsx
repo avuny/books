@@ -104,6 +104,8 @@ type UnitRowProps = {
  * Rendered once per extra-unit row. Calling `useUnitOptions` here gives every
  * row its own independent open / search / pagination state so rows don't
  * interfere with each other.
+ * All active units are shown — cross-type conversions (e.g. bag → kg or litres)
+ * are valid because the conversion factor is a product-specific scalar.
  */
 function UnitRow({
   control,
@@ -114,9 +116,7 @@ function UnitRow({
   disabled,
   onRemove,
 }: UnitRowProps) {
-  const source = useUnitOptions(pickerConfig.orgId, {
-    sameTypeAs: pickerConfig.sameTypeAs,
-  })
+  const source = useUnitOptions(pickerConfig.orgId)
 
   return (
     <li className="grid items-start gap-3 rounded-lg border border-border p-3 sm:grid-cols-[1fr_10rem_auto]">

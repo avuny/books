@@ -29,15 +29,11 @@ export function CreateUnitCollection({
   onSuccess,
 }: CreateUnitCollectionProps) {
   const [serverError, setServerError] = useState<string | null>(null)
-  const [baseUnitId, setBaseUnitId] = useState<string | undefined>(undefined)
 
   const createMutation = useCreateUnitCollectionMutation(orgId)
   const copy = useUnitCollectionFormCopy("create")
   const baseUnitPicker = useUnitPicker(orgId)
-  // The other units must measure the same thing as the base unit.
-  const extraUnitPickerConfig = useExtraUnitPickerConfig(orgId, {
-    sameTypeAs: baseUnitId,
-  })
+  const extraUnitPickerConfig = useExtraUnitPickerConfig(orgId)
 
   // Called only when Zod validation passes (react-hook-form guards the fields)
   const handleSubmit = async (values: CreateUnitCollectionFormValues) => {
@@ -58,7 +54,6 @@ export function CreateUnitCollection({
       copy={copy}
       baseUnitPicker={baseUnitPicker}
       extraUnitPickerConfig={extraUnitPickerConfig}
-      onBaseUnitChange={setBaseUnitId}
       onSubmit={handleSubmit}
       isPending={createMutation.isPending}
       errorMessage={serverError}

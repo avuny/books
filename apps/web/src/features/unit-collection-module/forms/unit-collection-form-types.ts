@@ -45,11 +45,10 @@ export type UnitPicker = {
 /**
  * Config passed to the extra-units field so it can create an independent
  * AsyncOptionsSource per row (avoids shared open/search state across rows).
+ * Units of any type are allowed — the conversion factor is a product-specific scalar.
  */
 export type ExtraUnitPickerConfig = {
   orgId: string
-  /** Narrows the unit list to units of the same type as the base unit. */
-  sameTypeAs?: string
   copy: AsyncComboboxCopy
   /** Omit to hide the "Create new" footer in each row's picker. */
   createAction?: ComboboxCreateAction

@@ -1,4 +1,3 @@
-import { useEffect, useRef } from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 
@@ -26,13 +25,7 @@ export type CreateUnitCollectionFormValues = UnitCollectionFormValues
 type CreateUnitCollectionFormProps = {
   copy: UnitCollectionFormCopy
   baseUnitPicker: UnitPicker
-  /**
-   * Config for the extra-unit pickers. Each row creates its own independent
-   * source; `sameTypeAs` is updated whenever the base unit changes.
-   */
   extraUnitPickerConfig: ExtraUnitPickerConfig
-  /** Lets the composition component narrow `extraUnitPickerConfig.sameTypeAs` to the base unit's type. */
-  onBaseUnitChange?: (baseUnitId: string | undefined) => void
   onSubmit: (values: CreateUnitCollectionFormValues) => void
   isPending: boolean
   /** Already localized. Shown in the form-level alert. */
@@ -44,7 +37,6 @@ export function CreateUnitCollectionForm({
   copy,
   baseUnitPicker,
   extraUnitPickerConfig,
-  onBaseUnitChange,
   onSubmit,
   isPending,
   errorMessage,
@@ -59,15 +51,6 @@ export function CreateUnitCollectionForm({
   })
 
   const baseUnitId = form.watch("baseUnitId")
-  const previousBase = useRef(baseUnitId)
-  useEffect(() => {
-    // Other units must measure the same thing as the base unit: a new base unit starts over.
-    if (previousBase.current !== baseUnitId) {
-      if (previousBase.current) form.setValue("units", [])
-      previousBase.current = baseUnitId
-    }
-    onBaseUnitChange?.(baseUnitId || undefined)
-  }, [baseUnitId, form, onBaseUnitChange])
 
   return (
     <FormShell
