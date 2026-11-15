@@ -78,6 +78,7 @@ function setup() {
     upsertExpirySettings: vi.fn(async () => {}),
     findStockPolicies: vi.fn(async () => new Map()),
     deleteItem: vi.fn(async () => ({ ok: true as const })),
+    deleteCreatedItemOnFailure: vi.fn(async () => {}),
   }
   const unitRepository = {
     findUnitsByIds: vi.fn(async () => [unit()]),
@@ -89,6 +90,14 @@ function setup() {
   const stockHistory = { hasMovements: vi.fn(async () => false) }
   const activityLog = { log: vi.fn(async () => {}) }
   const permissions = { check: vi.fn(async () => true) }
+  const openingStock = {
+    stockMovements: {
+      post: vi.fn(async () => ({ success: true, data: {} as any, msg: "ok" } as any)),
+    },
+    batches: {
+      ensureBatches: vi.fn(async () => ({ success: true, data: [], msg: "ok" } as any)),
+    },
+  }
   const service = createItemService({
     repository: repository as unknown as ItemRepository,
     unitRepository: unitRepository as unknown as ItemServiceDeps["unitRepository"],
@@ -96,8 +105,9 @@ function setup() {
     stockHistory,
     activityLog,
     permissions,
+    openingStock,
   })
-  return { repository, unitRepository, categoryRepository, stockHistory, activityLog, permissions, service }
+  return { repository, unitRepository, categoryRepository, stockHistory, activityLog, permissions, openingStock, service }
 }
 
 const createInput = {
@@ -194,6 +204,45 @@ describe("itemService", () => {
       const res = await t.service.create("u1", "org-1", createInput)
       expect(res).toMatchObject({ success: false, error: "ITEM_NAME_TAKEN" })
       expect(t.repository.upsertSettings).not.toHaveBeenCalled()
+    })
+
+    it("posts opening stock when provided", async () => {
+      const res = await t.service.create("u1", "org-1", {
+        ...createInput,
+        openingStock: {
+          lines: [{ locationId: "loc-1", quantity: "10" }],
+        },
+      })
+      expect(res).toMatchObject({ success: true })
+      expect(t.openingStock.stockMovements.post).toHaveBeenCalledWith(
+        "u1",
+        "org-1",
+        expect.objectContaining({
+          type: "opening",
+          lines: [expect.objectContaining({ toLocationId: "loc-1", quantity: "10" })],
+        }),
+        expect.anything()
+      )
+    })
+
+    it("cleans up inserted item (compensation) and maps error when opening stock fails", async () => {
+      t.openingStock.stockMovements.post.mockResolvedValue({
+        success: false,
+        error: "STOCK_MOVEMENT_EXPIRY_DATE_REQUIRED" as any,
+        msg: "Expiry date is required for expiry-tracked items",
+      })
+      const res = await t.service.create("u1", "org-1", {
+        ...createInput,
+        openingStock: {
+          lines: [{ locationId: "loc-1", quantity: "10" }],
+        },
+      })
+      expect(res).toMatchObject({
+        success: false,
+        error: "ITEM_EXPIRY_DATE_REQUIRED",
+        msg: "Expiry date is required for expiry-tracked items",
+      })
+      expect(t.repository.deleteCreatedItemOnFailure).toHaveBeenCalledWith("org-1", "item-1", expect.anything())
     })
   })
 

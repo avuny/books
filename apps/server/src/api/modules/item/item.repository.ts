@@ -1,5 +1,6 @@
 import { and, asc, eq, ilike, inArray, ne, sql, type SQL } from "drizzle-orm"
 import {
+  batches,
   itemCategories,
   itemExpirySettings,
   itemInventorySettings,
@@ -317,6 +318,19 @@ export function createItemRepository({ db }: { db: DB }) {
         // Future tables (stock movements, documents) will point at items with RESTRICT.
         if (isForeignKeyViolation(err)) return { ok: false, reason: "has_history" }
         throw err
+      }
+    },
+
+    /**
+     * Compensating rollback for failed item creation when opening stock or batch creation fails.
+     * Deletes any batches created during the create flow, then deletes the item (cascading settings).
+     */
+    async deleteCreatedItemOnFailure(orgId: string, id: string, tx?: Tx): Promise<void> {
+      try {
+        await exec(tx).delete(batches).where(and(eq(batches.orgId, orgId), eq(batches.itemId, id)))
+        await exec(tx).delete(items).where(and(eq(items.orgId, orgId), eq(items.id, id)))
+      } catch {
+        // Best effort compensation
       }
     },
   }

@@ -39,6 +39,10 @@ export const itemErrorsHttpMap = {
     statusCode: 422,
     responseMessage: "Opening stock cannot have a batch for non-batch-tracked items",
   },
+  ITEM_OPENING_STOCK_FAILED: {
+    statusCode: 422,
+    responseMessage: "Failed to record opening stock",
+  },
   ITEM_EXPIRY_DATE_REQUIRED: {
     statusCode: 422,
     responseMessage: "Expiry date is required for expiry-tracked items",

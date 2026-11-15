@@ -194,7 +194,7 @@ export function createItemService(deps: ItemServiceDeps) {
               canAssembled: input.canAssembled,
               isReturnable: input.isReturnable,
               isInventoryTracked: input.isInventoryTracked,
-              isBatchTracked: input.isBatchTracked,
+              isBatchTracked: input.isBatchTracked ?? (input.isInventoryTracked ? true : false),
               isExpiryTracked: input.isExpiryTracked,
               inventoryValuationMethod: input.inventoryValuationMethod,
             },
@@ -226,11 +226,35 @@ export function createItemService(deps: ItemServiceDeps) {
               orgId,
               itemId: res.row.id,
               itemName: res.row.name,
-              isBatchTracked: input.isBatchTracked,
+              isBatchTracked: input.isBatchTracked ?? (input.isInventoryTracked ? true : false),
               opening: input.openingStock,
             })
             if (!posted.ok) {
-              return abort(failure(Err.ITEM_OPENING_STOCK_NOT_TRACKED, posted.msg))
+              // Rollback compensation for stateless DB drivers (neon-http) where tx rollback is a no-op
+              await repo.deleteCreatedItemOnFailure(orgId, res.row.id, tx)
+
+              let errorCode: Code = Err.ITEM_OPENING_STOCK_FAILED
+              if (
+                posted.error === "STOCK_MOVEMENT_EXPIRY_DATE_REQUIRED" ||
+                posted.error === "BATCH_DATES_INVALID" ||
+                posted.error === Err.ITEM_EXPIRY_DATE_REQUIRED
+              ) {
+                errorCode = Err.ITEM_EXPIRY_DATE_REQUIRED
+              } else if (
+                posted.error === "STOCK_MOVEMENT_BATCH_REQUIRED" ||
+                posted.error === Err.ITEM_OPENING_STOCK_BATCH_REQUIRED
+              ) {
+                errorCode = Err.ITEM_OPENING_STOCK_BATCH_REQUIRED
+              } else if (
+                posted.error === "STOCK_MOVEMENT_BATCH_NOT_TRACKED" ||
+                posted.error === Err.ITEM_OPENING_STOCK_BATCH_NOT_TRACKED
+              ) {
+                errorCode = Err.ITEM_OPENING_STOCK_BATCH_NOT_TRACKED
+              } else if (posted.error && posted.error in Err) {
+                errorCode = posted.error as Code
+              }
+
+              return abort(failure(errorCode, posted.msg))
             }
           }
 

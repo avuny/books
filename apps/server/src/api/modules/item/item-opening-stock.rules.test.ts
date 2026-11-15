@@ -6,7 +6,7 @@ const line = (o: Record<string, unknown> = {}) => ({
   quantity: "5",
   ...o,
 })
-const base = { isInventoryTracked: true, isBatchTracked: false }
+const base = { isInventoryTracked: true, isBatchTracked: true, isExpiryTracked: false }
 
 describe("checkOpeningStock", () => {
   it("accepts an item with no opening stock", () => {
@@ -15,23 +15,31 @@ describe("checkOpeningStock", () => {
 
   it("needs an inventory-tracked item", () => {
     expect(
-      checkOpeningStock({ isInventoryTracked: false, isBatchTracked: false, openingStock: { lines: [line()] } })
+      checkOpeningStock({ isInventoryTracked: false, isBatchTracked: false, isExpiryTracked: false, openingStock: { lines: [line()] } })
     ).toMatchObject({ error: "ITEM_OPENING_STOCK_NOT_TRACKED" })
   })
 
-  it("needs a batch on every line of a batch-tracked item", () => {
-    const batch = { number: "L-01" }
+  it("accepts opening stock with quantity and location for non-expiry item", () => {
     expect(
-      checkOpeningStock({ ...base, isBatchTracked: true, openingStock: { lines: [line({ batch }), line()] } })
-    ).toMatchObject({ error: "ITEM_OPENING_STOCK_BATCH_REQUIRED" })
-    expect(
-      checkOpeningStock({ ...base, isBatchTracked: true, openingStock: { lines: [line({ batch })] } })
+      checkOpeningStock({ ...base, openingStock: { lines: [line()] } })
     ).toBeNull()
   })
 
-  it("rejects a batch on an item that is not batch tracked", () => {
+  it("requires a manufacture date on each line if expiry tracked", () => {
     expect(
-      checkOpeningStock({ ...base, openingStock: { lines: [line({ batch: { number: "L-01" } })] } })
-    ).toMatchObject({ error: "ITEM_OPENING_STOCK_BATCH_NOT_TRACKED" })
+      checkOpeningStock({
+        ...base,
+        isExpiryTracked: true,
+        openingStock: { lines: [line({ manufacturedOn: "2026-01-01" }), line()] },
+      })
+    ).toMatchObject({ error: "ITEM_EXPIRY_DATE_REQUIRED" })
+
+    expect(
+      checkOpeningStock({
+        ...base,
+        isExpiryTracked: true,
+        openingStock: { lines: [line({ manufacturedOn: "2026-01-01" })] },
+      })
+    ).toBeNull()
   })
 })
