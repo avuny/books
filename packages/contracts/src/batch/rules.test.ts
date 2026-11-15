@@ -59,6 +59,24 @@ describe("mergeBatchSpecs", () => {
         { number: "L-01", expiresOn: "2027-02-01" },
       ])
     ).toEqual({ ok: false, error: Err.BATCH_DETAILS_CONFLICT })
+
+    expect(
+      mergeBatchSpecs([
+        { number: "L-01", cost: "10.00" },
+        { number: "L-01", cost: "15.00" },
+      ])
+    ).toEqual({ ok: false, error: Err.BATCH_DETAILS_CONFLICT })
+  })
+
+  it("fills in missing cost and quantity", () => {
+    const res = mergeBatchSpecs([
+      { number: "L-01", cost: "10.00" },
+      { number: "L-01", quantity: "50" },
+    ])
+    expect(res).toEqual({
+      ok: true,
+      value: [{ number: "L-01", cost: "10.00", quantity: "50" }],
+    })
   })
 
   it("keys numbers without regard to case or surrounding spaces", () => {

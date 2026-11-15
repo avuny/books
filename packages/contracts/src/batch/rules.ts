@@ -11,6 +11,8 @@ import { BatchErrorCode as Err } from "./errors.js"
 /** What the caller tells us about a batch. null and undefined both mean "not given". */
 export type BatchSpec = {
   number: string
+  cost?: string | null
+  quantity?: string | null
   manufacturedOn?: string | null
   expiresOn?: string | null
   notes?: string | null
@@ -167,7 +169,7 @@ export function mergeBatchSpecs(
       merged.set(key, { ...spec, number: normalizeBatchNumber(spec.number) })
       continue
     }
-    for (const field of ["manufacturedOn", "expiresOn", "notes", "shelfLifeValue", "shelfLifeUnit"] as const) {
+    for (const field of ["cost", "quantity", "manufacturedOn", "expiresOn", "notes", "shelfLifeValue", "shelfLifeUnit"] as const) {
       const a = known[field] ?? null
       const b = spec[field] ?? null
       if (a !== null && b !== null && a !== b) return { ok: false, error: Err.BATCH_DETAILS_CONFLICT }
