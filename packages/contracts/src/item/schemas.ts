@@ -11,7 +11,7 @@ import {
 } from "./constants.js"
 import { UNIT_QUANTITY_PATTERN } from "../unit/constants.js"
 import { UnitDtoSchema } from "../unit/schemas.js"
-import { SHELF_LIFE_UNITS } from "../batch/constants.js"
+import { BATCH_DATE_REGEX, SHELF_LIFE_UNITS } from "../batch/constants.js"
 import { BatchInputSchema } from "../batch/schemas.js"
 
 const id = z.string().uuid()
@@ -53,12 +53,23 @@ export type ItemExpirySettingsDto = z.infer<typeof ItemExpirySettingsDtoSchema>
 export const ItemOpeningStockLineSchema = z.object({
   locationId: id,
   quantity,
+  cost: quantity.nullish(),
+  manufacturedOn: z.string().trim().regex(BATCH_DATE_REGEX, "Use YYYY-MM-DD").nullish(),
   batch: BatchInputSchema.nullish(),
 })
 export type ItemOpeningStockLine = z.infer<typeof ItemOpeningStockLineSchema>
 
 export const ItemOpeningStockSchema = z.object({
-  postedAt: z.string().datetime().optional(),
+  postedAt: z
+    .string()
+    .datetime()
+    .or(
+      z
+        .string()
+        .regex(/^\d{4}-\d{2}-\d{2}$/, "Use YYYY-MM-DD")
+        .transform((d) => new Date(`${d}T00:00:00.000Z`).toISOString())
+    )
+    .optional(),
   lines: z.array(ItemOpeningStockLineSchema).min(1),
 })
 export type ItemOpeningStock = z.infer<typeof ItemOpeningStockSchema>
@@ -80,7 +91,7 @@ export const CreateItemSchema = z
     canAssembled: z.boolean().default(false),
     isReturnable: z.boolean().default(true),
     isInventoryTracked: z.boolean().default(true),
-    isBatchTracked: z.boolean().default(false),
+    isBatchTracked: z.boolean().default(true),
     isExpiryTracked: z.boolean().default(false),
     expirySettings: ItemExpirySettingsInputSchema.nullish(),
     openingStock: ItemOpeningStockSchema.optional(),

@@ -18,7 +18,7 @@ describe("CreateItemSchema", () => {
       canAssembled: false,
       isReturnable: true,
       isInventoryTracked: true,
-      isBatchTracked: false,
+      isBatchTracked: true,
       inventoryValuationMethod: "fifo",
       allowNegativeStock: false,
     })

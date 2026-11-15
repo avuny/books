@@ -11,6 +11,7 @@
     "ITEM_OPENING_STOCK_NOT_TRACKED": "Opening stock needs an inventory-tracked item.",
     "ITEM_OPENING_STOCK_BATCH_REQUIRED": "Opening stock requires a batch for batch-tracked items.",
     "ITEM_OPENING_STOCK_BATCH_NOT_TRACKED": "Opening stock cannot have a batch for non-batch-tracked items.",
+    "ITEM_OPENING_STOCK_FAILED": "Failed to record opening stock.",
     "ITEM_EXPIRY_DATE_REQUIRED": "Expiry date is required for expiry-tracked items.",
     "ITEM_LOCKED_FIELD": "These settings cannot change after the item has stock movements.",
     "ITEM_HAS_HISTORY": "This item has stock history. Deactivate it instead of deleting it."
@@ -139,8 +140,10 @@
         "placeholder": "YYYY-MM-DD",
         "description": "Defaults to today if left blank."
       },
-      "addLine": "Add location",
+      "addLine": "Add line",
       "removeLine": "Remove",
+      "empty": "No opening stock lines added.",
+      "linesHeader": "Opening stock lines",
       "line": {
         "location": {
           "label": "Location",
@@ -149,6 +152,10 @@
         "quantity": {
           "label": "Quantity",
           "placeholder": "e.g. 100"
+        },
+        "cost": {
+          "label": "Cost",
+          "placeholder": "e.g. 10.00"
         }
       },
       "batch": {

@@ -11,6 +11,7 @@
     "ITEM_OPENING_STOCK_NOT_TRACKED": "الرصيد الافتتاحي يتطلب صنفاً يتتبع المخزون.",
     "ITEM_OPENING_STOCK_BATCH_REQUIRED": "الرصيد الافتتاحي يتطلب دفعة للأصناف متتبعة الدفعات.",
     "ITEM_OPENING_STOCK_BATCH_NOT_TRACKED": "لا يمكن إضافة دفعة في الرصيد الافتتاحي لصنف غير متتبع للدفعات.",
+    "ITEM_OPENING_STOCK_FAILED": "فشل تسجيل الرصيد الافتتاحي.",
     "ITEM_EXPIRY_DATE_REQUIRED": "تاريخ الصلاحية مطلوب للأصناف متتبعة الصلاحية.",
     "ITEM_LOCKED_FIELD": "لا يمكن تغيير هذه الإعدادات بعد وجود حركات مخزون للصنف.",
     "ITEM_HAS_HISTORY": "لهذا الصنف سجل مخزون. عطّله بدلاً من حذفه."
@@ -139,8 +140,10 @@
         "placeholder": "YYYY-MM-DD",
         "description": "يُعيَّن افتراضياً لتاريخ اليوم إذا تُرك فارغاً."
       },
-      "addLine": "إضافة موقع",
+      "addLine": "إضافة سطر",
       "removeLine": "حذف",
+      "empty": "لم تتم إضافة سطور رصيد افتتاحي.",
+      "linesHeader": "سطور الرصيد الافتتاحي",
       "line": {
         "location": {
           "label": "الموقع",
@@ -149,6 +152,10 @@
         "quantity": {
           "label": "الكمية",
           "placeholder": "مثال: 100"
+        },
+        "cost": {
+          "label": "التكلفة",
+          "placeholder": "مثال: 10.00"
         }
       },
       "batch": {
