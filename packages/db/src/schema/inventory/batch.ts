@@ -19,7 +19,7 @@ import {
     BATCH_NUMBER_MIN_LENGTH,
     BATCH_STATUSES,
 } from "@avuny/contracts/batch"
-import { lengthBetween, pk, timestamps } from "../_helpers.js"
+import { lengthBetween, pk, quantity, timestamps } from "../_helpers.js"
 import { items, orgRef, shelfLifeUnitEnum } from "../index.js"
 // Adjust to where the items table lives.
 
@@ -50,6 +50,8 @@ export const batches = pgTable(
         orgId: orgRef(),
         itemId: uuid("item_id").notNull(),
         batchNumber: text("batch_number").notNull(),
+        cost: quantity("cost"),
+        quantity: quantity("quantity"),
         manufacturedOn: date("manufactured_on", { mode: "string" }),
         expiresOn: date("expires_on", { mode: "string" }),
         shelfLifeValue: integer("shelf_life_value"),
@@ -76,6 +78,14 @@ export const batches = pgTable(
         check(
             "ck_batch_dates",
             sql`${t.manufacturedOn} is null or ${t.expiresOn} is null or ${t.expiresOn} >= ${t.manufacturedOn}`
+        ),
+        check(
+            "ck_batch_cost_non_negative",
+            sql`${t.cost} IS NULL OR ${t.cost} >= 0`
+        ),
+        check(
+            "ck_batch_quantity_non_negative",
+            sql`${t.quantity} IS NULL OR ${t.quantity} >= 0`
         ),
         check(
             "ck_batch_shelf_life_unit_and_value",
