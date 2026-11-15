@@ -37,7 +37,7 @@ describe("normalizeDecimal / isValidFactor", () => {
 })
 
 describe("checkCollectionDraft", () => {
-  it("passes when the base unit is active and all extra units share its type", () => {
+  it("passes when the base unit is active and extra units share its type", () => {
     const res = checkCollectionDraft(
       "m",
       [
@@ -50,15 +50,22 @@ describe("checkCollectionDraft", () => {
     if (res.ok) expect(res.value.id).toBe("m")
   })
 
+  it("passes when extra units are of a different type (cross-type conversions are allowed)", () => {
+    // e.g. a bag can equal 50 kg OR 50 litres; the factor is product-specific
+    const res = checkCollectionDraft(
+      "bag",
+      [
+        { unitId: "kg", conversionFactor: "50" },
+        { unitId: "l", conversionFactor: "50" },
+      ],
+      [u("bag", "count"), u("kg", "weight"), u("l", "volume")]
+    )
+    expect(res.ok).toBe(true)
+  })
+
   it("fails when the base unit does not exist or is inactive", () => {
     expect(checkCollectionDraft("m", [], []).ok).toBe(false)
     expect(checkCollectionDraft("m", [], [u("m", "length", { isActive: false })]).ok).toBe(false)
-  })
-
-  it("fails when an extra unit measures something else", () => {
-    const res = checkCollectionDraft("m", [{ unitId: "kg", conversionFactor: "1" }], [u("m"), u("kg", "weight")])
-    expect(res.ok).toBe(false)
-    if (!res.ok) expect(res.violation.error).toBe("UNIT_TYPE_MISMATCH")
   })
 
   it("fails when a unit appears twice or repeats the base unit", () => {

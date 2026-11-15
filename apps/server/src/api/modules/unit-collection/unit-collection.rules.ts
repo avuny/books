@@ -45,9 +45,10 @@ export function isValidFactor(value: string): boolean {
 }
 
 /**
- * A collection = its base unit + extra units, all of the SAME type as the base unit,
- * each unit at most once (the base unit counts), every factor > 0, at most `maxUnits`
- * rows in total. Returns the base unit when the draft is valid.
+ * A collection = its base unit + extra units, each unit at most once (the base unit counts),
+ * every factor > 0, at most `maxUnits` rows in total. Units may be of any type — a bag can
+ * equal 50 kg or 50 litres; the conversion factor is product-specific. Returns the base unit
+ * when the draft is valid.
  */
 export function checkCollectionDraft(
   baseUnitId: string,
@@ -75,11 +76,6 @@ export function checkCollectionDraft(
 
     const unit = byId.get(extra.unitId)
     if (!unit || !unit.isActive) return reject(Err.UNIT_NOT_FOUND, "Unit not found")
-    if (unit.type !== base.type)
-      return reject(
-        Err.UNIT_TYPE_MISMATCH,
-        `"${unit.symbol}" is a ${unit.type} unit but the base unit is a ${base.type} unit`
-      )
     if (!isValidFactor(extra.conversionFactor))
       return reject(
         Err.UNIT_INVALID_CONVERSION_FACTOR,
