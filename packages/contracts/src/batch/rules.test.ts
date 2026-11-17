@@ -62,20 +62,20 @@ describe("mergeBatchSpecs", () => {
 
     expect(
       mergeBatchSpecs([
-        { number: "L-01", cost: "10.00" },
-        { number: "L-01", cost: "15.00" },
+        { number: "L-01", notes: "first batch" },
+        { number: "L-01", notes: "conflicting note" },
       ])
     ).toEqual({ ok: false, error: Err.BATCH_DETAILS_CONFLICT })
   })
 
-  it("fills in missing cost and quantity", () => {
+  it("fills in missing metadata across multiple specs", () => {
     const res = mergeBatchSpecs([
-      { number: "L-01", cost: "10.00" },
-      { number: "L-01", quantity: "50" },
+      { number: "L-01", manufacturedOn: "2026-01-01" },
+      { number: "L-01", notes: "note 1" },
     ])
     expect(res).toEqual({
       ok: true,
-      value: [{ number: "L-01", cost: "10.00", quantity: "50" }],
+      value: [{ number: "L-01", manufacturedOn: "2026-01-01", notes: "note 1" }],
     })
   })
 

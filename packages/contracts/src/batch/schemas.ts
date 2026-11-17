@@ -10,11 +10,9 @@ import {
   BATCH_STATUSES,
   SHELF_LIFE_UNITS,
 } from "./constants.js"
-import { UNIT_QUANTITY_PATTERN } from "../unit/constants.js"
 
 const statusSchema = z.enum(BATCH_STATUSES)
 const numberSchema = z.string().trim().min(BATCH_NUMBER_MIN_LENGTH).max(BATCH_NUMBER_MAX_LENGTH)
-const quantitySchema = z.string().trim().regex(UNIT_QUANTITY_PATTERN, "Invalid number")
 const dateSchema = z.string().trim().regex(BATCH_DATE_REGEX, "Use YYYY-MM-DD")
 const notesSchema = z.string().trim().min(1).max(BATCH_NOTES_MAX_LENGTH)
 const shelfLifeUnitSchema = z.enum(SHELF_LIFE_UNITS)
@@ -25,8 +23,6 @@ const shelfLifeUnitSchema = z.enum(SHELF_LIFE_UNITS)
 export const BatchInputSchema = z
   .object({
     number: numberSchema,
-    cost: quantitySchema.nullish(),
-    quantity: quantitySchema.nullish(),
     manufacturedOn: dateSchema.nullish(),
     expiresOn: dateSchema.nullish(),
     notes: notesSchema.nullish(),
@@ -60,8 +56,6 @@ export const BatchDtoSchema = z.object({
   id: z.string().uuid(),
   itemId: z.string().uuid(),
   batchNumber: z.string(),
-  cost: z.string().nullable(),
-  quantity: z.string().nullable(),
   manufacturedOn: z.string().nullable(),
   expiresOn: z.string().nullable(),
   shelfLifeValue: z.number().int().nullable(),
