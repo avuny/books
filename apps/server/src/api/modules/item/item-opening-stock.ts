@@ -54,8 +54,6 @@ export async function postOpeningStock(
       lineBatchNumbers.push(batchNumber)
       specs.push({
         number: batchNumber,
-        cost: line.cost ?? line.batch?.cost ?? null,
-        quantity: line.quantity ?? line.batch?.quantity ?? null,
         manufacturedOn: line.manufacturedOn ?? line.batch?.manufacturedOn ?? null,
         expiresOn: line.batch?.expiresOn ?? null,
         shelfLifeValue: line.batch?.shelfLifeValue,
