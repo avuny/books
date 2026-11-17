@@ -19,29 +19,27 @@ import {
     BATCH_NUMBER_MIN_LENGTH,
     BATCH_STATUSES,
 } from "@avuny/contracts/batch"
-import { lengthBetween, pk, quantity, timestamps } from "../_helpers.js"
+import { lengthBetween, pk, timestamps } from "../_helpers.js"
 import { items, orgRef, shelfLifeUnitEnum } from "../index.js"
-// Adjust to where the items table lives.
-
 
 export const batchStatusEnum = pgEnum("batch_status", BATCH_STATUSES)
 
 const sqlNum = (n: number) => sql.raw(String(n))
 
 /**
- * BATCHES: a lot of one item, identified by the number printed on the goods, with its dates and
- * its operational status (available, quarantined, blocked, recalled).
- * Flow: created when stock of a batch-tracked item first arrives (opening stock, a purchase receipt,
- * a production output) through the batch service; the stock movement lines and balances then point
- * at it. Batches are never deleted: a lot that is withdrawn is recalled or blocked, and its history
- * stays readable.
- * Integrity: composite FK (org_id, item_id) keeps the batch inside the item's organization; the
- * number is unique per item, case-insensitively; (org_id, item_id, id) is the FK target for stock
- * rows, so a stock row can never name a batch of another item or organization; the expiry date is not
- * before the manufacturing date; the number is trimmed and within its length bounds.
- * Not expressible here: that the item is batch tracked, which statuses allow which stock postings
- * (batchAllowsIntent in contracts, applied by the stock movement service), and expiry handling
- * (picking order, blocking expired stock), which belongs to allocation.
+ * BATCHES: permanent master records identifying a particular lot of an item.
+ * Flow: created by the Batch Service when an item first receives a batch through opening stock,
+ * purchasing, or production; stock movements and location-level batch balances then reference it.
+ * One batch belongs to one organization and item, but the same batch may exist in multiple
+ * inventory locations. A location may also contain multiple batches of the same item.
+ * Integrity: composite FK to items; unique case-insensitive batch number per organization/item;
+ * unique (org_id, item_id, id) target for stock and inventory references; trimmed/length-bounded
+ * batch number; valid manufacturing/expiry dates; paired shelf-life value/unit; positive shelf life.
+ * Batches are permanent: zero quantity, blocked, recalled, expired, and quarantined batches remain
+ * readable. This table deliberately has no quantity or cost column; location quantities belong to
+ * inventory_item_batches and valuation belongs to the costing/accounting model.
+ * Not expressible here: whether the item is batch tracked, whether a batch status allows a posting,
+ * batch allocation/picking policy, expiry enforcement, or physical batch quantity aggregation.
  */
 export const batches = pgTable(
     "batches",
@@ -50,8 +48,6 @@ export const batches = pgTable(
         orgId: orgRef(),
         itemId: uuid("item_id").notNull(),
         batchNumber: text("batch_number").notNull(),
-        cost: quantity("cost"),
-        quantity: quantity("quantity"),
         manufacturedOn: date("manufactured_on", { mode: "string" }),
         expiresOn: date("expires_on", { mode: "string" }),
         shelfLifeValue: integer("shelf_life_value"),
@@ -61,7 +57,7 @@ export const batches = pgTable(
         ...timestamps(),
     },
     (t) => [
-        unique("ux_batch_org_item_id").on(t.orgId, t.itemId, t.id), // FK target for stock movement lines and balances
+        unique("ux_batch_org_item_id").on(t.orgId, t.itemId, t.id),
         foreignKey({
             name: "fk_batch_item",
             columns: [t.orgId, t.itemId],
@@ -69,7 +65,9 @@ export const batches = pgTable(
         }).onDelete("restrict"),
         uniqueIndex("ux_batch_org_item_number").on(t.orgId, t.itemId, sql`lower(${t.batchNumber})`),
         index("ix_batch_org_item_status_expiry").on(t.orgId, t.itemId, t.status, t.expiresOn),
-        index("ix_batch_org_expiry").on(t.orgId, t.expiresOn).where(sql`${t.expiresOn} is not null`),
+        index("ix_batch_org_expiry")
+            .on(t.orgId, t.expiresOn)
+            .where(sql`${t.expiresOn} is not null`),
         check(
             "ck_batch_number_len",
             lengthBetween(t.batchNumber, BATCH_NUMBER_MIN_LENGTH, BATCH_NUMBER_MAX_LENGTH)
@@ -80,20 +78,13 @@ export const batches = pgTable(
             sql`${t.manufacturedOn} is null or ${t.expiresOn} is null or ${t.expiresOn} >= ${t.manufacturedOn}`
         ),
         check(
-            "ck_batch_cost_non_negative",
-            sql`${t.cost} IS NULL OR ${t.cost} >= 0`
-        ),
-        check(
-            "ck_batch_quantity_non_negative",
-            sql`${t.quantity} IS NULL OR ${t.quantity} >= 0`
-        ),
-        check(
             "ck_batch_shelf_life_unit_and_value",
-            sql`(${t.shelfLifeValue} IS NULL AND ${t.shelfLifeUnit} IS NULL) OR (${t.shelfLifeValue} IS NOT NULL AND ${t.shelfLifeUnit} IS NOT NULL)`
+            sql`(${t.shelfLifeValue} is null and ${t.shelfLifeUnit} is null)
+                or (${t.shelfLifeValue} is not null and ${t.shelfLifeUnit} is not null)`
         ),
         check(
             "ck_batch_shelf_life_positive_value",
-            sql`${t.shelfLifeValue} IS NULL OR ${t.shelfLifeValue} > 0`
+            sql`${t.shelfLifeValue} is null or ${t.shelfLifeValue} > 0`
         ),
         check(
             "ck_batch_notes_len",
@@ -101,5 +92,6 @@ export const batches = pgTable(
         ),
     ]
 )
+
 export type Batch = typeof batches.$inferSelect
 export type NewBatch = typeof batches.$inferInsert
