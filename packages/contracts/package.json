@@ -15,6 +15,11 @@
       "import": "./dist/index.js",
       "default": "./dist/index.js"
     },
+    "./accounting": {
+      "types": "./dist/accounting/index.d.ts",
+      "import": "./dist/accounting/index.js",
+      "default": "./dist/accounting/index.js"
+    },
     "./activity-log": {
       "types": "./dist/activity-log/index.d.ts",
       "import": "./dist/activity-log/index.js",
@@ -39,6 +44,11 @@
       "types": "./dist/geo/index.d.ts",
       "import": "./dist/geo/index.js",
       "default": "./dist/geo/index.js"
+    },
+    "./inventory-reservation": {
+      "types": "./dist/inventory-reservation/index.d.ts",
+      "import": "./dist/inventory-reservation/index.js",
+      "default": "./dist/inventory-reservation/index.js"
     },
     "./item": {
       "types": "./dist/item/index.d.ts",
