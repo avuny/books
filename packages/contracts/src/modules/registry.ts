@@ -30,6 +30,7 @@ export const SIDEBAR_GROUPS = {
   users: { icon: "users", label: { en: "Users", ar: "المستخدمون" } },
   // purchases and sales groups are defined here when their first module is uncommented
   inventory: { icon: "boxes", label: { en: "Inventory", ar: "المخزون" } },
+  accounting: { icon: "calculator", label: { en: "Accounting", ar: "المحاسبة" } },
 } as const satisfies Record<string, { icon: string; label: Localized }>
 
 export type SidebarGroup = keyof typeof SIDEBAR_GROUPS
@@ -265,4 +266,39 @@ export const MODULES = {
       reverse: { permission: true, event: "reversed" },
     },
   },
+
+
+
+
+
+  // -- accounting ----------------------------------------------------------
+  // One resource covers the chart of accounts, journals and reports:
+  //   read    accounts, mappings, journals, periods and every report
+  //   create  accounts, manual journals (draft and post), opening balances, periods
+  //   update  accounts, mappings, draft journals, reversals, closing a period
+  //   delete  accounts that were never used, draft journals
+  // The other actions are logged only; they are not separate permissions.
+  accounting: {
+    sidebar: {
+      group: "accounting",
+      icon: "book-open",
+      path: "/accounting",
+      label: { en: "Accounting", ar: "المحاسبة" },
+    },
+    actions: {
+      create: { permission: true, event: "account_created" },
+      read: { permission: true },
+      update: { permission: true, event: "account_updated" },
+      delete: { permission: true, event: "account_deleted" },
+      change_mapping: { event: "mapping_changed" },
+      create_journal: { event: "journal_created" },
+      update_journal: { event: "journal_updated" },
+      delete_journal: { event: "journal_deleted" },
+      post_journal: { event: "journal_posted" },
+      reverse_journal: { event: "journal_reversed" },
+      create_period: { event: "period_created" },
+      close_period: { event: "period_closed" },
+    },
+  },
 } as const satisfies Record<string, ModuleSpec>
+

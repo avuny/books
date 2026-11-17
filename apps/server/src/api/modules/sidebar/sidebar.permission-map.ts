@@ -24,6 +24,7 @@ export const sidebarOptionResources = {
   // purchaseOrder: "purchase-order",
   // salesOrder: "sales-order",
   warehouse: "warehouse",
+  accounting: "accounting",
   organizationUser: "organization-user",
   // report: "report",
   // receipt: "receipt",
