@@ -153,12 +153,38 @@ export type StockMovementLineHistoryResponse = z.infer<
 
 /* ---------- balances (stock on hand) ---------- */
 
+export const InventoryItemDtoSchema = z.object({
+  id: z.string().uuid(),
+  itemId: z.string().uuid(),
+  warehouseId: z.string().uuid(),
+  locationId: z.string().uuid(),
+  onHandQty: z.string(),
+  reservedQty: z.string(),
+  createdAt: z.string().datetime(),
+  updatedAt: z.string().datetime(),
+})
+export type InventoryItemDto = z.infer<typeof InventoryItemDtoSchema>
+
+export const InventoryItemBatchDtoSchema = z.object({
+  id: z.string().uuid(),
+  inventoryItemId: z.string().uuid(),
+  itemId: z.string().uuid(),
+  batchId: z.string().uuid(),
+  onHandQty: z.string(),
+  reservedQty: z.string(),
+  createdAt: z.string().datetime(),
+  updatedAt: z.string().datetime(),
+})
+export type InventoryItemBatchDto = z.infer<typeof InventoryItemBatchDtoSchema>
+
 export const StockBalanceDtoSchema = z.object({
   warehouseId: z.string().uuid(),
   locationId: z.string().uuid(),
   itemId: z.string().uuid(),
   batchId: z.string().uuid().nullable(),
   quantity: z.string(),
+  onHandQty: z.string().optional(),
+  reservedQty: z.string().optional(),
   updatedAt: z.string().datetime(),
 })
 export type StockBalanceDto = z.infer<typeof StockBalanceDtoSchema>
