@@ -93,8 +93,6 @@ export function createBatchService(deps: BatchServiceDeps) {
               orgId,
               itemId,
               batchNumber: spec.number,
-              cost: spec.cost ?? null,
-              quantity: spec.quantity ?? null,
               manufacturedOn: spec.manufacturedOn ?? null,
               expiresOn: resolved.expiresOn,
               shelfLifeValue: resolved.shelfLifeValue,
