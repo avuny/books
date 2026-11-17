@@ -145,7 +145,7 @@ describe("stockMovementService.post", () => {
     expect(res).toMatchObject({ success: true })
     expect(t.repository.lockBalances).toHaveBeenCalledWith(
       ORG,
-      [{ locationId: BIN, itemId: ITEM, batchId: null }],
+      [{ locationId: BIN, itemId: ITEM, batchId: null, warehouseId: "wh-1" }],
       expect.anything()
     )
   })
@@ -437,9 +437,71 @@ describe("stockMovementService batches", () => {
     expect(t.repository.lockBalances).toHaveBeenCalledWith(
       ORG,
       [
-        { locationId: BIN, itemId: ITEM, batchId: null },
-        { locationId: "bin-0", itemId: ITEM, batchId: null },
+        { locationId: BIN, itemId: ITEM, batchId: null, warehouseId: "wh-1" },
+        { locationId: "bin-0", itemId: ITEM, batchId: null, warehouseId: "wh-1" },
       ].sort((a, b) => (`${a.locationId}` < `${b.locationId}` ? -1 : 1)),
+      expect.anything()
+    )
+  })
+
+  it("handles multiple batches in one location and aggregates deltas", async () => {
+    const BATCH_2 = "batch-2"
+    t.batches.findForPosting.mockResolvedValue(
+      new Map([
+        [BATCH, { itemId: ITEM, status: "available", expiresOn: "2027-01-01" }],
+        [BATCH_2, { itemId: ITEM, status: "available", expiresOn: "2027-06-01" }],
+      ])
+    )
+    const res = await t.service.post("u1", ORG, {
+      type: "opening",
+      lines: [
+        { itemId: ITEM, batchId: BATCH, toLocationId: BIN, quantity: "10" },
+        { itemId: ITEM, batchId: BATCH_2, toLocationId: BIN, quantity: "20" },
+      ],
+    })
+    expect(res).toMatchObject({ success: true })
+    expect(t.repository.applyBalanceDeltas).toHaveBeenCalledWith(
+      ORG,
+      [
+        { locationId: BIN, itemId: ITEM, batchId: BATCH, warehouseId: "wh-1", delta: "10" },
+        { locationId: BIN, itemId: ITEM, batchId: BATCH_2, warehouseId: "wh-1", delta: "20" },
+      ],
+      expect.anything()
+    )
+  })
+
+  it("handles the same batch across multiple locations", async () => {
+    const BIN_2 = "bin-2"
+    const res = await t.service.post("u1", ORG, {
+      type: "opening",
+      lines: [
+        { itemId: ITEM, batchId: BATCH, toLocationId: BIN, quantity: "5" },
+        { itemId: ITEM, batchId: BATCH, toLocationId: BIN_2, quantity: "15" },
+      ],
+    })
+    expect(res).toMatchObject({ success: true })
+    expect(t.repository.applyBalanceDeltas).toHaveBeenCalledWith(
+      ORG,
+      [
+        { locationId: BIN, itemId: ITEM, batchId: BATCH, warehouseId: "wh-1", delta: "5" },
+        { locationId: BIN_2, itemId: ITEM, batchId: BATCH, warehouseId: "wh-1", delta: "15" },
+      ],
+      expect.anything()
+    )
+  })
+
+  it("accumulates multiple lines for the same item, location and batch", async () => {
+    const res = await t.service.post("u1", ORG, {
+      type: "opening",
+      lines: [
+        { itemId: ITEM, batchId: BATCH, toLocationId: BIN, quantity: "3" },
+        { itemId: ITEM, batchId: BATCH, toLocationId: BIN, quantity: "7" },
+      ],
+    })
+    expect(res).toMatchObject({ success: true })
+    expect(t.repository.applyBalanceDeltas).toHaveBeenCalledWith(
+      ORG,
+      [{ locationId: BIN, itemId: ITEM, batchId: BATCH, warehouseId: "wh-1", delta: "10" }],
       expect.anything()
     )
   })

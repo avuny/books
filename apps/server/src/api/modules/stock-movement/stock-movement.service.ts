@@ -154,7 +154,12 @@ export function createStockMovementService(deps: StockMovementServiceDeps) {
     const required = new Map<string, BalanceKey & { quantity: string }>()
     for (const line of lines) {
       if (line.fromIntent) {
-        const key: BalanceKey = { locationId: line.fromLocationId, itemId: line.itemId, batchId: line.batchId }
+        const key: BalanceKey = {
+          locationId: line.fromLocationId,
+          warehouseId: warehouseOf.get(line.fromLocationId)!,
+          itemId: line.itemId,
+          batchId: line.batchId,
+        }
         touched.set(keyOf(key), key)
         // Only real warehouses of items that allow it may go negative; stock in transit never does.
         const mayGoNegative =
@@ -168,7 +173,12 @@ export function createStockMovementService(deps: StockMovementServiceDeps) {
         }
       }
       if (line.toIntent) {
-        const key: BalanceKey = { locationId: line.toLocationId, itemId: line.itemId, batchId: line.batchId }
+        const key: BalanceKey = {
+          locationId: line.toLocationId,
+          warehouseId: warehouseOf.get(line.toLocationId)!,
+          itemId: line.itemId,
+          batchId: line.batchId,
+        }
         touched.set(keyOf(key), key)
       }
     }

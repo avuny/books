@@ -13,9 +13,11 @@ assembly, adjustments and opening stock all post here; the warehouse and item mo
 |---|---|
 | `stock_movements` | Header: type, posted_at, source document (type, id, ref), note, reversal_of_id, created_by |
 | `stock_movement_lines` | One item from `from_location_id` to `to_location_id`, quantity > 0 in the item's base unit |
-| `stock_balances` | Quantity on hand per (location, item), with the location's warehouse. Stockable locations only |
+| `inventory_items` | Aggregate on-hand and reserved quantity per (location, item), with the location's warehouse |
+| `inventory_item_batches` | Batch-level on-hand and reserved quantity per (inventory_item, batch) |
 
-Lines and balances carry an optional `batch_id`: set exactly when the item is batch tracked (see the batch module). A balance is one row per (location, item, batch).
+Lines carry an optional `batch_id`: set exactly when the item is batch tracked (see the batch module).
+Core invariant: `InventoryItem.onHandQty = SUM(InventoryItemBatch.onHandQty)` for every batch-tracked item/location, maintained transactionally. Non-batch-tracked items exist only in `inventory_items`.
 
 Both sides of a line are always set. An end outside the business is a **system location** (role
 `supplier`, `customer`, `adjustment`, `production`) in the VIRTUAL system warehouse; `transit` is the

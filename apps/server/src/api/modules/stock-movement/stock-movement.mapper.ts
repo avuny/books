@@ -1,11 +1,13 @@
 import type {
+  InventoryItemBatchDto,
+  InventoryItemDto,
   StockBalanceDto,
   StockMovementDto,
   StockMovementLineDto,
   StockMovementLineHistoryItem,
 } from "@avuny/contracts"
-import type { StockBalance, StockMovement, StockMovementLine } from "@avuny/db"
-import type { HistoryRow } from "./stock-movement.repository.js"
+import type { InventoryItem, InventoryItemBatch, StockMovement, StockMovementLine } from "@avuny/db"
+import type { HistoryRow, StockBalanceRow } from "./stock-movement.repository.js"
 
 export function toStockMovementLineDto(row: StockMovementLine): StockMovementLineDto {
   return {
@@ -44,13 +46,41 @@ export function toHistoryItemDto(row: HistoryRow): StockMovementLineHistoryItem 
   return { ...row, postedAt: row.postedAt.toISOString() }
 }
 
-export function toStockBalanceDto(row: StockBalance): StockBalanceDto {
+export function toStockBalanceDto(row: StockBalanceRow): StockBalanceDto {
   return {
     warehouseId: row.warehouseId,
     locationId: row.locationId,
     itemId: row.itemId,
     batchId: row.batchId,
     quantity: row.quantity,
+    onHandQty: row.onHandQty ?? row.quantity,
+    reservedQty: row.reservedQty ?? "0",
+    updatedAt: row.updatedAt.toISOString(),
+  }
+}
+
+export function toInventoryItemDto(row: InventoryItem): InventoryItemDto {
+  return {
+    id: row.id,
+    itemId: row.itemId,
+    warehouseId: row.warehouseId,
+    locationId: row.locationId,
+    onHandQty: row.onHandQty,
+    reservedQty: row.reservedQty,
+    createdAt: row.createdAt.toISOString(),
+    updatedAt: row.updatedAt.toISOString(),
+  }
+}
+
+export function toInventoryItemBatchDto(row: InventoryItemBatch): InventoryItemBatchDto {
+  return {
+    id: row.id,
+    inventoryItemId: row.inventoryItemId,
+    itemId: row.itemId,
+    batchId: row.batchId,
+    onHandQty: row.onHandQty,
+    reservedQty: row.reservedQty,
+    createdAt: row.createdAt.toISOString(),
     updatedAt: row.updatedAt.toISOString(),
   }
 }

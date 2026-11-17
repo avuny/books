@@ -1,4 +1,4 @@
-import { and, asc, count, desc, eq, gte, inArray, isNotNull, isNull, lte, or, sql } from "drizzle-orm"
+import { and, asc, count, desc, eq, inArray, isNotNull, notExists, or, sql } from "drizzle-orm"
 import {
   balanceKey,
   type StockBalanceListQuery,
@@ -6,15 +6,17 @@ import {
   type SystemLocationIds,
 } from "@avuny/contracts"
 import {
-  stockBalances,
+  inventoryItemBatches,
+  inventoryItems,
   stockMovementLines,
   stockMovements,
   warehouseLocations,
   warehouses,
   type DB,
+  type InventoryItem,
+  type InventoryItemBatch,
   type NewStockMovement,
   type NewStockMovementLine,
-  type StockBalance,
   type StockMovement,
   type StockMovementLine,
   type Tx,
@@ -24,8 +26,14 @@ import { isUniqueViolation } from "../shared/pg-errors.js"
 const SOURCE_INDEX = ["ux_stock_movement_org_source"] as const
 const REVERSAL_INDEX = ["ux_stock_movement_org_reversal"] as const
 
-/** One stock balance row: batchId is null for items that are not batch tracked. */
-export type BalanceKey = { locationId: string; itemId: string; batchId: string | null }
+/** One inventory balance key: batchId is null for items that are not batch tracked. */
+export type BalanceKey = {
+  locationId: string
+  warehouseId?: string
+  itemId: string
+  batchId: string | null
+}
+
 export type BalanceDelta = BalanceKey & { warehouseId: string; delta: string }
 
 export type MovementWriteResult =
@@ -49,7 +57,16 @@ export type HistoryRow = {
   quantity: string
 }
 
-const NONZERO = sql`${stockBalances.quantity} <> 0`
+export type StockBalanceRow = {
+  warehouseId: string
+  locationId: string
+  itemId: string
+  batchId: string | null
+  quantity: string
+  onHandQty?: string
+  reservedQty?: string
+  updatedAt: Date
+}
 
 export function createStockMovementRepository({ db }: { db: DB }) {
   const exec = (tx?: Tx): DB | Tx => tx ?? db
@@ -57,10 +74,6 @@ export function createStockMovementRepository({ db }: { db: DB }) {
   const linesJoin = and(
     eq(stockMovements.orgId, stockMovementLines.orgId),
     eq(stockMovements.id, stockMovementLines.movementId)
-  )
-  const warehousesJoin = and(
-    eq(warehouses.orgId, stockBalances.orgId),
-    eq(warehouses.id, stockBalances.warehouseId)
   )
 
   /** Ids of the locations of one warehouse, as a subquery. */
@@ -93,9 +106,9 @@ export function createStockMovementRepository({ db }: { db: DB }) {
     },
 
     /**
-     * Locks the existing balance rows of the given keys in key order, and returns their quantities
-     * by balanceKey. A key with no row is missing from the result, which means zero on hand.
-     * Pass EVERY key the posting will touch (both sides), so all rows are locked in one ordered step.
+     * Locks the inventory items and batch records in canonical order (locationId, itemId, batchId).
+     * Missing inventory records are created automatically and safely under concurrent postings.
+     * Returns a map of on-hand quantities by balanceKey(locationId, itemId, batchId).
      */
     async lockBalances(
       orgId: string,
@@ -103,69 +116,209 @@ export function createStockMovementRepository({ db }: { db: DB }) {
       tx: Tx
     ): Promise<Map<string, string>> {
       if (keys.length === 0) return new Map()
-      const match = or(
-        ...keys.map((k) =>
-          and(
-            eq(stockBalances.locationId, k.locationId),
-            eq(stockBalances.itemId, k.itemId),
-            k.batchId ? eq(stockBalances.batchId, k.batchId) : isNull(stockBalances.batchId)
-          )
-        )
+
+      // 1. Distinct parent keys (locationId, itemId, warehouseId)
+      const parentMap = new Map<string, { locationId: string; itemId: string; warehouseId: string }>()
+      for (const k of keys) {
+        const pKey = `${k.locationId}:${k.itemId}`
+        if (!parentMap.has(pKey)) {
+          if (!k.warehouseId) {
+            throw new Error(`warehouseId is required to lock inventory for location ${k.locationId}`)
+          }
+          parentMap.set(pKey, {
+            locationId: k.locationId,
+            itemId: k.itemId,
+            warehouseId: k.warehouseId,
+          })
+        }
+      }
+      const sortedParents = [...parentMap.values()].sort((a, b) =>
+        a.locationId < b.locationId ? -1 : a.locationId > b.locationId ? 1 : a.itemId < b.itemId ? -1 : 1
       )
-      const rows = await tx
-        .select({
-          locationId: stockBalances.locationId,
-          itemId: stockBalances.itemId,
-          batchId: stockBalances.batchId,
-          quantity: stockBalances.quantity,
-        })
-        .from(stockBalances)
-        .where(and(eq(stockBalances.orgId, orgId), match))
-        .orderBy(
-          asc(stockBalances.locationId),
-          asc(stockBalances.itemId),
-          asc(stockBalances.batchId)
-        )
+
+      // 2. Ensure parent inventory_items exist (concurrency-safe via ON CONFLICT DO NOTHING)
+      if (sortedParents.length > 0) {
+        await tx
+          .insert(inventoryItems)
+          .values(
+            sortedParents.map((p) => ({
+              orgId,
+              itemId: p.itemId,
+              warehouseId: p.warehouseId,
+              locationId: p.locationId,
+              onHandQty: "0",
+              reservedQty: "0",
+            }))
+          )
+          .onConflictDoNothing({
+            target: [inventoryItems.orgId, inventoryItems.itemId, inventoryItems.locationId],
+          })
+      }
+
+      // 3. Lock parent inventory_items in canonical order
+      const parentConditions = sortedParents.map((p) =>
+        and(eq(inventoryItems.locationId, p.locationId), eq(inventoryItems.itemId, p.itemId))
+      )
+      const lockedParents = await tx
+        .select()
+        .from(inventoryItems)
+        .where(and(eq(inventoryItems.orgId, orgId), or(...parentConditions)))
+        .orderBy(asc(inventoryItems.locationId), asc(inventoryItems.itemId))
         .for("update")
-      return new Map(rows.map((r) => [balanceKey(r.locationId, r.itemId, r.batchId), r.quantity]))
+
+      const parentByLocItem = new Map<string, InventoryItem>()
+      for (const row of lockedParents) {
+        parentByLocItem.set(`${row.locationId}:${row.itemId}`, row)
+      }
+
+      // 4. Handle batch rows for batch-tracked keys
+      const batchKeys = keys.filter((k): k is BalanceKey & { batchId: string } => k.batchId !== null)
+      const distinctBatches = new Map<string, { inventoryItemId: string; itemId: string; batchId: string }>()
+      for (const b of batchKeys) {
+        const parent = parentByLocItem.get(`${b.locationId}:${b.itemId}`)
+        if (!parent) continue
+        const bKey = `${parent.id}:${b.batchId}`
+        if (!distinctBatches.has(bKey)) {
+          distinctBatches.set(bKey, {
+            inventoryItemId: parent.id,
+            itemId: b.itemId,
+            batchId: b.batchId,
+          })
+        }
+      }
+      const sortedBatches = [...distinctBatches.values()].sort((a, b) =>
+        a.inventoryItemId < b.inventoryItemId ? -1 : a.inventoryItemId > b.inventoryItemId ? 1 : a.batchId < b.batchId ? -1 : 1
+      )
+
+      // 5. Ensure inventory_item_batches exist
+      if (sortedBatches.length > 0) {
+        await tx
+          .insert(inventoryItemBatches)
+          .values(
+            sortedBatches.map((b) => ({
+              orgId,
+              inventoryItemId: b.inventoryItemId,
+              itemId: b.itemId,
+              batchId: b.batchId,
+              onHandQty: "0",
+              reservedQty: "0",
+            }))
+          )
+          .onConflictDoNothing({
+            target: [inventoryItemBatches.orgId, inventoryItemBatches.inventoryItemId, inventoryItemBatches.batchId],
+          })
+      }
+
+      // 6. Lock inventory_item_batches in canonical order
+      const lockedBatchesByParentBatch = new Map<string, InventoryItemBatch>()
+      if (sortedBatches.length > 0) {
+        const parentIds = [...new Set(sortedBatches.map((b) => b.inventoryItemId))]
+        const batchIds = [...new Set(sortedBatches.map((b) => b.batchId))]
+        const lockedBatches = await tx
+          .select()
+          .from(inventoryItemBatches)
+          .where(
+            and(
+              eq(inventoryItemBatches.orgId, orgId),
+              inArray(inventoryItemBatches.inventoryItemId, parentIds),
+              inArray(inventoryItemBatches.batchId, batchIds)
+            )
+          )
+          .orderBy(asc(inventoryItemBatches.inventoryItemId), asc(inventoryItemBatches.batchId))
+          .for("update")
+
+        for (const row of lockedBatches) {
+          lockedBatchesByParentBatch.set(`${row.inventoryItemId}:${row.batchId}`, row)
+        }
+      }
+
+      // 7. Build onHand quantity map keyed by balanceKey(locationId, itemId, batchId)
+      const onHandMap = new Map<string, string>()
+      for (const k of keys) {
+        const parent = parentByLocItem.get(`${k.locationId}:${k.itemId}`)
+        if (!parent) continue
+        if (k.batchId === null) {
+          onHandMap.set(balanceKey(k.locationId, k.itemId, null), parent.onHandQty)
+        } else {
+          const batchRow = lockedBatchesByParentBatch.get(`${parent.id}:${k.batchId}`)
+          onHandMap.set(balanceKey(k.locationId, k.itemId, k.batchId), batchRow?.onHandQty ?? "0")
+        }
+      }
+
+      return onHandMap
     },
 
     /**
-     * Adds the signed deltas to the balances. Pass each key once, sorted by (locationId, itemId, batchId).
-     * Rows without a batch and rows with a batch live under different partial unique indexes, so they
-     * are two statements; the order (no batch first) is the same in every transaction.
+     * Adds the signed deltas transactionally to inventory_items and inventory_item_batches.
+     * Maintains the invariant: InventoryItem.onHandQty = SUM(InventoryItemBatch.onHandQty).
      */
     async applyBalanceDeltas(orgId: string, deltas: readonly BalanceDelta[], tx?: Tx): Promise<void> {
-      const toRow = (d: BalanceDelta) => ({
-        orgId,
-        warehouseId: d.warehouseId,
-        locationId: d.locationId,
-        itemId: d.itemId,
-        batchId: d.batchId,
-        quantity: d.delta,
-      })
-      const set = { quantity: sql`${stockBalances.quantity} + excluded.quantity`, updatedAt: sql`now()` }
-      const plain = deltas.filter((d) => d.batchId === null)
-      const batched = deltas.filter((d) => d.batchId !== null)
-      if (plain.length > 0) {
-        await exec(tx)
-          .insert(stockBalances)
-          .values(plain.map(toRow))
-          .onConflictDoUpdate({
-            target: [stockBalances.orgId, stockBalances.locationId, stockBalances.itemId],
-            targetWhere: sql`batch_id is null`,
-            set,
+      const executor = exec(tx)
+
+      // 1. Group deltas by parent (locationId, itemId)
+      const parentDeltas = new Map<string, { locationId: string; itemId: string; delta: string }>()
+      for (const d of deltas) {
+        const pKey = `${d.locationId}:${d.itemId}`
+        const existing = parentDeltas.get(pKey)
+        if (existing) {
+          existing.delta = sql`${sql.raw(existing.delta)} + ${sql.raw(d.delta)}` as unknown as string
+        } else {
+          parentDeltas.set(pKey, {
+            locationId: d.locationId,
+            itemId: d.itemId,
+            delta: d.delta,
           })
+        }
       }
-      if (batched.length > 0) {
-        await exec(tx)
-          .insert(stockBalances)
-          .values(batched.map(toRow))
-          .onConflictDoUpdate({
-            target: [stockBalances.orgId, stockBalances.locationId, stockBalances.itemId, stockBalances.batchId],
-            targetWhere: sql`batch_id is not null`,
-            set,
+
+      // 2. Update parent inventory_items
+      for (const p of parentDeltas.values()) {
+        await executor
+          .update(inventoryItems)
+          .set({
+            onHandQty: sql`${inventoryItems.onHandQty} + ${p.delta}`,
+            updatedAt: sql`now()`,
           })
+          .where(
+            and(
+              eq(inventoryItems.orgId, orgId),
+              eq(inventoryItems.locationId, p.locationId),
+              eq(inventoryItems.itemId, p.itemId)
+            )
+          )
+      }
+
+      // 3. Update child inventory_item_batches for batch lines
+      const batchDeltas = deltas.filter((d) => d.batchId !== null)
+      for (const b of batchDeltas) {
+        // Find parent inventory_item id
+        const [parent] = await executor
+          .select({ id: inventoryItems.id })
+          .from(inventoryItems)
+          .where(
+            and(
+              eq(inventoryItems.orgId, orgId),
+              eq(inventoryItems.locationId, b.locationId),
+              eq(inventoryItems.itemId, b.itemId)
+            )
+          )
+          .limit(1)
+
+        if (parent) {
+          await executor
+            .update(inventoryItemBatches)
+            .set({
+              onHandQty: sql`${inventoryItemBatches.onHandQty} + ${b.delta}`,
+              updatedAt: sql`now()`,
+            })
+            .where(
+              and(
+                eq(inventoryItemBatches.orgId, orgId),
+                eq(inventoryItemBatches.inventoryItemId, parent.id),
+                eq(inventoryItemBatches.batchId, b.batchId!)
+              )
+            )
+        }
       }
     },
 
@@ -219,7 +372,7 @@ export function createStockMovementRepository({ db }: { db: DB }) {
       return row ?? null
     },
 
-    /** The movement that reversed this one, if any. */
+    /** Did another movement reverse this one? Returns the reversal if so. */
     async findReversalOf(orgId: string, id: string, tx?: Tx): Promise<{ id: string } | null> {
       const [row] = await exec(tx)
         .select({ id: stockMovements.id })
@@ -237,7 +390,7 @@ export function createStockMovementRepository({ db }: { db: DB }) {
         .orderBy(asc(stockMovementLines.lineNo))
     },
 
-    /** Stock card: lines newest first, filtered by item, location or warehouse (either side), type and dates. */
+    /** Stock card: movement lines in reverse chronological order, optionally narrowed down. */
     async listLines(
       orgId: string,
       q: StockMovementLineHistoryQuery
@@ -259,8 +412,8 @@ export function createStockMovementRepository({ db }: { db: DB }) {
             )
           : undefined,
         q.type ? eq(stockMovements.type, q.type) : undefined,
-        q.from ? gte(stockMovements.postedAt, new Date(q.from)) : undefined,
-        q.to ? lte(stockMovements.postedAt, new Date(q.to)) : undefined
+        q.from ? sql`${stockMovements.postedAt} >= ${q.from}` : undefined,
+        q.to ? sql`${stockMovements.postedAt} <= ${q.to}` : undefined
       )
       const [rows, [totalRow]] = await Promise.all([
         db
@@ -299,36 +452,167 @@ export function createStockMovementRepository({ db }: { db: DB }) {
       return { rows, total: totalRow?.total ?? 0 }
     },
 
-    /** Balance rows (stock on hand per location and item), real warehouses only unless asked. */
+    /** Balance rows (stock on hand per location and item/batch), real warehouses only unless asked. */
     async listBalances(
       orgId: string,
       q: StockBalanceListQuery
-    ): Promise<{ rows: StockBalance[]; total: number }> {
-      const where = and(
-        eq(stockBalances.orgId, orgId),
-        q.itemId ? eq(stockBalances.itemId, q.itemId) : undefined,
-        q.batchId ? eq(stockBalances.batchId, q.batchId) : undefined,
-        q.warehouseId ? eq(stockBalances.warehouseId, q.warehouseId) : undefined,
-        q.locationId ? eq(stockBalances.locationId, q.locationId) : undefined,
-        q.includeSystem ? undefined : eq(warehouses.isSystem, false),
-        q.includeZero ? undefined : NONZERO
+    ): Promise<{ rows: StockBalanceRow[]; total: number }> {
+      const warehousesJoin = and(
+        eq(warehouses.orgId, inventoryItems.orgId),
+        eq(warehouses.id, inventoryItems.warehouseId)
       )
+
+      if (q.batchId) {
+        // Specific batch queried: read from inventory_item_batches
+        const where = and(
+          eq(inventoryItemBatches.orgId, orgId),
+          eq(inventoryItemBatches.batchId, q.batchId),
+          q.itemId ? eq(inventoryItemBatches.itemId, q.itemId) : undefined,
+          q.warehouseId ? eq(inventoryItems.warehouseId, q.warehouseId) : undefined,
+          q.locationId ? eq(inventoryItems.locationId, q.locationId) : undefined,
+          q.includeSystem ? undefined : eq(warehouses.isSystem, false),
+          q.includeZero ? undefined : sql`${inventoryItemBatches.onHandQty} <> 0`
+        )
+
+        const [rows, [totalRow]] = await Promise.all([
+          db
+            .select({
+              warehouseId: inventoryItems.warehouseId,
+              locationId: inventoryItems.locationId,
+              itemId: inventoryItemBatches.itemId,
+              batchId: sql<string | null>`${inventoryItemBatches.batchId}`,
+              quantity: sql<string>`${inventoryItemBatches.onHandQty}::text`,
+              onHandQty: sql<string>`${inventoryItemBatches.onHandQty}::text`,
+              reservedQty: sql<string>`${inventoryItemBatches.reservedQty}::text`,
+              updatedAt: inventoryItemBatches.updatedAt,
+            })
+            .from(inventoryItemBatches)
+            .innerJoin(
+              inventoryItems,
+              and(
+                eq(inventoryItems.orgId, inventoryItemBatches.orgId),
+                eq(inventoryItems.id, inventoryItemBatches.inventoryItemId)
+              )
+            )
+            .innerJoin(warehouses, warehousesJoin)
+            .where(where)
+            .orderBy(asc(inventoryItems.locationId), asc(inventoryItemBatches.itemId))
+            .limit(q.pageSize)
+            .offset((q.page - 1) * q.pageSize),
+          db
+            .select({ total: count() })
+            .from(inventoryItemBatches)
+            .innerJoin(
+              inventoryItems,
+              and(
+                eq(inventoryItems.orgId, inventoryItemBatches.orgId),
+                eq(inventoryItems.id, inventoryItemBatches.inventoryItemId)
+              )
+            )
+            .innerJoin(warehouses, warehousesJoin)
+            .where(where),
+        ])
+
+        return { rows, total: totalRow?.total ?? 0 }
+      }
+
+      // No batch specified: batch-tracked items have batches in inventory_item_batches,
+      // non-batch-tracked items live in inventory_items with no child batches.
+      const batchWhere = and(
+        eq(inventoryItemBatches.orgId, orgId),
+        q.itemId ? eq(inventoryItemBatches.itemId, q.itemId) : undefined,
+        q.warehouseId ? eq(inventoryItems.warehouseId, q.warehouseId) : undefined,
+        q.locationId ? eq(inventoryItems.locationId, q.locationId) : undefined,
+        q.includeSystem ? undefined : eq(warehouses.isSystem, false),
+        q.includeZero ? undefined : sql`${inventoryItemBatches.onHandQty} <> 0`
+      )
+
+      const nonBatchWhere = and(
+        eq(inventoryItems.orgId, orgId),
+        q.itemId ? eq(inventoryItems.itemId, q.itemId) : undefined,
+        q.warehouseId ? eq(inventoryItems.warehouseId, q.warehouseId) : undefined,
+        q.locationId ? eq(inventoryItems.locationId, q.locationId) : undefined,
+        q.includeSystem ? undefined : eq(warehouses.isSystem, false),
+        q.includeZero ? undefined : sql`${inventoryItems.onHandQty} <> 0`,
+        notExists(
+          db
+            .select({ one: sql`1` })
+            .from(inventoryItemBatches)
+            .where(
+              and(
+                eq(inventoryItemBatches.orgId, inventoryItems.orgId),
+                eq(inventoryItemBatches.inventoryItemId, inventoryItems.id)
+              )
+            )
+        )
+      )
+
+      const batchQuery = db
+        .select({
+          warehouseId: inventoryItems.warehouseId,
+          locationId: inventoryItems.locationId,
+          itemId: inventoryItemBatches.itemId,
+          batchId: sql<string | null>`${inventoryItemBatches.batchId}`,
+          quantity: sql<string>`${inventoryItemBatches.onHandQty}::text`,
+          onHandQty: sql<string>`${inventoryItemBatches.onHandQty}::text`,
+          reservedQty: sql<string>`${inventoryItemBatches.reservedQty}::text`,
+          updatedAt: inventoryItemBatches.updatedAt,
+        })
+        .from(inventoryItemBatches)
+        .innerJoin(
+          inventoryItems,
+          and(
+            eq(inventoryItems.orgId, inventoryItemBatches.orgId),
+            eq(inventoryItems.id, inventoryItemBatches.inventoryItemId)
+          )
+        )
+        .innerJoin(warehouses, warehousesJoin)
+        .where(batchWhere)
+
+      const nonBatchQuery = db
+        .select({
+          warehouseId: inventoryItems.warehouseId,
+          locationId: inventoryItems.locationId,
+          itemId: inventoryItems.itemId,
+          batchId: sql<string | null>`null`,
+          quantity: sql<string>`${inventoryItems.onHandQty}::text`,
+          onHandQty: sql<string>`${inventoryItems.onHandQty}::text`,
+          reservedQty: sql<string>`${inventoryItems.reservedQty}::text`,
+          updatedAt: inventoryItems.updatedAt,
+        })
+        .from(inventoryItems)
+        .innerJoin(warehouses, warehousesJoin)
+        .where(nonBatchWhere)
+
+      const combinedQuery = db.$with("combined").as(db.select().from(batchQuery.unionAll(nonBatchQuery).as("sub")))
+
       const [rows, [totalRow]] = await Promise.all([
         db
-          .select({ balance: stockBalances })
-          .from(stockBalances)
-          .innerJoin(warehouses, warehousesJoin)
-          .where(where)
-          .orderBy(asc(stockBalances.locationId), asc(stockBalances.itemId))
+          .with(combinedQuery)
+          .select()
+          .from(combinedQuery)
+          .orderBy(asc(combinedQuery.locationId), asc(combinedQuery.itemId))
           .limit(q.pageSize)
           .offset((q.page - 1) * q.pageSize),
         db
+          .with(combinedQuery)
           .select({ total: count() })
-          .from(stockBalances)
-          .innerJoin(warehouses, warehousesJoin)
-          .where(where),
+          .from(combinedQuery),
       ])
-      return { rows: rows.map((r) => r.balance), total: totalRow?.total ?? 0 }
+
+      return {
+        rows: rows.map((r) => ({
+          warehouseId: r.warehouseId,
+          locationId: r.locationId,
+          itemId: r.itemId,
+          batchId: r.batchId,
+          quantity: r.quantity,
+          onHandQty: r.onHandQty,
+          reservedQty: r.reservedQty,
+          updatedAt: r.updatedAt,
+        })),
+        total: totalRow?.total ?? 0,
+      }
     },
 
     /** On hand per item (real warehouses only unless includeSystem), optionally inside one warehouse. */
@@ -337,22 +621,26 @@ export function createStockMovementRepository({ db }: { db: DB }) {
       itemIds: readonly string[],
       filter: { warehouseId?: string; includeSystem?: boolean }
     ): Promise<{ itemId: string; quantity: string }[]> {
+      const warehousesJoin = and(
+        eq(warehouses.orgId, inventoryItems.orgId),
+        eq(warehouses.id, inventoryItems.warehouseId)
+      )
       return db
         .select({
-          itemId: stockBalances.itemId,
-          quantity: sql<string>`coalesce(sum(${stockBalances.quantity}), 0)::text`,
+          itemId: inventoryItems.itemId,
+          quantity: sql<string>`coalesce(sum(${inventoryItems.onHandQty}), 0)::text`,
         })
-        .from(stockBalances)
+        .from(inventoryItems)
         .innerJoin(warehouses, warehousesJoin)
         .where(
           and(
-            eq(stockBalances.orgId, orgId),
-            inArray(stockBalances.itemId, [...itemIds]),
-            filter.warehouseId ? eq(stockBalances.warehouseId, filter.warehouseId) : undefined,
+            eq(inventoryItems.orgId, orgId),
+            inArray(inventoryItems.itemId, [...itemIds]),
+            filter.warehouseId ? eq(inventoryItems.warehouseId, filter.warehouseId) : undefined,
             filter.includeSystem ? undefined : eq(warehouses.isSystem, false)
           )
         )
-        .groupBy(stockBalances.itemId)
+        .groupBy(inventoryItems.itemId)
     },
 
     /** Where one item is: quantity per warehouse (system warehouses flagged), non-zero only. */
@@ -360,38 +648,54 @@ export function createStockMovementRepository({ db }: { db: DB }) {
       orgId: string,
       itemId: string
     ): Promise<{ warehouseId: string; isSystem: boolean; quantity: string }[]> {
+      const warehousesJoin = and(
+        eq(warehouses.orgId, inventoryItems.orgId),
+        eq(warehouses.id, inventoryItems.warehouseId)
+      )
       return db
         .select({
-          warehouseId: stockBalances.warehouseId,
+          warehouseId: inventoryItems.warehouseId,
           isSystem: warehouses.isSystem,
-          quantity: sql<string>`sum(${stockBalances.quantity})::text`,
+          quantity: sql<string>`sum(${inventoryItems.onHandQty})::text`,
         })
-        .from(stockBalances)
+        .from(inventoryItems)
         .innerJoin(warehouses, warehousesJoin)
-        .where(and(eq(stockBalances.orgId, orgId), eq(stockBalances.itemId, itemId)))
-        .groupBy(stockBalances.warehouseId, warehouses.isSystem)
-        .having(sql`sum(${stockBalances.quantity}) <> 0`)
+        .where(and(eq(inventoryItems.orgId, orgId), eq(inventoryItems.itemId, itemId)))
+        .groupBy(inventoryItems.warehouseId, warehouses.isSystem)
+        .having(sql`sum(${inventoryItems.onHandQty}) <> 0`)
     },
 
     /** On hand per batch of one item in real warehouses, non-zero only (batchless stock is not a batch). */
     sumByBatch(orgId: string, itemId: string): Promise<{ batchId: string | null; quantity: string }[]> {
       return db
         .select({
-          batchId: stockBalances.batchId,
-          quantity: sql<string>`sum(${stockBalances.quantity})::text`,
+          batchId: sql<string | null>`${inventoryItemBatches.batchId}`,
+          quantity: sql<string>`sum(${inventoryItemBatches.onHandQty})::text`,
         })
-        .from(stockBalances)
-        .innerJoin(warehouses, warehousesJoin)
+        .from(inventoryItemBatches)
+        .innerJoin(
+          inventoryItems,
+          and(
+            eq(inventoryItems.orgId, inventoryItemBatches.orgId),
+            eq(inventoryItems.id, inventoryItemBatches.inventoryItemId)
+          )
+        )
+        .innerJoin(
+          warehouses,
+          and(
+            eq(warehouses.orgId, inventoryItems.orgId),
+            eq(warehouses.id, inventoryItems.warehouseId)
+          )
+        )
         .where(
           and(
-            eq(stockBalances.orgId, orgId),
-            eq(stockBalances.itemId, itemId),
-            isNotNull(stockBalances.batchId),
+            eq(inventoryItemBatches.orgId, orgId),
+            eq(inventoryItemBatches.itemId, itemId),
             eq(warehouses.isSystem, false)
           )
         )
-        .groupBy(stockBalances.batchId)
-        .having(sql`sum(${stockBalances.quantity}) <> 0`)
+        .groupBy(inventoryItemBatches.batchId)
+        .having(sql`sum(${inventoryItemBatches.onHandQty}) <> 0`)
     },
 
     /* ---------- usage (answers for the warehouse and item modules) ---------- */
@@ -407,9 +711,15 @@ export function createStockMovementRepository({ db }: { db: DB }) {
       const executor = exec(tx)
       const [stock, from, to] = await Promise.all([
         executor
-          .selectDistinct({ id: stockBalances.locationId })
-          .from(stockBalances)
-          .where(and(eq(stockBalances.orgId, orgId), inArray(stockBalances.locationId, list), NONZERO)),
+          .selectDistinct({ id: inventoryItems.locationId })
+          .from(inventoryItems)
+          .where(
+            and(
+              eq(inventoryItems.orgId, orgId),
+              inArray(inventoryItems.locationId, list),
+              sql`${inventoryItems.onHandQty} <> 0`
+            )
+          ),
         executor
           .selectDistinct({ id: stockMovementLines.fromLocationId })
           .from(stockMovementLines)
@@ -435,8 +745,14 @@ export function createStockMovementRepository({ db }: { db: DB }) {
       const [stock, history] = await Promise.all([
         executor
           .select({ one: sql<number>`1` })
-          .from(stockBalances)
-          .where(and(eq(stockBalances.orgId, orgId), eq(stockBalances.warehouseId, warehouseId), NONZERO))
+          .from(inventoryItems)
+          .where(
+            and(
+              eq(inventoryItems.orgId, orgId),
+              eq(inventoryItems.warehouseId, warehouseId),
+              sql`${inventoryItems.onHandQty} <> 0`
+            )
+          )
           .limit(1),
         executor
           .select({ one: sql<number>`1` })
@@ -465,8 +781,14 @@ export function createStockMovementRepository({ db }: { db: DB }) {
       const [stock, moved] = await Promise.all([
         executor
           .select({ one: sql<number>`1` })
-          .from(stockBalances)
-          .where(and(eq(stockBalances.orgId, orgId), eq(stockBalances.itemId, itemId), NONZERO))
+          .from(inventoryItems)
+          .where(
+            and(
+              eq(inventoryItems.orgId, orgId),
+              eq(inventoryItems.itemId, itemId),
+              sql`${inventoryItems.onHandQty} <> 0`
+            )
+          )
           .limit(1),
         executor
           .select({ one: sql<number>`1` })
