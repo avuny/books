@@ -17,18 +17,29 @@ export function requestInterceptor(config: InternalAxiosRequestConfig) {
 }
 
 function attachAccessToken(config: InternalAxiosRequestConfig) {
-  const hasAuthorizationHeader =
-    typeof config.headers.Authorization === "string" &&
-    config.headers.Authorization.toLowerCase().startsWith("bearer")
+  const existingAuthHeader =
+    (typeof config.headers.get === "function"
+      ? config.headers.get("Authorization")
+      : config.headers.Authorization) as string | undefined
 
-  if (hasAuthorizationHeader) {
+  const hasValidAuthHeader =
+    typeof existingAuthHeader === "string" &&
+    existingAuthHeader.toLowerCase().startsWith("bearer ") &&
+    !existingAuthHeader.includes("undefined") &&
+    !existingAuthHeader.includes("null")
+
+  if (hasValidAuthHeader) {
     return
   }
 
   const token = tokenStorage.getAccessToken()
 
   if (token) {
-    config.headers.Authorization = `Bearer ${token}`
+    if (typeof config.headers.set === "function") {
+      config.headers.set("Authorization", `Bearer ${token}`)
+    } else {
+      config.headers.Authorization = `Bearer ${token}`
+    }
   }
 }
 

@@ -31,7 +31,10 @@ export const refreshQueue = {
 
       if (token) {
         promise.resolve(token)
+        return
       }
+
+      promise.reject(new Error("Token refresh completed without a valid token"))
     })
 
     failedQueue = []

@@ -14,7 +14,7 @@ export async function responseErrorInterceptor(error: AxiosError<any>) {
 
   const shouldRefresh = canRefreshToken(error)
 
-  if (!shouldRefresh || originalRequest?._retry) {
+  if (!originalRequest || !shouldRefresh || originalRequest._retry) {
     return Promise.reject(error)
   }
 
@@ -31,9 +31,7 @@ export async function responseErrorInterceptor(error: AxiosError<any>) {
 
     refreshQueue.process(null, newAccessToken)
 
-    if (originalRequest.headers) {
-      originalRequest.headers.Authorization = `Bearer ${newAccessToken}`
-    }
+    setRequestAuthorizationHeader(originalRequest, newAccessToken)
 
     return retryRequest(originalRequest)
   } catch (refreshError) {
@@ -61,13 +59,22 @@ function canRefreshToken(error: AxiosError<any>) {
   )
 }
 
+function setRequestAuthorizationHeader(request: RetryableRequest, token: string) {
+  if (!request?.headers) return
+  if (typeof request.headers.set === "function") {
+    request.headers.set("Authorization", `Bearer ${token}`)
+  } else {
+    request.headers.Authorization = `Bearer ${token}`
+  }
+}
+
 function enqueueRequest(originalRequest: RetryableRequest) {
+  originalRequest._retry = true
+
   return new Promise((resolve, reject) => {
     refreshQueue.enqueue({
       resolve: (token: string) => {
-        if (originalRequest.headers) {
-          originalRequest.headers.Authorization = `Bearer ${token}`
-        }
+        setRequestAuthorizationHeader(originalRequest, token)
 
         resolve(retryRequest(originalRequest))
       },
