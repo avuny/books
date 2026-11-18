@@ -100,9 +100,9 @@ router.openapi(refreshRoute, async (c) => {
       )
     }
 
-    presentedToken = getRefreshTokenFromCookie(c)
+    presentedToken = getRefreshTokenFromCookie(c) ?? body?.refreshToken
   } else {
-    presentedToken = body?.refreshToken
+    presentedToken = body?.refreshToken ?? getRefreshTokenFromCookie(c)
   }
 
   if (!presentedToken) {
