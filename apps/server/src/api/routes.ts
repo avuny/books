@@ -12,6 +12,7 @@ import healthRoute from "./health.route.js"
 import { installRequestLanguage } from "./intl/i18next.js"
 import { cors } from "hono/cors"
 // [codegen:imports:start]
+import { accountingRoutes } from "./modules/accounting/index.js"
 import { adminRoutes } from "./modules/admin/index.js"
 import { authRoutes } from "./modules/auth/index.js"
 import { geoRoutes } from "./modules/geo/index.js"
@@ -87,6 +88,7 @@ app.use(requestLogger())
 // ── Routes ────────────────────────────────────────────────────────────────────
 app.route("/", healthRoute)
 // [codegen:routes:start]
+app.route("/accounting", accountingRoutes)
 app.route("/admin", adminRoutes)
 app.route("/auth", authRoutes)
 app.route("/geo", geoRoutes)

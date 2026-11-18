@@ -1,4 +1,5 @@
 import { db } from "./db.js"
+import { syncAccountingDefaults } from "./modules/accounting/accounting.seed.js"
 import { syncSystemRoles } from "./modules/role/role.seed.js"
 import { seedSidebar } from "./modules/sidebar/sidebar.seed.js"
 import { syncSystemUnits } from "./modules/unit/unit.seed.js"
@@ -10,4 +11,5 @@ import { syncSystemUnits } from "./modules/unit/unit.seed.js"
 console.log("roles:", await syncSystemRoles(db))
 console.log("sidebar:", await seedSidebar({ db }))
 console.log("units:", await syncSystemUnits(db))
+console.log("accounting:", await syncAccountingDefaults(db))
 process.exit(0)
