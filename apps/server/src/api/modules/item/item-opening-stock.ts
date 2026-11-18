@@ -2,11 +2,17 @@ import {
   ITEM_OPENING_STOCK_SOURCE_TYPE,
   STOCK_MOVEMENT_SOURCE_REF_MAX_LENGTH,
   batchNumberKey,
+  computeLineValueMinor,
+  minorToStorage,
+  type AccountingErrorCode,
   type BatchSpec,
   type CreateItemInput,
+  type PostInventoryOpeningBalanceInput,
 } from "@avuny/contracts"
 import type { Tx } from "@avuny/db"
+import type { Result } from "@avuny/utils"
 import type { BatchService } from "../batch/index.js"
+import type { InventoryCostingService } from "../inventory-costing/index.js"
 import type { StockMovementService } from "../stock-movement/index.js"
 import { seedInventoryDefaults } from "../warehouse/warehouse.defaults.js"
 
@@ -20,6 +26,23 @@ export function generateBatchNumber(index?: number): string {
 export interface ItemOpeningStockDeps {
   stockMovements: Pick<StockMovementService, "post">
   batches: Pick<BatchService, "ensureBatches">
+  findOrgCurrency?: (orgId: string, tx: Tx) => Promise<string | null>
+  inventoryCosting?: {
+    service: Pick<InventoryCostingService, "createCostLayer">
+    /** Look up inventory item id by (orgId, itemId, locationId). Returns null if not found yet. */
+    findInventoryItemId(orgId: string, itemId: string, locationId: string, tx: Tx): Promise<string | null>
+    /** Look up inventory item batch id by (orgId, inventoryItemId, batchId). Returns null if not found. */
+    findInventoryItemBatchId(orgId: string, inventoryItemId: string, batchId: string, tx: Tx): Promise<string | null>
+  }
+  accounting?: {
+    postInventoryOpeningBalance(
+      actorId: string | null,
+      orgId: string,
+      input: PostInventoryOpeningBalanceInput,
+      tx: Tx
+    ): Promise<Result<{ journalEntryId: string | null }, AccountingErrorCode>>
+    initializeChartOfAccounts?(orgId: string, tx: Tx): Promise<unknown>
+  }
 }
 
 type OpeningStock = NonNullable<CreateItemInput["openingStock"]>
@@ -93,5 +116,103 @@ export async function postOpeningStock(
     }
   }
   if (!posted.success) return { ok: false, error: posted.error, msg: posted.msg }
+
+  // Resolve organization currency (needed for cost layers and accounting)
+  const currency = (deps.findOrgCurrency ? await deps.findOrgCurrency(orgId, tx) : null) ?? "USD"
+
+  let totalValueMinorBigInt = 0n
+  for (const line of opening.lines) {
+    const val = computeLineValueMinor(line.quantity, line.cost ?? "0", 0) ?? 0n
+    totalValueMinorBigInt += val
+  }
+
+  // Create FIFO cost layers for each inbound line (opening stock is always inbound)
+  if (deps.inventoryCosting && posted.data?.lines) {
+    for (const [index, postedLine] of posted.data.lines.entries()) {
+      const openingLine = opening.lines[index]
+      if (!openingLine) continue
+
+      const inventoryItemId = await deps.inventoryCosting.findInventoryItemId(
+        orgId,
+        itemId,
+        postedLine.toLocationId,
+        tx
+      )
+      if (!inventoryItemId) continue
+
+      let inventoryItemBatchId: string | null = null
+      if (postedLine.batchId) {
+        inventoryItemBatchId = await deps.inventoryCosting.findInventoryItemBatchId(
+          orgId,
+          inventoryItemId,
+          postedLine.batchId,
+          tx
+        )
+      }
+
+      const qty = postedLine.quantity
+      const unitCost = openingLine.cost ?? "0"
+      const lineValueMinor = computeLineValueMinor(qty, unitCost, 0) ?? 0n
+      const receivedValue = minorToStorage(lineValueMinor)
+
+      await deps.inventoryCosting.service.createCostLayer(
+        {
+          orgId,
+          inventoryItemId,
+          itemId,
+          inventoryItemBatchId,
+          sourceMovementLineId: postedLine.id,
+          originCostLayerId: null,
+          receivedQty: qty,
+          receivedValue,
+          currency,
+          receivedAt: new Date(opening.postedAt ?? new Date().toISOString()),
+        },
+        tx
+      )
+    }
+  }
+
+  // Post opening inventory to accounting: Dr Inventory Asset, Cr Opening Balance Equity
+  if (deps.accounting) {
+    const accountingInput: PostInventoryOpeningBalanceInput = {
+      sourceType: ITEM_OPENING_STOCK_SOURCE_TYPE,
+      sourceId: itemId,
+      sourceRef: itemName.slice(0, STOCK_MOVEMENT_SOURCE_REF_MAX_LENGTH),
+      postedAt: opening.postedAt ?? new Date().toISOString(),
+      amountMinor: totalValueMinorBigInt.toString(),
+      currency,
+    }
+
+    let accountingResult = await deps.accounting.postInventoryOpeningBalance(
+      actorId,
+      orgId,
+      accountingInput,
+      tx
+    )
+
+    if (
+      !accountingResult.success &&
+      accountingResult.error === "ACCOUNT_MAPPING_MISSING" &&
+      deps.accounting.initializeChartOfAccounts
+    ) {
+      try {
+        await deps.accounting.initializeChartOfAccounts(orgId, tx)
+        accountingResult = await deps.accounting.postInventoryOpeningBalance(
+          actorId,
+          orgId,
+          accountingInput,
+          tx
+        )
+      } catch {
+        // Best-effort auto-seeding
+      }
+    }
+
+    if (!accountingResult.success) {
+      return { ok: false, error: accountingResult.error, msg: accountingResult.msg }
+    }
+  }
+
   return { ok: true }
 }

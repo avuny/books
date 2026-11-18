@@ -97,6 +97,11 @@ function setup() {
     batches: {
       ensureBatches: vi.fn(async () => ({ success: true, data: [], msg: "ok" } as any)),
     },
+    findOrgCurrency: vi.fn(async () => "USD"),
+    accounting: {
+      postInventoryOpeningBalance: vi.fn(async () => ({ success: true, data: { journalEntryId: "je-1" }, msg: "ok" } as any)),
+      initializeChartOfAccounts: vi.fn(async () => ({ success: true })),
+    },
   }
   const service = createItemService({
     repository: repository as unknown as ItemRepository,
@@ -223,6 +228,58 @@ describe("itemService", () => {
         }),
         expect.anything()
       )
+      expect(t.openingStock.accounting.postInventoryOpeningBalance).toHaveBeenCalledWith(
+        "u1",
+        "org-1",
+        expect.objectContaining({
+          sourceType: "item_opening",
+          sourceId: "item-1",
+          sourceRef: "Royal Cement",
+          currency: "USD",
+        }),
+        expect.anything()
+      )
+    })
+
+    it("posts to accounting with computed minor amount when lines have cost", async () => {
+      const res = await t.service.create("u1", "org-1", {
+        ...createInput,
+        openingStock: {
+          lines: [{ locationId: "loc-1", quantity: "10", cost: "25.50" }],
+        },
+      })
+      expect(res).toMatchObject({ success: true })
+      expect(t.openingStock.accounting.postInventoryOpeningBalance).toHaveBeenCalledWith(
+        "u1",
+        "org-1",
+        expect.objectContaining({
+          sourceType: "item_opening",
+          sourceId: "item-1",
+          sourceRef: "Royal Cement",
+          amountMinor: "255",
+          currency: "USD",
+        }),
+        expect.anything()
+      )
+    })
+
+    it("cleans up inserted item and aborts when accounting post fails", async () => {
+      t.openingStock.accounting.postInventoryOpeningBalance.mockResolvedValueOnce({
+        success: false,
+        error: "ACCOUNTING_CURRENCY_MISMATCH" as any,
+        msg: "The opening stock is valued in USD but the books are kept in EGP",
+      })
+      const res = await t.service.create("u1", "org-1", {
+        ...createInput,
+        openingStock: {
+          lines: [{ locationId: "loc-1", quantity: "10", cost: "25.50" }],
+        },
+      })
+      expect(res).toMatchObject({
+        success: false,
+        msg: "The opening stock is valued in USD but the books are kept in EGP",
+      })
+      expect(t.repository.deleteCreatedItemOnFailure).toHaveBeenCalledWith("org-1", "item-1", expect.anything())
     })
 
     it("cleans up inserted item (compensation) and maps error when opening stock fails", async () => {
