@@ -1,4 +1,6 @@
 import i18next from "i18next"
+import accountingEn from "./locales/accounting/en.json" with { type: "json" }
+import accountingAr from "./locales/accounting/ar.json" with { type: "json" }
 import adminEn from "./locales/admin/en.json" with { type: "json" }
 import adminAr from "./locales/admin/ar.json" with { type: "json" }
 import authEn from "./locales/auth/en.json" with { type: "json" }
@@ -35,6 +37,7 @@ import { Locale } from "@avuny/i18n"
 
 export const resources = {
   en: {
+        accounting: accountingEn,
         admin: adminEn,
         auth: authEn,
         geo: geoEn,
@@ -58,6 +61,7 @@ export const resources = {
         warehouseLocation: warehouseLocationEn,
   },
   ar: {
+        accounting: accountingAr,
         admin: adminAr,
         auth: authAr,
         geo: geoAr,
@@ -92,7 +96,7 @@ export function installRequestLanguage(): void {
   i18next.init({
     lng: "en",
     fallbackLng: "en",
-    ns: ["admin", "auth", "geo", "item", "item-category", "itemCategory", "organization", "organization-invitation", "organizationInvitation", "organization-user", "organizationUser", "otp", "role", "sidebar", "unit", "unit-collection", "unitCollection", "users", "warehouse", "warehouse-location", "warehouseLocation"],
+    ns: ["accounting", "admin", "auth", "geo", "item", "item-category", "itemCategory", "organization", "organization-invitation", "organizationInvitation", "organization-user", "organizationUser", "otp", "role", "sidebar", "unit", "unit-collection", "unitCollection", "users", "warehouse", "warehouse-location", "warehouseLocation"],
     defaultNS: "otp",
     resources,
     interpolation: { escapeValue: false },

@@ -1,3 +1,4 @@
+import type accountingEn from "./locales/accounting/en.json"
 import type adminEn from "./locales/admin/en.json"
 import type authEn from "./locales/auth/en.json"
 import type geoEn from "./locales/geo/en.json"
@@ -15,6 +16,7 @@ import type usersEn from "./locales/users/en.json"
 import type warehouseEn from "./locales/warehouse/en.json"
 import type warehouseLocationEn from "./locales/warehouse-location/en.json"
 
+type AccountingMessages = typeof accountingEn
 type AdminMessages = typeof adminEn
 type AuthMessages = typeof authEn
 type GeoMessages = typeof geoEn
@@ -36,6 +38,7 @@ declare module "i18next" {
   interface CustomTypeOptions {
     defaultNS: "otp"
     resources: {
+      accounting: AccountingMessages
       admin: AdminMessages
       auth: AuthMessages
       geo: GeoMessages
