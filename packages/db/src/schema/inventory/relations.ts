@@ -1,7 +1,12 @@
+
 import { relations } from "drizzle-orm"
 import { items, warehouseLocations, warehouses } from "../index.js"
 import { batches } from "./batch.js"
 import { inventoryItemBatches, inventoryItems } from "./inventory-item.js"
+import {
+    inventoryCostAllocations,
+    inventoryCostLayers,
+} from "./inventory-costing.js"
 import {
     inventoryReservationAllocations,
     inventoryReservations,
@@ -9,6 +14,10 @@ import {
 import { stockMovementLines, stockMovements } from "./stock-movement.js"
 
 /** All Drizzle relations for the inventory domain live in this file. */
+
+// -----------------------------------------------------------------------------
+// Batches
+// -----------------------------------------------------------------------------
 
 export const batchesRelations = relations(batches, ({ one, many }) => ({
     item: one(items, {
@@ -18,6 +27,10 @@ export const batchesRelations = relations(batches, ({ one, many }) => ({
     inventoryItemBatches: many(inventoryItemBatches),
     movementLines: many(stockMovementLines),
 }))
+
+// -----------------------------------------------------------------------------
+// Inventory Items
+// -----------------------------------------------------------------------------
 
 export const inventoryItemsRelations = relations(inventoryItems, ({ one, many }) => ({
     item: one(items, {
@@ -38,7 +51,12 @@ export const inventoryItemsRelations = relations(inventoryItems, ({ one, many })
     }),
     batches: many(inventoryItemBatches),
     reservationAllocations: many(inventoryReservationAllocations),
+    costLayers: many(inventoryCostLayers),
 }))
+
+// -----------------------------------------------------------------------------
+// Inventory Item Batches
+// -----------------------------------------------------------------------------
 
 export const inventoryItemBatchesRelations = relations(
     inventoryItemBatches,
@@ -64,8 +82,13 @@ export const inventoryItemBatchesRelations = relations(
             references: [batches.orgId, batches.itemId, batches.id],
         }),
         reservationAllocations: many(inventoryReservationAllocations),
+        costLayers: many(inventoryCostLayers),
     })
 )
+
+// -----------------------------------------------------------------------------
+// Stock Movements
+// -----------------------------------------------------------------------------
 
 export const stockMovementsRelations = relations(stockMovements, ({ one, many }) => ({
     lines: many(stockMovementLines),
@@ -79,30 +102,55 @@ export const stockMovementsRelations = relations(stockMovements, ({ one, many })
     }),
 }))
 
-export const stockMovementLinesRelations = relations(stockMovementLines, ({ one }) => ({
-    movement: one(stockMovements, {
-        fields: [stockMovementLines.orgId, stockMovementLines.movementId],
-        references: [stockMovements.orgId, stockMovements.id],
-    }),
-    item: one(items, {
-        fields: [stockMovementLines.orgId, stockMovementLines.itemId],
-        references: [items.orgId, items.id],
-    }),
-    batch: one(batches, {
-        fields: [stockMovementLines.orgId, stockMovementLines.itemId, stockMovementLines.batchId],
-        references: [batches.orgId, batches.itemId, batches.id],
-    }),
-    fromLocation: one(warehouseLocations, {
-        fields: [stockMovementLines.orgId, stockMovementLines.fromLocationId],
-        references: [warehouseLocations.orgId, warehouseLocations.id],
-        relationName: "stock_movement_from_location",
-    }),
-    toLocation: one(warehouseLocations, {
-        fields: [stockMovementLines.orgId, stockMovementLines.toLocationId],
-        references: [warehouseLocations.orgId, warehouseLocations.id],
-        relationName: "stock_movement_to_location",
-    }),
-}))
+// -----------------------------------------------------------------------------
+// Stock Movement Lines
+// -----------------------------------------------------------------------------
+
+export const stockMovementLinesRelations = relations(
+    stockMovementLines,
+    ({ one, many }) => ({
+        movement: one(stockMovements, {
+            fields: [stockMovementLines.orgId, stockMovementLines.movementId],
+            references: [stockMovements.orgId, stockMovements.id],
+        }),
+        item: one(items, {
+            fields: [stockMovementLines.orgId, stockMovementLines.itemId],
+            references: [items.orgId, items.id],
+        }),
+        batch: one(batches, {
+            fields: [
+                stockMovementLines.orgId,
+                stockMovementLines.itemId,
+                stockMovementLines.batchId,
+            ],
+            references: [batches.orgId, batches.itemId, batches.id],
+        }),
+        fromLocation: one(warehouseLocations, {
+            fields: [stockMovementLines.orgId, stockMovementLines.fromLocationId],
+            references: [warehouseLocations.orgId, warehouseLocations.id],
+            relationName: "stock_movement_from_location",
+        }),
+        toLocation: one(warehouseLocations, {
+            fields: [stockMovementLines.orgId, stockMovementLines.toLocationId],
+            references: [warehouseLocations.orgId, warehouseLocations.id],
+            relationName: "stock_movement_to_location",
+        }),
+
+        // Valuation: incoming movement lines can create multiple cost layers.
+        sourceCostLayers: many(inventoryCostLayers, {
+            relationName: "inventory_cost_layer_source",
+        }),
+
+        // Valuation: outgoing movement lines can consume multiple cost layers.
+        costAllocations: many(inventoryCostAllocations, {
+            relationName: "inventory_cost_allocation_movement",
+        }),
+    })
+)
+
+// -----------------------------------------------------------------------------
+// Inventory Reservations
+// -----------------------------------------------------------------------------
 
 export const inventoryReservationsRelations = relations(
     inventoryReservations,
@@ -127,7 +175,11 @@ export const inventoryReservationAllocationsRelations = relations(
                 inventoryReservationAllocations.inventoryItemId,
                 inventoryReservationAllocations.itemId,
             ],
-            references: [inventoryItems.orgId, inventoryItems.id, inventoryItems.itemId],
+            references: [
+                inventoryItems.orgId,
+                inventoryItems.id,
+                inventoryItems.itemId,
+            ],
         }),
         inventoryItemBatch: one(inventoryItemBatches, {
             fields: [
@@ -142,6 +194,115 @@ export const inventoryReservationAllocationsRelations = relations(
                 inventoryItemBatches.inventoryItemId,
                 inventoryItemBatches.itemId,
             ],
+        }),
+    })
+)
+
+// -----------------------------------------------------------------------------
+// Inventory Cost Layers
+// -----------------------------------------------------------------------------
+
+export const inventoryCostLayersRelations = relations(
+    inventoryCostLayers,
+    ({ one, many }) => ({
+        // The item/location aggregate that owns this cost layer.
+        inventoryItem: one(inventoryItems, {
+            fields: [
+                inventoryCostLayers.orgId,
+                inventoryCostLayers.inventoryItemId,
+                inventoryCostLayers.itemId,
+            ],
+            references: [
+                inventoryItems.orgId,
+                inventoryItems.id,
+                inventoryItems.itemId,
+            ],
+        }),
+
+        // Optional physical batch/location association.
+        // Null for non-batch-tracked inventory.
+        inventoryItemBatch: one(inventoryItemBatches, {
+            fields: [
+                inventoryCostLayers.orgId,
+                inventoryCostLayers.inventoryItemBatchId,
+                inventoryCostLayers.inventoryItemId,
+                inventoryCostLayers.itemId,
+            ],
+            references: [
+                inventoryItemBatches.orgId,
+                inventoryItemBatches.id,
+                inventoryItemBatches.inventoryItemId,
+                inventoryItemBatches.itemId,
+            ],
+        }),
+
+        // Original incoming movement line that created this layer.
+        sourceMovementLine: one(stockMovementLines, {
+            fields: [
+                inventoryCostLayers.orgId,
+                inventoryCostLayers.sourceMovementLineId,
+            ],
+            references: [
+                stockMovementLines.orgId,
+                stockMovementLines.id,
+            ],
+            relationName: "inventory_cost_layer_source",
+        }),
+
+        // Original cost layer from which this layer was derived.
+        // Used for preserving cost provenance through transfers.
+        originCostLayer: one(inventoryCostLayers, {
+            fields: [
+                inventoryCostLayers.orgId,
+                inventoryCostLayers.originCostLayerId,
+            ],
+            references: [
+                inventoryCostLayers.orgId,
+                inventoryCostLayers.id,
+            ],
+            relationName: "inventory_cost_layer_origin",
+        }),
+
+        // Destination layers derived from this original layer.
+        derivedLayers: many(inventoryCostLayers, {
+            relationName: "inventory_cost_layer_origin",
+        }),
+
+        // Outgoing movements that consumed quantities from this layer.
+        allocations: many(inventoryCostAllocations),
+    })
+)
+
+// -----------------------------------------------------------------------------
+// Inventory Cost Allocations
+// -----------------------------------------------------------------------------
+
+export const inventoryCostAllocationsRelations = relations(
+    inventoryCostAllocations,
+    ({ one }) => ({
+        // The FIFO cost layer consumed by this allocation.
+        costLayer: one(inventoryCostLayers, {
+            fields: [
+                inventoryCostAllocations.orgId,
+                inventoryCostAllocations.costLayerId,
+            ],
+            references: [
+                inventoryCostLayers.orgId,
+                inventoryCostLayers.id,
+            ],
+        }),
+
+        // The outgoing movement line responsible for consuming the cost.
+        outgoingMovementLine: one(stockMovementLines, {
+            fields: [
+                inventoryCostAllocations.orgId,
+                inventoryCostAllocations.outgoingMovementLineId,
+            ],
+            references: [
+                stockMovementLines.orgId,
+                stockMovementLines.id,
+            ],
+            relationName: "inventory_cost_allocation_movement",
         }),
     })
 )
