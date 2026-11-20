@@ -1,1021 +1,1037 @@
-# AGENT.md — Server Module Guide (source of truth)
+# AGENTS.md — Backend API Modules
 
-**Scope:** everything under `apps/server/src/api/modules/**`
-**Audience:** AI coding agents (and humans) who create, extend, or refactor server modules.
+This guide defines how to build and maintain backend domain modules under:
 
----
-
-## 0. How to use this file
-
-1. **This file is the source of truth.** Every pattern you need is written out below with a short example. You do not need to open another module to learn the structure. (The `role` module is the reference implementation these patterns were extracted from.)
-2. **Do not invent helpers.** Only use symbols listed in [§3 Building blocks](#3-building-blocks-import-cheat-sheet). If you need something that is not listed, `grep` for it first; if it does not exist, ask or create it in the right layer.
-3. **Work order for any task:** read the request → find the matching recipe ([§5 New module](#5-recipe-a--create-a-new-module), [§6 Refactor](#6-recipe-b--refactor-an-existing-module), [§7 Add endpoint](#7-recipe-c--add-an-endpoint-to-an-existing-module), [§8 Permissions](#8-recipe-d--add-or-change-permissions)) → follow it top to bottom → run the [Definition of Done](#11-definition-of-done).
-4. **When code and this file disagree:** new code follows this file. Do not "fix" unrelated modules in the same change. If the difference is a mistake in this file, update this file in the same PR.
-5. **Keep `SPEC.md` of each module current** whenever observable behavior changes (new route, error code, rule).
-
----
-
-## 1. Stack and code style
-
-| Topic | Rule |
-|---|---|
-| Runtime / framework | Node, TypeScript (ESM), Hono + `@hono/zod-openapi` |
-| DB | Postgres via Drizzle ORM (`drizzle-orm`), tables and types from `@avuny/db` |
-| Validation | Zod via `@avuny/zod` (`import { z } from "@avuny/zod"`) |
-| Tests | Vitest |
-| **Relative imports** | **Always end with `.js`** (`"./role.service.js"`), even though files are `.ts` |
-| Type-only imports | `import type { X } from "..."` (or inline `type X`) |
-| Formatting | 2 spaces, double quotes, **no semicolons**, trailing commas in multiline literals, ~100 cols |
-| `any` | Forbidden in source. Only allowed in `deps.ts` Proxy getters and in test mocks |
-| Dates over the wire | ISO strings (`date.toISOString()`), produced only in mappers |
-| IDs | UUID strings, validated in routes with `z.string().uuid()` |
-
-Naming:
-
-| Thing | Convention | Example |
-|---|---|---|
-| Module folder | singular, kebab-case | `role`, `activity-log`, `warehouse` |
-| Module files | `<module>.<kind>.ts` | `warehouse.service.ts` |
-| Route files | `<verb>-<thing>.route.ts` | `create-warehouse.route.ts` |
-| Factories | `create<Module><Kind>` | `createWarehouseService`, `createWarehouseRepository` |
-| Error codes | `<MODULE>_<REASON>` SCREAMING_SNAKE | `WAREHOUSE_NAME_TAKEN` |
-| Audit actions | `ActivityLogAction.<MODULE>_<VERB>` → string `"<module>.<verb>"` | `WAREHOUSE_CREATED` → `"warehouse.created"` |
-| Unique indexes | `ux_<entity>_<columns>` | `ux_warehouse_org_name` |
-| Permission keys | `action:resource`, underscores in resource become hyphens | `"update:organization-user"` |
-
----
-
-## 2. Architecture
-
-```
-HTTP
- └─▶ hono-routes/*.route.ts     auth + permission middleware, request validation, OpenAPI docs,
-      │                         calls exactly ONE service method, maps Result → HTTP via handleResult
-      ▼
-     <module>.service.ts        business rules, transactions, Result<T, Code>, audit log, cache invalidation
-      │
-      ▼
-     <module>.repository.ts     Drizzle queries only (no decisions, no HTTP)
-      │
-      ▼
-     Postgres
-
-@avuny/contracts   shared by server + web: Zod schemas, DTO types, error codes,
-                   permission catalog, system roles, audit action names
+```text
+apps/server/src/api/modules/<module-name>/
 ```
 
-### Layer contract
+These rules are the default for every module. Domain-specific operations may be added, but they do not replace the six minimum service methods defined below.
 
-| Layer | Owns | Must NEVER |
-|---|---|---|
-| **Contracts** (`@avuny/contracts`) | Zod schemas, inferred DTO/input types, `XErrorCode`, `ActivityLogAction` entries, permission catalog | import `@avuny/db`, Hono, or any server code |
-| **Route** (`hono-routes/`) | path, method, OpenAPI metadata, middleware list, param/body/query validation, calling one service method, `handleResult` | query the DB, call the repository, contain business rules |
-| **Service** | business rules, tenant checks, transactions, locking, `ok()/fail()`, audit logging, cache invalidation | import Hono, build HTTP responses, `throw` for expected failures |
-| **Repository** | Drizzle queries, unique/FK violation → typed result | decide business outcomes, import the service, know HTTP |
-| **Mapper** | pure row → DTO conversion | do I/O |
-| **deps.ts** | wiring (lazy singletons) | contain logic |
+## 1. What a module represents
 
-### Dependency rules
+A module represents a **domain capability / aggregate**, not necessarily one database table.
 
-* Direction is strictly `route → service → repository → db`. Never upward, never skipping a layer.
-* **Cross-module imports go through the other module's `index.ts` barrel only** (e.g. `../activity-log/index.js`). Never import another module's `*.service.ts` / `*.repository.ts` directly.
-* A module needs a collaborator (audit log, plan features, cache)? Declare a **port** (small interface) in `<module>.types.ts`, accept it in the service deps as optional, default to a `Dummy*` from `testing.ts`, and wire the real one in `deps.ts`.
-* Every query is **scoped by `orgId`** (multi-tenant). Never load a tenant row by `id` alone.
+A repository is normally organized around an **aggregate root**: the entity that owns the lifecycle and consistency rules of a group of related records. It may read and write several tables when those tables form one aggregate.
 
----
+For example, a sales order is an aggregate root and its line items are normally child entities of that order:
 
-## 3. Building blocks (import cheat sheet)
-
-| Need | Import |
-|---|---|
-| Route definition | `import { createRoute } from "@hono/zod-openapi"` |
-| Router, result→HTTP, locale | `import { createOpenAPIRouter, handleResult, getRequestLocale } from "@avuny/hono"` |
-| Result helpers | `import { ok, fail, type Result } from "@avuny/utils"` — `ok({ data, msg })`, `fail({ error, msg })` |
-| Error meta type | `import type { ErrorMeta } from "@avuny/utils"` |
-| Standard error responses | `import { globalErrorResponses } from "@avuny/utils"` (spread **last** in `responses`) |
-| Cursor pagination | `import { decodeCursor, toCursorPage } from "@avuny/utils"` |
-| Zod | `import { z } from "@avuny/zod"` |
-| Contracts | `import { ... } from "@avuny/contracts"` |
-| DB handle & types | `import { type DB, type Tx, <tables>, type <Row> } from "@avuny/db"` |
-| The shared db instance | `import { db } from "../../db.js"` (from the module root `deps.ts`) |
-| PG violation helpers | `import { isUniqueViolation, isForeignKeyViolation } from "../shared/pg-errors.js"` |
-| Auth middleware | `import { requireAuth } from "../../auth/index.js"` (from `hono-routes/index.ts`) |
-| Permission middleware | `import { requirePermission } from "../../role/index.js"` (other modules) |
-| Audit log service | `import { activityLogService } from "../activity-log/index.js"` (in `deps.ts`) |
-| Translator for errors | `import { trans } from "../../../intl/i18next.js"` (from `hono-routes/`) |
-
-Permission-related contract helpers: `PERMISSION_CATALOG`, `SYSTEM_ROLES`, `parsePermissionKey`, `evaluate`, `canAccess`, `grantsAll`, `hasPermission`, `findInvalidStatement`, `PERMISSION_WILDCARD`.
-
-Response envelope: success `{ success: true, data, msg? }`; failure uses the domain-error envelope produced by `handleResult`.
-
----
-
-## 4. Module anatomy
-
+```text
+SalesOrder aggregate
+├── sales_orders        (aggregate root)
+└── sales_order_lines   (owned child records)
 ```
-apps/server/src/api/modules/<module>/
-├── SPEC.md                      # purpose, domain model, rules, error codes, file map (keep current)
-├── index.ts                     # public barrel — the ONLY thing other modules import
-├── deps.ts                      # lazy singleton wiring + Proxy exports
-├── <module>.types.ts            # service/repository types (ReturnType<...>), ports, deps bags
-├── <module>.errors.ts           # code → { statusCode, responseMessage }
-├── <module>.error-map.ts        # full error map for the module
-├── <module>.mapper.ts           # row → DTO (pure)
-├── <module>.repository.ts       # Drizzle queries
-├── <module>.service.ts          # business logic (closure factory)
-├── <module>.service.spec.ts     # service unit tests (mock repository)
-├── testing.ts                   # Dummy* test doubles for ports
+
+The sales-order repository therefore owns operations involving both `sales_orders` and `sales_order_lines`. Creating an order and its lines, changing its lines, loading the order with its lines, and deleting an eligible draft order belong in the same repository boundary and, when they must succeed together, the same transaction.
+
+Do **not** create a separate `sales_order_line` module just because `sales_order_lines` is a separate table. A child table belongs to its aggregate when its records:
+
+- cannot exist meaningfully without the parent;
+- are created, changed, and deleted through the parent's lifecycle;
+- do not have an independent permission boundary or standalone business workflow.
+
+A record that has its own lifecycle, permissions, workflows, or independent ownership may deserve its own module. References to another aggregate (for example, a customer or item referenced by a sales order) do not become owned child records: keep their ownership in their own modules and use their public APIs or documented domain ports when validation or behavior is needed.
+
+## 2. Required module structure
+
+Use the following structure as the normal starting point. Add files only when the module needs them, but keep the six service operations and the module's public boundary consistent.
+
+```text
+apps/server/src/api/modules/<module-name>/
+├── <module-name>.repository.ts
+├── <module-name>.service.ts
+├── <module-name>.types.ts
+├── <module-name>.permissions.ts
+├── <module-name>.errors.ts
+├── <module-name>.mapper.ts             # when row-to-DTO mapping is needed
+├── deps.ts
+├── testing.ts
+├── <module-name>.service.spec.ts
 ├── hono-routes/
-│   ├── _shared.ts               # jsonOk, jsonError, honoPath
-│   ├── module-routes.types.ts   # RouteDeps
-│   ├── <verb>-<thing>.route.ts  # ONE endpoint per file
-│   └── index.ts                 # aggregator + singleton router
-└── __tests__/
-    └── <module>.routes.test.ts  # route tests (mock service)
+│   ├── module-routes.types.ts
+│   ├── create-<module-name>.route.ts
+│   ├── list-<module-name>.route.ts
+│   ├── <module-name>-options.route.ts
+│   ├── get-<module-name>.route.ts
+│   ├── update-<module-name>.route.ts
+│   ├── delete-<module-name>.route.ts
+│   ├── <additional-operation>.route.ts  # optional
+│   └── index.ts
+└── index.ts
 ```
 
-Optional files, only when needed: `<module>.middleware.ts`, `<module>.permissions.ts`, `<module>.seed.ts`, extra `*.spec.ts` per unit.
+The module name in filenames is kebab-case. TypeScript symbols use PascalCase or camelCase as appropriate. Use `.js` extensions in relative imports because the API uses ESM.
 
----
+A module may also contain focused files such as `validation.ts`, `policy.ts`, `usage.ts`, or `calculations.ts` when that keeps substantial domain logic out of the service. Do not turn the module into a collection of one-file-per-function abstractions without a clear boundary.
 
-## 5. Recipe A — Create a new module
+## 3. Responsibilities and dependency direction
 
-Worked example: a **`warehouse`** module with `POST /organizations/{orgId}/warehouses` and `GET /organizations/{orgId}/warehouses/{warehouseId}`. Replace names for your module; the shape never changes.
+Keep responsibilities separate:
 
-### Step 0 — Decide and document
+| File | Responsibility | Must not do |
+|---|---|---|
+| `*.repository.ts` | Drizzle queries, writes, aggregate loading, transaction access, mapping known database constraints to typed write reasons | Permission checks, HTTP handling, audit logging, user-facing business decisions |
+| `*.service.ts` | Use cases, authorization, domain rules, transaction orchestration, DTO conversion, audit after commit | Build SQL queries or depend on Hono request/response objects |
+| `*.mapper.ts` | Pure database-row / aggregate-to-DTO conversion | I/O, authorization, database access, business mutations |
+| `*.permissions.ts` | Typed permission constants used by the service | Define a permission that is absent from the contracts module registry |
+| `*.errors.ts` | HTTP metadata for the module's domain errors | Define new domain error codes |
+| `deps.ts` | Construct and wire concrete repository, permission, audit, and other dependencies | Contain business logic |
+| `hono-routes/` | HTTP path, validation, OpenAPI schema, auth middleware, service invocation, response mapping | Contain business rules or query the database directly |
+| `testing.ts` / `*.spec.ts` | Fixtures, fake dependencies, and service behavior tests | Import production `deps.ts` into service unit tests |
+| `index.ts` | Public exports for other modules and API composition | Expose private implementation details unnecessarily |
 
-Write `SPEC.md` first (template in [§5.13](#513-specmd-template)). List endpoints, rules, error codes, permission keys.
+Use public module exports for cross-module imports. Another module must not import a private file such as `../item/item.repository.js` or reach into another module's `deps.ts`. Export the intended public service, types, or domain port from that module's `index.ts`.
 
-### Step 1 — Database (`@avuny/db`)
+If one use case must atomically coordinate multiple aggregates, make that orchestration explicit. Do not call two independently committing service methods and assume they form one transaction. Pass a shared transaction through a deliberately designed application/domain operation, or put the orchestration in an appropriate higher-level use case.
 
-Add the table and a migration, mirroring an existing org-scoped table: uuid primary key, `orgId` FK, `createdAt`/`updatedAt`, and every uniqueness rule as a **named unique index** (`ux_warehouse_org_name` on `(orgId, name)`). Export the table and its row type (`Warehouse`). The service relies on the named index to map races to a domain error.
+## 4. Repository conventions
 
-### Step 2 — Contracts (`@avuny/contracts`)
+### 4.1 Aggregate repository, not one repository per table
 
-Create the module's contract file next to the existing ones (`grep -rn "RoleErrorCode" <contracts package>` to find the folder; mirror its layout and export it from the package index).
+The repository owns all tables that make up its aggregate. Its public methods should speak in domain terms (`insertOrder`, `replaceLines`, `findOrder`, or similar), rather than exposing arbitrary table operations to the service.
 
-```ts
-import { z } from "@avuny/zod"
+For a parent with owned lines:
 
-// Error codes: value AND type share one name.
-export const WarehouseErrorCode = {
-  WAREHOUSE_NOT_FOUND: "WAREHOUSE_NOT_FOUND",
-  WAREHOUSE_NAME_TAKEN: "WAREHOUSE_NAME_TAKEN",
-} as const
-export type WarehouseErrorCode = (typeof WarehouseErrorCode)[keyof typeof WarehouseErrorCode]
+- Insert the parent and its lines in the same transaction.
+- Load the parent and its required child records as one aggregate when the service needs the aggregate.
+- Update the parent and replace/update its lines atomically when the input represents one complete order edit.
+- Verify child IDs belong to the parent and organization before changing or removing them. Never trust a line ID supplied by the client on its own.
+- Keep list-table queries focused on the aggregate root and list-item projection. Do not load every line for every row in a paginated table.
+- Use deliberate foreign-key behavior: cascade only for child records whose lifecycle truly belongs to the parent; use restrict for records whose history must prevent deletion.
 
-export const CreateWarehouseSchema = z.object({
-  name: z.string().trim().min(1).max(80),
-})
-export type CreateWarehouseInput = z.infer<typeof CreateWarehouseSchema>
+### 4.2 Standard repository shape
 
-export const WarehouseDtoSchema = z.object({
-  id: z.string().uuid(),
-  orgId: z.string().uuid(),
-  name: z.string(),
-  createdAt: z.string(), // ISO
-  updatedAt: z.string(), // ISO
-})
-export type WarehouseDto = z.infer<typeof WarehouseDtoSchema>
-```
-
-Also add the audit actions to `ActivityLogAction` (`WAREHOUSE_CREATED = "warehouse.created"`, …).
-
-> [!IMPORTANT]
-> **Single Source of Truth for Permissions & Audit Events**:
-> Every new domain module MUST be registered in `packages/contracts/src/modules/registry.ts` under `MODULES`.
-> `PermissionKey`, `ActivityLogAction`, and `SIDEBAR_TREE` are all automatically derived from `registry.ts`.
-> If you do not register the module in `registry.ts`:
-> 1. `PermissionKey` will not contain `<action>:<module>` (e.g. `"create:warehouse"`).
-> 2. `ActivityLogAction` will not contain `<module>.<event>` (e.g. `"warehouse.created"`).
-> 3. TypeScript will fail on `permissions.check` and `activityLog.log`.
-
-> There is **no** `WAREHOUSE_PERMISSION_DENIED`. `requirePermission` is shared and always answers with `RoleErrorCode.ROLE_PERMISSION_DENIED` (403). Document that code in each route's 403 response.
-
-### Step 3 — Errors
-
-`warehouse.errors.ts` — one entry per code, `satisfies` guarantees none is forgotten:
+The exact method names may be domain-specific, but a typical aggregate repository exposes the following capabilities:
 
 ```ts
-import { WarehouseErrorCode } from "@avuny/contracts"
-import type { ErrorMeta } from "@avuny/utils"
+import { and, asc, eq, ilike, sql, type SQL } from "drizzle-orm"
+import {
+  type SalesOrderListFilters,
+  type SalesOrderOptionFilters,
+  type SalesOrderPatch,
+} from "@avuny/contracts"
+import {
+  salesOrderLines,
+  salesOrders,
+  type DB,
+  type NewSalesOrder,
+  type NewSalesOrderLine,
+  type SalesOrder,
+  type Tx,
+} from "@avuny/db"
 
-export { WarehouseErrorCode }
+const escapeLike = (value: string) => value.replace(/[\\%_]/g, "\\$&")
 
-export const warehouseErrorsHttpMap = {
-  WAREHOUSE_NOT_FOUND: { statusCode: 404, responseMessage: "Warehouse not found" },
-  WAREHOUSE_NAME_TAKEN: {
-    statusCode: 409,
-    responseMessage: "A warehouse with this name already exists",
-  },
-} as const satisfies Record<WarehouseErrorCode, ErrorMeta>
-```
+function constraintOf(err: unknown, sqlState: string): string | null {
+  const e = err as {
+    code?: string
+    constraint?: string
+    constraint_name?: string
+    cause?: unknown
+  }
+  if (e && e.code === sqlState) return e.constraint ?? e.constraint_name ?? ""
+  return e?.cause ? constraintOf(e.cause, sqlState) : null
+}
 
-> [!WARNING]
-> **`ErrorMeta` Schema (`statusCode` + `responseMessage`)**:
-> `ErrorMeta` in `@avuny/utils` requires `{ statusCode: ClientErrorStatusCode, responseMessage: string }`.
-> - **NEVER** use `{ status: 404 }`. This causes TS2353 on every error entry.
-> - **Always use `as const`**: preserving numeric literal types (`404`, `409`) prevents status widening to `ClientErrorStatusCode`.
-
-`warehouse.error-map.ts`:
-
-```ts
-import { WarehouseErrorCode as Code } from "@avuny/contracts"
-import { warehouseErrorsHttpMap as errors } from "./warehouse.errors.js"
-
-export const warehouseErrorMap = {
-  WAREHOUSE_NOT_FOUND: errors.WAREHOUSE_NOT_FOUND,
-  WAREHOUSE_NAME_TAKEN: errors.WAREHOUSE_NAME_TAKEN,
-} as const satisfies Record<Code, (typeof errors)[keyof typeof errors]>
-```
-
-> [!WARNING]
-> **Never widen error-map to `Record<..., ErrorMeta>`**:
-> Do NOT type error maps as `Record<Code, ErrorMeta>`. Casting to `ErrorMeta` widens literal status codes to `ClientErrorStatusCode` (`400 | 401 | 402 | ...`). When passed to `handleResult`, it breaks OpenAPI route handler type-checking. Always use `as const satisfies Record<Code, (typeof errors)[keyof typeof errors]>` or simple `as const`.
-
-### Step 4 — Repository
-
-Rules: factory taking `{ db }`; every method takes an optional trailing `tx`; **always filter by `orgId`**; writes return a discriminated result instead of throwing for expected violations; no business decisions.
-
-```ts
-import { and, eq, sql } from "drizzle-orm"
-import { warehouses, type DB, type Tx, type Warehouse } from "@avuny/db"
-import { isUniqueViolation } from "../shared/pg-errors.js"
-
-const NAME_INDEXES = ["ux_warehouse_org_name"] as const
-
-type NewWarehouse = typeof warehouses.$inferInsert
-export type WarehouseWriteResult =
-  | { ok: true; row: Warehouse }
-  | { ok: false; reason: "name_taken" | "not_found" }
-
-export function createWarehouseRepository({ db }: { db: DB }) {
-  const exec = (tx?: Tx): DB | Tx => tx ?? db // same code works inside and outside a transaction
+export function createSalesOrderRepository({ db }: { db: DB }) {
+  const exec = (tx?: Tx) => tx ?? db
 
   return {
     transaction<T>(fn: (tx: Tx) => Promise<T>): Promise<T> {
       return db.transaction(fn)
     },
 
-    /** Serializes check-then-write sequences of one organization. */
-    async lockOrg(orgId: string, tx: Tx): Promise<void> {
-      await tx.execute(
-        sql`select pg_advisory_xact_lock(hashtextextended(${`warehouses:${orgId}`}, 0))`
-      )
+    // Aggregate write: persist root and owned children together.
+    async insertAggregate(
+      orgId: string,
+      values: Omit<NewSalesOrder, "orgId" | "id">,
+      lines: readonly Omit<NewSalesOrderLine, "orgId" | "id" | "salesOrderId">[],
+      tx?: Tx,
+    ) {
+      try {
+        const [order] = await exec(tx)
+          .insert(salesOrders)
+          .values({ ...values, orgId })
+          .returning()
+
+        if (!order) throw new Error("Sales order insert returned no row")
+
+        const insertedLines = lines.length
+          ? await exec(tx)
+              .insert(salesOrderLines)
+              .values(lines.map((line) => ({ ...line, orgId, salesOrderId: order.id })))
+              .returning()
+          : []
+
+        return { ok: true as const, row: { ...order, lines: insertedLines } }
+      } catch (err) {
+        // Use the project's shared constraint-inspection helper here.
+        if (constraintOf(err, "23505") === "ux_sales_order_org_number") {
+          return { ok: false as const, reason: "number_taken" as const }
+        }
+        throw err
+      }
     },
 
-    async findById(orgId: string, id: string, tx?: Tx): Promise<Warehouse | null> {
-      const [row] = await exec(tx)
+    // Aggregate read: always scope the root by organization; then load its owned lines.
+    async findAggregate(
+      orgId: string,
+      id: string,
+      tx?: Tx,
+      opts: { forUpdate?: boolean } = {},
+    ) {
+      const rootQuery = exec(tx)
         .select()
-        .from(warehouses)
-        .where(and(eq(warehouses.orgId, orgId), eq(warehouses.id, id)))
+        .from(salesOrders)
+        .where(and(eq(salesOrders.orgId, orgId), eq(salesOrders.id, id)))
         .limit(1)
+
+      const [order] = await (opts.forUpdate ? rootQuery.for("update") : rootQuery)
+      if (!order) return null
+
+      const lines = await exec(tx)
+        .select()
+        .from(salesOrderLines)
+        .where(and(
+          eq(salesOrderLines.orgId, orgId),
+          eq(salesOrderLines.salesOrderId, id),
+        ))
+        .orderBy(asc(salesOrderLines.position), asc(salesOrderLines.id))
+
+      return { ...order, lines }
+    },
+
+    // The data-table query returns root rows; it does not hydrate all child lines.
+    async list(orgId: string, filters: SalesOrderListFilters, tx?: Tx) {
+      const conditions: SQL[] = [eq(salesOrders.orgId, orgId)]
+      if (filters.status) conditions.push(eq(salesOrders.status, filters.status))
+      const where = and(...conditions)
+
+      const rows = await exec(tx)
+        .select()
+        .from(salesOrders)
+        .where(where)
+        .orderBy(asc(salesOrders.createdAt), asc(salesOrders.id))
+        .limit(filters.pageSize)
+        .offset((filters.page - 1) * filters.pageSize)
+
+      const [counted] = await exec(tx)
+        .select({ total: sql<number>`count(*)::int` })
+        .from(salesOrders)
+        .where(where)
+
+      return { rows, total: counted?.total ?? 0 }
+    },
+
+    // Picker query: return a small projection, not full aggregate DTOs.
+    async listOptions(orgId: string, filters: SalesOrderOptionFilters, tx?: Tx) {
+      const conditions: SQL[] = [eq(salesOrders.orgId, orgId)]
+      if (filters.search) {
+        conditions.push(ilike(salesOrders.orderNumber, `%${escapeLike(filters.search)}%`))
+      }
+      if (filters.after) {
+        conditions.push(sql`(${salesOrders.orderNumber}, ${salesOrders.id}) > (${filters.after.name}::text, ${filters.after.id}::uuid)`)
+      }
+
+      return exec(tx)
+        .select({ id: salesOrders.id, name: salesOrders.orderNumber })
+        .from(salesOrders)
+        .where(and(...conditions))
+        .orderBy(asc(salesOrders.orderNumber), asc(salesOrders.id))
+        .limit(filters.limit)
+    },
+
+    // Root/aggregate update methods should receive the same Tx when part of a use case.
+    async updateAggregate(
+      orgId: string,
+      id: string,
+      patch: SalesOrderPatch,
+      tx?: Tx,
+    ) {
+      const [row] = await exec(tx)
+        .update(salesOrders)
+        .set({ ...patch, updatedAt: new Date() })
+        .where(and(eq(salesOrders.orgId, orgId), eq(salesOrders.id, id)))
+        .returning()
       return row ?? null
     },
 
-    async insert(values: NewWarehouse, tx?: Tx): Promise<WarehouseWriteResult> {
+    async replaceLines(
+      orgId: string,
+      salesOrderId: string,
+      lines: readonly Omit<NewSalesOrderLine, "orgId" | "id" | "salesOrderId">[],
+      tx: Tx,
+    ) {
+      // The parent must already be locked and verified by the service/use case.
+      await exec(tx)
+        .delete(salesOrderLines)
+        .where(and(
+          eq(salesOrderLines.orgId, orgId),
+          eq(salesOrderLines.salesOrderId, salesOrderId),
+        ))
+
+      return lines.length
+        ? exec(tx)
+            .insert(salesOrderLines)
+            .values(lines.map((line) => ({ ...line, orgId, salesOrderId })))
+            .returning()
+        : []
+    },
+
+    async delete(orgId: string, id: string, tx?: Tx) {
+      // Return a typed reason when a known FK constraint prevents deletion.
+      // Unknown database errors must be rethrown, not disguised as a business conflict.
       try {
-        const [row] = await exec(tx).insert(warehouses).values(values).returning()
-        return row ? { ok: true, row } : { ok: false, reason: "not_found" }
+        const deleted = await exec(tx)
+          .delete(salesOrders)
+          .where(and(eq(salesOrders.orgId, orgId), eq(salesOrders.id, id)))
+          .returning({ id: salesOrders.id })
+        return deleted.length
+          ? { ok: true as const }
+          : { ok: false as const, reason: "not_found" as const }
       } catch (err) {
-        if (isUniqueViolation(err, NAME_INDEXES)) return { ok: false, reason: "name_taken" }
-        throw err // unexpected errors bubble up
+        if (constraintOf(err, "23503") !== null) {
+          return { ok: false as const, reason: "in_use" as const }
+        }
+        throw err
       }
     },
   }
 }
 ```
 
-LIKE searches must escape user input: `const escapeLike = (s: string) => s.replace(/[\\%_]/g, (m) => `\\${m}`)` then `ilike(col, `%${escapeLike(q)}%`)`.
+The table and filter type names above illustrate the shape; use the real names and types from the module's contracts and database schema. Add the required unique/FK constraint handling for the actual domain. Prefer a shared constraint-inspection helper if the API already provides one. Catch only known SQL states and named constraints; rethrow unexpected errors so genuine defects are not hidden.
 
-### Step 5 — Mapper
+### 4.3 Repository rules
+
+- Every organization-owned read and write must be scoped by `orgId`. Include it in child-table conditions too; do not rely only on a client-supplied parent ID.
+- Put `orgId` before the record ID in repository signatures when that is the established local pattern.
+- Accept an optional `tx?: Tx` on repository methods that can participate in a larger transaction. Use `const exec = (tx?: Tx) => tx ?? db`.
+- The repository owns `transaction<T>(fn)` and passes the Drizzle `Tx` to the callback.
+- Lock aggregate roots with `forUpdate` when a use case must serialize concurrent edits, posting, reservations, or state transitions.
+- Return typed write outcomes for expected unique/FK conflicts. Do not return raw PostgreSQL errors to the service.
+- Be careful when catching a PostgreSQL constraint error inside an existing transaction: PostgreSQL may mark that transaction as failed even after application code catches the error. If the configured driver does so, let the error escape the transaction and translate it after rollback, or use an explicit savepoint/rollback mechanism supported by the project. Do not return a failure value and then attempt to continue or commit an aborted transaction.
+- Never use a repository method that silently opens its own transaction when the service has already supplied a transaction.
+- Keep SQL, joins, filters, pagination, and database constraint names in this layer.
+- Do not put authorization, activity-log calls, HTTP status codes, or localized messages in the repository.
+
+## 5. Service conventions — six mandatory methods
+
+Every module service must implement these methods with the same overall signature and behavior pattern:
+
+| Method | Purpose | Expected permission |
+|---|---|---|
+| `create(actorId, orgId, input)` | Create one aggregate, including owned child records | `create:<resource>` |
+| `update(actorId, orgId, id, input)` | Update an existing aggregate | `update:<resource>` |
+| `delete(actorId, orgId, id)` | Delete an eligible aggregate, or return a domain error when deletion is not allowed | `delete:<resource>` |
+| `listOptions(actorId, orgId, query)` | Return small, eligible picker options with cursor pagination | `read:<resource>` |
+| `list(actorId, orgId, query)` | Return a paginated data-table response | `read:<resource>` |
+| `get(actorId, orgId, id)` | Return one complete aggregate DTO | `read:<resource>` |
+
+These six methods are mandatory even when the domain has additional operations. Add methods such as `approve`, `post`, `cancel`, `deactivate`, `reactivate`, `reverse`, `duplicate`, or `setDefault` when the domain requires them. Do not use an additional operation as a replacement for one of the six minimum methods.
+
+A method's existence does not mean every record can always undergo that operation. For example, `delete` may return a typed `*_NOT_DELETABLE` error for a posted or historically referenced document. A financial or immutable domain still implements `delete` and expresses its rule explicitly.
+
+### 5.1 Shared service pattern
+
+Use typed `Result` responses from `@avuny/utils`. Check permission before repository access. Scope permission checks to the organization and, where the resource is record-scopable, to the record as well. Convert expected repository/domain failures into contract error codes. Convert database rows through mappers. Write audit records only after the relevant transaction commits.
+
+A common internal transaction outcome is:
 
 ```ts
-import type { WarehouseDto } from "@avuny/contracts"
-import type { Warehouse } from "@avuny/db"
+type Outcome<T> =
+  | { ok: true; value: T }
+  | { ok: false; error: Code; msg: string }
 
-export function toWarehouseDto(row: Warehouse): WarehouseDto {
+const stop = (error: Code, msg: string) => ({ ok: false as const, error, msg })
+```
+
+A service skeleton showing all six mandatory methods:
+
+```ts
+import {
+  type ActivityLogAction,
+  type PermissionKey,
+  RoleErrorCode,
+  SalesOrderErrorCode as E,
+  SalesOrderOptionCursorSchema,
+  SALES_ORDER_AUDIT_EVENTS,
+  type Code,
+  type CreateSalesOrderInput,
+  type DeleteSalesOrderResult,
+  type OptionListResponse,
+  type SalesOrderDto,
+  type SalesOrderOffsetListQuery,
+  type SalesOrderOffsetListResponse,
+  type SalesOrderOptionListQuery,
+  type UpdateSalesOrderInput,
+} from "@avuny/contracts"
+import { decodeCursor, fail, ok, toCursorPage, type Result } from "@avuny/utils"
+import { toSalesOrderDto, toSalesOrderListItemDto } from "./sales-order.mapper.js"
+import { SALES_ORDER_PERMISSIONS as P } from "./sales-order.permissions.js"
+import type { SalesOrderServiceDeps } from "./sales-order.types.js"
+
+type Outcome<T> =
+  | { ok: true; value: T }
+  | { ok: false; error: Code; msg: string }
+
+const stop = (error: Code, msg: string) => ({ ok: false as const, error, msg })
+
+export function createSalesOrderService(deps: SalesOrderServiceDeps) {
+  const repo = deps.repository
+
+  const can = (actorId: string, action: PermissionKey, orgId: string, resourceId = orgId) =>
+    deps.permissions.check({ userId: actorId }, action, { resourceId, orgId })
+
+  const forbidden = () =>
+    fail({
+      error: RoleErrorCode.ROLE_PERMISSION_DENIED,
+      msg: "You do not have permission to perform this action",
+    })
+
+  const audit = (
+    orgId: string,
+    actorId: string,
+    action: ActivityLogAction,
+    resourceId: string,
+    metadata?: Record<string, unknown>,
+  ) => deps.activityLog.record({ orgId, actorId, action, resourceId, metadata })
+
+  const toFailure = (outcome: { error: Code; msg: string }) =>
+    fail({ error: outcome.error, msg: outcome.msg })
+
+  return {
+    async create(
+      actorId: string,
+      orgId: string,
+      input: CreateSalesOrderInput,
+    ): Promise<Result<SalesOrderDto, Code>> {
+      if (!(await can(actorId, P.CREATE, orgId))) return forbidden()
+
+      const outcome = await repo.transaction(async (tx): Promise<Outcome<SalesOrderDto>> => {
+        // Validate referenced customer/items, quantities, prices, and domain rules here
+        // before writing. Use public domain ports for other aggregates when required.
+        const { lines, ...orderValues } = input
+        const inserted = await repo.insertAggregate(orgId, orderValues, lines, tx)
+        if (!inserted.ok) {
+          return stop(E.SALES_ORDER_NUMBER_TAKEN, "A sales order with this number already exists")
+        }
+        return { ok: true, value: toSalesOrderDto(inserted.row) }
+      })
+
+      if (!outcome.ok) return toFailure(outcome)
+      await audit(orgId, actorId, SALES_ORDER_AUDIT_EVENTS.CREATED, outcome.value.id)
+      return ok({ data: outcome.value, msg: "Sales order created successfully" })
+    },
+
+    async update(
+      actorId: string,
+      orgId: string,
+      id: string,
+      input: UpdateSalesOrderInput,
+    ): Promise<Result<SalesOrderDto, Code>> {
+      if (!(await can(actorId, P.UPDATE, orgId, id))) return forbidden()
+
+      const outcome = await repo.transaction(async (tx): Promise<Outcome<SalesOrderDto>> => {
+        const current = await repo.findAggregate(orgId, id, tx, { forUpdate: true })
+        if (!current) return stop(E.SALES_ORDER_NOT_FOUND, "Sales order not found")
+        if (current.status !== "draft") {
+          return stop(E.SALES_ORDER_NOT_EDITABLE, "Only draft sales orders can be changed")
+        }
+
+        // Validate the full replacement line set before the first write.
+        const { lines: replacementLines, ...patch } = input
+        const updated = await repo.updateAggregate(orgId, id, patch, tx)
+        if (!updated) return stop(E.SALES_ORDER_NOT_FOUND, "Sales order not found")
+        const lines = replacementLines !== undefined
+          ? await repo.replaceLines(orgId, id, replacementLines, tx)
+          : current.lines
+
+        // Build the DTO from the rows already returned by the writes. Avoid a new
+        // failure branch after mutations have started; see the transaction rule below.
+        return { ok: true, value: toSalesOrderDto({ ...updated, lines }) }
+      })
+
+      if (!outcome.ok) return toFailure(outcome)
+      await audit(orgId, actorId, SALES_ORDER_AUDIT_EVENTS.UPDATED, id, {
+        changedFields: Object.keys(input),
+      })
+      return ok({ data: outcome.value, msg: "Sales order updated successfully" })
+    },
+
+    async delete(
+      actorId: string,
+      orgId: string,
+      id: string,
+    ): Promise<Result<DeleteSalesOrderResult, Code>> {
+      if (!(await can(actorId, P.DELETE, orgId, id))) return forbidden()
+
+      const outcome = await repo.transaction(async (tx): Promise<Outcome<{ id: string }>> => {
+        const current = await repo.findAggregate(orgId, id, tx, { forUpdate: true })
+        if (!current) return stop(E.SALES_ORDER_NOT_FOUND, "Sales order not found")
+        if (current.status !== "draft") {
+          return stop(E.SALES_ORDER_NOT_DELETABLE, "Only draft sales orders can be deleted")
+        }
+        const deleted = await repo.delete(orgId, id, tx)
+        if (!deleted.ok && deleted.reason === "not_found") {
+          return stop(E.SALES_ORDER_NOT_FOUND, "Sales order not found")
+        }
+        if (!deleted.ok) return stop(E.SALES_ORDER_IN_USE, "The sales order is referenced by other records")
+        return { ok: true, value: { id } }
+      })
+
+      if (!outcome.ok) return toFailure(outcome)
+      await audit(orgId, actorId, SALES_ORDER_AUDIT_EVENTS.DELETED, id)
+      return ok({ data: { id }, msg: "Sales order deleted successfully" })
+    },
+
+    async listOptions(
+      actorId: string,
+      orgId: string,
+      query: SalesOrderOptionListQuery,
+    ): Promise<Result<OptionListResponse, Code>> {
+      if (!(await can(actorId, P.READ, orgId))) return forbidden()
+      const rows = await repo.listOptions(orgId, {
+        search: query.search,
+        after: decodeCursor(query.cursor, SalesOrderOptionCursorSchema),
+        limit: query.limit + 1,
+      })
+      const page = toCursorPage(rows, query.limit, (row) => ({ name: row.name, id: row.id }))
+      return ok({
+        data: {
+          items: page.items.map(({ id, name }) => ({ id, name })),
+          nextCursor: page.nextCursor,
+        },
+        msg: "Sales order options retrieved successfully",
+      })
+    },
+
+    async list(
+      actorId: string,
+      orgId: string,
+      query: SalesOrderOffsetListQuery,
+    ): Promise<Result<SalesOrderOffsetListResponse, Code>> {
+      if (!(await can(actorId, P.READ, orgId))) return forbidden()
+      const { rows, total } = await repo.list(orgId, {
+        status: query.status,
+        search: query.search || undefined,
+        page: query.page,
+        pageSize: query.pageSize,
+      })
+      return ok({
+        data: {
+          items: rows.map(toSalesOrderListItemDto),
+          page: query.page,
+          pageSize: query.pageSize,
+          total,
+        },
+        msg: "Sales orders retrieved successfully",
+      })
+    },
+
+    async get(
+      actorId: string,
+      orgId: string,
+      id: string,
+    ): Promise<Result<SalesOrderDto, Code>> {
+      if (!(await can(actorId, P.READ, orgId, id))) return forbidden()
+      const aggregate = await repo.findAggregate(orgId, id)
+      if (!aggregate) return fail({ error: E.SALES_ORDER_NOT_FOUND, msg: "Sales order not found" })
+      return ok({ data: toSalesOrderDto(aggregate), msg: "Sales order retrieved successfully" })
+    },
+
+    // Add domain-specific methods below the six required methods.
+  }
+}
+```
+
+The names and error values in this sample are illustrative; define the real input, response, cursor, and error types in `@avuny/contracts` before using them. Keep service method signatures and `Result` return types explicit.
+
+### 5.2 Important transaction rule
+
+Returning an ordinary `{ ok: false }` value from a Drizzle transaction callback does **not** automatically roll the transaction back. The database sees a normally completed callback unless the transaction is explicitly rolled back or an error is thrown.
+
+Therefore:
+
+1. Perform authorization before opening the transaction.
+2. Lock and load the aggregate when concurrency matters.
+3. Complete all expected validations before the first write whenever possible.
+4. If a failure can still occur after writes have started, use the project's explicit transaction rollback mechanism. Do not return a failure sentinel and accidentally commit partial changes.
+5. Keep audit writes after a successful commit. If audit delivery must be guaranteed together with the domain write, use a transactional outbox rather than writing to an external audit service inside the database transaction.
+
+### 5.3 Authorization and permissions
+
+Use `PermissionKey` from `@avuny/contracts`; do not build arbitrary permission strings at runtime. Keep the module's commonly used keys together:
+
+```ts
+import type { PermissionKey } from "@avuny/contracts"
+
+export const SALES_ORDER_PERMISSIONS = {
+  CREATE: "create:sales-order",
+  READ: "read:sales-order",
+  UPDATE: "update:sales-order",
+  DELETE: "delete:sales-order",
+  APPROVE: "approve:sales-order",
+} as const satisfies Record<string, PermissionKey>
+```
+
+The resource part is the route/resource token generated for the module. For a registry key such as `sales_order`, the permission key commonly uses `sales-order`. Confirm the actual generated `PermissionKey` rather than inventing a string.
+
+Permission checks should normally include `{ resourceId: orgId, orgId }` for organization-level grants. For a record-scopable permission, use the record ID as `resourceId` and keep `orgId` as the tenant boundary. The contracts registry's `scopable` setting determines whether record-level scoping is supported for that resource.
+
+Use the shared `ROLE_PERMISSION_DENIED` error and the established role HTTP mapping. Do not define a module-specific copy of the shared permission error.
+
+### 5.4 Audit logging
+
+Audit only successful domain changes. Use the action values generated from the contracts module registry / exported module audit constants, typed as `ActivityLogAction`. Do not invent event strings in random service methods.
+
+Audit metadata should be useful, small, and free of secrets. Prefer IDs, changed field names, status transitions, and other safe business context. Do not log passwords, tokens, payment credentials, or unnecessary personal data.
+
+## 6. Types and permissions files
+
+### `<module-name>.types.ts`
+
+Keep the module's public inferred service/repository types here when useful:
+
+```ts
+import type { ActivityLogAction, PermissionKey } from "@avuny/contracts"
+import { createSalesOrderRepository } from "./sales-order.repository.js"
+import { createSalesOrderService } from "./sales-order.service.js"
+
+export type SalesOrderRepository = ReturnType<typeof createSalesOrderRepository>
+export type SalesOrderService = ReturnType<typeof createSalesOrderService>
+
+export interface SalesOrderServiceDeps {
+  repository: SalesOrderRepository
+  permissions: {
+    check(
+      actor: { userId: string },
+      action: PermissionKey,
+      scope: { resourceId: string; orgId: string },
+    ): Promise<boolean>
+  }
+  activityLog: {
+    record(entry: {
+      orgId: string
+      actorId: string
+      action: ActivityLogAction
+      resourceId: string
+      metadata?: Record<string, unknown>
+    }): Promise<unknown>
+  }
+}
+```
+
+Adapt the port signatures to the real exported types from the role and activity-log modules. Keep dependency types explicit; do not solve a circular type problem with `any`.
+
+### `<module-name>.permissions.ts`
+
+Export the permission constants used by the service and constrain them with `satisfies Record<string, PermissionKey>`. Every grantable permission must exist in the contracts registry. Read-only or logged-only operations must not be given a permission just because they have an audit event.
+
+## 7. Mapper conventions
+
+A mapper is a pure conversion from database records / aggregate objects into public DTOs:
+
+```ts
+import type { SalesOrder, SalesOrderLine } from "@avuny/db"
+import type { SalesOrderDto, SalesOrderListItemDto } from "@avuny/contracts"
+
+type SalesOrderAggregate = SalesOrder & { lines: SalesOrderLine[] }
+
+export function toSalesOrderDto(row: SalesOrderAggregate): SalesOrderDto {
   return {
     id: row.id,
-    orgId: row.orgId,
-    name: row.name,
+    orderNumber: row.orderNumber,
+    status: row.status,
+    lines: row.lines.map((line) => ({
+      id: line.id,
+      itemId: line.itemId,
+      quantity: line.quantity,
+      unitPrice: line.unitPrice,
+    })),
     createdAt: row.createdAt.toISOString(),
+    updatedAt: row.updatedAt.toISOString(),
+  }
+}
+
+export function toSalesOrderListItemDto(row: SalesOrder): SalesOrderListItemDto {
+  return {
+    id: row.id,
+    orderNumber: row.orderNumber,
+    status: row.status,
     updatedAt: row.updatedAt.toISOString(),
   }
 }
 ```
 
-Never return raw rows from the service: mappers hide internal columns and format dates.
+Adapt the fields to the actual contract schemas. DTOs must not expose internal database columns, tenant implementation details, secrets, or unneeded joined data. Convert `Date` values to the timestamp format required by the contract.
 
-### Step 6 — Types and test doubles
+## 8. Error mapping and translations
 
-`warehouse.types.ts` — derive types from the factories, declare ports:
+### Domain error codes
 
-```ts
-import type { createWarehouseRepository } from "./warehouse.repository.js"
-import type { createWarehouseService } from "./warehouse.service.js"
-import type { ActivityLog, ActivityLogEntry } from "../activity-log/activity-log.port.js"
+Define domain error codes in `packages/contracts` following the contracts package rules. Error codes are public API: do not rename or reuse a shipped code. The service returns those codes; it does not return HTTP status codes.
 
-export type WarehouseRepository = ReturnType<typeof createWarehouseRepository>
-export type WarehouseService = ReturnType<typeof createWarehouseService>
-export type { ActivityLog, ActivityLogEntry }
+### `<module-name>.errors.ts`
 
-export interface WarehouseServiceDeps {
-  repository: WarehouseRepository
-  activityLog?: ActivityLog // optional port; defaults to a no-op
-}
-```
-
-`testing.ts`:
+Map every module domain error to an HTTP status and a default response message. Keep the map exhaustive:
 
 ```ts
-import type { ActivityLog } from "./warehouse.types.js"
+import type { ErrorMeta } from "@avuny/utils"
+import type { SalesOrderErrorCode } from "@avuny/contracts"
+import { roleErrorsHttpMap } from "../role/index.js"
 
-export class DummyActivityLog implements ActivityLog {
-  async log(): Promise<void> {}
-}
-```
+export const salesOrderErrorsHttpMap = {
+  SALES_ORDER_NOT_FOUND: {
+    statusCode: 404,
+    responseMessage: "Sales order not found",
+  },
+  SALES_ORDER_NUMBER_TAKEN: {
+    statusCode: 409,
+    responseMessage: "A sales order with this number already exists",
+  },
+  SALES_ORDER_NOT_EDITABLE: {
+    statusCode: 409,
+    responseMessage: "This sales order can no longer be edited",
+  },
+  SALES_ORDER_NOT_DELETABLE: {
+    statusCode: 409,
+    responseMessage: "This sales order cannot be deleted",
+  },
+  SALES_ORDER_IN_USE: {
+    statusCode: 409,
+    responseMessage: "The sales order is used by other records",
+  },
+} as const satisfies Record<SalesOrderErrorCode, ErrorMeta>
 
-### Step 7 — Service
-
-Rules: closure factory; returns `Result<T, Code>`; expected failures are `fail(...)`, never `throw`; authorization is **not** here (it is the route's `requirePermission`) but tenant scoping and business rules are; side effects (audit, cache) happen **after** the transaction commits.
-
-```ts
-import {
-  ActivityLogAction,
-  type CreateWarehouseInput,
-  type WarehouseDto,
-} from "@avuny/contracts"
-import { fail, ok, type Result } from "@avuny/utils"
-import { WarehouseErrorCode, type WarehouseErrorCode as Code } from "./warehouse.errors.js"
-import { toWarehouseDto } from "./warehouse.mapper.js"
-import { DummyActivityLog } from "./testing.js"
-import type { WarehouseServiceDeps } from "./warehouse.types.js"
-
-const Err = WarehouseErrorCode
-const MSG = {
-  notFound: "Warehouse not found",
-  nameTaken: "A warehouse with this name already exists",
+export const salesOrderErrorMap = {
+  ...salesOrderErrorsHttpMap,
+  ROLE_PERMISSION_DENIED: roleErrorsHttpMap.ROLE_PERMISSION_DENIED,
 } as const
+```
 
-export function createWarehouseService(deps: WarehouseServiceDeps) {
-  const repo = deps.repository
-  const activityLog = deps.activityLog ?? new DummyActivityLog()
+The example must be kept synchronized with the actual error-code union. If the module adds an error code, update the HTTP map, route response declarations, and both locale files.
 
-  return {
-    async getById(orgId: string, warehouseId: string): Promise<Result<WarehouseDto, Code>> {
-      const row = await repo.findById(orgId, warehouseId)
-      if (!row) return fail({ error: Err.WAREHOUSE_NOT_FOUND, msg: MSG.notFound })
-      return ok({ data: toWarehouseDto(row), msg: "Warehouse retrieved successfully" })
-    },
+### API translations
 
-    async create(
-      actorId: string,
-      orgId: string,
-      input: CreateWarehouseInput
-    ): Promise<Result<WarehouseDto, Code>> {
-      const res = await repo.insert({ orgId, name: input.name })
-      if (!res.ok) return fail({ error: Err.WAREHOUSE_NAME_TAKEN, msg: MSG.nameTaken })
+Add the API error translations under:
 
-      await activityLog.log({
-        action: ActivityLogAction.WAREHOUSE_CREATED,
-        actorId,
-        orgId,
-        resourceId: res.row.id,
-        metadata: { name: res.row.name },
-      })
-      return ok({ data: toWarehouseDto(res.row), msg: "Warehouse created" })
-    },
+```text
+apps/server/src/api/intl/locales/<module-name>/
+├── en.json
+└── ar.json
+```
+
+Both files must contain the same error keys and complete messages. Do not update only one locale. Keep contracts UI translations and API error translations in their respective established locations; do not mix their responsibilities.
+
+## 9. Dependency composition — `deps.ts`
+
+`deps.ts` is the composition root for this module. It connects the abstract service to concrete dependencies:
+
+- the shared database instance;
+- the module repository factory;
+- the permission checker;
+- the activity-log service adapter;
+- other explicit domain ports / registries required by the module.
+
+Example:
+
+```ts
+import { db } from "../../db.js"
+import { activityLogService } from "../activity-log/index.js"
+import { permissionChecker } from "../role/index.js"
+import { createSalesOrderRepository } from "./sales-order.repository.js"
+import { createSalesOrderService } from "./sales-order.service.js"
+import type { SalesOrderService } from "./sales-order.types.js"
+
+let instance: SalesOrderService | undefined
+
+export function getSalesOrderService(): SalesOrderService {
+  if (!instance) {
+    const repository = createSalesOrderRepository({ db })
+    const activityLog = {
+      record: (entry: Parameters<typeof activityLogService.log>[0]) =>
+        activityLogService.log(entry),
+    }
+
+    instance = createSalesOrderService({
+      repository,
+      permissions: permissionChecker,
+      activityLog,
+    })
   }
+
+  return instance
 }
-```
 
-#### Multi-step writes: transaction + failure sentinel
-
-When one operation reads, checks, then writes, run it in a transaction, lock the org, and return a *failure sentinel* from inside (throwing would roll back but lose the typed error). Copy these four helpers into the top of each service file:
-
-```ts
-type Failure = { failed: true; error: Code; msg: string }
-const failure = (error: Code, msg: string): Failure => ({ failed: true, error, msg })
-const isFailure = (v: unknown): v is Failure =>
-  typeof v === "object" && v !== null && (v as Failure).failed === true
-const toFail = (f: Failure) => fail({ error: f.error, msg: f.msg })
-```
-
-```ts
-async rename(actorId: string, orgId: string, id: string, name: string) {
-  const outcome = await repo.transaction(async (tx) => {
-    await repo.lockOrg(orgId, tx)                       // serialize per organization
-    const row = await repo.findById(orgId, id, tx)
-    if (!row) return failure(Err.WAREHOUSE_NOT_FOUND, MSG.notFound)
-    const res = await repo.update(id, { name }, tx)     // unique index is the race backstop
-    if (!res.ok) return failure(Err.WAREHOUSE_NAME_TAKEN, MSG.nameTaken)
-    return res.row
-  })
-  if (isFailure(outcome)) return toFail(outcome)
-
-  // side effects AFTER commit
-  await activityLog.log({ action: ActivityLogAction.WAREHOUSE_UPDATED, actorId, orgId, resourceId: id })
-  return ok({ data: toWarehouseDto(outcome), msg: "Warehouse updated" })
-}
-```
-
-Keep `deleteRole`-style checks in order: **not found → forbidden-state (e.g. system/read-only) → in use → delete**, and map FK violations from the repository to the "in use" error.
-
-### Step 8 — Routes
-
-#### `hono-routes/_shared.ts` (copy verbatim into every module)
-
-```ts
-import { createDomainErrorResponseSchema, createResponseSchema } from "@avuny/utils"
-import type { z } from "@avuny/zod"
-
-export const jsonOk = <T extends z.ZodTypeAny>(description: string, schema: T) => ({
-  description,
-  content: { "application/json": { schema: createResponseSchema(schema) } },
-})
-
-export const jsonError = <const C extends readonly [string, ...string[]]>(
-  description: string,
-  codes: C
-) => ({
-  description,
-  content: {
-    "application/json": { schema: createDomainErrorResponseSchema([...codes] as never) },
+export const salesOrderService = new Proxy({} as SalesOrderService, {
+  get(_target, prop) {
+    if (typeof prop !== "string") return undefined
+    const service = getSalesOrderService()
+    if (!(prop in service)) return undefined
+    return service[prop as keyof SalesOrderService]
   },
 })
-
-/** "/organizations/{orgId}/x" -> "/organizations/:orgId/x" */
-export const honoPath = (openApiPath: string) =>
-  openApiPath.replace(/\{([^}]+)\}/g, ":$1")
 ```
 
-#### `hono-routes/module-routes.types.ts`
+Adapt the activity-log adapter's input type to the actual exported API. If lazy construction is unnecessary, prefer simpler direct construction. If a proxy is required, keep it type-safe and do not use `as any` to bypass the service type.
 
-```ts
-import type { MiddlewareHandler } from "hono"
-import type { WarehouseService } from "../warehouse.types.js"
-import type { RequirePermissionOptions } from "../../role/index.js"
+## 10. Hono routes
 
-export interface RouteDeps {
-  service: WarehouseService
-  requireAuth: MiddlewareHandler
-  requirePermission?: (key: string, options?: RequirePermissionOptions) => MiddlewareHandler
-}
-```
+Put HTTP endpoints under `hono-routes/`. The six standard service methods should have corresponding HTTP endpoints unless the API deliberately exposes a different transport contract. Each route should:
 
-> If `role/index.ts` does not yet export `RequirePermissionOptions`, add `export type { RequirePermissionOptions } from "./role.middleware.js"` there (one line).
+1. Define the method, path, `operationId`, tag, summary, middleware, request schemas, and response schemas with `createRoute`.
+2. Use `@avuny/zod` for Zod schemas.
+3. Validate organization IDs and record IDs as UUIDs when that is the contract.
+4. Apply the established `requireAuth` middleware.
+5. Read the authenticated actor from `c.get("user")`.
+6. Call the service with `actorId`, `orgId`, and validated input.
+7. Return through `handleResult`, `jsonOk`, `jsonError`, `globalErrorResponses`, and the module error map.
+8. Keep business rules out of the route.
 
-`deps` are injected so tests can pass fakes; production wiring happens in `hono-routes/index.ts`.
-
-#### `hono-routes/create-warehouse.route.ts` (the canonical route)
+A typical route shape:
 
 ```ts
 import { createRoute } from "@hono/zod-openapi"
 import { z } from "@avuny/zod"
-import { createOpenAPIRouter, handleResult, getRequestLocale } from "@avuny/hono"
+import { createOpenAPIRouter, getRequestLocale, handleResult } from "@avuny/hono"
 import { globalErrorResponses } from "@avuny/utils"
 import {
-  CreateWarehouseSchema,
+  CreateSalesOrderSchema,
   RoleErrorCode,
-  WarehouseDtoSchema,
-  WarehouseErrorCode as Code,
+  SalesOrderDtoSchema,
+  SalesOrderErrorCode as Code,
 } from "@avuny/contracts"
 import { trans } from "../../../intl/i18next.js"
-import { requirePermission as defaultRequirePermission } from "../../role/index.js"
-import { warehouseErrorsHttpMap as errors } from "../warehouse.errors.js"
-import { honoPath, jsonError, jsonOk } from "./_shared.js"
+import { honoPath, jsonError, jsonOk } from "../../shared/route-helpers.js"
+import { roleErrorsHttpMap } from "../../role/index.js"
+import { salesOrderErrorsHttpMap as errors } from "../sales-order.errors.js"
 import type { RouteDeps } from "./module-routes.types.js"
 
-// Only the codes THIS route can produce; cast so handleResult accepts the full Code union.
-const rawErrorMap = { WAREHOUSE_NAME_TAKEN: errors.WAREHOUSE_NAME_TAKEN } as const
-const errorMap = rawErrorMap as Record<Code, (typeof rawErrorMap)[keyof typeof rawErrorMap]>
+const rawErrorMap = {
+  SALES_ORDER_NUMBER_TAKEN: errors.SALES_ORDER_NUMBER_TAKEN,
+  ROLE_PERMISSION_DENIED: roleErrorsHttpMap.ROLE_PERMISSION_DENIED,
+} as const
 
-export const createWarehouseRoute = ({
-  service,
-  requireAuth,
-  requirePermission = defaultRequirePermission,
-}: RouteDeps) => {
+const errorMap = rawErrorMap as Record<
+  Code | RoleErrorCode,
+  (typeof rawErrorMap)[keyof typeof rawErrorMap]
+>
+
+export const createSalesOrderRoute = ({ service, requireAuth }: RouteDeps) => {
   const router = createOpenAPIRouter()
-
   const route = createRoute({
     method: "post",
-    path: "/organizations/{orgId}/warehouses",
-    operationId: "createWarehouse",
-    tags: ["warehouse"],
-    summary: "Create a warehouse",
-    middleware: [requireAuth, requirePermission("create:warehouse")] as const,
+    path: "/organizations/{orgId}/sales-orders",
+    operationId: "createSalesOrder",
+    tags: ["sales-order"],
+    summary: "Create a sales order",
+    middleware: [requireAuth] as const,
     request: {
       params: z.object({ orgId: z.string().uuid() }),
-      body: { content: { "application/json": { schema: CreateWarehouseSchema } } },
+      body: { content: { "application/json": { schema: CreateSalesOrderSchema } } },
     },
     responses: {
-      201: jsonOk("Warehouse created", WarehouseDtoSchema),
+      201: jsonOk("Sales order created", SalesOrderDtoSchema),
       403: jsonError("Forbidden", [RoleErrorCode.ROLE_PERMISSION_DENIED]),
-      409: jsonError("Name taken", [Code.WAREHOUSE_NAME_TAKEN]),
-      ...globalErrorResponses, // always last
+      409: jsonError("Conflict", [Code.SALES_ORDER_NUMBER_TAKEN]),
+      ...globalErrorResponses,
     },
   })
 
-  router.use(honoPath(route.path), requireAuth) // keep: project convention in every route
-
+  router.use(honoPath(route.path), requireAuth)
   router.openapi(route, async (c) => {
     const errorTrans = trans({ lang: getRequestLocale() })
     const user = c.get("user")
     const { orgId } = c.req.valid("param")
     const body = c.req.valid("json")
-
     const result = await service.create(user.id, orgId, body)
+
     return handleResult({
       c,
       result,
-      successStatus: 201, // must equal the success key in `responses`
+      successStatus: 201,
       errorMap,
       errorTrans,
-      moduleName: "warehouse",
+      moduleName: "sales-order",
     })
   })
 
   return router
 }
-
-export default createWarehouseRoute
 ```
 
-Route checklist:
+The error map in each route should contain the domain errors that route can return plus the shared permission error. The OpenAPI response declarations must list the matching status/error codes. Keep route dependencies in `module-routes.types.ts` and use the project's established middleware type.
 
-* **Scoped `rawErrorMap = { ... } as const` per route**: List ONLY the error codes that this specific endpoint can return. Every code's HTTP status MUST match a status explicitly listed in `responses` of `createRoute`. Never pass the full module error map unless the endpoint can produce every single code and every status is declared.
-* `middleware: [requireAuth, requirePermission("<action>:<resource>")] as const` — auth first, permission second.
-* Every status the route can return appears in `responses`; each domain code listed under the status its `errorsHttpMap` entry declares.
-* Handler body: read validated input → one service call → `handleResult`. Nothing else.
-* `moduleName` equals the module name.
-* Pass `user.id` as `actorId` for any write (audit + escalation checks).
+In `hono-routes/index.ts`, create the router and mount all route factories. Register static paths such as `/sales-order-options` before parameterized paths such as `/sales-orders/{salesOrderId}` if their patterns could overlap. Export both the factory and configured routes when that is the module convention. Finally, mount the module routes in the API's top-level router composition.
 
-`get-warehouse.route.ts` is identical in shape: `method: "get"`, `path: "/organizations/{orgId}/warehouses/{warehouseId}"`, `requirePermission("read:warehouse")`, params `{ orgId, warehouseId }`, `200`/`404` responses, calls `service.getById(orgId, warehouseId)`, `rawErrorMap = { WAREHOUSE_NOT_FOUND: ... }`.
+## 11. Tests and test doubles
 
-**Infallible endpoints** (service method cannot produce a domain error, e.g. a list or static data) skip `handleResult`:
+Create `testing.ts` with stable IDs, aggregate fixtures, fake repository methods, fake permission checks, fake audit logging, and any fake domain ports. Service tests should call `create<Module>Service` with those fakes; they should not import `deps.ts` or the real database.
+
+At minimum, `*.service.spec.ts` must cover:
+
+- authorization for **all six mandatory methods**; denied calls must not touch the repository or audit service;
+- organization scoping in permission checks and repository calls;
+- successful create/update/delete behavior;
+- not-found and expected conflict outcomes;
+- list pagination, filters, total count, and list-item mapping;
+- option cursor handling and eligibility filters;
+- full aggregate behavior, including child records such as order lines;
+- audit action and metadata, and proof that audit is not called after a failed operation;
+- concurrency/state-transition rules that are important to the module.
+
+A useful authorization matrix:
 
 ```ts
-router.openapi(route, async (c) => {
-  const { orgId } = c.req.valid("param")
-  const query = c.req.valid("query")
-  const result = await service.list(orgId, query)
-  if (!result.success) throw new Error("list cannot fail") // invariant, not a domain error
-  return c.json({ success: true, data: result.data }, 200)
+const requiredCalls = [
+  ["create", (t: TestContext) => t.service.create(ACTOR, ORG, createInput)],
+  ["update", (t: TestContext) => t.service.update(ACTOR, ORG, RECORD_ID, updateInput)],
+  ["delete", (t: TestContext) => t.service.delete(ACTOR, ORG, RECORD_ID)],
+  ["listOptions", (t: TestContext) => t.service.listOptions(ACTOR, ORG, { limit: 20 })],
+  ["list", (t: TestContext) => t.service.list(ACTOR, ORG, { page: 1, pageSize: 20 })],
+  ["get", (t: TestContext) => t.service.get(ACTOR, ORG, RECORD_ID)],
+] as const
+
+it.each(requiredCalls)("denies %s without permission", async (_name, run) => {
+  const t = setup()
+  t.permissions.check.mockResolvedValue(false)
+
+  const result = await run(t)
+
+  expect(result).toMatchObject({ success: false, error: "ROLE_PERMISSION_DENIED" })
+  expect(t.repository.transaction).not.toHaveBeenCalled()
+  expect(t.repository.list).not.toHaveBeenCalled()
+  expect(t.repository.findAggregate).not.toHaveBeenCalled()
+  expect(t.activityLog.record).not.toHaveBeenCalled()
 })
 ```
 
-**Route order:** in `hono-routes/index.ts`, register static paths before parametric ones that could shadow them (e.g. `/permissions/catalog` before `/permissions/{id}`).
+Add tests for each additional domain operation as well. Repository tests should cover SQL-specific behavior and named constraint translation separately from service tests.
 
-#### `hono-routes/index.ts`
+## 12. `index.ts` — public module API
+
+Export only what other modules and API composition need. A typical module entry point:
 
 ```ts
-import { createOpenAPIRouter } from "@avuny/hono"
-import { requireAuth } from "../../auth/index.js"
-import { warehouseService } from "../deps.js"
-import type { RouteDeps } from "./module-routes.types.js"
-import { createWarehouseRoute } from "./create-warehouse.route.js"
-import { getWarehouseRoute } from "./get-warehouse.route.js"
-
-export const createWarehouseRoutes = (deps: RouteDeps) => {
-  const router = createOpenAPIRouter()
-  router.route("/", createWarehouseRoute(deps))
-  router.route("/", getWarehouseRoute(deps))
-  return router
-}
-
-export const warehouseRoutes = createWarehouseRoutes({
-  service: warehouseService,
-  requireAuth,
-})
-
-export default warehouseRoutes
+export { salesOrderRoutes, createSalesOrderRoutes } from "./hono-routes/index.js"
+export { salesOrderService, getSalesOrderService } from "./deps.js"
+export { createSalesOrderService } from "./sales-order.service.js"
+export { salesOrderErrorsHttpMap } from "./sales-order.errors.js"
+export { SALES_ORDER_PERMISSIONS } from "./sales-order.permissions.js"
+export type { SalesOrderService, SalesOrderRepository } from "./sales-order.types.js"
 ```
 
-### Step 9 — Wiring (`deps.ts`) and barrel (`index.ts`)
+Export additional domain ports or types only when another module genuinely needs them. Keep repository internals private unless there is a specific, documented reason to expose them.
 
-`deps.ts` builds dependencies **lazily** and exports Proxies, so importing the module never touches the database (tests stay fast; import order stops mattering):
+## 13. Registering the module in the contracts registry
+
+The central module/action registry lives at:
+
+```text
+packages/contracts/src/modules/registry.ts
+```
+
+This file is the source of truth for module resources, grantable permission actions, activity-log events, and sidebar metadata. Other lists are derived from it, including the permission catalog / `PermissionKey`, activity-log action types and allowed actions, sidebar tree/options/labels, and related seed data.
+
+### 13.1 How an action is interpreted
+
+Each action can define two independent properties:
 
 ```ts
-import { db } from "../../db.js"
-import { activityLogService } from "../activity-log/index.js"
-import { createWarehouseRepository } from "./warehouse.repository.js"
-import { createWarehouseService } from "./warehouse.service.js"
-import type { WarehouseRepository, WarehouseService } from "./warehouse.types.js"
-
-let _repo: WarehouseRepository | undefined
-let _service: WarehouseService | undefined
-
-export function getWarehouseRepository(): WarehouseRepository {
-  return (_repo ??= createWarehouseRepository({ db }))
+interface ActionSpec {
+  permission?: true
+  event?: string
 }
+```
 
-export function getWarehouseService(): WarehouseService {
-  return (_service ??= createWarehouseService({
-    repository: getWarehouseRepository(),
-    activityLog: activityLogService,
-  }))
-}
+- `permission: true` means a role can be granted `<action>:<resource>`.
+- `event: "approved"` means the activity log records `<module>.<event>`.
+- Both can be present when the operation is grantable and audited.
+- Only one can be present when the action is grantable but not logged, or logged but not independently grantable.
 
-export const warehouseService = new Proxy({} as WarehouseService, {
-  get(_target, prop) {
-    return (getWarehouseService() as any)[prop]
+For example, `read` is commonly grantable but not logged. A lifecycle event such as `approved` may be logged and also have a permission. A system-driven event such as `joined` may be logged without a separately grantable permission.
+
+Use the shared `READ` / `CRUD` definitions where they match the module's actual behavior. Do not blindly use `CRUD` if an operation has special lifecycle semantics or is not supported by the domain.
+
+### 13.2 Add the module entry
+
+Add the module key in `MODULES` using `snake_case`. Define its actions and, when it should appear in the sidebar, its sidebar metadata:
+
+```ts
+sales_order: {
+  sidebar: {
+    group: "sales",
+    icon: "shopping-bag",
+    path: "/sales-orders",
+    label: { en: "Sales orders", ar: "أوامر البيع" },
   },
-})
+  actions: {
+    ...CRUD,
+    approve: { permission: true, event: "approved" },
+    cancel: { permission: true, event: "cancelled" },
+    send: { event: "sent" },
+  },
+  scopable: true,
+},
 ```
 
-`index.ts` — the public surface; other modules import only from here:
-
-```ts
-export { WarehouseErrorCode, warehouseErrorsHttpMap } from "./warehouse.errors.js"
-export { warehouseErrorMap } from "./warehouse.error-map.js"
-export { createWarehouseService } from "./warehouse.service.js"
-export { createWarehouseRepository } from "./warehouse.repository.js"
-export { warehouseService, getWarehouseService, getWarehouseRepository } from "./deps.js"
-export { warehouseRoutes, createWarehouseRoutes } from "./hono-routes/index.js"
-export type { WarehouseService, WarehouseRepository, WarehouseServiceDeps } from "./warehouse.types.js"
-```
-
-**Mount the router:** find where `roleRoutes` is mounted (`grep -rn "roleRoutes" apps/server/src`) and register `warehouseRoutes` the same way, next to it.
-
-### Step 10 — Permissions
-
-Add the resource to the catalog, then decide which system roles get it — see [§8](#8-recipe-d--add-or-change-permissions). Without this, `requirePermission("create:warehouse")` denies everyone except owners.
-
-### Step 11 — Tests
-
-**Service test** (`warehouse.service.spec.ts`) — mock the repository, never the DB; a `setup()` factory is rebuilt in `beforeEach`:
-
-```ts
-import { beforeEach, describe, expect, it, vi } from "vitest"
-import type { Warehouse } from "@avuny/db"
-import { createWarehouseService } from "./warehouse.service.js"
-import type { WarehouseRepository } from "./warehouse.types.js"
-
-vi.mock("../../db.js", () => ({ db: {} })) // transitive imports must not open a connection
-
-const NOW = new Date("2026-01-01T00:00:00Z")
-const warehouse = (o: Partial<Warehouse> = {}): Warehouse => ({
-  id: "w1", orgId: "org-1", name: "Main", createdAt: NOW, updatedAt: NOW, ...o,
-})
-
-function setup() {
-  const repository = { findById: vi.fn(), insert: vi.fn() }
-  const activityLog = { log: vi.fn(async () => {}) }
-  const service = createWarehouseService({
-    repository: repository as unknown as WarehouseRepository,
-    activityLog,
-  })
-  return { repository, activityLog, service }
-}
-
-describe("warehouseService.create", () => {
-  let t: ReturnType<typeof setup>
-  beforeEach(() => { t = setup() })
-
-  it("creates and audits", async () => {
-    t.repository.insert.mockResolvedValue({ ok: true, row: warehouse() })
-    const res = await t.service.create("u1", "org-1", { name: "Main" })
-    expect(res).toMatchObject({ success: true })
-    expect(t.activityLog.log).toHaveBeenCalledWith(
-      expect.objectContaining({ action: "warehouse.created", resourceId: "w1" })
-    )
-  })
-
-  it("maps a duplicate name to WAREHOUSE_NAME_TAKEN", async () => {
-    t.repository.insert.mockResolvedValue({ ok: false, reason: "name_taken" })
-    const res = await t.service.create("u1", "org-1", { name: "Main" })
-    expect(res).toMatchObject({ success: false, error: "WAREHOUSE_NAME_TAKEN" })
-    expect(t.activityLog.log).not.toHaveBeenCalled()
-  })
-})
-```
-
-**Route test** (`__tests__/warehouse.routes.test.ts`) — mock the service, bypass auth/permissions, use real UUIDs and the real DTO field names:
-
-```ts
-import { describe, expect, it, vi } from "vitest"
-import type { MiddlewareHandler } from "hono"
-import { createOpenAPIRouter } from "@avuny/hono"
-import { ok } from "@avuny/utils"
-import { createWarehouseRoute } from "../hono-routes/create-warehouse.route.js"
-
-const orgId = "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a02"
-const mockRequireAuth: MiddlewareHandler = async (c, next) => {
-  c.set("user", { id: "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a01" })
-  await next()
-}
-const mockAllowPermission = () => (async (_c: any, next: any) => next()) as MiddlewareHandler
-
-it("POST returns 201 with the created warehouse", async () => {
-  const dto = { id: "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a05", orgId, name: "Main",
-    createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() }
-  const service: any = { create: vi.fn().mockResolvedValue(ok({ data: dto, msg: "Warehouse created" })) }
-
-  const app = createOpenAPIRouter()
-  app.route("/", createWarehouseRoute({
-    service, requireAuth: mockRequireAuth, requirePermission: mockAllowPermission,
-  }))
-
-  const res = await app.request(`/organizations/${orgId}/warehouses`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ name: "Main" }),
-  })
-  expect(res.status).toBe(201)
-  expect(((await res.json()) as any).data.name).toBe("Main")
-})
-```
-
-Add one route test per endpoint at least; add error-status tests (`fail(...)` from the mock → expected status) for endpoints with domain errors.
-
-### 5.12 Final file tree of the example
-
-```
-warehouse/
-├── SPEC.md  index.ts  deps.ts  testing.ts
-├── warehouse.types.ts  warehouse.errors.ts  warehouse.error-map.ts
-├── warehouse.mapper.ts  warehouse.repository.ts  warehouse.service.ts
-├── warehouse.service.spec.ts
-├── hono-routes/
-│   ├── _shared.ts  module-routes.types.ts  index.ts
-│   ├── create-warehouse.route.ts  get-warehouse.route.ts
-└── __tests__/warehouse.routes.test.ts
-```
-
-### 5.13 SPEC.md template
-
-```md
-# Warehouse Module — Specification
-> Update this file whenever a requirement changes: new error code, route, policy, or behavior.
-
-## 1. Purpose
-One paragraph.
-
-## 2. Domain Model
-Table per entity: column | type | notes.
-
-## 3. Business Rules & Policies
-Numbered rules, each naming the error code it raises.
-
-## 4. Error Codes
-| Code | HTTP | Description |
-
-## 5. File Structure
-Annotated tree.
-```
-
----
-
-## 6. Recipe B — Refactor an existing module
-
-**Goal:** move a legacy module (handlers that mix validation, auth, queries and responses) to the structure above **without changing behavior**.
-
-### 6.1 Smell → fix table
-
-| Smell in legacy code | Fix |
-|---|---|
-| Handler calls `db` directly | Move the query to a repository method with optional trailing `tx` |
-| `return c.json({ error: "..." }, 404)` | Service returns `fail({ error: Code.X, msg })`; route uses `handleResult` + `errorMap` |
-| `throw new HTTPException(...)` for a business failure | `fail(...)` from the service |
-| Inline `if (!body.name)` validation | Zod schema in `@avuny/contracts` + `request:` in `createRoute` |
-| Inline role checks (`if (user.role !== "admin")`) | `requirePermission("action:resource")` in `middleware`, resource added to the catalog |
-| Business rule in the route | Move into the service |
-| Check-then-insert (race) | transaction + `lockOrg` + named unique index mapped to a domain error |
-| Raw DB rows in responses | Mapper → DTO (ISO dates, no internal columns) |
-| `new XService(db)` at import time | `deps.ts` lazy singleton + Proxy |
-| Imports another module's internals | Use its barrel `index.ts`, or define a port in `types.ts` |
-| Audit/cache work inside the transaction | Move after commit |
-| Query without `orgId` filter | Add it. Treat as a security bug; mention it in the PR |
-| One 400-line route file | One endpoint per `*.route.ts` |
-
-### 6.2 Procedure (follow in order, one module per PR)
-
-1. **Inventory.** List every endpoint: method, path, params/body, success status, every error status and message. Write/refresh `SPEC.md` from this list. Paths, methods and status codes **must not change** unless you record it in `SPEC.md` and the PR description.
-2. **Characterize.** If there are no tests, write route tests against the *current* behavior first (happy path + each error). They are your safety net.
-3. **Contracts.** Move schemas, DTO types and error codes into `@avuny/contracts` ([§5 Step 2](#step-2--contracts-avunycontracts)).
-4. **Repository.** Extract every query ([§5 Step 4](#step-4--repository)). Pure data access, `orgId` on every tenant query.
-5. **Mapper + errors.** Create `*.mapper.ts`, `*.errors.ts`, `*.error-map.ts`.
-6. **Service.** Move all decisions here; return `Result`. Add `*.service.spec.ts`.
-7. **Routes.** One file per endpoint; handlers shrink to "validate → service → handleResult".
-8. **Wiring.** `deps.ts`, `hono-routes/index.ts`, `index.ts`; point the app mount at the new `*Routes`.
-9. **Permissions.** Replace inline checks with `requirePermission`; update catalog/system roles ([§8](#8-recipe-d--add-or-change-permissions)).
-10. **Delete** the old files and every dead import. Run the DoD checklist.
-
-### 6.3 Before → after (one endpoint)
-
-**Before** — everything in the handler:
-
-```ts
-app.post("/organizations/:orgId/warehouses", async (c) => {
-  const user = c.get("user")
-  if (user.role !== "admin") return c.json({ error: "forbidden" }, 403)       // auth inline
-  const body = await c.req.json()
-  if (!body.name) return c.json({ error: "name required" }, 400)              // validation inline
-  const orgId = c.req.param("orgId")
-  const [dup] = await db.select().from(warehouses)                            // query inline
-    .where(and(eq(warehouses.orgId, orgId), eq(warehouses.name, body.name)))
-  if (dup) return c.json({ error: "exists" }, 409)                            // rule inline
-  const [row] = await db.insert(warehouses).values({ orgId, name: body.name }).returning()
-  return c.json(row, 201)                                                     // raw row out
-})
-```
-
-**After** — each line has a home:
-
-| Legacy line | New home |
-|---|---|
-| `user.role !== "admin"` | `requirePermission("create:warehouse")` in route `middleware` |
-| `!body.name` | `CreateWarehouseSchema` in contracts, used in `request.body` |
-| duplicate `select` + `if (dup)` | unique index `ux_warehouse_org_name` → `repo.insert` returns `{ ok: false, reason: "name_taken" }` → service `fail(WAREHOUSE_NAME_TAKEN)` |
-| `db.insert(...)` | `repo.insert` |
-| `c.json({ error }, 409)` | `warehouseErrorsHttpMap` entry + route `errorMap` + `handleResult` |
-| `c.json(row, 201)` | `toWarehouseDto` + `successStatus: 201` |
-
-The resulting route is the one in [§5 Step 8](#step-8--routes); the service is `create` in [§5 Step 7](#step-7--service).
-
-**Behavior parity gotchas:** old error *bodies* will change shape (now the domain-error envelope) — note it in the PR. Old and new status codes must match per the SPEC (e.g. validation failures are produced by the framework, not by hand).
-
----
-
-## 7. Recipe C — Add an endpoint to an existing module
-
-Checklist, in order:
-
-1. `SPEC.md`: add the rule(s) and error code(s).
-2. Contracts: new schema/DTO/error code; add the code to `XErrorCode`.
-3. `*.errors.ts` and `*.error-map.ts`: add the entry (the `satisfies` clause fails the build if you forget).
-4. Repository: add the query/method (optional `tx`, `orgId` scoped).
-5. Service: add the method returning `Result`.
-6. Route file `<verb>-<thing>.route.ts` copied from [§5 Step 8](#step-8--routes); add it to `hono-routes/index.ts`.
-7. Permission key: reuse an existing one or add per [§8](#8-recipe-d--add-or-change-permissions).
-8. Tests: service spec cases + route test.
-
-### Pagination patterns
-
-**Offset (tables):** query schema carries `page`/`pageSize`; repository returns `{ rows, total }`; service returns `{ items, page, pageSize, total }`.
-
-**Cursor (pickers/dropdowns):** order by a **unique** key (e.g. `custom, name, id`), fetch `limit + 1` rows, let `toCursorPage` cut the extra row and build `nextCursor`:
-
-```ts
-async listOptions(orgId: string, query: OptionListQuery): Promise<Result<OptionListResponse, Code>> {
-  const rows = await repo.listOptions(orgId, {
-    search: query.search,
-    after: decodeCursor(query.cursor, warehouseOptionCursorSchema), // null on first page
-    limit: query.limit + 1,                                         // +1 to detect "has more"
-  })
-  const page = toCursorPage(rows, query.limit, (row) => ({ name: row.name, id: row.id }))
-  return ok({
-    data: { items: page.items.map((r) => ({ id: r.id, name: r.name })), nextCursor: page.nextCursor },
-    msg: "Warehouse options retrieved successfully",
-  })
-}
-```
-
-Repository side uses a row-value comparison for "continue after":
-`` sql`(${roles.name}, ${roles.id}) > (${after.name}::text, ${after.id}::uuid)` `` with `orderBy(asc(name), asc(id))`.
-
----
-
-## 8. Recipe D — Add or change permissions
-
-### Model
-
-* Statement: `{ effect: "allow" | "deny", resource, action, resourceId }`. `*` is a wildcard for any of the three.
-* Evaluation: **explicit deny beats allow; no match = deny.** A statement narrowed to a `resourceId` only applies when that record is checked.
-* Actor types: **owner** → always allowed; **portal** and inactive members → never; **managed** → union of statements from their roles.
-* Key syntax: `"action:resource"`, lowercase, exactly one colon, no `*`, hyphens stand for underscores in the resource (`"read:organization-user"` → resource `organization_user`). Malformed keys throw at startup (`requirePermission` parses eagerly).
-* Roles: system roles (`orgId === null`) are read-only; custom roles are per organization. Role assignment has a **privilege-escalation guard**: non-owners cannot change their own roles and can only grant roles whose allow-statements they already hold.
-
-### Protect a route
-
-```ts
-middleware: [requireAuth, requirePermission("update:warehouse")] as const,
-```
-
-Options: `requirePermission("update:warehouse", { orgParam: "orgId", resourceParam: "warehouseId" })` — `orgParam` defaults to `"orgId"`; `resourceParam` makes the check record-scoped.
-
-### Register a new resource
-
-1. In `@avuny/contracts`, add an entry to `PERMISSION_CATALOG`:
-   ```ts
-   { resource: "warehouse", actions: ["create", "read", "update", "delete"], scopable: true }
-   ```
-   (`scopable: true` allows statements narrowed by `resourceId`; otherwise `resourceId` must be `"*"`.)
-2. Decide which `SYSTEM_ROLES` get it and edit their `statements` there, e.g.
-   `{ effect: "allow", resource: "warehouse", action: "*", resourceId: "*" }`.
-   The existing RBAC spec validates every system role against the catalog; keep it green.
-3. System roles reach the DB through `syncSystemRoles(db)` (idempotent, runs on deploy after migrations). Never edit system roles by SQL.
-4. Frontend/UI visibility uses `GET /me/organizations/{orgId}/permissions` and `hasPermission(...)` — nothing extra to build server-side.
-
----
-
-## 9. Error and HTTP conventions
-
-| Status | Use for | Example codes |
-|---|---|---|
-| 200 | successful read / update / delete (delete returns `{ id }`) | |
-| 201 | successful create | |
-| 403 | caller not allowed, plan feature missing, privilege escalation | `ROLE_PERMISSION_DENIED`, `ROLE_FEATURE_NOT_AVAILABLE`, `ROLE_ESCALATION_NOT_ALLOWED` |
-| 404 | entity missing **or belongs to another org** (never reveal other tenants' data) | `ROLE_NOT_FOUND`, `ROLE_MEMBER_NOT_FOUND` |
-| 409 | state conflicts: name taken, in use, read-only, wrong target state | `ROLE_NAME_TAKEN`, `ROLE_IN_USE`, `ROLE_SYSTEM_READONLY`, `ROLE_MEMBER_NOT_ASSIGNABLE` |
-| 422 | well-formed request rejected by domain validation | `ROLE_INVALID_PERMISSION` |
-| 400 / 401 / 500 | framework validation, authentication, unexpected — provided by `...globalErrorResponses` | |
-
-Rules:
-
-* Every code lives in contracts, has an `errorsHttpMap` entry, and appears in the `jsonError` of every route that can return it.
-* Service messages (`msg`) are plain English fallbacks; the route translates via `errorTrans`. When adding codes, add translations wherever existing codes (e.g. `ROLE_NOT_FOUND`) are translated (`grep` under `apps/server/src/api/intl`).
-* Expected failures → `fail(...)`. `throw` only for invariants/bugs and truly unexpected errors.
-
----
-
-## 10. Testing rules
-
-* Framework: Vitest. Unit tests never touch a real DB or network.
-* Service tests: `*.service.spec.ts` at the module root; mock the repository (`as unknown as XRepository`); assert both the `Result` and the side effects (`activityLog.log`, cache invalidation, lock order, "not called" for no-ops).
-* Route tests: `__tests__/<module>.routes.test.ts`; mock the service; inject `requireAuth`/`requirePermission` fakes through `RouteDeps`; use real UUIDs; request via `app.request(...)`; assert status + body.
-* Every service rule in `SPEC.md` has at least one test; every error code has at least one test that produces it.
-* Pure logic (evaluators, mappers) gets its own `*.spec.ts` without mocks.
-* `vi.mock("../../db.js", () => ({ db: {} }))` at the top of any spec that imports something reaching `db`.
-* Mock data must use the **real DTO field names** from the contracts.
-* **Schema validation rejection status:** In route tests, `@hono/zod-openapi` rejects invalid request bodies or invalid query parameters with HTTP `422` (Unprocessable Entity), NOT `400`. Always assert `expect(res.status).toBe(422)` when sending malformed inputs.
-
----
-
-## 11. Definition of Done
-
-Run through this list before you say a task is finished.
-
-- [ ] Layering respected: no DB in routes, no Hono in services, no HTTP in repositories.
-- [ ] Every tenant query filtered by `orgId`.
-- [ ] Relative imports end in `.js`; no `any` outside `deps.ts`/test mocks; no semicolons, double quotes.
-- [ ] Module registered in `packages/contracts/src/modules/registry.ts` under `MODULES` with grantable actions (`permission: true`) and audit events.
-- [ ] If the module has a sidebar entry in `registry.ts`, it is mapped in `apps/server/src/api/modules/sidebar/sidebar.permission-map.ts`.
-- [ ] New/changed error codes: contracts + `errorsHttpMap` (`{ statusCode, responseMessage }`) + `error-map` (`as const`) + route `responses` + (translations if applicable).
-- [ ] Routes: `[requireAuth, requirePermission(...)] as const`, `router.use(honoPath(route.path), requireAuth)`, correct `successStatus`, scoped `rawErrorMap = { ... } as const` matching route `responses`, `...globalErrorResponses` last.
-- [ ] Writes use `actorId`, log to the activity log **after** commit (`action: ActivityLogAction`), and invalidate caches after commit.
-- [ ] Service authorization helper `can(...)` strictly types `action: PermissionKey`.
-- [ ] Check-then-write flows are in a transaction with `lockOrg` and backed by a named unique index.
-- [ ] Permission keys exist in `PERMISSION_CATALOG`; system roles updated if needed.
-- [ ] `index.ts` barrel exports updated; router mounted in the app.
-- [ ] `SPEC.md` updated (rules, error codes, file tree).
-- [ ] Tests added/updated and passing; route validation failure tests assert `422`; typecheck and lint pass (`pnpm --filter=books-server typecheck` & `build`).
-- [ ] For refactors: behavior parity confirmed (paths, methods, status codes) or deviations documented in the PR.
-
----
-
-## 12. Known quirks in the reference module (do not copy)
-
-| Quirk | What to do |
-|---|---|
-| `deps.ts` of `role` wires `DummyPlanFeatures` (always `true`) in production | Intentional placeholder until real plan/billing exists. New modules wire real implementations or omit the optional port. |
-| `role/permission-checker/` (a standalone `PermissionChecker` class with an "ASSUMPTION" comment about column names) | Legacy/alternate. The canonical runtime path is `createPermissionResolver` + `createRbacPermissionChecker` in `role.permissions.ts`. Do not build on it. |
-| `_shared.ts` in `role` also exports `createErrorMap`, which no route uses | Use the `rawErrorMap as const` + cast pattern shown in §5 instead. |
-| `role.types.ts` and `role.repository.ts` both export `RoleRepository` | New modules declare the type once, in `<module>.types.ts`. |
-| `role/SPEC.md` lists an `is_system` column; code derives `isSystem` from `orgId === null` | Code is truth: system role ⇔ `orgId === null`. Fix the SPEC when you touch the module. |
-| `role.routes.test.ts` sample DTO uses `assignedCount`, mapper returns `memberCount` | Mock-only drift. In new tests use the real DTO fields. |
-| `RequirePermissionOptions` is not exported from `role/index.ts` | Add `export type { RequirePermissionOptions } from "./role.middleware.js"` when first needed. |
-
----
-
-## 13. Critical Pitfalls & TypeScript Traps (Avoid These Errors)
-
-These are the most common mistakes that cause build and typecheck failures during module creation:
-
-### 1. Missing Registry Entry in `@avuny/contracts`
-- **Mistake**: Defining constants or schemas in `packages/contracts/src/<module>/` without registering the module in `packages/contracts/src/modules/registry.ts`.
-- **Symptom**: `TS2769: Argument of type 'string' is not assignable to parameter of type 'PermissionKey'`, and `TS2345: Type 'string' is not assignable to type 'ActivityLogAction'` in `deps.ts` and `service.ts`.
-- **Rule**: `PermissionKey`, `ActivityLogAction`, and `SIDEBAR_TREE` are derived entirely from `MODULES` in `packages/contracts/src/modules/registry.ts`. Whenever you add a module, immediately register it in `registry.ts` with its actions (`permission: true`) and audit event names.
-
-### 2. Using `{ status: number }` instead of `{ statusCode, responseMessage }` in `errorsHttpMap`
-- **Mistake**: Declaring `export const <module>ErrorsHttpMap = { ERROR_CODE: { status: 404 } }`.
-- **Symptom**: `TS2353: Object literal may only specify known properties, and 'status' does not exist in type 'ErrorMeta'`.
-- **Rule**: `ErrorMeta` in `@avuny/utils` strictly requires `{ statusCode: ClientErrorStatusCode, responseMessage: string }`. Always provide both.
-
-### 3. Error Map Status Widening & OpenAPI Handler Mismatch (TS2345)
-- **Mistake**:
-  1. Casting the module error map `as Record<Code, ErrorMeta>`.
-  2. Passing the broad module-wide `errorMap` to `handleResult` in a route whose `responses` only declares a subset of status codes (e.g., passing a map containing `404` to `createRoute` that only declared `201`, `403`, `409`, `422`).
-- **Symptom**: `TS2345: Argument of type '(c) => Promise<...>' is not assignable to parameter of type 'Handler<...>' ... Type 'ClientErrorStatusCode' (or '400') is not assignable to type '403'`.
-- **Rule**:
-  1. In each route file, always declare a scoped `rawErrorMap = { ... } as const` that contains **ONLY** the error codes that specific endpoint can produce.
-  2. Every status code in `rawErrorMap` MUST be declared in `responses: { ... }` of `createRoute`.
-  3. Never type error maps as `Record<..., ErrorMeta>`. Use `as const satisfies Record<Code, ...>` or `as const` to keep exact numeric literal types (`404`, `409`, etc.).
-
-### 4. Permissive / Untyped Service Authorization and Audit Logging
-- **Mistake**: Declaring `can = (actorId: string, action: string, orgId: string)` or `audit = (..., action: string, ...)`.
-- **Symptom**: `TS2769` on `permissions.check` and `TS2345` on `activityLog.record`.
-- **Rule**:
-  - `permissions.check` takes `PermissionKey | readonly PermissionKey[]`. Type the `action` parameter as `PermissionKey` (or use constants typed with `satisfies Record<string, PermissionKey>`).
-  - `activityLog.log` takes `ActivityLogEntry` where `action` is `ActivityLogAction`. Type audit actions strictly as `ActivityLogAction`.
-
-### 5. Sidebar Permission Map Missing Entry
-- **Mistake**: Adding a module with `sidebar: { ... }` to `registry.ts` without mapping it in `apps/server/src/api/modules/sidebar/sidebar.permission-map.ts`.
-- **Symptom**: `TS1360: Property '<module>' is missing in type '...' but required in type 'Record<SidebarOptionName, string>'`.
-- **Rule**: If a module has a sidebar configuration in `registry.ts`, add its camelCase option name to `sidebarOptionResources` in `sidebar.permission-map.ts` (e.g. `warehouse: "warehouse"`).
-
-### 6. Expecting 400 instead of 422 for Request Validation in Route Tests
-- **Mistake**: In route tests, expecting `expect(res.status).toBe(400)` when passing an invalid body or invalid query parameters.
-- **Symptom**: Test failure `expected 422 to be 400`.
-- **Rule**: Hono's `@hono/zod-openapi` validation middleware responds with HTTP `422` (Unprocessable Entity) on Zod schema validation errors. Route tests must assert `expect(res.status).toBe(422)`.
+Before using a sidebar group, verify it exists in `SIDEBAR_GROUPS`. If it does not, add the group there with its icon and complete `en` / `ar` labels. The group declaration controls sidebar grouping/order. A module without `sidebar` metadata does not appear as a sidebar destination, but its permissions and events can still be registered.
+
+Use:
+
+- `snake_case` for the registry resource key, e.g. `sales_order`;
+- the generated hyphenated resource token for permission/route keys, e.g. `sales-order`;
+- an organization-relative path for the sidebar, e.g. `/sales-orders`;
+- complete Arabic and English labels.
+
+Set `scopable: true` only if the module's permissions are intended to support record-level `resource_id` grants. Do not enable it automatically for every module.
+
+### 13.3 Registry changes have consequences
+
+- Adding a permission action makes it available to the derived permission catalog and role UI/validation.
+- Adding an event expands the activity-log action type and allowed event list.
+- Adding sidebar metadata adds the module to the derived sidebar and seed composition.
+- The seed synchronizes the plain-text module/action/sidebar records with this registry. The registry comments describe which records are inserted, updated, or removed by the seed; understand those effects before changing an existing entry.
+- Removing or renaming a module/action can remove grants from all roles, including custom roles, on the next seed.
+- Audit rows are historical and append-only. **Never remove or rename an event that has shipped.** Add a new event and deprecate the old behavior instead.
+- Follow the actual database schema and seed behavior in the current codebase before concluding that a change needs or does not need a migration. Do not create a migration solely for a registry edit when the project stores the affected names as plain text and the seed owns synchronization.
+
+After editing the registry, rebuild `@avuny/contracts` and check that the generated permission and activity-log types accept the module's permission constants and audit actions.
+
+## 14. Build order for a new backend module
+
+For a feature that introduces new persisted data, work in dependency order:
+
+1. **Contracts:** add constants, error codes, schemas, inferred input/DTO/query types, cursor schema, audit constants where appropriate, exports, and contract tests. Follow `packages/contracts/AGENTS.md`. When an update input contains a line array that replaces all stored lines, document that replacement behavior beside the schema.
+2. **Database:** add aggregate-root and owned-child tables, relations, indexes, unique/FK constraints, inferred row types, exports, and migrations. Keep child ownership and deletion behavior explicit.
+3. **Contracts registry:** add the module/actions/sidebar data in `packages/contracts/src/modules/registry.ts`; add a sidebar group first if needed. Rebuild contracts and verify derived types.
+4. **Repository:** implement tenant-scoped aggregate reads/writes, list and option queries, transactions, locks, and expected constraint mapping.
+5. **Mapper and service:** implement DTO mapping, all six mandatory methods, authorization, business rules, transaction boundaries, audit-after-commit, and any additional domain operations.
+6. **Dependency wiring and exports:** implement `deps.ts`, `index.ts`, route dependency types, and public module exports.
+7. **Routes:** implement OpenAPI routes for the required methods and additional operations; mount the module in the API router composition.
+8. **API translations:** add matching `en.json` and `ar.json` error translations under `apps/server/src/api/intl/locales/<module-name>/` and register the namespace wherever the API translation setup requires it.
+9. **Tests:** add repository tests, service tests, route/OpenAPI tests where established, and coverage for all six authorization paths.
+10. **Verify:** build, typecheck, lint, and run the relevant tests for contracts, database, and server. Do not treat a successful API typecheck as proof that the contracts package or migration is correct.
+
+## 15. Final checklist
+
+Before considering a module complete, verify all of the following:
+
+- [ ] The module models a domain capability / aggregate, not an arbitrary single table.
+- [ ] The repository owns the aggregate root and its owned child tables; child IDs and tenant ownership are validated.
+- [ ] All tenant-owned reads and writes are scoped by `orgId`.
+- [ ] Repository methods accept `Tx` where they may participate in a larger use-case transaction.
+- [ ] Expected database conflicts become typed write reasons; unexpected errors are rethrown.
+- [ ] The service implements `create`, `update`, `delete`, `listOptions`, `list`, and `get`.
+- [ ] Every service method checks authorization before repository access.
+- [ ] Additional domain methods do not replace any mandatory method.
+- [ ] Transaction failures cannot accidentally commit partial writes.
+- [ ] Audit events are registered centrally and logged only after successful commits (or through a transactional outbox when atomic delivery is required).
+- [ ] DTOs are mapped explicitly and do not leak internal columns.
+- [ ] HTTP error metadata, OpenAPI response declarations, and both API locales cover the module's errors.
+- [ ] The contracts registry includes the correct resource/actions and optional sidebar metadata.
+- [ ] The module is mounted in the API router and exposes only its intended public API.
+- [ ] Service tests cover denied access for all six mandatory methods, successful paths, errors, aggregate behavior, pagination, options, and audit behavior.
+- [ ] No `any` is introduced to bypass a typing issue.
+- [ ] Contracts build, database migration checks, server typecheck/lint, and relevant tests pass.
