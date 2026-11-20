@@ -12,6 +12,14 @@ import {
     inventoryReservations,
 } from "./inventory-reservation.js"
 import { stockMovementLines, stockMovements } from "./stock-movement.js"
+import { units } from "../item/unit.js"
+import { users } from "../user/users.js"
+import { journalEntries } from "../accounting/journal-entries.js"
+import {
+    inventoryAdjustmentLines,
+    inventoryAdjustmentReasons,
+    inventoryAdjustments,
+} from "./inventory-adjustment.js"
 
 /** All Drizzle relations for the inventory domain live in this file. */
 
@@ -306,3 +314,93 @@ export const inventoryCostAllocationsRelations = relations(
         }),
     })
 )
+
+// -----------------------------------------------------------------------------
+// Inventory Adjustment Reasons
+// -----------------------------------------------------------------------------
+
+export const inventoryAdjustmentReasonsRelations = relations(
+    inventoryAdjustmentReasons,
+    ({ many }) => ({
+        adjustments: many(inventoryAdjustments),
+    })
+)
+
+// -----------------------------------------------------------------------------
+// Inventory Adjustments
+// -----------------------------------------------------------------------------
+
+export const inventoryAdjustmentsRelations = relations(
+    inventoryAdjustments,
+    ({ one, many }) => ({
+        warehouse: one(warehouses, {
+            fields: [inventoryAdjustments.orgId, inventoryAdjustments.warehouseId],
+            references: [warehouses.orgId, warehouses.id],
+        }),
+        reason: one(inventoryAdjustmentReasons, {
+            fields: [inventoryAdjustments.reasonId],
+            references: [inventoryAdjustmentReasons.id],
+        }),
+        creator: one(users, {
+            fields: [inventoryAdjustments.createdBy],
+            references: [users.id],
+        }),
+        confirmer: one(users, {
+            fields: [inventoryAdjustments.confirmedBy],
+            references: [users.id],
+        }),
+        stockMovement: one(stockMovements, {
+            fields: [inventoryAdjustments.orgId, inventoryAdjustments.stockMovementId],
+            references: [stockMovements.orgId, stockMovements.id],
+        }),
+        journalEntry: one(journalEntries, {
+            fields: [inventoryAdjustments.orgId, inventoryAdjustments.journalEntryId],
+            references: [journalEntries.orgId, journalEntries.id],
+        }),
+        lines: many(inventoryAdjustmentLines),
+    })
+)
+
+// -----------------------------------------------------------------------------
+// Inventory Adjustment Lines
+// -----------------------------------------------------------------------------
+
+export const inventoryAdjustmentLinesRelations = relations(
+    inventoryAdjustmentLines,
+    ({ one }) => ({
+        adjustment: one(inventoryAdjustments, {
+            fields: [
+                inventoryAdjustmentLines.orgId,
+                inventoryAdjustmentLines.adjustmentId,
+            ],
+            references: [inventoryAdjustments.orgId, inventoryAdjustments.id],
+        }),
+        item: one(items, {
+            fields: [inventoryAdjustmentLines.orgId, inventoryAdjustmentLines.itemId],
+            references: [items.orgId, items.id],
+        }),
+        location: one(warehouseLocations, {
+            fields: [
+                inventoryAdjustmentLines.orgId,
+                inventoryAdjustmentLines.locationId,
+            ],
+            references: [warehouseLocations.orgId, warehouseLocations.id],
+        }),
+        unit: one(units, {
+            fields: [inventoryAdjustmentLines.unitId],
+            references: [units.id],
+        }),
+        baseUnit: one(units, {
+            fields: [inventoryAdjustmentLines.baseUnitId],
+            references: [units.id],
+        }),
+        batch: one(batches, {
+            fields: [
+                inventoryAdjustmentLines.orgId,
+                inventoryAdjustmentLines.batchId,
+            ],
+            references: [batches.orgId, batches.id],
+        }),
+    })
+)
+
