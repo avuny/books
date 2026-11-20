@@ -33,8 +33,7 @@ i18n
       "user",
       "warehouse",
       "warehouse-location",
-      "warehouse",
-      "warehouse-location",
+      "inventory-adjustment",
     ],
 
     returnNull: false,
