@@ -184,3 +184,445 @@ Rules (read the ones touching your task, they are short): `.agents/rules/*.md`.
 ## 7. When unsure
 
 Prefer the pattern in the skill templates over inventing. If a template does not cover your case, extend it minimally and keep the same layering. Do not introduce new libraries, new folder layouts, or route-level permission middleware without being asked (that decision is still open: today permissions are checked in the service).
+
+
+
+
+# Task: Establish Synchronized, Contract-First Module Specifications
+
+## Objective
+
+Improve the project documentation by introducing or enhancing a `SPEC.md` in every module in both the contracts and server packages.
+
+The goal is to establish a **single, reliable source of truth for each module**, allowing frontend and backend agents to work independently while remaining completely aligned.
+
+A frontend agent should be able to read the module's contracts directory, understand the business requirements, know exactly what UI to build, understand every user interaction, and identify precisely which API endpoints to consume without inspecting or reverse-engineering the backend implementation.
+
+Backend agents should use the same specification to implement the required behavior and maintain consistency with the frontend.
+
+## 1. Contracts Specification — Canonical Module Specification
+
+Location:
+
+`packages/contracts/src/<module>/SPEC.md`
+
+This is the primary specification and the source of truth for the module's business behavior, frontend requirements, and public API contract.
+
+It should document:
+
+### A. Module Overview
+- Purpose and responsibilities.
+- Main features and supported operations.
+- Business workflows and user journeys.
+- Module boundaries and ownership.
+- Dependencies on other modules.
+
+### B. Frontend Requirements
+Describe everything the frontend needs to implement:
+
+- Pages, screens, tabs, sections, and navigation.
+- Tables, columns, filters, sorting, and pagination.
+- Create and update forms, dialogs, drawers, and confirmation dialogs.
+- Form fields, input types, defaults, required status, validation, and conditional visibility.
+- Available actions and their expected behavior.
+- Select inputs and their data sources, including dependencies between fields.
+- Search, filtering, bulk operations, and other interactions where applicable.
+- Loading, empty, success, error, validation, and permission-denied states.
+- Responsive behavior, localization, English/Arabic translations, and RTL requirements.
+
+Describe not only what components exist, but also exactly how they should behave.
+
+### C. Business Rules and Domain Behavior
+Document the actual business rules independently of the UI:
+
+- Validation and domain constraints.
+- Relationships between entities.
+- Allowed and forbidden operations.
+- Dependencies between fields and entities.
+- Lifecycle statuses and permitted state transitions.
+- Business calculations and default values.
+- Important edge cases and exceptional scenarios.
+- Rules that must be enforced by the backend, even when the frontend performs preliminary validation.
+
+### D. API Contract and Endpoint Documentation
+
+Document every endpoint required by the module.
+
+For each endpoint specify:
+
+- Stable operation/requirement ID.
+- Purpose and frontend use case.
+- HTTP method and exact URL.
+- Authentication requirements.
+- Required permissions.
+- Path parameters and query parameters.
+- Filters, sorting, and pagination behavior.
+- Request body, including field descriptions and validation.
+- Response structure and representative examples.
+- Possible domain errors and their expected handling.
+- Important side effects or business behavior.
+- Whether the operation is implemented or planned.
+
+Reference the canonical Zod schemas and inferred types instead of unnecessarily duplicating their definitions. Examples should illustrate the actual contract, not create alternative definitions.
+
+Document exactly what each endpoint does, what it expects, and what it returns.
+
+### E. Frontend Screen-to-API Mapping
+
+Provide a clear mapping between frontend screens and their corresponding API operations.
+
+For example:
+
+| Frontend feature | Operation ID | API endpoint | Purpose |
+|---|---|---|---|
+| Items listing | ITEM-LIST | GET /items | Retrieve items with filtering and pagination |
+| Create item | ITEM-CREATE | POST /items | Create an item |
+| Edit item | ITEM-UPDATE | PATCH /items/:id | Update an existing item |
+
+Use actual module endpoints and contracts, not hypothetical endpoints presented as implemented functionality.
+
+### F. Permissions and Access Control
+- Document the permissions required for each operation.
+- Explain which UI actions should be hidden, disabled, or inaccessible without permission.
+- Document organization-level and record-level access restrictions where applicable.
+
+### G. Cross-Module Dependencies
+- Identify the modules this module depends on.
+- Explain which public APIs and DTOs are consumed from each dependency.
+- Document important relationships and coordination between modules.
+- Never introduce duplicate ownership of another module's business logic.
+
+### H. Acceptance Criteria
+Define clear criteria for completing the frontend implementation, including expected workflows, validation, permissions, and error handling.
+
+---
+
+## 2. Server Specification — Backend Implementation Specification
+
+Location:
+
+`apps/server/src/api/modules/<module>/SPEC.md`
+
+Create or update the server specification to describe how the backend implements the canonical contracts specification.
+
+At the beginning, explicitly reference the corresponding contracts `SPEC.md` using a relative path.
+
+The contracts specification remains authoritative for business requirements and public API behavior. The server specification must not independently redefine or contradict it.
+
+Document:
+
+### A. Implementation Overview
+- Backend responsibilities and module boundaries.
+- Current implementation status.
+- Relevant internal files and their responsibilities.
+
+### B. Endpoint Implementation
+For every implemented endpoint, document:
+
+- The corresponding operation ID from the contracts specification.
+- Exact HTTP method and route.
+- Route handler and service method.
+- Authentication and authorization behavior.
+- Input validation and schemas used.
+- Business processing and response mapping.
+- Possible domain errors.
+- Transactions and side effects.
+
+### C. Service and Business Logic
+- Available service methods and their responsibilities.
+- Important business rules implemented.
+- Repository operations.
+- Cross-module service interactions.
+- Transaction boundaries and atomicity requirements.
+- Activity logging and other required side effects.
+
+### D. Database Responsibilities
+- Relevant database entities and relationships.
+- Owned tables and their responsibilities.
+- Important constraints and indexes.
+- Transactional operations and data integrity requirements.
+
+Do not duplicate database schema definitions unnecessarily. Reference the actual schema files.
+
+### E. Implementation Gaps
+Explicitly identify:
+- Missing endpoints.
+- Partially implemented operations.
+- Missing validation or business rules.
+- Differences between the contracts and actual implementation.
+- Outstanding tests or integration requirements.
+
+### F. Backend Acceptance Criteria
+Define when the backend implementation can be considered complete, including API behavior, authorization, business rules, transactions, tests, and consistency with contracts.
+
+---
+
+## 3. Synchronization and Source-of-Truth Rules
+
+These rules are essential:
+
+1. The contracts `SPEC.md` is the canonical specification for business requirements, frontend behavior, and public API expectations.
+2. The server `SPEC.md` documents the actual backend implementation and references the contracts specification.
+3. Every frontend operation must map to a documented API operation.
+4. Every implemented endpoint must map to a documented operation ID.
+5. The HTTP method, URL, request, response, permissions, and error behavior must remain consistent across both specifications and the actual implementation.
+6. Never document a planned feature or endpoint as implemented.
+7. Do not invent missing requirements, API endpoints, business rules, or response structures. Identify gaps explicitly.
+8. Reference existing Zod schemas, inferred types, OpenAPI definitions, and public module APIs instead of maintaining redundant definitions.
+9. Whenever a contract changes, review the corresponding server implementation and both specifications.
+10. Whenever backend behavior changes, verify that it still satisfies the contracts specification.
+11. If a discrepancy is found, explicitly identify it rather than silently changing one specification to match the other.
+12. Avoid unnecessary duplication. Business requirements belong primarily in contracts; implementation details belong in server.
+
+## 4. Agent Workflow
+
+Establish a consistent workflow for future development agents.
+
+### Frontend Agent
+Before implementing a module:
+
+1. Read the module's contracts `SPEC.md`.
+2. Read its schemas, DTOs, constants, errors, and relevant public contracts.
+3. Review the documented frontend screens and workflows.
+4. Map each interaction to its documented API operation.
+5. Identify dependencies on other modules.
+6. Implement the UI according to the specification.
+7. Report any missing, ambiguous, or contradictory requirement instead of inventing behavior.
+
+The frontend agent should not need to inspect server implementation files to understand what the module is supposed to do.
+
+### Backend Agent
+Before implementing a module:
+
+1. Read the contracts `SPEC.md`.
+2. Read the server `SPEC.md`.
+3. Inspect existing contracts and relevant module patterns.
+4. Implement the endpoints and business behavior defined by the contracts.
+5. Update the server specification to reflect the actual implementation.
+6. Verify that all implemented endpoints and behavior satisfy the contracts.
+7. Report any missing requirements or contract changes needed.
+
+## 5. Specification Quality and Maintenance
+
+- Keep specifications concise, structured, and easy for AI agents to navigate.
+- Avoid repeating information already available in code or other documentation.
+- Use stable operation IDs across contracts and server specifications.
+- Use consistent terminology, naming, and status definitions across modules.
+- Link to relevant source files rather than copying their contents.
+- Keep planned, partially implemented, implemented, and deprecated functionality distinguishable.
+- Update both specifications whenever relevant requirements or implementation behavior changes.
+- Do not create empty sections, speculative requirements, or unnecessary boilerplate.
+
+## 6. Deliverables
+
+Inspect the existing project and its actual module structure before making changes.
+
+Implement the documentation improvements across the relevant modules while:
+
+- Preserving the original project structure.
+- Following existing architecture and coding conventions.
+- Avoiding unrelated refactoring.
+- Keeping existing specifications and useful documentation intact while improving them.
+- Ensuring relative references between contracts and server specifications resolve correctly.
+- Identifying existing inconsistencies and gaps rather than concealing them.
+
+Finally, provide a ZIP file containing the updated project with its original directory structure preserved, together with a concise summary of the modifications and any unresolved gaps.
+
+
+
+
+### 3. Web Specification — Frontend Implementation Specification
+
+Location:
+
+`web/src/features/<module>/SPEC.md`
+
+Create or update a specification for every frontend feature module.
+
+This document must explicitly reference the corresponding contracts `SPEC.md` using a relative path. The contracts specification remains the source of truth for business requirements, UI requirements, and API contracts.
+
+The Web SPEC documents how the frontend implements those requirements.
+
+Include:
+
+**A. Feature Structure**
+- Feature responsibilities and boundaries.
+- Pages, routes, layouts and navigation.
+- Main components and their responsibilities.
+- Relevant files and their locations.
+
+**B. API Integration**
+- Contracts operation IDs and corresponding endpoints.
+- API client functions and generated hooks used.
+- Query keys, parameters and mutation behavior.
+- Caching, invalidation and refetching strategies.
+- Request and response transformations, if any.
+- Error handling.
+
+**C. UI Implementation**
+- Forms, tables, filters, dialogs, drawers and actions.
+- Form schemas, defaults and validation.
+- Component dependencies and reusable UI elements.
+- Loading, empty, error, success and disabled states.
+- Permission-aware rendering and behavior.
+
+**D. Frontend State and Behavior**
+- Server state and local state responsibilities.
+- Query and mutation lifecycle.
+- Form state and dependent fields.
+- Search, filtering, sorting and pagination behavior.
+- Navigation and post-operation behavior.
+
+**E. Localization and Accessibility**
+- English and Arabic translation namespaces.
+- RTL behavior.
+- Responsive layouts.
+- Accessibility and interaction requirements.
+
+**F. Dependencies**
+- Shared components and utilities.
+- Other frontend feature dependencies.
+- Relevant contracts and public API dependencies.
+
+**G. Implementation Status and Gaps**
+- Implemented functionality.
+- Partially implemented functionality.
+- Missing functionality.
+- Deviations from the contracts specification.
+- Outstanding integration or testing requirements.
+
+### Frontend Synchronization Rules
+
+1. Always read the contracts SPEC before implementing a frontend feature.
+2. Every frontend operation must map to a documented contracts operation ID.
+3. API integrations must follow the documented request and response contracts.
+4. Do not invent endpoints, business rules, validation rules or UI behavior.
+5. Update the Web SPEC when the actual frontend implementation changes.
+6. Distinguish planned implementation from actual implementation.
+7. Report discrepancies between frontend implementation and contracts instead of silently introducing different behavior.
+8. Reference actual source files rather than duplicating their implementation details.
+9. Keep the Web SPEC focused on frontend implementation, avoiding duplication of backend internals or the complete contracts specification.
+
+
+
+## 6. Mandatory Module TODO and AI Agent Progress Tracking
+
+Every AI agent MUST create and maintain a `<module>.todo.md` file inside every package or application module it works on.
+
+### File Locations
+
+The TODO file must be located alongside the module's specification and implementation files.
+
+Examples:
+
+- `packages/contracts/src/<module>/<module>.todo.md`
+- `apps/server/src/api/modules/<module>/<module>.todo.md`
+- `web/src/features/<module>/<module>.todo.md`
+
+Apply the same convention to any other package or application containing an assigned part of the module.
+
+Each package/app must maintain its own TODO file because each represents a separate implementation responsibility.
+
+### Purpose
+
+The TODO file acts as the agent's persistent working memory and progress record.
+
+An agent must be able to stop working, lose its conversation context, or resume in a completely new session and understand:
+
+- What the original task is.
+- What has already been completed.
+- What is currently in progress.
+- What remains to be implemented.
+- What is blocked and why.
+- What decisions have been made.
+- Which files have been modified.
+- What the next steps are.
+- Which tests and verification commands have actually been executed.
+
+### Required Structure
+
+Use Markdown checklists with clear status sections:
+
+#### Task Overview
+
+A concise description of the assigned task and its expected outcome.
+
+#### Pending
+
+Tasks not started yet.
+
+- [ ] Task description
+
+#### In Progress
+
+Tasks currently being worked on.
+
+- [ ] Task description — started: YYYY-MM-DD HH\:mm
+
+#### Completed
+
+Tasks successfully implemented and verified.
+
+- [x] Task description — completed: YYYY-MM-DD HH\:mm
+
+#### Blocked
+
+Tasks that cannot proceed, including the reason and required resolution.
+
+- [ ] Task description — Blocked: reason
+
+#### Decisions and Notes
+
+Record important implementation decisions, assumptions, discovered dependencies, and relevant context needed to resume work.
+
+#### Modified Files
+
+Record the important files created, modified, or removed and briefly describe the changes.
+
+#### Verification
+
+Record tests, typechecks, linting, generation commands, and their actual results. Never mark verification as successful without executing it.
+
+#### Next Steps
+
+Clearly identify the immediate next actions for the next working session or agent.
+
+### Mandatory Agent Workflow
+
+**When starting work:**
+
+1. Locate and read the module's TODO files in every package/app involved.
+2. Read the relevant contracts, server, and web specifications.
+3. Understand previous progress, decisions, blockers, and remaining tasks.
+4. Resume from the existing progress instead of repeating completed work.
+
+**While working:**
+
+1. Update the TODO immediately when starting or completing a meaningful task.
+2. Move tasks between Pending, In Progress, Completed, and Blocked as appropriate.
+3. Record important decisions and discoveries so they are not lost with conversation context.
+4. Keep the TODO synchronized with the actual repository state.
+5. Update the relevant package/app TODO independently when work spans multiple locations.
+
+**Before stopping, ending a session, or handing work to another agent:**
+
+1. Update every affected TODO file.
+2. Record exactly what was completed and what remains.
+3. Record unresolved issues, blockers, and implementation decisions.
+4. Identify the next concrete action.
+5. Ensure the TODO accurately reflects the current code rather than merely reflecting the agent's intentions.
+
+### Important Rules
+
+- Creating and maintaining these files is mandatory, not optional.
+- Never overwrite an existing TODO with a fresh checklist that loses previous progress.
+- Never mark unfinished or unverified work as completed.
+- Completed tasks should remain recorded unless the task itself is intentionally removed or superseded.
+- Keep entries concise and actionable; do not duplicate the entire SPEC.md.
+- Use timestamps in `YYYY-MM-DD HH:mm` format.
+- Each package/app TODO tracks only the work relevant to that package/app.
+- When work is resumed, the TODO files must be treated as the primary persistent progress record, alongside the specifications and actual repository state.
+- When multiple agents work on different parts of the same module, each agent must respect the existing TODO records and avoid overwriting another agent's progress.
+
+The objective is to make development resumable and resilient to lost AI conversation context, session interruptions, and agent handoffs.
+
