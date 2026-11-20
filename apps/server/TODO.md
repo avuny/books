@@ -1,6 +1,11 @@
 # Server Refactoring TODO — Inventory Architecture
 
+## InProgress
+
+## Todo
+
 ## Done
+- [2026-11-20 15:05] Inventory Adjustment: Contract definitions (@avuny/contracts/inventory-adjustment), database schema and migrations (@avuny/db), and server backend module (repository, service, mappers, DI wiring, OpenAPI routes, unit & route integration tests). All 13 service tests and 11 route tests pass; OpenAPI and Orval client generated; monorepo typecheck passed cleanly.
 - [2026-11-17 16:54] Database Schema & Migration: Exported inventory tables (`inventory_items`, `inventory_item_batches`, `inventory_reservations`, `inventory_reservation_allocations`), generated migration `0015_breezy_the_twelve.sql`, applied migrations to drop `stock_balances` and create new inventory tables, built `@avuny/db`.
 - [2026-11-17 18:04] Contracts Refactoring: Updated `@avuny/contracts` for Batch (removed cost & quantity from Batch master input, DTO, rules, specs) and Stock Movement / Inventory (added InventoryItemDto, InventoryItemBatchDto, updated StockBalanceDto). Verified tests and typecheck.
 - [2026-11-17 18:22] Batch Module: Updated mapper, service, and specs to remove quantity/cost from batch masters and support multi-location batches. All batch unit tests pass.

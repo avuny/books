@@ -16,6 +16,7 @@ import { accountingRoutes } from "./modules/accounting/index.js"
 import { adminRoutes } from "./modules/admin/index.js"
 import { authRoutes } from "./modules/auth/index.js"
 import { geoRoutes } from "./modules/geo/index.js"
+import { inventoryAdjustmentRoutes } from "./modules/inventory-adjustment/index.js"
 import { itemRoutes } from "./modules/item/index.js"
 import { itemCategoryRoutes } from "./modules/item-category/index.js"
 import { organizationRoutes } from "./modules/organization/index.js"
@@ -92,6 +93,7 @@ app.route("/accounting", accountingRoutes)
 app.route("/admin", adminRoutes)
 app.route("/auth", authRoutes)
 app.route("/geo", geoRoutes)
+app.route("/inventoryAdjustment", inventoryAdjustmentRoutes)
 app.route("/item", itemRoutes)
 app.route("/itemCategory", itemCategoryRoutes)
 app.route("/organizations", organizationRoutes)

@@ -23,6 +23,7 @@ export const sidebarOptionResources = {
   // supplier: "supplier",
   // purchaseOrder: "purchase-order",
   // salesOrder: "sales-order",
+  inventoryAdjustment: "inventory-adjustment",
   warehouse: "warehouse",
   accounting: "accounting",
   organizationUser: "organization-user",
