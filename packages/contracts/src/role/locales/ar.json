@@ -17,6 +17,7 @@
       "organization_user": "الأعضاء",
       "organization_invitation": "الدعوات",
       "role": "الأدوار",
+      "inventory_adjustment": "تسويات المخزون",
       "*": "كل شيء"
     },
     "actions": {
@@ -26,6 +27,8 @@
       "delete": "حذف",
       "deactivate": "تعطيل / إعادة تفعيل",
       "assign": "إسناد للأعضاء",
+      "confirm": "تأكيد",
+      "cancel": "إلغاء",
       "*": "كل الإجراءات"
     },
     "effects": {

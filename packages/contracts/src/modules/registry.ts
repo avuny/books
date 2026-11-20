@@ -266,6 +266,19 @@ export const MODULES = {
       reverse: { permission: true, event: "reversed" },
     },
   },
+  inventory_adjustment: {
+    sidebar: {
+      group: "inventory",
+      icon: "sliders",
+      path: "/inventory-adjustments",
+      label: { en: "Inventory adjustments", ar: "تسويات المخزون" },
+    },
+    actions: {
+      ...CRUD,
+      confirm: { permission: true, event: "confirmed" },
+      cancel: { permission: true, event: "cancelled" },
+    },
+  },
 
 
 

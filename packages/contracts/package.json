@@ -45,6 +45,11 @@
       "import": "./dist/geo/index.js",
       "default": "./dist/geo/index.js"
     },
+    "./inventory-adjustment": {
+      "types": "./dist/inventory-adjustment/index.d.ts",
+      "import": "./dist/inventory-adjustment/index.js",
+      "default": "./dist/inventory-adjustment/index.js"
+    },
     "./inventory-reservation": {
       "types": "./dist/inventory-reservation/index.d.ts",
       "import": "./dist/inventory-reservation/index.js",

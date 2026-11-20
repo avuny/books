@@ -17,6 +17,7 @@
       "organization_user": "Members",
       "organization_invitation": "Invitations",
       "role": "Roles",
+      "inventory_adjustment": "Inventory adjustments",
       "*": "Everything"
     },
     "actions": {
@@ -26,6 +27,8 @@
       "delete": "Delete",
       "deactivate": "Deactivate / reactivate",
       "assign": "Assign to members",
+      "confirm": "Confirm",
+      "cancel": "Cancel",
       "*": "All actions"
     },
     "effects": {

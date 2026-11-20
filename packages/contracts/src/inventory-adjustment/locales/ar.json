@@ -1,0 +1,136 @@
+{
+  "errors": {
+    "INVENTORY_ADJUSTMENT_NOT_FOUND": "تسوية المخزون غير موجودة",
+    "INVENTORY_ADJUSTMENT_NOT_EDITABLE": "يمكن تعديل المسودات فقط",
+    "INVENTORY_ADJUSTMENT_NOT_DELETABLE": "يمكن حذف المسودات فقط",
+    "INVENTORY_ADJUSTMENT_ALREADY_CONFIRMED": "التسوية مؤكدة بالفعل",
+    "INVENTORY_ADJUSTMENT_ALREADY_CANCELLED": "التسوية ملغاة بالفعل",
+    "INVENTORY_ADJUSTMENT_CANNOT_CANCEL_CONFIRMED": "لا يمكن إلغاء التسويات المؤكدة",
+    "INVENTORY_ADJUSTMENT_WAREHOUSE_NOT_FOUND": "المستودع المحدد غير موجود",
+    "INVENTORY_ADJUSTMENT_WAREHOUSE_NOT_PHYSICAL": "يمكن اختيار المستودعات الفعلية فقط لتسويات المخزون",
+    "INVENTORY_ADJUSTMENT_REASON_NOT_FOUND": "سبب التسوية المحدد غير موجود",
+    "INVENTORY_ADJUSTMENT_REASON_INACTIVE": "سبب التسوية المحدد غير نشط",
+    "INVENTORY_ADJUSTMENT_NO_LINES": "يلزم إدخال بند تسوية واحد على الأقل",
+    "INVENTORY_ADJUSTMENT_TOO_MANY_LINES": "تجاوزت التسوية الحد الأقصى المسموح به للبنود",
+    "INVENTORY_ADJUSTMENT_DUPLICATE_LINES": "توجد بنود مكررة لنفس الصنف والموقع ورقم التشغيلة",
+    "INVENTORY_ADJUSTMENT_NO_DIFFERENCE": "لا توجد فروق كميات لترحيلها في هذه التسوية",
+    "INVENTORY_ADJUSTMENT_DIRECTION_MISMATCH": "فروق الكميات لا تتطابق مع اتجاه سبب التسوية المحدد",
+    "INVENTORY_ADJUSTMENT_LOCATION_NOT_FOUND": "موقع المستودع المحدد غير موجود",
+    "INVENTORY_ADJUSTMENT_LOCATION_NOT_IN_WAREHOUSE": "الموقع لا يتبع المستودع المحدد",
+    "INVENTORY_ADJUSTMENT_LOCATION_NOT_STOCKABLE": "الموقع غير قابل للتخزين",
+    "INVENTORY_ADJUSTMENT_LOCATION_BLOCKED": "الموقع محظور لتسويات المخزون",
+    "INVENTORY_ADJUSTMENT_ITEM_NOT_FOUND": "الصنف المحدد غير موجود",
+    "INVENTORY_ADJUSTMENT_ITEM_INACTIVE": "لا يمكن تسوية أصناف غير نشطة",
+    "INVENTORY_ADJUSTMENT_ITEM_NOT_STOCKED": "لا يمكن تسوية أصناف غير مخزنية",
+    "INVENTORY_ADJUSTMENT_UNIT_NOT_IN_COLLECTION": "الوحدة المحددة غير مهيأة لهذا الصنف",
+    "INVENTORY_ADJUSTMENT_BATCH_REQUIRED": "يلزم تحديد رقم التشغيلة للأصناف المدارة بالتشغيلات",
+    "INVENTORY_ADJUSTMENT_BATCH_NOT_TRACKED": "لا يُسمح بتحديد رقم تشغيلة لصنف غير مدار بالتشغيلات",
+    "INVENTORY_ADJUSTMENT_BATCH_NOT_FOUND": "رقم التشغيلة المحدد غير موجود",
+    "INVENTORY_ADJUSTMENT_STALE_COUNT": "تغير رصيد النظام منذ أخذ هذا الجرد. يرجى التحديث والمراجعة.",
+    "INVENTORY_ADJUSTMENT_INSUFFICIENT_STOCK": "الرصيد غير كافٍ لإجراء تسوية العجز هذه",
+    "INVENTORY_ADJUSTMENT_RESERVATION_VIOLATION": "ستنتهك التسوية حجوزات المخزون النشطة",
+    "INVENTORY_ADJUSTMENT_NUMBER_TAKEN": "يوجد بالفعل تسوية مخزون بهذا الرقم",
+    "INVENTORY_ADJUSTMENT_COST_NOT_DETERMINABLE": "تعذر تحديد تكلفة التقييم لتسوية الزيادة"
+  },
+  "labels": {
+    "status": {
+      "DRAFT": "مسودة",
+      "CONFIRMED": "مؤكدة",
+      "CANCELLED": "ملغاة"
+    },
+    "direction": {
+      "INCREASE": "زيادة (فائض)",
+      "DECREASE": "نقص (عجز)",
+      "BOTH": "كلاهما (مختلط)"
+    },
+    "reasons": {
+      "COUNT_SHORTAGE": "عجز في الجرد",
+      "COUNT_SURPLUS": "فائض في الجرد",
+      "DAMAGE": "تلف في المخزون",
+      "THEFT": "سرقة أو عجز غير مبرر",
+      "EXPIRED": "أصناف منتهية الصلاحية",
+      "FOUND_STOCK": "مخزون تم العثور عليه",
+      "OTHER": "تسوية أخرى"
+    }
+  },
+  "msgs": {
+    "INVENTORY_ADJUSTMENT_CREATED": "تم إنشاء تسوية المخزون بنجاح",
+    "INVENTORY_ADJUSTMENT_UPDATED": "تم تحديث تسوية المخزون بنجاح",
+    "INVENTORY_ADJUSTMENT_DELETED": "تم حذف تسوية المخزون بنجاح",
+    "INVENTORY_ADJUSTMENT_CONFIRMED": "تم تأكيد تسوية المخزون وترحيل الحركات بنجاح",
+    "INVENTORY_ADJUSTMENT_CANCELLED": "تم إلغاء تسوية المخزون بنجاح"
+  },
+  "list": {
+    "title": "تسويات المخزون",
+    "description": "مطابقة أرصدة المخزون المسجلة مع الجرد الفعلي.",
+    "newButton": "تسوية جديدة"
+  },
+  "create": {
+    "title": "تسوية مخزون جديدة",
+    "description": "إدخال الجرد الفعلي وترحيل فروق الكميات.",
+    "saveDraft": "حفظ كمسودة",
+    "confirm": "تأكيد وترحيل"
+  },
+  "update": {
+    "title": "تعديل تسوية المخزون",
+    "description": "تعديل بيانات المسودة وأرقام الجرد."
+  },
+  "fields": {
+    "number": "رقم التسوية",
+    "referenceNumber": "الرقم المرجعي",
+    "date": "تاريخ التسوية",
+    "warehouse": "المستودع",
+    "reason": "سبب التسوية",
+    "description": "الوصف",
+    "status": "الحالة",
+    "item": "الصنف",
+    "location": "الموقع",
+    "unit": "الوحدة",
+    "batch": "التشغيلة",
+    "systemQuantity": "كمية النظام",
+    "countedQuantity": "الكمية الفعلية",
+    "difference": "الفرق",
+    "baseQuantity": "الكمية الأساسية",
+    "notes": "ملاحظات"
+  },
+  "actions": {
+    "view": "عرض التفاصيل",
+    "edit": "تعديل المسودة",
+    "delete": "حذف المسودة",
+    "confirm": "تأكيد",
+    "cancel": "إلغاء التسوية",
+    "addLine": "إضافة بند",
+    "removeLine": "حذف البند"
+  },
+  "type": {
+    "adjustment": "تسوية مخزون"
+  },
+  "table": {
+    "number": "الرقم",
+    "date": "التاريخ",
+    "warehouse": "المستودع",
+    "reason": "السبب",
+    "items": "البنود",
+    "status": "الحالة",
+    "createdAt": "تاريخ الإنشاء"
+  },
+  "empty": {
+    "title": "لا توجد تسويات مخزون",
+    "description": "أنشئ تسوية لتسجيل فروق الجرد أو التلف أو تصحيح الكميات."
+  },
+  "delete": {
+    "title": "حذف التسوية",
+    "message": "هل أنت متأكد من حذف هذه المسودة؟ لا يمكن التراجع عن هذا الإجراء."
+  },
+  "details": {
+    "title": "تفاصيل التسوية",
+    "stockMovement": "حركة المخزون",
+    "journalEntry": "قيد اليومية",
+    "confirmedBy": "تم التأكيد بواسطة",
+    "confirmedAt": "تاريخ التأكيد",
+    "linesSummary": "الأصناف المعدلة"
+  },
+  "pagination": {
+    "showing": "عرض {from} إلى {to} من أصل {total} تسوية"
+  }
+}
