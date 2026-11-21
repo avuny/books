@@ -397,9 +397,10 @@ export const inventoryAdjustmentLinesRelations = relations(
         batch: one(batches, {
             fields: [
                 inventoryAdjustmentLines.orgId,
+                inventoryAdjustmentLines.itemId,
                 inventoryAdjustmentLines.batchId,
             ],
-            references: [batches.orgId, batches.id],
+            references: [batches.orgId, batches.itemId, batches.id],
         }),
     })
 )

@@ -204,8 +204,8 @@ export const inventoryAdjustmentLines = pgTable(
         }).onDelete("restrict"),
         foreignKey({
             name: "fk_inventory_adjustment_line_batch",
-            columns: [t.orgId, t.batchId],
-            foreignColumns: [batches.orgId, batches.id],
+            columns: [t.orgId, t.itemId, t.batchId],
+            foreignColumns: [batches.orgId, batches.itemId, batches.id],
         }).onDelete("restrict"),
         unique("ux_inventory_adjustment_line_no").on(t.adjustmentId, t.lineNo),
         check(
