@@ -187,6 +187,29 @@ describe("InventoryAdjustmentService", () => {
       expect(confirmRes.data.journalEntryId).toBe("je-1")
     })
 
+    it("posts stock movement for increase adjustment with positive formatted quantity", async () => {
+      repo.stock.set(`${locationId}:${itemId}:`, "100.000000")
+
+      const createRes = await service.create(actorId, orgId, {
+        date: "2026-11-20",
+        warehouseId,
+        reasonId: reasonSurplusId,
+        lines: [{ itemId, locationId, unitId, countedQuantity: "115.000000" }],
+      })
+      expect(createRes.success).toBe(true)
+      if (!createRes.success) return
+
+      const confirmRes = await service.confirm(actorId, orgId, createRes.data.id)
+      expect(confirmRes.success).toBe(true)
+      if (!confirmRes.success) return
+
+      expect(confirmRes.data.status).toBe("CONFIRMED")
+      expect(confirmRes.data.confirmedBy).toBe(actorId)
+      expect(confirmRes.data.confirmedAt).toBeTruthy()
+      expect(confirmRes.data.stockMovementId).toBe("movement-1")
+      expect(confirmRes.data.journalEntryId).toBe("je-1")
+    })
+
     it("rejects confirmation if count is stale", async () => {
       repo.stock.set(`${locationId}:${itemId}:`, "100")
 

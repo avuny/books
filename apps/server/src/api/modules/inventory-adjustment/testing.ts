@@ -5,7 +5,8 @@ import type {
   NewInventoryAdjustment,
   NewInventoryAdjustmentLine,
 } from "@avuny/db"
-import { ok } from "@avuny/utils"
+import { fail, ok } from "@avuny/utils"
+import { isPositiveQuantity, StockMovementErrorCode } from "@avuny/contracts"
 import type {
   AccountingPort,
   ActivityLogPort,
@@ -96,6 +97,10 @@ export class InMemoryInventoryAdjustmentRepository implements InventoryAdjustmen
       .filter((l) => l.orgId === orgId && l.adjustmentId === id)
       .sort((a, b) => a.lineNo - b.lineNo)
     return { row, lines }
+  }
+
+  async findDetail(orgId: string, id: string) {
+    return this.findAggregate(orgId, id) as any
   }
 
   async updateAggregate(orgId: string, id: string, patch: Partial<NewInventoryAdjustment>) {
@@ -222,6 +227,12 @@ export const dummyBatch: BatchPort = {
 
 export const dummyStockMovement: StockMovementPort = {
   async post(_actorId, _orgId, input) {
+    if (input.lines.some((l) => !isPositiveQuantity(l.quantity))) {
+      return fail({
+        error: StockMovementErrorCode.STOCK_MOVEMENT_INVALID_QUANTITY,
+        msg: "The quantity is not valid",
+      })
+    }
     const now = new Date().toISOString()
     return ok({
       data: {

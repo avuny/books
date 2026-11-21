@@ -1,10 +1,17 @@
-import { and, asc, count, desc, eq, gte, ilike, lte, or, sql, type SQL } from "drizzle-orm"
+import { aliasedTable, and, asc, count, desc, eq, gte, ilike, lte, or, sql, type SQL } from "drizzle-orm"
 import {
+  batches,
   inventoryAdjustmentLines,
   inventoryAdjustmentReasons,
   inventoryAdjustments,
   inventoryItemBatches,
   inventoryItems,
+  items,
+  journalEntries,
+  units,
+  users,
+  warehouseLocations,
+  warehouses,
   type DB,
   type InventoryAdjustment,
   type InventoryAdjustmentLine,
@@ -14,7 +21,13 @@ import {
   type Tx,
 } from "@avuny/db"
 import { INVENTORY_ADJUSTMENT_NUMBER_PAD, INVENTORY_ADJUSTMENT_NUMBER_PREFIX } from "@avuny/contracts"
-import type { InventoryAdjustmentRepository, StockSnapshotData } from "./inventory-adjustment.types.js"
+import type {
+  InventoryAdjustmentDetailRow,
+  InventoryAdjustmentLineDetailRow,
+  InventoryAdjustmentListRow,
+  InventoryAdjustmentRepository,
+  StockSnapshotData,
+} from "./inventory-adjustment.types.js"
 
 const escapeLike = (value: string) => value.replace(/[\\%_]/g, "\\$&")
 
@@ -106,6 +119,90 @@ export function createInventoryAdjustmentRepository({ db }: { db: DB }): Invento
         .orderBy(asc(inventoryAdjustmentLines.lineNo), asc(inventoryAdjustmentLines.id))
 
       return { row, lines }
+    },
+
+    async findDetail(
+      orgId: string,
+      id: string,
+      tx?: Tx
+    ): Promise<{ row: InventoryAdjustmentDetailRow; lines: InventoryAdjustmentLineDetailRow[] } | null> {
+      const createdUsers = aliasedTable(users, "created_users")
+      const confirmedUsers = aliasedTable(users, "confirmed_users")
+
+      const [header] = await exec(tx)
+        .select({
+          adjustment: inventoryAdjustments,
+          warehouseName: warehouses.name,
+          warehouseCode: warehouses.code,
+          reasonName: inventoryAdjustmentReasons.name,
+          reasonCode: inventoryAdjustmentReasons.code,
+          journalEntryNumber: journalEntries.entryNumber,
+          createdByName: createdUsers.name,
+          confirmedByName: confirmedUsers.name,
+        })
+        .from(inventoryAdjustments)
+        .leftJoin(warehouses, eq(inventoryAdjustments.warehouseId, warehouses.id))
+        .leftJoin(inventoryAdjustmentReasons, eq(inventoryAdjustments.reasonId, inventoryAdjustmentReasons.id))
+        .leftJoin(journalEntries, eq(inventoryAdjustments.journalEntryId, journalEntries.id))
+        .leftJoin(createdUsers, eq(inventoryAdjustments.createdBy, createdUsers.id))
+        .leftJoin(confirmedUsers, eq(inventoryAdjustments.confirmedBy, confirmedUsers.id))
+        .where(and(eq(inventoryAdjustments.orgId, orgId), eq(inventoryAdjustments.id, id)))
+        .limit(1)
+
+      if (!header) return null
+
+      const baseUnits = aliasedTable(units, "base_units")
+
+      const lineRows = await exec(tx)
+        .select({
+          line: inventoryAdjustmentLines,
+          itemName: items.name,
+          locationName: warehouseLocations.name,
+          locationCode: warehouseLocations.code,
+          unitName: units.name,
+          unitSymbol: units.symbol,
+          baseUnitName: baseUnits.name,
+          baseUnitSymbol: baseUnits.symbol,
+          batchNumber: batches.batchNumber,
+        })
+        .from(inventoryAdjustmentLines)
+        .leftJoin(items, eq(inventoryAdjustmentLines.itemId, items.id))
+        .leftJoin(warehouseLocations, eq(inventoryAdjustmentLines.locationId, warehouseLocations.id))
+        .leftJoin(units, eq(inventoryAdjustmentLines.unitId, units.id))
+        .leftJoin(baseUnits, eq(inventoryAdjustmentLines.baseUnitId, baseUnits.id))
+        .leftJoin(batches, eq(inventoryAdjustmentLines.batchId, batches.id))
+        .where(
+          and(
+            eq(inventoryAdjustmentLines.orgId, orgId),
+            eq(inventoryAdjustmentLines.adjustmentId, id)
+          )
+        )
+        .orderBy(asc(inventoryAdjustmentLines.lineNo), asc(inventoryAdjustmentLines.id))
+
+      const row: InventoryAdjustmentDetailRow = {
+        ...header.adjustment,
+        warehouseName: header.warehouseName ?? null,
+        warehouseCode: header.warehouseCode ?? null,
+        reasonName: header.reasonName ?? null,
+        reasonCode: header.reasonCode ?? null,
+        journalEntryNumber: header.journalEntryNumber ?? null,
+        createdByName: header.createdByName ?? null,
+        confirmedByName: header.confirmedByName ?? null,
+      }
+
+      const detailLines: InventoryAdjustmentLineDetailRow[] = lineRows.map((l) => ({
+        ...l.line,
+        itemName: l.itemName ?? null,
+        locationName: l.locationName ?? null,
+        locationCode: l.locationCode ?? null,
+        unitName: l.unitName ?? null,
+        unitSymbol: l.unitSymbol ?? null,
+        baseUnitName: l.baseUnitName ?? null,
+        baseUnitSymbol: l.baseUnitSymbol ?? null,
+        batchNumber: l.batchNumber ?? null,
+      }))
+
+      return { row, lines: detailLines }
     },
 
     async updateAggregate(
@@ -213,9 +310,15 @@ export function createInventoryAdjustmentRepository({ db }: { db: DB }): Invento
         .select({
           adjustment: inventoryAdjustments,
           lineCount: sql<number>`coalesce(${lineCountSubquery.lineCount}, 0)::int`,
+          warehouseName: warehouses.name,
+          warehouseCode: warehouses.code,
+          reasonName: inventoryAdjustmentReasons.name,
+          reasonCode: inventoryAdjustmentReasons.code,
         })
         .from(inventoryAdjustments)
         .leftJoin(lineCountSubquery, eq(inventoryAdjustments.id, lineCountSubquery.adjustmentId))
+        .leftJoin(warehouses, eq(inventoryAdjustments.warehouseId, warehouses.id))
+        .leftJoin(inventoryAdjustmentReasons, eq(inventoryAdjustments.reasonId, inventoryAdjustmentReasons.id))
         .where(where)
         .orderBy(desc(inventoryAdjustments.date), desc(inventoryAdjustments.createdAt), desc(inventoryAdjustments.id))
         .limit(filters.pageSize)

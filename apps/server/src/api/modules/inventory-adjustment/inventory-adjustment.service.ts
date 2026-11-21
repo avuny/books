@@ -70,6 +70,12 @@ export const negateDecimal = (a: string): string => {
   return format(-p.n, p.scale)
 }
 
+export const absDecimal = (a: string): string => {
+  const p = parse(a)
+  const absN = p.n < 0n ? -p.n : p.n
+  return format(absN, p.scale)
+}
+
 export const multiplyDecimal = (a: string, b: string): string => {
   const pa = parse(a)
   const pb = parse(b)
@@ -248,7 +254,13 @@ export function createInventoryAdjustmentService(deps: InventoryAdjustmentServic
           return { ok: false as const, error: Err.INVENTORY_ADJUSTMENT_NUMBER_TAKEN }
         }
 
-        return { ok: true as const, value: toInventoryAdjustmentDto(inserted.row, inserted.lines) }
+        const detail = await repo.findDetail(orgId, inserted.row.id, tx)
+        return {
+          ok: true as const,
+          value: detail
+            ? toInventoryAdjustmentDto(detail.row, detail.lines)
+            : toInventoryAdjustmentDto(inserted.row, inserted.lines),
+        }
       })
 
       if (!outcome.ok) return fail({ error: outcome.error, msg: message(outcome.error) })
@@ -381,7 +393,13 @@ export function createInventoryAdjustmentService(deps: InventoryAdjustmentServic
         const updated = await repo.updateAggregate(orgId, id, patch, tx)
         if (!updated) return { ok: false as const, error: Err.INVENTORY_ADJUSTMENT_NOT_FOUND }
 
-        return { ok: true as const, value: toInventoryAdjustmentDto(updated, newLines) }
+        const detail = await repo.findDetail(orgId, id, tx)
+        return {
+          ok: true as const,
+          value: detail
+            ? toInventoryAdjustmentDto(detail.row, detail.lines)
+            : toInventoryAdjustmentDto(updated, newLines),
+        }
       })
 
       if (!outcome.ok) return fail({ error: outcome.error, msg: message(outcome.error) })
@@ -450,8 +468,11 @@ export function createInventoryAdjustmentService(deps: InventoryAdjustmentServic
 
       return ok({
         data: {
-          items: rows.map(({ adjustment, lineCount }) =>
-            toInventoryAdjustmentListItemDto(adjustment, lineCount)
+          items: rows.map(({ adjustment, lineCount, warehouseName, warehouseCode, reasonName, reasonCode }) =>
+            toInventoryAdjustmentListItemDto(
+              { ...adjustment, warehouseName, warehouseCode, reasonName, reasonCode },
+              lineCount
+            )
           ),
           page: query.page,
           pageSize: query.pageSize,
@@ -463,12 +484,12 @@ export function createInventoryAdjustmentService(deps: InventoryAdjustmentServic
 
     async get(actorId: string, orgId: string, id: string): Promise<Result<InventoryAdjustmentDto, Code>> {
       if (!(await can(actorId, P.READ, orgId, id))) return forbidden()
-      const aggregate = await repo.findAggregate(orgId, id)
-      if (!aggregate) {
+      const detail = await repo.findDetail(orgId, id)
+      if (!detail) {
         return fail({ error: Err.INVENTORY_ADJUSTMENT_NOT_FOUND, msg: message(Err.INVENTORY_ADJUSTMENT_NOT_FOUND) })
       }
       return ok({
-        data: toInventoryAdjustmentDto(aggregate.row, aggregate.lines),
+        data: toInventoryAdjustmentDto(detail.row, detail.lines),
         msg: "Inventory adjustment retrieved successfully",
       })
     },
@@ -527,13 +548,15 @@ export function createInventoryAdjustmentService(deps: InventoryAdjustmentServic
               return { ok: false as const, error: Err.INVENTORY_ADJUSTMENT_DIRECTION_MISMATCH }
             }
 
+            const quantity = absDecimal(delta)
+
             if (comp > 0) {
               // Gain: toLocation is the warehouse location, from is null (resolved to adjustment system location)
               movementLines.push({
                 itemId: line.itemId,
                 batchId: line.batchId,
                 toLocationId: line.locationId,
-                quantity: delta,
+                quantity,
               })
             } else {
               // Loss: fromLocation is the warehouse location, to is null (resolved to adjustment system location)
@@ -541,7 +564,7 @@ export function createInventoryAdjustmentService(deps: InventoryAdjustmentServic
                 itemId: line.itemId,
                 batchId: line.batchId,
                 fromLocationId: line.locationId,
-                quantity: negateDecimal(delta),
+                quantity,
               })
             }
           }
@@ -608,7 +631,13 @@ export function createInventoryAdjustmentService(deps: InventoryAdjustmentServic
           return { ok: false as const, error: Err.INVENTORY_ADJUSTMENT_NOT_FOUND }
         }
 
-        return { ok: true as const, value: toInventoryAdjustmentDto(confirmed, current.lines) }
+        const detail = await repo.findDetail(orgId, id, tx)
+        return {
+          ok: true as const,
+          value: detail
+            ? toInventoryAdjustmentDto(detail.row, detail.lines)
+            : toInventoryAdjustmentDto(confirmed, current.lines),
+        }
       })
 
       if (!outcome.ok) return fail({ error: outcome.error, msg: message(outcome.error) })
@@ -632,7 +661,13 @@ export function createInventoryAdjustmentService(deps: InventoryAdjustmentServic
         const cancelled = await repo.updateAggregate(orgId, id, { status: "CANCELLED" }, tx)
         if (!cancelled) return { ok: false as const, error: Err.INVENTORY_ADJUSTMENT_NOT_FOUND }
 
-        return { ok: true as const, value: toInventoryAdjustmentDto(cancelled, current.lines) }
+        const detail = await repo.findDetail(orgId, id, tx)
+        return {
+          ok: true as const,
+          value: detail
+            ? toInventoryAdjustmentDto(detail.row, detail.lines)
+            : toInventoryAdjustmentDto(cancelled, current.lines),
+        }
       })
 
       if (!outcome.ok) return fail({ error: outcome.error, msg: message(outcome.error) })

@@ -29,6 +29,36 @@ export interface StockSnapshotData {
   onHandQty: string
 }
 
+export interface InventoryAdjustmentDetailRow extends InventoryAdjustment {
+  warehouseName?: string | null
+  warehouseCode?: string | null
+  reasonName?: string | null
+  reasonCode?: string | null
+  journalEntryNumber?: string | null
+  createdByName?: string | null
+  confirmedByName?: string | null
+}
+
+export interface InventoryAdjustmentLineDetailRow extends InventoryAdjustmentLine {
+  itemName?: string | null
+  locationName?: string | null
+  locationCode?: string | null
+  unitName?: string | null
+  unitSymbol?: string | null
+  baseUnitName?: string | null
+  baseUnitSymbol?: string | null
+  batchNumber?: string | null
+}
+
+export interface InventoryAdjustmentListRow {
+  adjustment: InventoryAdjustment
+  lineCount: number
+  warehouseName?: string | null
+  warehouseCode?: string | null
+  reasonName?: string | null
+  reasonCode?: string | null
+}
+
 export interface InventoryAdjustmentRepository {
   transaction<T>(fn: (tx: Tx) => Promise<T>): Promise<T>
   nextDocumentNumber(orgId: string, tx?: Tx): Promise<string>
@@ -47,6 +77,11 @@ export interface InventoryAdjustmentRepository {
     tx?: Tx,
     opts?: { forUpdate?: boolean }
   ): Promise<{ row: InventoryAdjustment; lines: InventoryAdjustmentLine[] } | null>
+  findDetail(
+    orgId: string,
+    id: string,
+    tx?: Tx
+  ): Promise<{ row: InventoryAdjustmentDetailRow; lines: InventoryAdjustmentLineDetailRow[] } | null>
   updateAggregate(
     orgId: string,
     id: string,
@@ -73,7 +108,7 @@ export interface InventoryAdjustmentRepository {
       toDate?: string
     },
     tx?: Tx
-  ): Promise<{ rows: Array<{ adjustment: InventoryAdjustment; lineCount: number }>; total: number }>
+  ): Promise<{ rows: InventoryAdjustmentListRow[]; total: number }>
   listOptions(
     orgId: string,
     filters: { search?: string; after?: { name: string; id: string }; limit: number },
