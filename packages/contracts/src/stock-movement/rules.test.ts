@@ -39,10 +39,11 @@ describe("decimal helpers", () => {
   it("accepts only positive quantities that fit the column", () => {
     expect(isPositiveQuantity("1")).toBe(true)
     expect(isPositiveQuantity("0.0001")).toBe(true)
+    expect(isPositiveQuantity("0.000001")).toBe(true)
     expect(isPositiveQuantity("0")).toBe(false)
     expect(isPositiveQuantity("0.00")).toBe(false)
     expect(isPositiveQuantity("-1")).toBe(false)
-    expect(isPositiveQuantity("1.23456")).toBe(false)
+    expect(isPositiveQuantity("1.2345678")).toBe(false)
   })
 })
 

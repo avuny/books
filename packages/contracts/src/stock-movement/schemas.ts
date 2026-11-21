@@ -136,7 +136,13 @@ export const StockMovementLineHistoryItemSchema = z.object({
   itemId: z.string().uuid(),
   batchId: z.string().uuid().nullable(),
   fromLocationId: z.string().uuid(),
+  fromLocationCode: z.string().nullable().optional(),
+  fromLocationName: z.string().nullable().optional(),
+  fromWarehouseName: z.string().nullable().optional(),
   toLocationId: z.string().uuid(),
+  toLocationCode: z.string().nullable().optional(),
+  toLocationName: z.string().nullable().optional(),
+  toWarehouseName: z.string().nullable().optional(),
   quantity: z.string(),
 })
 export type StockMovementLineHistoryItem = z.infer<typeof StockMovementLineHistoryItemSchema>
@@ -160,6 +166,7 @@ export const InventoryItemDtoSchema = z.object({
   locationId: z.string().uuid(),
   onHandQty: z.string(),
   reservedQty: z.string(),
+  onOrderQty: z.string().default("0"),
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime(),
 })
@@ -172,19 +179,29 @@ export const InventoryItemBatchDtoSchema = z.object({
   batchId: z.string().uuid(),
   onHandQty: z.string(),
   reservedQty: z.string(),
+  onOrderQty: z.string().default("0"),
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime(),
 })
 export type InventoryItemBatchDto = z.infer<typeof InventoryItemBatchDtoSchema>
 
 export const StockBalanceDtoSchema = z.object({
+  id: z.string().uuid().optional(),
   warehouseId: z.string().uuid(),
+  warehouseName: z.string().optional(),
+  warehouseCode: z.string().optional(),
+  warehouseType: z.enum(["physical", "virtual"]).optional(),
   locationId: z.string().uuid(),
+  locationName: z.string().optional(),
+  locationCode: z.string().optional(),
+  locationType: z.string().optional(),
   itemId: z.string().uuid(),
   batchId: z.string().uuid().nullable(),
   quantity: z.string(),
   onHandQty: z.string().optional(),
   reservedQty: z.string().optional(),
+  onOrderQty: z.string().optional(),
+  availableQty: z.string().optional(),
   updatedAt: z.string().datetime(),
 })
 export type StockBalanceDto = z.infer<typeof StockBalanceDtoSchema>
@@ -234,8 +251,21 @@ export const ItemStockDtoSchema = z.object({
   onHand: z.string(),
   /** Sum over system warehouses (stock between two warehouses). */
   inTransit: z.string(),
+  reserved: z.string().default("0"),
+  onOrder: z.string().default("0"),
+  available: z.string().default("0"),
   warehouses: z.array(
-    z.object({ warehouseId: z.string().uuid(), isSystem: z.boolean(), quantity: z.string() })
+    z.object({
+      warehouseId: z.string().uuid(),
+      warehouseName: z.string().optional(),
+      warehouseCode: z.string().optional(),
+      warehouseType: z.enum(["physical", "virtual"]).optional(),
+      isSystem: z.boolean(),
+      quantity: z.string(),
+      reserved: z.string().optional(),
+      onOrder: z.string().optional(),
+      available: z.string().optional(),
+    })
   ),
 })
 export type ItemStockDto = z.infer<typeof ItemStockDtoSchema>

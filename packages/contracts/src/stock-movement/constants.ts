@@ -27,9 +27,9 @@ export const STOCK_MOVEMENT_MAX_LINES = 1000
 
 /**
  * Positive decimal string in the item's base unit. Never convert to number.
- * Digits must fit the quantity() column of @avuny/db (12 integer + 4 decimal digits here).
+ * Digits must fit the quantity() column of @avuny/db (12 integer + 6 decimal digits here).
  */
-export const STOCK_MOVEMENT_QUANTITY_REGEX = /^(?!0+(\.0+)?$)\d{1,12}(\.\d{1,4})?$/
+export const STOCK_MOVEMENT_QUANTITY_REGEX = /^(?!0+(\.0+)?$)\d{1,12}(\.\d{1,6})?$/
 
 export const STOCK_MOVEMENT_LIST_DEFAULT_PAGE_SIZE = 20
 export const STOCK_MOVEMENT_LIST_MAX_PAGE_SIZE = 100
