@@ -26,6 +26,7 @@ import { organizationUserRoutes } from "./modules/organization-user/index.js"
 import { otpRoutes } from "./modules/otp/index.js"
 import { roleRoutes } from "./modules/role/index.js"
 import { sidebarRoutes } from "./modules/sidebar/index.js"
+import { stockMovementRoutes } from "./modules/stock-movement/index.js"
 import { unitRoutes } from "./modules/unit/index.js"
 import { unitCollectionRoutes } from "./modules/unit-collection/index.js"
 import { usersRoutes } from "./modules/users/index.js"
@@ -104,6 +105,7 @@ app.route("/organization-users", organizationUserRoutes)
 app.route("/otp", otpRoutes)
 app.route("/roles", roleRoutes)
 app.route("/sidebar", sidebarRoutes)
+app.route("/stockMovement", stockMovementRoutes)
 app.route("/unit", unitRoutes)
 app.route("/unitCollection", unitCollectionRoutes)
 app.route("/users", usersRoutes)
