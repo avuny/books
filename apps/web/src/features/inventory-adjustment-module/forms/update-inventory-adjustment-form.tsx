@@ -1,14 +1,17 @@
+import { useEffect, useMemo, useState } from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useFieldArray, useForm, useWatch } from "react-hook-form"
-import { Plus, Trash2 } from "lucide-react"
+import { useForm, useWatch, type Resolver } from "react-hook-form"
 import { UpdateInventoryAdjustmentSchema } from "@avuny/contracts"
-import { Button } from "@workspace/ui/components/button"
 import {
   FormShell,
   InputField,
+  LineItems,
   SelectField,
   SubmitButton,
+  type AsyncComboboxCopy,
+  type AsyncOptionsSource,
 } from "@workspace/ui/blocks/form"
+import { cn } from "@workspace/ui/lib/utils"
 
 import { calculateLineDifference } from "../lib/calculate-line-difference"
 import type {
@@ -20,10 +23,21 @@ import type {
   OptionItem,
 } from "./inventory-adjustment-form-types"
 
-import type { z } from "@avuny/zod"
-
 export type UpdateInventoryAdjustmentFormValues = UpdateInventoryAdjustmentInput
-type UpdateInventoryAdjustmentFormInput = z.input<typeof UpdateInventoryAdjustmentSchema>
+
+const updateAdjustmentResolver: Resolver<UpdateInventoryAdjustmentFormValues> = async (
+  values,
+  context,
+  options
+) => {
+  const sanitized = {
+    ...values,
+    lines: Array.isArray(values.lines)
+      ? values.lines.filter((l) => Boolean(l && l.itemId))
+      : values.lines,
+  }
+  return zodResolver(UpdateInventoryAdjustmentSchema)(sanitized as any, context, options)
+}
 
 type UpdateInventoryAdjustmentFormProps = {
   copy: InventoryAdjustmentFormCopy
@@ -31,8 +45,11 @@ type UpdateInventoryAdjustmentFormProps = {
   warehouseOptions: OptionItem[]
   reasonOptions: OptionItem[]
   locationOptions: OptionItem[]
-  itemOptions: OptionItem[]
+  itemSource: AsyncOptionsSource
+  itemComboboxCopy: AsyncComboboxCopy
   unitOptionsMap?: Record<string, OptionItem[]>
+  onWarehouseChange?: (warehouseId: string) => void
+  onItemChange?: (index: number, itemId: string) => void
   onSubmit: (values: UpdateInventoryAdjustmentFormValues) => void
   isPending: boolean
   errorMessage?: string | null
@@ -45,18 +62,29 @@ export function UpdateInventoryAdjustmentForm({
   warehouseOptions,
   reasonOptions,
   locationOptions,
-  itemOptions,
+  itemSource,
+  itemComboboxCopy,
   unitOptionsMap = {},
+  onWarehouseChange,
+  onItemChange,
   onSubmit,
   isPending,
   errorMessage,
 }: UpdateInventoryAdjustmentFormProps) {
-  const form = useForm<
-    UpdateInventoryAdjustmentFormInput,
-    unknown,
-    UpdateInventoryAdjustmentFormValues
-  >({
-    resolver: zodResolver(UpdateInventoryAdjustmentSchema),
+  const initialReason = reasonOptions.find((r) => r.value === adjustment.reasonId)
+  const initialDirection =
+    (initialReason?.direction as "DECREASE" | "INCREASE" | "BOTH") || "BOTH"
+  const [direction, setDirection] = useState<"DECREASE" | "INCREASE" | "BOTH">(initialDirection)
+
+  const filteredReasonOptions = useMemo(() => {
+    if (direction === "BOTH") return reasonOptions
+    return reasonOptions.filter(
+      (r) => !r.direction || r.direction === direction || r.direction === "BOTH"
+    )
+  }, [reasonOptions, direction])
+
+  const form = useForm<UpdateInventoryAdjustmentFormValues>({
+    resolver: updateAdjustmentResolver,
     defaultValues: {
       date: adjustment.date,
       referenceNumber: adjustment.referenceNumber ?? "",
@@ -74,15 +102,27 @@ export function UpdateInventoryAdjustmentForm({
     },
   })
 
-  const { fields, append, remove } = useFieldArray({
+  const watchedWarehouseId = useWatch({
     control: form.control,
-    name: "lines",
+    name: "warehouseId",
   })
 
-  const linesWatch = useWatch({
-    control: form.control,
-    name: "lines",
-  })
+  // Synchronize filtered reason options
+  useEffect(() => {
+    const currentReasonId = form.getValues("reasonId")
+    if (filteredReasonOptions.length > 0) {
+      const exists = filteredReasonOptions.some((r) => r.value === currentReasonId)
+      if (!exists) {
+        form.setValue("reasonId", filteredReasonOptions[0].value)
+      }
+    }
+  }, [filteredReasonOptions, form])
+
+  useEffect(() => {
+    if (watchedWarehouseId) {
+      onWarehouseChange?.(watchedWarehouseId)
+    }
+  }, [watchedWarehouseId, onWarehouseChange])
 
   return (
     <FormShell
@@ -122,138 +162,163 @@ export function UpdateInventoryAdjustmentForm({
             disabled={isPending}
           />
 
+          <div className="space-y-2">
+            <label className="text-sm font-medium leading-none text-foreground peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+              {copy.direction.label}
+            </label>
+            <div className="flex rounded-md border border-input p-1 bg-muted/40">
+              {(["DECREASE", "INCREASE", "BOTH"] as const).map((dir) => {
+                const isSelected = direction === dir
+                const label =
+                  dir === "DECREASE"
+                    ? copy.direction.decrease
+                    : dir === "INCREASE"
+                      ? copy.direction.increase
+                      : copy.direction.both
+                return (
+                  <button
+                    key={dir}
+                    type="button"
+                    disabled={isPending}
+                    onClick={() => setDirection(dir)}
+                    className={cn(
+                      "flex-1 rounded-sm px-3 py-1.5 text-xs font-medium transition-all cursor-pointer",
+                      isSelected
+                        ? "bg-background text-foreground shadow-xs font-semibold"
+                        : "text-muted-foreground hover:text-foreground"
+                    )}
+                  >
+                    {label}
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <SelectField
             control={form.control}
             name="reasonId"
             copy={copy.reason}
-            options={reasonOptions}
+            options={filteredReasonOptions}
+            disabled={isPending}
+          />
+
+          <InputField
+            control={form.control}
+            name="description"
+            copy={copy.formDescription}
+            type="text"
             disabled={isPending}
           />
         </div>
 
-        <InputField
+        {/* Reusable Zoho-style Line Items Component */}
+        <LineItems
           control={form.control}
-          name="description"
-          copy={copy.formDescription}
-          type="text"
+          name="lines"
+          blankLine={{
+            itemId: "",
+            locationId: locationOptions[0]?.value ?? "",
+            unitId: "",
+            batchId: null,
+            countedQuantity: "0",
+            notes: "",
+          }}
+          copy={{
+            title: copy.linesTitle,
+            addLine: copy.addLine,
+            removeLine: copy.removeLine,
+            noLines: copy.noLines,
+            item: copy.fields.item,
+          }}
+          itemSource={itemSource}
+          itemComboboxCopy={itemComboboxCopy}
+          itemPlaceholder={copy.fields.item.placeholder}
+          itemColSpan="sm:col-span-7"
           disabled={isPending}
-        />
+          onItemChange={(index, itemId) => {
+            onItemChange?.(index, itemId)
+            const currentLoc = form.getValues(`lines.${index}.locationId` as any)
+            if (!currentLoc && locationOptions.length > 0) {
+              form.setValue(`lines.${index}.locationId` as any, locationOptions[0].value)
+            }
+          }}
+          renderFields={({ index, disabled, line }) => {
+            const lineData = line as any
+            const itemUnits = lineData?.itemId ? unitOptionsMap[lineData.itemId] ?? [] : []
 
-        {/* Lines Section */}
-        <div className="space-y-4 rounded-lg border border-border p-4">
-          <div className="flex items-center justify-between">
-            <h3 className="text-base font-semibold text-foreground">
-              {copy.linesTitle}
-            </h3>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              disabled={isPending}
-              onClick={() =>
-                append({
-                  itemId: "",
-                  locationId: locationOptions[0]?.value ?? "",
-                  unitId: "",
-                  batchId: null,
-                  countedQuantity: "0",
-                  notes: "",
-                })
-              }
-            >
-              <Plus className="me-1 size-4" />
-              {copy.addLine}
-            </Button>
-          </div>
-
-          <div className="space-y-4">
-            {fields.map((fieldItem, index) => {
-              const lineState = linesWatch?.[index]
-              const origLine = adjustment.lines[index]
-              const itemUnits = lineState?.itemId ? unitOptionsMap[lineState.itemId] ?? [] : []
-              const provisionalDiff = calculateLineDifference(
-                lineState?.countedQuantity,
-                origLine?.systemQuantityBase ?? 0
-              )
-
-              return (
-                <div
-                  key={fieldItem.id}
-                  className="relative grid grid-cols-1 gap-3 rounded-md border border-border/60 bg-muted/20 p-3 sm:grid-cols-12"
-                >
-                  <div className="sm:col-span-4">
-                    <SelectField
-                      control={form.control}
-                      name={`lines.${index}.itemId` as const}
-                      copy={copy.fields.item}
-                      options={itemOptions}
-                      disabled={isPending}
-                    />
-                  </div>
-
-                  <div className="sm:col-span-3">
-                    <SelectField
-                      control={form.control}
-                      name={`lines.${index}.locationId` as const}
-                      copy={copy.fields.location}
-                      options={locationOptions}
-                      disabled={isPending}
-                    />
-                  </div>
-
-                  <div className="sm:col-span-2">
-                    <SelectField
-                      control={form.control}
-                      name={`lines.${index}.unitId` as const}
-                      copy={copy.fields.unit}
-                      options={itemUnits.length > 0 ? itemUnits : [{ value: "base", label: "Default unit" }]}
-                      disabled={isPending}
-                    />
-                  </div>
-
-                  <div className="sm:col-span-2">
-                    <InputField
-                      control={form.control}
-                      name={`lines.${index}.countedQuantity` as const}
-                      copy={copy.fields.countedQuantity}
-                      type="number"
-                      disabled={isPending}
-                    />
-                  </div>
-
-                  <div className="flex items-center justify-end sm:col-span-1">
-                    {fields.length > 1 && (
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon"
-                        aria-label={copy.removeLine}
-                        disabled={isPending}
-                        onClick={() => remove(index)}
-                        className="text-destructive hover:bg-destructive/10"
-                      >
-                        <Trash2 className="size-4" />
-                      </Button>
-                    )}
-                  </div>
-
-                  <div className="col-span-full flex items-center justify-between text-xs text-muted-foreground">
-                    <span>
-                      {copy.fields.systemQuantity}:{" "}
-                      <strong className="tabular-nums text-foreground">
-                        {origLine?.systemQuantityBase ?? "0.0000"}
-                      </strong>
-                    </span>
-                    <span>
-                      {copy.fields.difference}:{" "}
-                      <strong className="tabular-nums text-foreground">{provisionalDiff}</strong>
-                    </span>
-                  </div>
+            return (
+              <>
+                {/* Row 1 remainder: Location */}
+                <div className="sm:col-span-5">
+                  <SelectField
+                    control={form.control}
+                    name={`lines.${index}.locationId` as const}
+                    copy={copy.fields.location}
+                    options={locationOptions}
+                    disabled={disabled}
+                  />
                 </div>
-              )
-            })}
-          </div>
-        </div>
+
+                {/* Row 2: Unit, Counted Quantity, Notes */}
+                <div className="sm:col-span-3">
+                  <SelectField
+                    control={form.control}
+                    name={`lines.${index}.unitId` as const}
+                    copy={copy.fields.unit}
+                    options={
+                      itemUnits.length > 0
+                        ? itemUnits
+                        : [
+                            {
+                              value: lineData?.unitId || "base",
+                              label: lineData?.unitId ? "Selected unit" : "Select unit",
+                            },
+                          ]
+                    }
+                    disabled={disabled}
+                  />
+                </div>
+
+                <div className="sm:col-span-3">
+                  <InputField
+                    control={form.control}
+                    name={`lines.${index}.countedQuantity` as const}
+                    copy={copy.fields.countedQuantity}
+                    type="number"
+                    disabled={disabled}
+                  />
+                </div>
+
+                <div className="sm:col-span-6">
+                  <InputField
+                    control={form.control}
+                    name={`lines.${index}.notes` as const}
+                    copy={copy.fields.notes}
+                    type="text"
+                    disabled={disabled}
+                  />
+                </div>
+              </>
+            )
+          }}
+          renderRowFooter={({ line }) => {
+            const lineData = line as any
+            const provisionalDiff = calculateLineDifference(lineData?.countedQuantity, 0)
+            return (
+              <div className="flex items-center justify-between text-xs text-muted-foreground">
+                <span>
+                  {copy.fields.difference}:{" "}
+                  <strong className="tabular-nums text-foreground">
+                    {provisionalDiff}
+                  </strong>
+                </span>
+              </div>
+            )
+          }}
+        />
 
         <SubmitButton
           className="w-full"

@@ -21,6 +21,12 @@ export function useInventoryAdjustmentFormCopy(
       label: t("fields.warehouse"),
       placeholder: "Select warehouse...",
     },
+    direction: {
+      label: t("fields.direction"),
+      decrease: t("labels.direction.DECREASE"),
+      increase: t("labels.direction.INCREASE"),
+      both: t("labels.direction.BOTH"),
+    },
     reason: {
       label: t("fields.reason"),
       placeholder: "Select reason...",
@@ -48,8 +54,9 @@ export function useInventoryAdjustmentFormCopy(
       },
       batch: {
         label: t("fields.batch"),
-        placeholder: "Batch number (optional)...",
+        placeholder: "Select batch...",
       },
+      newBatch: t("actions.addBatch", { defaultValue: "+ New Batch" }),
       countedQuantity: {
         label: t("fields.countedQuantity"),
         placeholder: "0.0000",

@@ -12,6 +12,12 @@ import {
 } from "@avuny/contracts"
 
 import {
+  createBatch,
+  getItem,
+  getListItemOptionsQueryKey,
+  getUnitCollection,
+  listBatches,
+  listItemOptions,
   getGetInventoryAdjustmentQueryKey,
   getListInventoryAdjustmentsQueryKey,
   useCancelInventoryAdjustment,
@@ -21,13 +27,13 @@ import {
   useGetInventoryAdjustment,
   useGetInventoryAdjustmentSnapshot,
   useGetMyPermissions,
-  useListItemOptions,
   useListWarehouseLocationOptions,
   useListWarehouseOptions,
   useListInventoryAdjustmentReasons,
   useListInventoryAdjustments,
   useUpdateInventoryAdjustment,
 } from "@/api"
+import { useCursorOptions } from "../lib/options/use-cursor-options"
 
 import type {
   InventoryAdjustmentDto,
@@ -186,7 +192,7 @@ export function useStockSnapshot(orgId: string, queryParams: StockSnapshotQuery,
 }
 
 export function useWarehouseOptions(orgId: string) {
-  const query = useListWarehouseOptions(orgId, { limit: 100 })
+  const query = useListWarehouseOptions(orgId, { limit: 50 })
   const options = useMemo(() => {
     return (query.data?.data?.items ?? []).map((w: any) => ({
       value: w.id as string,
@@ -201,9 +207,9 @@ export function useWarehouseLocationOptions(orgId: string, warehouseId?: string)
   const query = useListWarehouseLocationOptions(
     orgId,
     {
-      warehouseId,
+      warehouseId: warehouseId || undefined,
       stockableOnly: "true" as any,
-      limit: 100,
+      limit: 50,
     },
     {
       query: {
@@ -222,20 +228,84 @@ export function useWarehouseLocationOptions(orgId: string, warehouseId?: string)
   return { options, isLoading: query.isLoading }
 }
 
-export function useItemOptions(orgId: string, search?: string) {
-  const query = useListItemOptions(orgId, {
-    search: search || undefined,
-    limit: 50,
+export function useItemOptions(orgId: string) {
+  return useCursorOptions({
+    queryKey: getListItemOptionsQueryKey(orgId),
+    fetchPage: async ({ cursor, search, limit, signal }) =>
+      (await listItemOptions(orgId, { cursor, search, limit }, { signal })).data,
+    enabled: Boolean(orgId),
   })
+}
 
-  const options = useMemo(() => {
-    return (query.data?.data?.items ?? []).map((i: any) => ({
-      value: i.id as string,
-      label: i.name as string,
+export async function fetchItemDetails(
+  orgId: string,
+  itemId: string
+): Promise<{
+  baseUnitId: string
+  units: { value: string; label: string }[]
+  isBatchTracked: boolean
+}> {
+  try {
+    const itemRes = await getItem(orgId, itemId)
+    const item = itemRes.data
+    const isBatchTracked = Boolean(item.isBatchTracked)
+    const baseUnitOption = {
+      value: item.baseUnit.id,
+      label: `${item.baseUnit.name} (${item.baseUnit.symbol})`,
+    }
+
+    if (!item.unitCollectionId) {
+      return { baseUnitId: item.baseUnit.id, units: [baseUnitOption], isBatchTracked }
+    }
+
+    const collectionRes = await getUnitCollection(orgId, item.unitCollectionId)
+    const collectionUnits = (collectionRes.data.units ?? []).map((u: any) => ({
+      value: u.id as string,
+      label: `${u.name} (${u.symbol})`,
     }))
-  }, [query.data])
 
-  return { options, isLoading: query.isLoading }
+    const exists = collectionUnits.some((u: any) => u.value === item.baseUnit.id)
+    const allUnits = exists ? collectionUnits : [baseUnitOption, ...collectionUnits]
+
+    return { baseUnitId: item.baseUnit.id, units: allUnits, isBatchTracked }
+  } catch {
+    return { baseUnitId: "", units: [], isBatchTracked: false }
+  }
+}
+
+export const fetchItemUnits = fetchItemDetails
+
+export async function fetchItemBatches(
+  orgId: string,
+  itemId: string
+): Promise<{ value: string; label: string }[]> {
+  try {
+    const res = await listBatches(orgId, { itemId, pageSize: 50 })
+    const items = res.data.items ?? []
+    return items.map((b) => ({
+      value: b.id,
+      label: `${b.batchNumber}${b.expiresOn ? ` (Exp: ${b.expiresOn})` : ""}`,
+    }))
+  } catch {
+    return []
+  }
+}
+
+export async function createItemBatch(
+  orgId: string,
+  itemId: string,
+  batchNumber: string
+): Promise<{ value: string; label: string } | null> {
+  try {
+    const res = await createBatch(orgId, { itemId, number: batchNumber.trim() })
+    const b = res.data
+    return {
+      value: b.id,
+      label: `${b.batchNumber}${b.expiresOn ? ` (Exp: ${b.expiresOn})` : ""}`,
+    }
+  } catch {
+    return null
+  }
 }
 
 export function useInventoryAdjustmentAbilities(orgId: string) {

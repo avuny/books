@@ -3,6 +3,7 @@ import type { FieldCopy } from "@workspace/ui/blocks/types"
 export type OptionItem = {
   value: string
   label: string
+  direction?: string
 }
 
 export type InventoryAdjustmentFormCopy = {
@@ -11,6 +12,12 @@ export type InventoryAdjustmentFormCopy = {
   referenceNumber: FieldCopy
   date: FieldCopy
   warehouse: FieldCopy
+  direction: {
+    label: string
+    decrease: string
+    increase: string
+    both: string
+  }
   reason: FieldCopy
   formDescription: FieldCopy
   linesTitle: string
@@ -22,6 +29,7 @@ export type InventoryAdjustmentFormCopy = {
     location: FieldCopy
     unit: FieldCopy
     batch: FieldCopy
+    newBatch?: string
     countedQuantity: FieldCopy
     systemQuantity: string
     difference: string
