@@ -1,7 +1,7 @@
 import type { ErrorMeta } from "@avuny/utils"
 import type { BatchErrorCode as Code } from "@avuny/contracts"
 
-export const batchErrorsHttpMap: Record<Code, ErrorMeta> = {
+export const batchErrorsHttpMap = {
   BATCH_NOT_FOUND: {
     statusCode: 404,
     responseMessage: "Batch not found",
@@ -34,4 +34,4 @@ export const batchErrorsHttpMap: Record<Code, ErrorMeta> = {
     statusCode: 422,
     responseMessage: "The batch shelf life is not valid",
   },
-}
+} as const satisfies Record<Code, ErrorMeta>
