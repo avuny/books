@@ -27,7 +27,10 @@ export function InventoryAdjustmentDetails({
   onBack,
 }: InventoryAdjustmentDetailsProps) {
   const { t } = useTranslation("inventory-adjustment")
-  const { adjustment, isLoading, error } = useInventoryAdjustment(orgId, adjustmentId)
+  const { adjustment, isLoading, error } = useInventoryAdjustment(
+    orgId,
+    adjustmentId
+  )
   const abilities = useInventoryAdjustmentAbilities(orgId)
   const { getStatusLabel } = useInventoryAdjustmentLabels()
 
@@ -73,34 +76,46 @@ export function InventoryAdjustmentDetails({
   }
 
   const copy = {
-    backLabel: "Back to list",
-    title: t("details.title"),
-    date: t("fields.date"),
-    referenceNumber: t("fields.referenceNumber"),
-    warehouse: t("fields.warehouse"),
-    reason: t("fields.reason"),
-    description: t("fields.description"),
-    status: t("fields.status"),
-    linesTitle: t("details.linesSummary"),
-    stockMovement: t("details.stockMovement"),
-    journalEntry: t("details.journalEntry"),
-    confirmedBy: t("details.confirmedBy"),
-    confirmedAt: t("details.confirmedAt"),
+    backLabel: t("actions.backToList", { defaultValue: "Back to adjustments" }),
+    title: t("details.title", { defaultValue: "Adjustment details" }),
+    date: t("fields.date", { defaultValue: "Adjustment date" }),
+    referenceNumber: t("fields.referenceNumber", { defaultValue: "Reference number" }),
+    warehouse: t("fields.warehouse", { defaultValue: "Warehouse" }),
+    reason: t("fields.reason", { defaultValue: "Adjustment reason" }),
+    description: t("fields.description", { defaultValue: "Description" }),
+    status: t("fields.status", { defaultValue: "Status" }),
+    linesTitle: t("details.linesSummary", { defaultValue: "Adjusted items" }),
+    stockMovement: t("details.stockMovement", { defaultValue: "Stock movement" }),
+    journalEntry: t("details.journalEntry", { defaultValue: "Journal entry" }),
+    confirmedBy: t("details.confirmedBy", { defaultValue: "Confirmed by" }),
+    confirmedAt: t("details.confirmedAt", { defaultValue: "Confirmed at" }),
+    createdBy: t("details.createdBy", { defaultValue: "Created by" }),
+    createdAt: t("details.createdAt", { defaultValue: "Created at" }),
+    overview: t("details.overview", { defaultValue: "Overview" }),
+    documentInfo: t("details.documentInfo", { defaultValue: "Document details" }),
+    auditInfo: t("details.auditInfo", { defaultValue: "Audit & Postings" }),
+    totalLines: t("details.totalLines", { defaultValue: "Total items" }),
+    increases: t("details.increases", { defaultValue: "Increases" }),
+    decreases: t("details.decreases", { defaultValue: "Decreases" }),
+    noChange: t("details.noChange", { defaultValue: "No change" }),
+    netDifference: t("details.netDifference", { defaultValue: "Net difference" }),
+    pendingPosting: t("details.pendingPosting", { defaultValue: "Pending confirmation" }),
+    noItems: t("details.noItems", { defaultValue: "No items recorded in this adjustment." }),
     fields: {
-      item: t("fields.item"),
-      location: t("fields.location"),
-      unit: t("fields.unit"),
-      batch: t("fields.batch"),
-      countedQuantity: t("fields.countedQuantity"),
-      systemQuantity: t("fields.systemQuantity"),
-      difference: t("fields.difference"),
-      notes: t("fields.notes"),
+      item: t("fields.item", { defaultValue: "Item" }),
+      location: t("fields.location", { defaultValue: "Location" }),
+      unit: t("fields.unit", { defaultValue: "Unit" }),
+      batch: t("fields.batch", { defaultValue: "Batch" }),
+      countedQuantity: t("fields.countedQuantity", { defaultValue: "Counted quantity" }),
+      systemQuantity: t("fields.systemQuantity", { defaultValue: "System quantity" }),
+      difference: t("fields.difference", { defaultValue: "Difference" }),
+      notes: t("fields.notes", { defaultValue: "Notes" }),
     },
     actions: {
-      edit: t("actions.edit"),
-      confirm: t("actions.confirm"),
-      cancel: t("actions.cancel"),
-      delete: t("actions.delete"),
+      edit: t("actions.edit", { defaultValue: "Edit draft" }),
+      confirm: t("actions.confirm", { defaultValue: "Confirm" }),
+      cancel: t("actions.cancel", { defaultValue: "Cancel adjustment" }),
+      delete: t("actions.delete", { defaultValue: "Delete" }),
     },
     getStatusLabel,
   }
@@ -138,13 +153,10 @@ export function InventoryAdjustmentDetails({
           setIsConfirmDialogOpen(open)
           if (!open) setActionError(null)
         }}
-        title={t("actions.confirm")}
-        description={
-          actionError ??
-          "Confirming this adjustment will post a stock movement and general ledger journal entry. Confirmed adjustments cannot be edited or undone."
-        }
-        confirmLabel={t("actions.confirm")}
-        cancelLabel="Back"
+        title={t("actions.confirmTitle", { defaultValue: "Confirm inventory adjustment" })}
+        description={actionError ?? t("actions.confirmDescription", { defaultValue: "Confirming this adjustment will post a stock movement and general ledger journal entry. Confirmed adjustments cannot be edited or undone." })}
+        confirmLabel={t("actions.confirm", { defaultValue: "Confirm" })}
+        cancelLabel={t("actions.back", { defaultValue: "Back" })}
         isLoading={confirmMutation.isPending}
         onConfirm={handleConfirm}
       />
@@ -155,13 +167,15 @@ export function InventoryAdjustmentDetails({
           setIsCancelDialogOpen(open)
           if (!open) setActionError(null)
         }}
-        title={t("actions.cancel")}
+        title={t("actions.cancelTitle", { defaultValue: "Cancel inventory adjustment" })}
         description={
           actionError ??
-          "Are you sure you want to cancel this draft adjustment? No stock will be affected."
+          t("actions.cancelDescription", {
+            defaultValue: "Are you sure you want to cancel this draft adjustment? No stock will be affected.",
+          })
         }
-        confirmLabel={t("actions.cancel")}
-        cancelLabel="Back"
+        confirmLabel={t("actions.cancel", { defaultValue: "Cancel adjustment" })}
+        cancelLabel={t("actions.back", { defaultValue: "Back" })}
         isLoading={cancelMutation.isPending}
         onConfirm={handleCancel}
       />
@@ -172,10 +186,10 @@ export function InventoryAdjustmentDetails({
           setIsDeleteDialogOpen(open)
           if (!open) setActionError(null)
         }}
-        title={t("delete.title")}
-        description={actionError ?? t("delete.message")}
-        confirmLabel={t("actions.delete")}
-        cancelLabel="Back"
+        title={t("delete.title", { defaultValue: "Delete adjustment" })}
+        description={actionError ?? t("delete.message", { defaultValue: "Are you sure you want to delete this draft adjustment? This action cannot be undone." })}
+        confirmLabel={t("actions.delete", { defaultValue: "Delete" })}
+        cancelLabel={t("actions.back", { defaultValue: "Back" })}
         isLoading={deleteMutation.isPending}
         onConfirm={handleDelete}
       />
