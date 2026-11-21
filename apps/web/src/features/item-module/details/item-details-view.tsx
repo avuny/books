@@ -4,12 +4,23 @@ import { ArrowLeft } from "lucide-react"
 import { Badge } from "@workspace/ui/components/badge"
 import { Button } from "@workspace/ui/components/button"
 import { Skeleton } from "@workspace/ui/components/skeleton"
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@workspace/ui/components/tabs"
 
 import { ItemStatusBadge, ItemTrackingBadges } from "../components"
 import type { ItemDto } from "../types"
+import { ItemInventoryTab } from "./item-inventory-tab"
+import { ItemStockMovementsTab } from "./item-stock-movements-tab"
 
 export type ItemDetailsViewCopy = {
   backLabel: string
+  tabOverview: string
+  tabInventory: string
+  tabMovements: string
   activeLabel: string
   inactiveLabel: string
   trackedLabel: string
@@ -35,6 +46,7 @@ export type ItemDetailsViewCopy = {
 }
 
 export interface ItemDetailsViewProps {
+  orgId: string
   item: ItemDto | null
   isLoading: boolean
   /** Already localized. Shown instead of the item when loading failed. */
@@ -53,6 +65,7 @@ export interface ItemDetailsViewProps {
 }
 
 export function ItemDetailsView({
+  orgId,
   item,
   isLoading,
   errorMessage,
@@ -108,87 +121,113 @@ export function ItemDetailsView({
             {editAction}
           </div>
 
-          <dl className="grid grid-cols-1 gap-4 text-sm sm:grid-cols-3">
-            <div>
-              <dt className="text-xs text-muted-foreground">
-                {copy.categoryLabel}
-              </dt>
-              <dd className="text-foreground">{item.categoryName}</dd>
-            </div>
-            <div>
-              <dt className="text-xs text-muted-foreground">
-                {copy.baseUnitLabel}
-              </dt>
-              <dd className="text-foreground">{baseUnitText}</dd>
-            </div>
-            <div>
-              <dt className="text-xs text-muted-foreground">
-                {copy.createdLabel}
-              </dt>
-              <dd className="text-foreground">{createdAt}</dd>
-            </div>
-            <div>
-              <dt className="text-xs text-muted-foreground">
-                {copy.updatedLabel}
-              </dt>
-              <dd className="text-foreground">{updatedAt}</dd>
-            </div>
-          </dl>
+          <Tabs defaultValue="overview" className="w-full">
+            <TabsList className="mb-4">
+              <TabsTrigger value="overview">{copy.tabOverview}</TabsTrigger>
+              <TabsTrigger value="inventory">{copy.tabInventory}</TabsTrigger>
+              <TabsTrigger value="movements">{copy.tabMovements}</TabsTrigger>
+            </TabsList>
 
-          <section className="grid gap-3">
-            <h2 className="text-sm font-medium text-foreground">
-              {copy.settingsTitle}
-            </h2>
-            <dl className="grid grid-cols-1 gap-4 text-sm sm:grid-cols-3">
-              <div>
-                <dt className="text-xs text-muted-foreground">
-                  {copy.valuationLabel}
-                </dt>
-                <dd className="text-foreground">{valuationText}</dd>
-              </div>
-              <div>
-                <dt className="text-xs text-muted-foreground">
-                  {copy.reorderPointLabel}
-                </dt>
-                <dd className="text-foreground tabular-nums">
-                  {item.reorderPoint ?? copy.noneLabel}
-                </dd>
-              </div>
-              <div>
-                <dt className="text-xs text-muted-foreground">
-                  {copy.negativeStockLabel}
-                </dt>
-                <dd className="text-foreground">
-                  {item.allowNegativeStock
-                    ? copy.allowedLabel
-                    : copy.notAllowedLabel}
-                </dd>
-              </div>
-            </dl>
-          </section>
+            <TabsContent value="overview" className="space-y-6">
+              <dl className="grid grid-cols-1 gap-4 text-sm sm:grid-cols-3">
+                <div>
+                  <dt className="text-xs text-muted-foreground">
+                    {copy.categoryLabel}
+                  </dt>
+                  <dd className="text-foreground">{item.categoryName}</dd>
+                </div>
+                <div>
+                  <dt className="text-xs text-muted-foreground">
+                    {copy.baseUnitLabel}
+                  </dt>
+                  <dd className="text-foreground">{baseUnitText}</dd>
+                </div>
+                <div>
+                  <dt className="text-xs text-muted-foreground">
+                    {copy.createdLabel}
+                  </dt>
+                  <dd className="text-foreground">{createdAt}</dd>
+                </div>
+                <div>
+                  <dt className="text-xs text-muted-foreground">
+                    {copy.updatedLabel}
+                  </dt>
+                  <dd className="text-foreground">{updatedAt}</dd>
+                </div>
+              </dl>
 
-          <section className="grid gap-2">
-            <h2 className="text-sm font-medium text-foreground">
-              {copy.flagsTitle}
-            </h2>
-            <div className="flex flex-wrap gap-2">
-              <ItemTrackingBadges
-                isInventoryTracked={item.isInventoryTracked}
-                isBatchTracked={item.isBatchTracked}
-                isExpiryTracked={item.isExpiryTracked}
-                trackedLabel={copy.trackedLabel}
-                untrackedLabel={copy.untrackedLabel}
-                batchLabel={copy.batchLabel}
-                expiryLabel={copy.expiryLabel}
+              <section className="grid gap-3">
+                <h2 className="text-sm font-medium text-foreground">
+                  {copy.settingsTitle}
+                </h2>
+                <dl className="grid grid-cols-1 gap-4 text-sm sm:grid-cols-3">
+                  <div>
+                    <dt className="text-xs text-muted-foreground">
+                      {copy.valuationLabel}
+                    </dt>
+                    <dd className="text-foreground">{valuationText}</dd>
+                  </div>
+                  <div>
+                    <dt className="text-xs text-muted-foreground">
+                      {copy.reorderPointLabel}
+                    </dt>
+                    <dd className="text-foreground tabular-nums">
+                      {item.reorderPoint ?? copy.noneLabel}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt className="text-xs text-muted-foreground">
+                      {copy.negativeStockLabel}
+                    </dt>
+                    <dd className="text-foreground">
+                      {item.allowNegativeStock
+                        ? copy.allowedLabel
+                        : copy.notAllowedLabel}
+                    </dd>
+                  </div>
+                </dl>
+              </section>
+
+              <section className="grid gap-2">
+                <h2 className="text-sm font-medium text-foreground">
+                  {copy.flagsTitle}
+                </h2>
+                <div className="flex flex-wrap gap-2">
+                  <ItemTrackingBadges
+                    isInventoryTracked={item.isInventoryTracked}
+                    isBatchTracked={item.isBatchTracked}
+                    isExpiryTracked={item.isExpiryTracked}
+                    trackedLabel={copy.trackedLabel}
+                    untrackedLabel={copy.untrackedLabel}
+                    batchLabel={copy.batchLabel}
+                    expiryLabel={copy.expiryLabel}
+                  />
+                  {item.canAssembled ? (
+                    <Badge variant="outline">{copy.assemblableLabel}</Badge>
+                  ) : null}
+                  {item.isReturnable ? (
+                    <Badge variant="outline">{copy.returnableLabel}</Badge>
+                  ) : null}
+                </div>
+              </section>
+            </TabsContent>
+
+            <TabsContent value="inventory" className="pt-2">
+              <ItemInventoryTab
+                orgId={orgId}
+                itemId={item.id}
+                baseUnitSymbol={item.baseUnit.symbol}
               />
-              {item.canAssembled ? (
-                <Badge variant="outline">{copy.assemblableLabel}</Badge>
-              ) : null}
-              {item.isReturnable ? (
-                <Badge variant="outline">{copy.returnableLabel}</Badge>
-              ) : null}
-            </div>
-          </section>
+            </TabsContent>
+
+            <TabsContent value="movements" className="pt-2">
+              <ItemStockMovementsTab
+                orgId={orgId}
+                itemId={item.id}
+                baseUnitSymbol={item.baseUnit.symbol}
+              />
+            </TabsContent>
+          </Tabs>
         </>
       )}
     </div>

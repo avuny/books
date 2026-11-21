@@ -27,11 +27,15 @@ export function ItemDetails({ orgId, itemId, onBack }: ItemDetailsProps) {
 
   return (
     <ItemDetailsView
+      orgId={orgId}
       item={item}
       isLoading={isLoading}
       errorMessage={error ? parseApiError(error).message : null}
       copy={{
         backLabel: t("details.back"),
+        tabOverview: t("details.tabs.overview", "Overview"),
+        tabInventory: t("details.tabs.inventory", "Inventory"),
+        tabMovements: t("details.tabs.movements", "Stock movements"),
         activeLabel: t("type.active"),
         inactiveLabel: t("type.inactive"),
         trackedLabel: t("type.tracked"),
