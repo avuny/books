@@ -196,6 +196,7 @@
     "baseUnit": "الوحدة الأساسية",
     "tracking": "التتبع",
     "status": "الحالة",
+    "availableStock": "المخزون المتوفر",
     "actions": "الإجراءات",
     "actionsFor": "إجراءات {name}"
   },
@@ -209,6 +210,41 @@
   },
   "details": {
     "back": "العودة إلى الأصناف",
+    "tabs": {
+      "overview": "نظرة عامة",
+      "inventory": "المخزون",
+      "movements": "حركات المخزون"
+    },
+    "inventory": {
+      "title": "عناصر المخزون",
+      "description": "مستويات المخزون عبر المستودعات ومواقع التخزين.",
+      "empty": "لا توجد سجلات مخزون للمستودع أو الموقع المحدد.",
+      "available": "المتوفر",
+      "onHand": "في اليد",
+      "reserved": "المحجوز",
+      "onOrder": "قيد الطلب",
+      "inTransit": "في الطريق",
+      "warehouse": "المستودع",
+      "location": "الموقع",
+      "totalAvailable": "إجمالي المتوفر",
+      "totalOnHand": "إجمالي في اليد",
+      "totalReserved": "إجمالي المحجوز",
+      "totalOnOrder": "إجمالي قيد الطلب",
+      "totalInTransit": "إجمالي في الطريق"
+    },
+    "movements": {
+      "title": "حركات المخزون",
+      "description": "سجل حركات المخزون، الاستلام، التحويل، التسوية والصرف.",
+      "empty": "لا توجد حركات مخزون مسجلة لهذا الصنف.",
+      "date": "التاريخ",
+      "type": "النوع",
+      "reference": "المرجع",
+      "from": "من",
+      "to": "إلى",
+      "quantity": "الكمية",
+      "reversal": "حركة عكسية",
+      "note": "ملاحظة"
+    },
     "category": "الفئة",
     "baseUnit": "الوحدة الأساسية",
     "valuation": "طريقة التقييم",

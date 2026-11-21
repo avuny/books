@@ -179,6 +179,7 @@ export const ItemListItemDtoSchema = z.object({
   isBatchTracked: z.boolean(),
   isExpiryTracked: z.boolean(),
   isActive: z.boolean(),
+  availableQuantity: z.string().nullable().optional(),
   createdAt: timestamp,
   updatedAt: timestamp,
 })
@@ -199,6 +200,8 @@ export const ItemOffsetListQuerySchema = z.object({
   /** With categoryId: also match items in its sub-categories. Defaults to true. */
   includeSubcategories: queryBoolean.optional().transform((v) => v ?? true),
   isActive: queryBoolean.optional(),
+  warehouseId: id.optional(),
+  locationId: id.optional(),
 })
 export type ItemOffsetListQuery = z.infer<typeof ItemOffsetListQuerySchema>
 

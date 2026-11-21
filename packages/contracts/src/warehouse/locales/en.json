@@ -24,6 +24,19 @@
       "system": "System"
     }
   },
+  "filter": {
+    "allWarehouses": "<All warehouses>",
+    "allLocations": "<All locations>",
+    "warehouses": "Warehouses",
+    "locations": "Locations",
+    "searchWarehouse": "Search warehouses...",
+    "searchLocation": "Search locations...",
+    "noWarehouses": "No warehouses found",
+    "noLocations": "No locations found",
+    "selectedCount": "{{count}} selected",
+    "physical": "Physical",
+    "virtual": "Virtual"
+  },
   "msgs": {
     "WAREHOUSE_CREATED": "Warehouse created",
     "WAREHOUSE_UPDATED": "Warehouse updated",

@@ -196,6 +196,7 @@
     "baseUnit": "Base unit",
     "tracking": "Tracking",
     "status": "Status",
+    "availableStock": "Available stock",
     "actions": "Actions",
     "actionsFor": "Actions for {name}"
   },
@@ -209,6 +210,41 @@
   },
   "details": {
     "back": "Back to items",
+    "tabs": {
+      "overview": "Overview",
+      "inventory": "Inventory",
+      "movements": "Stock movements"
+    },
+    "inventory": {
+      "title": "Inventory items",
+      "description": "Stock levels across warehouses and storage locations.",
+      "empty": "No inventory records found for the selected warehouse or location.",
+      "available": "Available",
+      "onHand": "On hand",
+      "reserved": "Reserved",
+      "onOrder": "On order",
+      "inTransit": "In transit",
+      "warehouse": "Warehouse",
+      "location": "Location",
+      "totalAvailable": "Total available",
+      "totalOnHand": "Total on hand",
+      "totalReserved": "Total reserved",
+      "totalOnOrder": "Total on order",
+      "totalInTransit": "Total in transit"
+    },
+    "movements": {
+      "title": "Stock movements",
+      "description": "Stock history, receipts, transfers, adjustments, and issues.",
+      "empty": "No stock movements recorded for this item.",
+      "date": "Date",
+      "type": "Type",
+      "reference": "Reference",
+      "from": "From",
+      "to": "To",
+      "quantity": "Quantity",
+      "reversal": "Reversal",
+      "note": "Note"
+    },
     "category": "Category",
     "baseUnit": "Base unit",
     "valuation": "Valuation method",

@@ -24,6 +24,19 @@
       "system": "نظام"
     }
   },
+  "filter": {
+    "allWarehouses": "<جميع المستودعات>",
+    "allLocations": "<جميع المواقع>",
+    "warehouses": "المستودعات",
+    "locations": "المواقع",
+    "searchWarehouse": "البحث في المستودعات...",
+    "searchLocation": "البحث في المواقع...",
+    "noWarehouses": "لم يتم العثور على مستودعات",
+    "noLocations": "لم يتم العثور على مواقع",
+    "selectedCount": "تم تحديد {{count}}",
+    "physical": "فعلي",
+    "virtual": "افتراضي"
+  },
   "msgs": {
     "WAREHOUSE_CREATED": "تم إنشاء المستودع",
     "WAREHOUSE_UPDATED": "تم تحديث المستودع",
