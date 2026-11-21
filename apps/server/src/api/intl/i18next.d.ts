@@ -1,6 +1,7 @@
 import type accountingEn from "./locales/accounting/en.json"
 import type adminEn from "./locales/admin/en.json"
 import type authEn from "./locales/auth/en.json"
+import type batchEn from "./locales/batch/en.json"
 import type geoEn from "./locales/geo/en.json"
 import type inventoryAdjustmentEn from "./locales/inventory-adjustment/en.json"
 import type itemEn from "./locales/item/en.json"
@@ -20,6 +21,7 @@ import type warehouseLocationEn from "./locales/warehouse-location/en.json"
 type AccountingMessages = typeof accountingEn
 type AdminMessages = typeof adminEn
 type AuthMessages = typeof authEn
+type BatchMessages = typeof batchEn
 type GeoMessages = typeof geoEn
 type InventoryAdjustmentMessages = typeof inventoryAdjustmentEn
 type ItemMessages = typeof itemEn
@@ -43,6 +45,7 @@ declare module "i18next" {
       accounting: AccountingMessages
       admin: AdminMessages
       auth: AuthMessages
+      batch: BatchMessages
       geo: GeoMessages
       "inventory-adjustment": InventoryAdjustmentMessages
       inventoryAdjustment: InventoryAdjustmentMessages

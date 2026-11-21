@@ -5,6 +5,8 @@ import adminEn from "./locales/admin/en.json" with { type: "json" }
 import adminAr from "./locales/admin/ar.json" with { type: "json" }
 import authEn from "./locales/auth/en.json" with { type: "json" }
 import authAr from "./locales/auth/ar.json" with { type: "json" }
+import batchEn from "./locales/batch/en.json" with { type: "json" }
+import batchAr from "./locales/batch/ar.json" with { type: "json" }
 import geoEn from "./locales/geo/en.json" with { type: "json" }
 import geoAr from "./locales/geo/ar.json" with { type: "json" }
 import inventoryAdjustmentEn from "./locales/inventory-adjustment/en.json" with { type: "json" }
@@ -42,6 +44,7 @@ export const resources = {
         accounting: accountingEn,
         admin: adminEn,
         auth: authEn,
+        batch: batchEn,
         geo: geoEn,
         "inventory-adjustment": inventoryAdjustmentEn,
         inventoryAdjustment: inventoryAdjustmentEn,
@@ -68,6 +71,7 @@ export const resources = {
         accounting: accountingAr,
         admin: adminAr,
         auth: authAr,
+        batch: batchAr,
         geo: geoAr,
         "inventory-adjustment": inventoryAdjustmentAr,
         inventoryAdjustment: inventoryAdjustmentAr,
@@ -102,7 +106,7 @@ export function installRequestLanguage(): void {
   i18next.init({
     lng: "en",
     fallbackLng: "en",
-    ns: ["accounting", "admin", "auth", "geo", "inventory-adjustment", "inventoryAdjustment", "item", "item-category", "itemCategory", "organization", "organization-invitation", "organizationInvitation", "organization-user", "organizationUser", "otp", "role", "sidebar", "unit", "unit-collection", "unitCollection", "users", "warehouse", "warehouse-location", "warehouseLocation"],
+    ns: ["accounting", "admin", "auth", "batch", "geo", "inventory-adjustment", "inventoryAdjustment", "item", "item-category", "itemCategory", "organization", "organization-invitation", "organizationInvitation", "organization-user", "organizationUser", "otp", "role", "sidebar", "unit", "unit-collection", "unitCollection", "users", "warehouse", "warehouse-location", "warehouseLocation"],
     defaultNS: "otp",
     resources,
     interpolation: { escapeValue: false },
