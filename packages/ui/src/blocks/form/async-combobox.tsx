@@ -221,10 +221,10 @@ export function AsyncCombobox({
               value={option}
               className="group/combobox-item justify-between"
             >
-              <span className="flex-1 min-w-0 flex items-center">
+              <span className="flex min-w-0 flex-1 items-center">
                 {typeof option.depth === "number" && option.depth > 0 && (
                   <span
-                    className="inline-flex items-center text-muted-foreground/70 shrink-0 me-1.5"
+                    className="me-1.5 inline-flex shrink-0 items-center text-muted-foreground/70"
                     style={{ paddingInlineStart: `${option.depth * 14}px` }}
                     aria-hidden
                   >
@@ -239,11 +239,13 @@ export function AsyncCombobox({
                 >
                   {option.name}
                 </span>
-                {option.path && typeof option.depth === "number" && option.depth > 0 && (
-                  <span className="ms-2 text-xs text-muted-foreground/60 truncate">
-                    ({option.path})
-                  </span>
-                )}
+                {option.path &&
+                  typeof option.depth === "number" &&
+                  option.depth > 0 && (
+                    <span className="ms-2 truncate text-xs text-muted-foreground/60">
+                      ({option.path})
+                    </span>
+                  )}
               </span>
               {editHandler && (
                 <button

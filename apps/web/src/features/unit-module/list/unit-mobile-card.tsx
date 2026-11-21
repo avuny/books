@@ -20,7 +20,11 @@ export function UnitMobileCard({ unit, copy, onSelect }: UnitMobileCardProps) {
   return (
     <Card
       onClick={onSelect}
-      className={onSelect ? "cursor-pointer transition-colors hover:bg-muted/50" : undefined}
+      className={
+        onSelect
+          ? "cursor-pointer transition-colors hover:bg-muted/50"
+          : undefined
+      }
     >
       <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2">
         <div>
@@ -51,4 +55,3 @@ export function UnitMobileCard({ unit, copy, onSelect }: UnitMobileCardProps) {
     </Card>
   )
 }
-

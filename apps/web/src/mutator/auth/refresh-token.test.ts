@@ -73,4 +73,3 @@ describe("refreshAccessToken", () => {
     expect(tokenStorage.getAccessToken()).toBeNull()
   })
 })
-

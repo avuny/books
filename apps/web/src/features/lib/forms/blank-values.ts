@@ -3,7 +3,8 @@
  * or `null` (clear the stored value). These helpers map blanks before validation so the
  * contracts schemas stay the single source of truth.
  */
-const isBlank = (value: unknown) => typeof value === "string" && value.trim() === ""
+const isBlank = (value: unknown) =>
+  typeof value === "string" && value.trim() === ""
 
 /** Replaces blank strings under `keys` with `replacement`; every other key is untouched. */
 export function mapBlanks<T extends Record<string, unknown>>(

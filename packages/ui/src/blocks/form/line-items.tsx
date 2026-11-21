@@ -16,10 +16,7 @@ import { cn } from "@workspace/ui/lib/utils"
 import type { FieldCopy } from "@workspace/ui/blocks/types"
 
 import { AsyncComboboxField } from "./async-combobox-field"
-import type {
-  AsyncComboboxCopy,
-  AsyncOptionsSource,
-} from "./async-combobox"
+import type { AsyncComboboxCopy, AsyncOptionsSource } from "./async-combobox"
 
 export type LineItemsCopy = {
   title?: string
@@ -54,8 +51,12 @@ export type LineItemsProps<
   itemPlaceholder?: string
   onItemChange?: (index: number, itemId: string) => void
   // Render functions
-  renderFields: (context: LineItemRenderContext<PathValue<TFieldValues, TName>[number]>) => ReactNode
-  renderRowFooter?: (context: LineItemRenderContext<PathValue<TFieldValues, TName>[number]>) => ReactNode
+  renderFields: (
+    context: LineItemRenderContext<PathValue<TFieldValues, TName>[number]>
+  ) => ReactNode
+  renderRowFooter?: (
+    context: LineItemRenderContext<PathValue<TFieldValues, TName>[number]>
+  ) => ReactNode
   headerActions?: ReactNode
 }
 
@@ -174,11 +175,18 @@ export function LineItems<
   }
 
   return (
-    <div className={cn("space-y-4 rounded-lg border border-border bg-card/40 p-4", className)}>
+    <div
+      className={cn(
+        "space-y-4 rounded-lg border border-border bg-card/40 p-4",
+        className
+      )}
+    >
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           {copy.title ? (
-            <h3 className="text-base font-semibold text-foreground">{copy.title}</h3>
+            <h3 className="text-base font-semibold text-foreground">
+              {copy.title}
+            </h3>
           ) : null}
           <span className="inline-flex items-center rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">
             {fields.length}
@@ -203,88 +211,96 @@ export function LineItems<
       </div>
 
       <div className="space-y-3">
-        {fields.map((fieldItem: FieldArrayWithId<TFieldValues, TName>, index: number) => {
-          const currentLine = (linesWatch as any)?.[index]
-          const isItemSelected = Boolean(currentLine?.[itemFieldName])
-          const isRowDisabled = disabled || !isItemSelected
+        {fields.map(
+          (fieldItem: FieldArrayWithId<TFieldValues, TName>, index: number) => {
+            const currentLine = (linesWatch as any)?.[index]
+            const isItemSelected = Boolean(currentLine?.[itemFieldName])
+            const isRowDisabled = disabled || !isItemSelected
 
-          return (
-            <div
-              key={fieldItem.id}
-              className={cn(
-                "relative rounded-lg border p-3 transition-colors",
-                isItemSelected
-                  ? "border-border/80 bg-background/60 shadow-xs"
-                  : "border-dashed border-border/70 bg-muted/20"
-              )}
-            >
-              <div className="flex items-start gap-3">
-                {/* Row Number Badge */}
-                <div className="flex shrink-0 items-center justify-center pt-2">
-                  <span className="flex size-6 items-center justify-center rounded-full bg-muted text-xs font-medium text-muted-foreground">
-                    {index + 1}
-                  </span>
-                </div>
-
-                {/* Line Fields Grid */}
-                <div className="grid flex-1 grid-cols-1 gap-3 sm:grid-cols-12">
-                  {/* Item Picker (Always enabled unless whole form is pending/disabled) */}
-                  <div className={itemColSpan}>
-                    <AsyncComboboxField
-                      control={control}
-                      name={`${name}.${index}.${itemFieldName}` as any}
-                      copy={
-                        copy.item ?? {
-                          label: "Item",
-                          placeholder: itemPlaceholder ?? "Select an item",
-                        }
-                      }
-                      comboboxCopy={itemComboboxCopy}
-                      source={itemSource}
-                      placeholder={itemPlaceholder ?? copy.item?.placeholder ?? "Select an item"}
-                      disabled={disabled}
-                    />
+            return (
+              <div
+                key={fieldItem.id}
+                className={cn(
+                  "relative rounded-lg border p-3 transition-colors",
+                  isItemSelected
+                    ? "border-border/80 bg-background/60 shadow-xs"
+                    : "border-dashed border-border/70 bg-muted/20"
+                )}
+              >
+                <div className="flex items-start gap-3">
+                  {/* Row Number Badge */}
+                  <div className="flex shrink-0 items-center justify-center pt-2">
+                    <span className="flex size-6 items-center justify-center rounded-full bg-muted text-xs font-medium text-muted-foreground">
+                      {index + 1}
+                    </span>
                   </div>
 
-                  {/* Document specific fields (Disabled until item is selected) */}
-                  {renderFields({
-                    index,
-                    isItemSelected,
-                    disabled: isRowDisabled,
-                    line: currentLine,
-                  })}
+                  {/* Line Fields Grid */}
+                  <div className="grid flex-1 grid-cols-1 gap-3 sm:grid-cols-12">
+                    {/* Item Picker (Always enabled unless whole form is pending/disabled) */}
+                    <div className={itemColSpan}>
+                      <AsyncComboboxField
+                        control={control}
+                        name={`${name}.${index}.${itemFieldName}` as any}
+                        copy={
+                          copy.item ?? {
+                            label: "Item",
+                            placeholder: itemPlaceholder ?? "Select an item",
+                          }
+                        }
+                        comboboxCopy={itemComboboxCopy}
+                        source={itemSource}
+                        placeholder={
+                          itemPlaceholder ??
+                          copy.item?.placeholder ??
+                          "Select an item"
+                        }
+                        disabled={disabled}
+                      />
+                    </div>
+
+                    {/* Document specific fields (Disabled until item is selected) */}
+                    {renderFields({
+                      index,
+                      isItemSelected,
+                      disabled: isRowDisabled,
+                      line: currentLine,
+                    })}
+                  </div>
+
+                  {/* Delete button */}
+                  <div className="flex shrink-0 items-center pt-2">
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      aria-label={copy.removeLine ?? "Remove line"}
+                      disabled={
+                        disabled || (fields.length === 1 && !isItemSelected)
+                      }
+                      onClick={() => handleRemove(index)}
+                      className="text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+                    >
+                      <Trash2 className="size-4" />
+                    </Button>
+                  </div>
                 </div>
 
-                {/* Delete button */}
-                <div className="flex shrink-0 items-center pt-2">
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    aria-label={copy.removeLine ?? "Remove line"}
-                    disabled={disabled || (fields.length === 1 && !isItemSelected)}
-                    onClick={() => handleRemove(index)}
-                    className="text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
-                  >
-                    <Trash2 className="size-4" />
-                  </Button>
-                </div>
+                {/* Optional Row Footer (e.g. difference, totals, alerts) */}
+                {renderRowFooter ? (
+                  <div className="mt-2 border-t border-border/40 ps-9 pt-2">
+                    {renderRowFooter({
+                      index,
+                      isItemSelected,
+                      disabled: isRowDisabled,
+                      line: currentLine,
+                    })}
+                  </div>
+                ) : null}
               </div>
-
-              {/* Optional Row Footer (e.g. difference, totals, alerts) */}
-              {renderRowFooter ? (
-                <div className="mt-2 border-t border-border/40 pt-2 ps-9">
-                  {renderRowFooter({
-                    index,
-                    isItemSelected,
-                    disabled: isRowDisabled,
-                    line: currentLine,
-                  })}
-                </div>
-              ) : null}
-            </div>
-          )
-        })}
+            )
+          }
+        )}
       </div>
     </div>
   )

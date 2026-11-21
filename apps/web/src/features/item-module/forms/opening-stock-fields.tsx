@@ -52,9 +52,11 @@ export function OpeningStockFields({
           <h3 className="text-sm font-semibold text-foreground">
             {copy.sectionTitle}
           </h3>
-          <p className="text-xs text-muted-foreground">{copy.sectionDescription}</p>
+          <p className="text-xs text-muted-foreground">
+            {copy.sectionDescription}
+          </p>
         </div>
-        <div className="w-full sm:w-64 shrink-0">
+        <div className="w-full shrink-0 sm:w-64">
           <DatePickerField
             control={control}
             name="openingStockPostedAt"
@@ -66,7 +68,7 @@ export function OpeningStockFields({
 
       <div className="space-y-3">
         <div className="flex items-center justify-between border-t border-border pt-3">
-          <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+          <span className="text-xs font-medium tracking-wider text-muted-foreground uppercase">
             {copy.linesHeader}
           </span>
           {fields.length > 0 ? (
@@ -140,9 +142,7 @@ function LineCard({
       <div className="flex items-start gap-3">
         <div
           className={`grid flex-1 gap-3 ${
-            isExpiryTracked
-              ? "sm:grid-cols-2 md:grid-cols-4"
-              : "sm:grid-cols-3"
+            isExpiryTracked ? "sm:grid-cols-2 md:grid-cols-4" : "sm:grid-cols-3"
           }`}
         >
           <AsyncComboboxField
@@ -180,7 +180,7 @@ function LineCard({
           ) : null}
         </div>
 
-        <div className="pt-7 shrink-0">
+        <div className="shrink-0 pt-7">
           <Button
             type="button"
             variant="ghost"

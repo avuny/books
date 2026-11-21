@@ -47,15 +47,13 @@ describe("createUnitFormSchema", () => {
 
 describe("updateUnitFormSchema", () => {
   it("accepts a partial update (name only)", () => {
-    expect(
-      updateUnitFormSchema.safeParse({ name: "Gram" }).success
-    ).toBe(true)
+    expect(updateUnitFormSchema.safeParse({ name: "Gram" }).success).toBe(true)
   })
 
   it("accepts isActive toggle", () => {
-    expect(
-      updateUnitFormSchema.safeParse({ isActive: false }).success
-    ).toBe(true)
+    expect(updateUnitFormSchema.safeParse({ isActive: false }).success).toBe(
+      true
+    )
   })
 })
 
@@ -86,4 +84,3 @@ describe("form values → API input", () => {
     })
   })
 })
-

@@ -55,11 +55,17 @@ const ItemFormShape = z.object({
         quantity: z
           .string()
           .trim()
-          .refine((v) => v === "" || UNIT_QUANTITY_PATTERN.test(v), "Invalid number"),
+          .refine(
+            (v) => v === "" || UNIT_QUANTITY_PATTERN.test(v),
+            "Invalid number"
+          ),
         cost: z
           .string()
           .trim()
-          .refine((v) => v === "" || UNIT_QUANTITY_PATTERN.test(v), "Invalid number")
+          .refine(
+            (v) => v === "" || UNIT_QUANTITY_PATTERN.test(v),
+            "Invalid number"
+          )
           .optional(),
         manufacturedOn: z.string().trim().optional(),
       })
@@ -82,8 +88,10 @@ const shelfLifePairCheck = (v: {
   defaultShelfLifeValue?: number
   defaultShelfLifeUnit?: string
 }) =>
-  (v.defaultShelfLifeValue === undefined && v.defaultShelfLifeUnit === undefined) ||
-  (v.defaultShelfLifeValue !== undefined && v.defaultShelfLifeUnit !== undefined)
+  (v.defaultShelfLifeValue === undefined &&
+    v.defaultShelfLifeUnit === undefined) ||
+  (v.defaultShelfLifeValue !== undefined &&
+    v.defaultShelfLifeUnit !== undefined)
 
 /** Create: requires unitCollectionId (or legacy baseUnitId). */
 export const CreateItemFormSchema = ItemFormShape.refine(batchNeedsTracking, {
@@ -91,17 +99,22 @@ export const CreateItemFormSchema = ItemFormShape.refine(batchNeedsTracking, {
   path: ["isBatchTracked"],
 })
   .refine(expiryNeedsBatchAndTracking, {
-    message: "Expiry tracking requires both inventory tracking and batch tracking",
+    message:
+      "Expiry tracking requires both inventory tracking and batch tracking",
     path: ["isExpiryTracked"],
   })
   .refine(shelfLifePairCheck, {
-    message: "Shelf life value and unit must either both be provided or both be empty",
+    message:
+      "Shelf life value and unit must either both be provided or both be empty",
     path: ["defaultShelfLifeUnit"],
   })
-  .refine((v) => (v.baseUnitId === undefined) !== (v.unitCollectionId === undefined), {
-    message: "Choose either a base unit or a unit collection",
-    path: ["baseUnitId"],
-  })
+  .refine(
+    (v) => (v.baseUnitId === undefined) !== (v.unitCollectionId === undefined),
+    {
+      message: "Choose either a base unit or a unit collection",
+      path: ["baseUnitId"],
+    }
+  )
   .refine(
     (v) => {
       if (!v.openingStockLines?.length) return true
@@ -124,7 +137,8 @@ export const CreateItemFormSchema = ItemFormShape.refine(batchNeedsTracking, {
       })
     },
     {
-      message: "Manufacture date is required for each line when expiry tracking is enabled",
+      message:
+        "Manufacture date is required for each line when expiry tracking is enabled",
       path: ["openingStockLines"],
     }
   )
@@ -135,11 +149,13 @@ export const UpdateItemFormSchema = ItemFormShape.refine(batchNeedsTracking, {
   path: ["isBatchTracked"],
 })
   .refine(expiryNeedsBatchAndTracking, {
-    message: "Expiry tracking requires both inventory tracking and batch tracking",
+    message:
+      "Expiry tracking requires both inventory tracking and batch tracking",
     path: ["isExpiryTracked"],
   })
   .refine(shelfLifePairCheck, {
-    message: "Shelf life value and unit must either both be provided or both be empty",
+    message:
+      "Shelf life value and unit must either both be provided or both be empty",
     path: ["defaultShelfLifeUnit"],
   })
 
@@ -192,8 +208,10 @@ export function getUpdateItemDefaults(item: ItemDto): UpdateItemFormInput {
     isInventoryTracked: item.isInventoryTracked,
     isBatchTracked: item.isBatchTracked,
     isExpiryTracked: item.isExpiryTracked,
-    defaultShelfLifeValue: item.expirySettings?.defaultShelfLifeValue ?? undefined,
-    defaultShelfLifeUnit: item.expirySettings?.defaultShelfLifeUnit ?? undefined,
+    defaultShelfLifeValue:
+      item.expirySettings?.defaultShelfLifeValue ?? undefined,
+    defaultShelfLifeUnit:
+      item.expirySettings?.defaultShelfLifeUnit ?? undefined,
     inventoryValuationMethod: item.inventoryValuationMethod,
     allowNegativeStock: item.allowNegativeStock,
     reorderPoint: item.reorderPoint ? trimQuantity(item.reorderPoint) : "",
@@ -237,7 +255,9 @@ export function toCreateItemInput(
     isBatchTracked: values.isBatchTracked,
     isExpiryTracked: values.isExpiryTracked,
     expirySettings:
-      values.isExpiryTracked && values.defaultShelfLifeValue && values.defaultShelfLifeUnit
+      values.isExpiryTracked &&
+      values.defaultShelfLifeValue &&
+      values.defaultShelfLifeUnit
         ? {
             defaultShelfLifeValue: values.defaultShelfLifeValue,
             defaultShelfLifeUnit: values.defaultShelfLifeUnit,
@@ -278,7 +298,9 @@ export function toUpdateItemInput(
     isBatchTracked: values.isInventoryTracked,
     isExpiryTracked: values.isExpiryTracked,
     expirySettings:
-      values.isExpiryTracked && values.defaultShelfLifeValue && values.defaultShelfLifeUnit
+      values.isExpiryTracked &&
+      values.defaultShelfLifeValue &&
+      values.defaultShelfLifeUnit
         ? {
             defaultShelfLifeValue: values.defaultShelfLifeValue,
             defaultShelfLifeUnit: values.defaultShelfLifeUnit,

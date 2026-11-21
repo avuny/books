@@ -79,11 +79,8 @@ export function UnitDetails({ orgId, unitId, onBack }: UnitDetailsProps) {
       copy={copy}
       onBack={onBack}
       actions={
-        !unit.isSystem ? (
-          <UnitButton orgId={orgId} unit={unit} />
-        ) : undefined
+        !unit.isSystem ? <UnitButton orgId={orgId} unit={unit} /> : undefined
       }
     />
   )
 }
-

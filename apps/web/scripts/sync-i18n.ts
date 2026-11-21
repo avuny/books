@@ -89,13 +89,9 @@ function buildResourcesFile(modules: ModuleInfo[]): string {
     .map((m) => `import { ${m.ar}, ${m.en} } from "${m.importPath}"`)
     .join("\n")
 
-  const enEntries = modules
-    .map((m) => `    "${m.slug}": ${m.en},`)
-    .join("\n")
+  const enEntries = modules.map((m) => `    "${m.slug}": ${m.en},`).join("\n")
 
-  const arEntries = modules
-    .map((m) => `    "${m.slug}": ${m.ar},`)
-    .join("\n")
+  const arEntries = modules.map((m) => `    "${m.slug}": ${m.ar},`).join("\n")
 
   return `${imports}
 
@@ -141,10 +137,10 @@ function patchI18nFile(modules: ModuleInfo[], original: string): string {
 
 function formatWithPrettier(content: string, filepath: string): string {
   try {
-    return execSync(
-      `pnpm prettier --stdin-filepath "${filepath}"`,
-      { cwd: ROOT, input: content }
-    ).toString()
+    return execSync(`pnpm prettier --stdin-filepath "${filepath}"`, {
+      cwd: ROOT,
+      input: content,
+    }).toString()
   } catch {
     // prettier unavailable — compare raw
     return content

@@ -19,4 +19,3 @@ export type {
   UnitType,
   UpdateUnitInput,
 }
-

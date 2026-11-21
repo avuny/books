@@ -15,7 +15,12 @@ type UpdateUnitProps = {
   onCancel?: () => void
 }
 
-export function UpdateUnit({ orgId, unit, onSuccess, onCancel }: UpdateUnitProps) {
+export function UpdateUnit({
+  orgId,
+  unit,
+  onSuccess,
+  onCancel,
+}: UpdateUnitProps) {
   const copy = useUnitFormCopy()
   const updateMutation = useUpdateUnitMutation(orgId)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
@@ -48,4 +53,3 @@ export function UpdateUnit({ orgId, unit, onSuccess, onCancel }: UpdateUnitProps
     />
   )
 }
-

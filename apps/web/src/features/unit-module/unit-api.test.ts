@@ -25,4 +25,3 @@ describe("unit-api normalization", () => {
     expect(unitLabel({ name: "Kilogram", symbol: "kg" })).toBe("Kilogram (kg)")
   })
 })
-

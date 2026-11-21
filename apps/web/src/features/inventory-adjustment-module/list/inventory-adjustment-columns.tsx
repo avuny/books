@@ -36,9 +36,7 @@ export function createInventoryAdjustmentColumns({
       header: copy.number,
       enableSorting: false,
       cell: ({ row }) => (
-        <div className="font-medium text-foreground">
-          {row.original.number}
-        </div>
+        <div className="font-medium text-foreground">{row.original.number}</div>
       ),
     },
     {

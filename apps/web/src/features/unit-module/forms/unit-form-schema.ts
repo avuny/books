@@ -1,6 +1,9 @@
 import { z } from "@avuny/zod"
 import { CreateUnitSchema, UpdateUnitSchema } from "@avuny/contracts"
-import type { CreateUnitFormValues, UpdateUnitFormValues } from "./unit-form-types"
+import type {
+  CreateUnitFormValues,
+  UpdateUnitFormValues,
+} from "./unit-form-types"
 
 export const createUnitFormSchema = CreateUnitSchema
 export type CreateUnitFormInput = z.input<typeof createUnitFormSchema>

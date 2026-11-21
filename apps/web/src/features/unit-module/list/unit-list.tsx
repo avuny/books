@@ -216,7 +216,9 @@ export function UnitList({ orgId, onViewUnit }: UnitListProps) {
           <UnitMobileCard
             unit={row.original}
             copy={columnsCopy}
-            onSelect={onViewUnit ? () => onViewUnit(row.original.id) : undefined}
+            onSelect={
+              onViewUnit ? () => onViewUnit(row.original.id) : undefined
+            }
           />
         )}
         footer={

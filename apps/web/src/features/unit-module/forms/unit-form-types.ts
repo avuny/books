@@ -36,4 +36,3 @@ export type UnitFormCopy = {
     submittingLabel: string
   }
 }
-

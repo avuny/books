@@ -25,4 +25,5 @@ export type {
 }
 
 // UI-only types
-export type InventoryAdjustmentScope = "all" | "DRAFT" | "CONFIRMED" | "CANCELLED"
+export type InventoryAdjustmentScope =
+  "all" | "DRAFT" | "CONFIRMED" | "CANCELLED"

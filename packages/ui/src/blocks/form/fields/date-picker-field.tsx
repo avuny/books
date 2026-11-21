@@ -87,7 +87,8 @@ export function DatePickerField<
       name={name}
       render={({ field, fieldState }) => {
         const selectedDate = parseLocalDate(field.value)
-        const displayPlaceholder = placeholder ?? copy.placeholder ?? "YYYY-MM-DD"
+        const displayPlaceholder =
+          placeholder ?? copy.placeholder ?? "YYYY-MM-DD"
 
         const handleSelect = (date: Date | undefined) => {
           if (!date) {
@@ -125,17 +126,23 @@ export function DatePickerField<
                     disabled={disabled}
                     aria-invalid={fieldState.invalid}
                     className={cn(
-                      "w-full justify-between font-normal text-start",
+                      "w-full justify-between text-start font-normal",
                       !selectedDate && "text-muted-foreground",
-                      fieldState.invalid && "border-destructive ring-destructive/20"
+                      fieldState.invalid &&
+                        "border-destructive ring-destructive/20"
                     )}
                   />
                 }
               >
                 <span className="flex items-center gap-2 truncate">
-                  <CalendarIcon className="size-4 shrink-0 text-muted-foreground" aria-hidden />
+                  <CalendarIcon
+                    className="size-4 shrink-0 text-muted-foreground"
+                    aria-hidden
+                  />
                   <span className="truncate">
-                    {selectedDate ? format(selectedDate, "yyyy-MM-dd") : displayPlaceholder}
+                    {selectedDate
+                      ? format(selectedDate, "yyyy-MM-dd")
+                      : displayPlaceholder}
                   </span>
                 </span>
 

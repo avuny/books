@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest"
-import { normalizeInventoryAdjustment, normalizeStatement } from "./inventory-adjustment-api"
+import {
+  normalizeInventoryAdjustment,
+  normalizeStatement,
+} from "./inventory-adjustment-api"
 
 describe("inventory-adjustment-api normalization", () => {
   it("normalizes permissions statement", () => {

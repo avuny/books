@@ -76,7 +76,7 @@ export function UnitDetailsView({
       </div>
 
       {unit.isSystem && (
-        <div className="rounded-md bg-muted/60 p-4 text-sm text-muted-foreground border">
+        <div className="rounded-md border bg-muted/60 p-4 text-sm text-muted-foreground">
           {copy.systemNotice}
         </div>
       )}
@@ -162,4 +162,3 @@ export function UnitDetailsView({
     </div>
   )
 }
-

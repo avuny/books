@@ -46,4 +46,3 @@ export function CreateUnit({ orgId, onSuccess, onCancel }: CreateUnitProps) {
     />
   )
 }
-

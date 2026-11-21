@@ -5,7 +5,10 @@
  */
 import { useMemo, useState } from "react"
 import { keepPreviousData, useQueryClient } from "@tanstack/react-query"
-import type { AsyncOptionsSource, ComboboxOption } from "@workspace/ui/blocks/form"
+import type {
+  AsyncOptionsSource,
+  ComboboxOption,
+} from "@workspace/ui/blocks/form"
 
 import {
   getGetItemCategoryQueryKey,

@@ -1,7 +1,11 @@
 import { useTranslation } from "react-i18next"
 import { INVENTORY_VALUATION_METHODS, SHELF_LIFE_UNITS } from "@avuny/contracts"
 
-import type { ItemFormCopy, ShelfLifeUnitOption, ValuationOption } from "./item-form-types"
+import type {
+  ItemFormCopy,
+  ShelfLifeUnitOption,
+  ValuationOption,
+} from "./item-form-types"
 
 /** Builds the localized strings for the create or update form. */
 export function useItemFormCopy(mode: "create" | "update"): ItemFormCopy {
@@ -99,7 +103,9 @@ export function useItemFormCopy(mode: "create" | "update"): ItemFormCopy {
         },
         manufacturedOn: {
           label: t("fields.openingStock.batch.manufacturedOn.label"),
-          placeholder: t("fields.openingStock.batch.manufacturedOn.placeholder"),
+          placeholder: t(
+            "fields.openingStock.batch.manufacturedOn.placeholder"
+          ),
         },
         expiresOn: {
           label: t("fields.openingStock.batch.expiresOn.label"),

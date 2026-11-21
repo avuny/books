@@ -1,14 +1,14 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Controller, useForm, type Resolver } from "react-hook-form"
 
-import {
-  FormShell,
-  InputField,
-  SubmitButton,
-} from "@workspace/ui/blocks/form"
+import { FormShell, InputField, SubmitButton } from "@workspace/ui/blocks/form"
 import { Button } from "@workspace/ui/components/button"
 import { Checkbox } from "@workspace/ui/components/checkbox"
-import { Field, FieldDescription, FieldLabel } from "@workspace/ui/components/field"
+import {
+  Field,
+  FieldDescription,
+  FieldLabel,
+} from "@workspace/ui/components/field"
 import { Input } from "@workspace/ui/components/input"
 
 import type { UnitDto } from "../types"
@@ -33,7 +33,9 @@ export function UpdateUnitForm({
   errorMessage,
 }: UpdateUnitFormProps) {
   const form = useForm<UpdateUnitFormValues>({
-    resolver: zodResolver(updateUnitFormSchema) as Resolver<UpdateUnitFormValues>,
+    resolver: zodResolver(
+      updateUnitFormSchema
+    ) as Resolver<UpdateUnitFormValues>,
     defaultValues: {
       name: unit.name,
       symbol: unit.symbol,
@@ -83,7 +85,7 @@ export function UpdateUnitForm({
           control={form.control}
           name="isActive"
           render={({ field }) => (
-            <Field className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+            <Field className="flex flex-row items-start space-y-0 space-x-3 rounded-md border p-4">
               <Checkbox
                 checked={field.value}
                 onCheckedChange={field.onChange}

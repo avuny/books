@@ -16,8 +16,7 @@ export async function refreshAccessToken(): Promise<string> {
   )
 
   const accessToken =
-    response.data?.data?.tokens?.accessToken ??
-    response.data?.data?.accessToken
+    response.data?.data?.tokens?.accessToken ?? response.data?.data?.accessToken
 
   if (!accessToken || typeof accessToken !== "string") {
     throw new Error("Access token missing in refresh response")

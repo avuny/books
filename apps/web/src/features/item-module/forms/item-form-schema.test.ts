@@ -130,7 +130,9 @@ describe("form values -> API input", () => {
     })
     const input = toCreateItemInput(values)
     expect(input.openingStock).toBeDefined()
-    expect(input.openingStock?.postedAt).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/)
+    expect(input.openingStock?.postedAt).toMatch(
+      /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/
+    )
     expect(input.openingStock?.lines).toEqual([
       {
         locationId: uuid(5),

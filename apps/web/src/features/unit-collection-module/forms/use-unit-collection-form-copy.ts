@@ -64,9 +64,7 @@ export function useUnitPicker(
  * so each row creates its own independent AsyncOptionsSource.
  * Units of any type are allowed — conversions are product-specific scalar multipliers.
  */
-export function useExtraUnitPickerConfig(
-  orgId: string
-): ExtraUnitPickerConfig {
+export function useExtraUnitPickerConfig(orgId: string): ExtraUnitPickerConfig {
   return {
     orgId,
     copy: useAsyncComboboxCopy(),

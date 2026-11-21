@@ -2,7 +2,9 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router"
 
 import { InventoryAdjustmentDetails } from "@/features/inventory-adjustment-module"
 
-export const Route = createFileRoute("/organization/$orgId/inventory-adjustments/$adjustmentId")({
+export const Route = createFileRoute(
+  "/organization/$orgId/inventory-adjustments/$adjustmentId"
+)({
   component: InventoryAdjustmentDetailsPage,
 })
 

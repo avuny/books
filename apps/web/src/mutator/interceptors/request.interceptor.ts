@@ -17,10 +17,11 @@ export function requestInterceptor(config: InternalAxiosRequestConfig) {
 }
 
 function attachAccessToken(config: InternalAxiosRequestConfig) {
-  const existingAuthHeader =
-    (typeof config.headers.get === "function"
+  const existingAuthHeader = (
+    typeof config.headers.get === "function"
       ? config.headers.get("Authorization")
-      : config.headers.Authorization) as string | undefined
+      : config.headers.Authorization
+  ) as string | undefined
 
   const hasValidAuthHeader =
     typeof existingAuthHeader === "string" &&

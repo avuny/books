@@ -231,9 +231,7 @@ export function InventoryAdjustmentList({
         <h1 className="text-xl font-semibold text-foreground">
           {t("list.title")}
         </h1>
-        <p className="text-sm text-muted-foreground">
-          {t("list.description")}
-        </p>
+        <p className="text-sm text-muted-foreground">{t("list.description")}</p>
       </div>
 
       <DataTableViewTabs
@@ -247,7 +245,8 @@ export function InventoryAdjustmentList({
         }}
         tabs={SCOPES.map((item) => ({
           value: item,
-          label: item === "all" ? t("labels.direction.BOTH") : getStatusLabel(item),
+          label:
+            item === "all" ? t("labels.direction.BOTH") : getStatusLabel(item),
         }))}
       />
 

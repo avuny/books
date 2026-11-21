@@ -13,7 +13,10 @@ function WarehousesPage() {
     <WarehouseList
       orgId={orgId}
       onViewWarehouse={(warehouseId) =>
-        navigate({ to: "/organization/$orgId/warehouses/$warehouseId", params: { orgId, warehouseId } })
+        navigate({
+          to: "/organization/$orgId/warehouses/$warehouseId",
+          params: { orgId, warehouseId },
+        })
       }
     />
   )

@@ -1,7 +1,9 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router"
 import { WarehouseDetails } from "@/features/warehouse-module"
 
-export const Route = createFileRoute("/organization/$orgId/warehouses/$warehouseId/")({
+export const Route = createFileRoute(
+  "/organization/$orgId/warehouses/$warehouseId/"
+)({
   component: WarehouseDetailsPage,
 })
 
@@ -13,9 +15,14 @@ function WarehouseDetailsPage() {
     <WarehouseDetails
       orgId={orgId}
       warehouseId={warehouseId}
-      onBack={() => navigate({ to: "/organization/$orgId/warehouses", params: { orgId } })}
+      onBack={() =>
+        navigate({ to: "/organization/$orgId/warehouses", params: { orgId } })
+      }
       onViewLocations={() =>
-        navigate({ to: "/organization/$orgId/warehouses/$warehouseId/locations", params: { orgId, warehouseId } })
+        navigate({
+          to: "/organization/$orgId/warehouses/$warehouseId/locations",
+          params: { orgId, warehouseId },
+        })
       }
     />
   )

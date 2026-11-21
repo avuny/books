@@ -59,7 +59,10 @@ function canRefreshToken(error: AxiosError<any>) {
   )
 }
 
-function setRequestAuthorizationHeader(request: RetryableRequest, token: string) {
+function setRequestAuthorizationHeader(
+  request: RetryableRequest,
+  token: string
+) {
   if (!request?.headers) return
   if (typeof request.headers.set === "function") {
     request.headers.set("Authorization", `Bearer ${token}`)
