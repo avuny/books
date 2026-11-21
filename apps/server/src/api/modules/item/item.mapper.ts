@@ -57,6 +57,7 @@ export function toItemListItemDto(row: ItemRow): ItemListItemDto {
     isBatchTracked: item.isBatchTracked,
     isExpiryTracked: item.isExpiryTracked,
     isActive: item.isActive,
+    availableQuantity: row.availableQuantity ?? (item.isInventoryTracked ? "0" : null),
     createdAt: item.createdAt.toISOString(),
     updatedAt: item.updatedAt.toISOString(),
   }

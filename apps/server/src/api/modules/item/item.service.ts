@@ -110,6 +110,8 @@ export function createItemService(deps: ItemServiceDeps) {
         categoryId: query.categoryId,
         includeSubcategories: query.includeSubcategories,
         isActive: query.isActive,
+        warehouseId: query.warehouseId,
+        locationId: query.locationId,
         page: query.page,
         pageSize: query.pageSize,
       })

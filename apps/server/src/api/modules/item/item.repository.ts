@@ -1,11 +1,13 @@
 import { and, asc, eq, ilike, inArray, ne, sql, type SQL } from "drizzle-orm"
 import {
   batches,
+  inventoryItems,
   itemCategories,
   itemExpirySettings,
   itemInventorySettings,
   items,
   units,
+  warehouses,
   type DB,
   type Item,
   type ItemExpirySettings,
@@ -29,6 +31,7 @@ export type ItemRow = {
   expirySettings: ItemExpirySettings | null
   categoryName: string
   unit: Unit
+  availableQuantity?: string | null
 }
 export type ItemWriteResult =
   | { ok: true; row: Item }
@@ -42,6 +45,8 @@ export type ListItemsFilter = {
   categoryId?: string
   includeSubcategories: boolean
   isActive?: boolean
+  warehouseId?: string
+  locationId?: string
   page: number
   pageSize: number
 }
@@ -146,7 +151,54 @@ export function createItemRepository({ db }: { db: DB }) {
       if (f.isActive !== undefined) conditions.push(eq(items.isActive, f.isActive))
       const where = and(...conditions)
 
-      const rows = await rowQuery(exec(tx))
+      const whConditions: SQL[] = [
+        eq(inventoryItems.orgId, orgId),
+        eq(inventoryItems.itemId, items.id),
+      ]
+      if (f.locationId) whConditions.push(eq(inventoryItems.locationId, f.locationId))
+      if (f.warehouseId) {
+        whConditions.push(eq(inventoryItems.warehouseId, f.warehouseId))
+      } else {
+        whConditions.push(eq(warehouses.isSystem, false))
+      }
+
+      const availableQuantitySql = sql<string | null>`
+        case when ${items.isInventoryTracked} = true then
+          coalesce(
+            (
+              select sum(${inventoryItems.onHandQty} - ${inventoryItems.reservedQty})::text
+              from ${inventoryItems}
+              inner join ${warehouses} on ${warehouses.id} = ${inventoryItems.warehouseId} and ${warehouses.orgId} = ${inventoryItems.orgId}
+              where ${and(...whConditions)}
+            ),
+            '0'
+          )
+        else null end
+      `
+
+      const rows = await exec(tx)
+        .select({
+          item: items,
+          settings: itemInventorySettings,
+          expirySettings: itemExpirySettings,
+          categoryName: itemCategories.name,
+          unit: units,
+          availableQuantity: availableQuantitySql,
+        })
+        .from(items)
+        .innerJoin(
+          itemCategories,
+          and(eq(itemCategories.orgId, items.orgId), eq(itemCategories.id, items.categoryId))
+        )
+        .innerJoin(units, eq(units.id, items.baseUnitId))
+        .leftJoin(
+          itemInventorySettings,
+          and(eq(itemInventorySettings.orgId, items.orgId), eq(itemInventorySettings.itemId, items.id))
+        )
+        .leftJoin(
+          itemExpirySettings,
+          and(eq(itemExpirySettings.orgId, items.orgId), eq(itemExpirySettings.itemId, items.id))
+        )
         .where(where)
         .orderBy(asc(items.name), asc(items.id))
         .limit(f.pageSize)
