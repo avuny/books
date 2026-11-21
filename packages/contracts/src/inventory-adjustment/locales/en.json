@@ -80,6 +80,7 @@
     "referenceNumber": "Reference number",
     "date": "Adjustment date",
     "warehouse": "Warehouse",
+    "direction": "Adjustment type",
     "reason": "Adjustment reason",
     "description": "Description",
     "status": "Status",

@@ -80,6 +80,7 @@
     "referenceNumber": "الرقم المرجعي",
     "date": "تاريخ التسوية",
     "warehouse": "المستودع",
+    "direction": "نوع التسوية",
     "reason": "سبب التسوية",
     "description": "الوصف",
     "status": "الحالة",
