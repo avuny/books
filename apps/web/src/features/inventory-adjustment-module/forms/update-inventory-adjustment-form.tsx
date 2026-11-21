@@ -272,11 +272,11 @@ export function UpdateInventoryAdjustmentForm({
                       itemUnits.length > 0
                         ? itemUnits
                         : [
-                            {
-                              value: lineData?.unitId || "base",
-                              label: lineData?.unitId ? "Selected unit" : "Select unit",
-                            },
-                          ]
+                          {
+                            value: lineData?.unitId || "base",
+                            label: lineData?.unitId ? "Selected unit" : "Select unit",
+                          },
+                        ]
                     }
                     disabled={disabled}
                   />
