@@ -99,7 +99,14 @@
     "edit": "Edit draft",
     "delete": "Delete draft",
     "confirm": "Confirm",
+    "confirmTitle": "Confirm inventory adjustment",
+    "confirmDescription": "Confirming this adjustment will post a stock movement and general ledger journal entry. Confirmed adjustments cannot be edited or undone.",
+    "cancelDialog": "Cancel",
     "cancel": "Cancel adjustment",
+    "cancelTitle": "Cancel inventory adjustment",
+    "cancelDescription": "Are you sure you want to cancel this draft adjustment? No stock will be affected.",
+    "back": "Back",
+    "backToList": "Back to adjustments",
     "addLine": "Add line",
     "removeLine": "Remove line"
   },
@@ -125,11 +132,23 @@
   },
   "details": {
     "title": "Adjustment details",
+    "overview": "Overview",
+    "documentInfo": "Document details",
+    "auditInfo": "Audit & Postings",
     "stockMovement": "Stock movement",
     "journalEntry": "Journal entry",
     "confirmedBy": "Confirmed by",
     "confirmedAt": "Confirmed at",
-    "linesSummary": "Adjusted items"
+    "createdBy": "Created by",
+    "createdAt": "Created at",
+    "linesSummary": "Adjusted items",
+    "totalLines": "Total items",
+    "increases": "Increases",
+    "decreases": "Decreases",
+    "noChange": "No change",
+    "netDifference": "Net difference",
+    "pendingPosting": "Pending confirmation",
+    "noItems": "No items recorded in this adjustment."
   },
   "pagination": {
     "showing": "Showing {from} to {to} of {total} adjustments"

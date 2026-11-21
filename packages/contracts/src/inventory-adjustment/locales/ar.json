@@ -99,7 +99,14 @@
     "edit": "تعديل المسودة",
     "delete": "حذف المسودة",
     "confirm": "تأكيد",
+    "confirmTitle": "تأكيد تسوية المخزون",
+    "confirmDescription": "تأكيد هذه التسوية سيؤدي إلى ترحيل حركة المخزون وقيد اليومية في دفتر الأستاذ العام. لا يمكن تعديل أو التراجع عن التسويات المؤكدة.",
+    "cancelDialog": "إلغاء",
     "cancel": "إلغاء التسوية",
+    "cancelTitle": "إلغاء تسوية المخزون",
+    "cancelDescription": "هل أنت متأكد من إلغاء مسودة تسوية المخزون هذه؟ لن تتأثر كميات المخزون.",
+    "back": "رجوع",
+    "backToList": "العودة إلى التسويات",
     "addLine": "إضافة بند",
     "removeLine": "حذف البند"
   },
@@ -125,11 +132,23 @@
   },
   "details": {
     "title": "تفاصيل التسوية",
+    "overview": "نظرة عامة",
+    "documentInfo": "بيانات التسوية",
+    "auditInfo": "التدقيق والترحيل",
     "stockMovement": "حركة المخزون",
     "journalEntry": "قيد اليومية",
     "confirmedBy": "تم التأكيد بواسطة",
     "confirmedAt": "تاريخ التأكيد",
-    "linesSummary": "الأصناف المعدلة"
+    "createdBy": "تم الإنشاء بواسطة",
+    "createdAt": "تاريخ الإنشاء",
+    "linesSummary": "الأصناف المعدلة",
+    "totalLines": "إجمالي البنود",
+    "increases": "الزيادات",
+    "decreases": "العجز",
+    "noChange": "دون تغيير",
+    "netDifference": "صافي الفروق",
+    "pendingPosting": "بانتظار التأكيد",
+    "noItems": "لا توجد بنود مسجلة في هذه التسوية."
   },
   "pagination": {
     "showing": "عرض {from} إلى {to} من أصل {total} تسوية"
