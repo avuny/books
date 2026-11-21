@@ -48,13 +48,22 @@ export function toHistoryItemDto(row: HistoryRow): StockMovementLineHistoryItem 
 
 export function toStockBalanceDto(row: StockBalanceRow): StockBalanceDto {
   return {
+    id: row.id,
     warehouseId: row.warehouseId,
+    warehouseName: row.warehouseName,
+    warehouseCode: row.warehouseCode,
+    warehouseType: row.warehouseType,
     locationId: row.locationId,
+    locationName: row.locationName,
+    locationCode: row.locationCode,
+    locationType: row.locationType,
     itemId: row.itemId,
     batchId: row.batchId,
     quantity: row.quantity,
     onHandQty: row.onHandQty ?? row.quantity,
     reservedQty: row.reservedQty ?? "0",
+    onOrderQty: row.onOrderQty ?? "0",
+    availableQty: row.availableQty ?? (row.onHandQty ? String(Number(row.onHandQty) - Number(row.reservedQty ?? 0)) : row.quantity),
     updatedAt: row.updatedAt.toISOString(),
   }
 }
@@ -67,6 +76,7 @@ export function toInventoryItemDto(row: InventoryItem): InventoryItemDto {
     locationId: row.locationId,
     onHandQty: row.onHandQty,
     reservedQty: row.reservedQty,
+    onOrderQty: row.onOrderQty,
     createdAt: row.createdAt.toISOString(),
     updatedAt: row.updatedAt.toISOString(),
   }
@@ -80,6 +90,7 @@ export function toInventoryItemBatchDto(row: InventoryItemBatch): InventoryItemB
     batchId: row.batchId,
     onHandQty: row.onHandQty,
     reservedQty: row.reservedQty,
+    onOrderQty: row.onOrderQty,
     createdAt: row.createdAt.toISOString(),
     updatedAt: row.updatedAt.toISOString(),
   }

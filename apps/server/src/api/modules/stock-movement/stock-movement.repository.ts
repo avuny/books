@@ -1,4 +1,4 @@
-import { and, asc, count, desc, eq, inArray, isNotNull, notExists, or, sql } from "drizzle-orm"
+import { aliasedTable, and, asc, count, desc, eq, inArray, isNotNull, notExists, or, sql } from "drizzle-orm"
 import {
   balanceKey,
   type StockBalanceListQuery,
@@ -53,18 +53,33 @@ export type HistoryRow = {
   itemId: string
   batchId: string | null
   fromLocationId: string
+  fromLocationCode?: string | null
+  fromLocationName?: string | null
+  fromWarehouseName?: string | null
   toLocationId: string
+  toLocationCode?: string | null
+  toLocationName?: string | null
+  toWarehouseName?: string | null
   quantity: string
 }
 
 export type StockBalanceRow = {
+  id?: string
   warehouseId: string
+  warehouseName?: string
+  warehouseCode?: string
+  warehouseType?: "physical" | "virtual"
   locationId: string
+  locationName?: string
+  locationCode?: string
+  locationType?: string
   itemId: string
   batchId: string | null
   quantity: string
   onHandQty?: string
   reservedQty?: string
+  onOrderQty?: string
+  availableQty?: string
   updatedAt: Date
 }
 
@@ -415,6 +430,11 @@ export function createStockMovementRepository({ db }: { db: DB }) {
         q.from ? sql`${stockMovements.postedAt} >= ${q.from}` : undefined,
         q.to ? sql`${stockMovements.postedAt} <= ${q.to}` : undefined
       )
+      const fromLoc = aliasedTable(warehouseLocations, "from_loc")
+      const toLoc = aliasedTable(warehouseLocations, "to_loc")
+      const fromWh = aliasedTable(warehouses, "from_wh")
+      const toWh = aliasedTable(warehouses, "to_wh")
+
       const [rows, [totalRow]] = await Promise.all([
         db
           .select({
@@ -430,11 +450,27 @@ export function createStockMovementRepository({ db }: { db: DB }) {
             itemId: stockMovementLines.itemId,
             batchId: stockMovementLines.batchId,
             fromLocationId: stockMovementLines.fromLocationId,
+            fromLocationCode: fromLoc.fullCode,
+            fromLocationName: fromLoc.name,
+            fromWarehouseName: fromWh.name,
             toLocationId: stockMovementLines.toLocationId,
+            toLocationCode: toLoc.fullCode,
+            toLocationName: toLoc.name,
+            toWarehouseName: toWh.name,
             quantity: stockMovementLines.quantity,
           })
           .from(stockMovementLines)
           .innerJoin(stockMovements, linesJoin)
+          .leftJoin(
+            fromLoc,
+            and(eq(fromLoc.orgId, stockMovementLines.orgId), eq(fromLoc.id, stockMovementLines.fromLocationId))
+          )
+          .leftJoin(fromWh, and(eq(fromWh.orgId, fromLoc.orgId), eq(fromWh.id, fromLoc.warehouseId)))
+          .leftJoin(
+            toLoc,
+            and(eq(toLoc.orgId, stockMovementLines.orgId), eq(toLoc.id, stockMovementLines.toLocationId))
+          )
+          .leftJoin(toWh, and(eq(toWh.orgId, toLoc.orgId), eq(toWh.id, toLoc.warehouseId)))
           .where(where)
           .orderBy(
             desc(stockMovements.postedAt),
@@ -462,6 +498,11 @@ export function createStockMovementRepository({ db }: { db: DB }) {
         eq(warehouses.id, inventoryItems.warehouseId)
       )
 
+      const locJoin = and(
+        eq(warehouseLocations.orgId, inventoryItems.orgId),
+        eq(warehouseLocations.id, inventoryItems.locationId)
+      )
+
       if (q.batchId) {
         // Specific batch queried: read from inventory_item_batches
         const where = and(
@@ -477,13 +518,22 @@ export function createStockMovementRepository({ db }: { db: DB }) {
         const [rows, [totalRow]] = await Promise.all([
           db
             .select({
+              id: inventoryItemBatches.id,
               warehouseId: inventoryItems.warehouseId,
+              warehouseName: warehouses.name,
+              warehouseCode: warehouses.code,
+              warehouseType: warehouses.type,
               locationId: inventoryItems.locationId,
+              locationName: warehouseLocations.name,
+              locationCode: warehouseLocations.fullCode,
+              locationType: warehouseLocations.type,
               itemId: inventoryItemBatches.itemId,
               batchId: sql<string | null>`${inventoryItemBatches.batchId}`,
               quantity: sql<string>`${inventoryItemBatches.onHandQty}::text`,
               onHandQty: sql<string>`${inventoryItemBatches.onHandQty}::text`,
               reservedQty: sql<string>`${inventoryItemBatches.reservedQty}::text`,
+              onOrderQty: sql<string>`${inventoryItemBatches.onOrderQty}::text`,
+              availableQty: sql<string>`(${inventoryItemBatches.onHandQty} - ${inventoryItemBatches.reservedQty})::text`,
               updatedAt: inventoryItemBatches.updatedAt,
             })
             .from(inventoryItemBatches)
@@ -495,6 +545,7 @@ export function createStockMovementRepository({ db }: { db: DB }) {
               )
             )
             .innerJoin(warehouses, warehousesJoin)
+            .innerJoin(warehouseLocations, locJoin)
             .where(where)
             .orderBy(asc(inventoryItems.locationId), asc(inventoryItemBatches.itemId))
             .limit(q.pageSize)
@@ -549,13 +600,22 @@ export function createStockMovementRepository({ db }: { db: DB }) {
 
       const batchQuery = db
         .select({
+          id: inventoryItemBatches.id,
           warehouseId: inventoryItems.warehouseId,
+          warehouseName: warehouses.name,
+          warehouseCode: warehouses.code,
+          warehouseType: warehouses.type,
           locationId: inventoryItems.locationId,
+          locationName: warehouseLocations.name,
+          locationCode: warehouseLocations.fullCode,
+          locationType: warehouseLocations.type,
           itemId: inventoryItemBatches.itemId,
           batchId: sql<string | null>`${inventoryItemBatches.batchId}`,
           quantity: sql<string>`${inventoryItemBatches.onHandQty}::text`,
           onHandQty: sql<string>`${inventoryItemBatches.onHandQty}::text`,
           reservedQty: sql<string>`${inventoryItemBatches.reservedQty}::text`,
+          onOrderQty: sql<string>`${inventoryItemBatches.onOrderQty}::text`,
+          availableQty: sql<string>`(${inventoryItemBatches.onHandQty} - ${inventoryItemBatches.reservedQty})::text`,
           updatedAt: inventoryItemBatches.updatedAt,
         })
         .from(inventoryItemBatches)
@@ -567,21 +627,32 @@ export function createStockMovementRepository({ db }: { db: DB }) {
           )
         )
         .innerJoin(warehouses, warehousesJoin)
+        .innerJoin(warehouseLocations, locJoin)
         .where(batchWhere)
 
       const nonBatchQuery = db
         .select({
+          id: inventoryItems.id,
           warehouseId: inventoryItems.warehouseId,
+          warehouseName: warehouses.name,
+          warehouseCode: warehouses.code,
+          warehouseType: warehouses.type,
           locationId: inventoryItems.locationId,
+          locationName: warehouseLocations.name,
+          locationCode: warehouseLocations.fullCode,
+          locationType: warehouseLocations.type,
           itemId: inventoryItems.itemId,
           batchId: sql<string | null>`null`,
           quantity: sql<string>`${inventoryItems.onHandQty}::text`,
           onHandQty: sql<string>`${inventoryItems.onHandQty}::text`,
           reservedQty: sql<string>`${inventoryItems.reservedQty}::text`,
+          onOrderQty: sql<string>`${inventoryItems.onOrderQty}::text`,
+          availableQty: sql<string>`(${inventoryItems.onHandQty} - ${inventoryItems.reservedQty})::text`,
           updatedAt: inventoryItems.updatedAt,
         })
         .from(inventoryItems)
         .innerJoin(warehouses, warehousesJoin)
+        .innerJoin(warehouseLocations, locJoin)
         .where(nonBatchWhere)
 
       const combinedQuery = db.$with("combined").as(db.select().from(batchQuery.unionAll(nonBatchQuery).as("sub")))
@@ -602,13 +673,22 @@ export function createStockMovementRepository({ db }: { db: DB }) {
 
       return {
         rows: rows.map((r) => ({
+          id: r.id,
           warehouseId: r.warehouseId,
+          warehouseName: r.warehouseName,
+          warehouseCode: r.warehouseCode,
+          warehouseType: r.warehouseType as "physical" | "virtual",
           locationId: r.locationId,
+          locationName: r.locationName,
+          locationCode: r.locationCode,
+          locationType: r.locationType,
           itemId: r.itemId,
           batchId: r.batchId,
           quantity: r.quantity,
           onHandQty: r.onHandQty,
           reservedQty: r.reservedQty,
+          onOrderQty: r.onOrderQty,
+          availableQty: r.availableQty,
           updatedAt: r.updatedAt,
         })),
         total: totalRow?.total ?? 0,
@@ -647,7 +727,17 @@ export function createStockMovementRepository({ db }: { db: DB }) {
     sumByWarehouse(
       orgId: string,
       itemId: string
-    ): Promise<{ warehouseId: string; isSystem: boolean; quantity: string }[]> {
+    ): Promise<{
+      warehouseId: string
+      warehouseName?: string
+      warehouseCode?: string
+      warehouseType?: "physical" | "virtual"
+      isSystem: boolean
+      quantity: string
+      reserved?: string
+      onOrder?: string
+      available?: string
+    }[]> {
       const warehousesJoin = and(
         eq(warehouses.orgId, inventoryItems.orgId),
         eq(warehouses.id, inventoryItems.warehouseId)
@@ -655,14 +745,20 @@ export function createStockMovementRepository({ db }: { db: DB }) {
       return db
         .select({
           warehouseId: inventoryItems.warehouseId,
+          warehouseName: warehouses.name,
+          warehouseCode: warehouses.code,
+          warehouseType: warehouses.type,
           isSystem: warehouses.isSystem,
           quantity: sql<string>`sum(${inventoryItems.onHandQty})::text`,
+          reserved: sql<string>`sum(${inventoryItems.reservedQty})::text`,
+          onOrder: sql<string>`sum(${inventoryItems.onOrderQty})::text`,
+          available: sql<string>`sum(${inventoryItems.onHandQty} - ${inventoryItems.reservedQty})::text`,
         })
         .from(inventoryItems)
         .innerJoin(warehouses, warehousesJoin)
         .where(and(eq(inventoryItems.orgId, orgId), eq(inventoryItems.itemId, itemId)))
-        .groupBy(inventoryItems.warehouseId, warehouses.isSystem)
-        .having(sql`sum(${inventoryItems.onHandQty}) <> 0`)
+        .groupBy(inventoryItems.warehouseId, warehouses.name, warehouses.code, warehouses.type, warehouses.isSystem)
+        .having(sql`sum(${inventoryItems.onHandQty}) <> 0 or sum(${inventoryItems.onOrderQty}) <> 0`)
     },
 
     /** On hand per batch of one item in real warehouses, non-zero only (batchless stock is not a batch). */

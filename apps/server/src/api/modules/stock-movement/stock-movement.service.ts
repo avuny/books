@@ -442,11 +442,23 @@ export function createStockMovementService(deps: StockMovementServiceDeps) {
       const rows = await repo.sumByWarehouse(orgId, itemId)
       let onHand = "0"
       let inTransit = "0"
+      let reserved = "0"
+      let onOrder = "0"
+      let available = "0"
       for (const r of rows) {
-        if (r.isSystem) inTransit = addDecimal(inTransit, r.quantity)
-        else onHand = addDecimal(onHand, r.quantity)
+        if (r.isSystem) {
+          inTransit = addDecimal(inTransit, r.quantity)
+        } else {
+          onHand = addDecimal(onHand, r.quantity)
+          if (r.reserved) reserved = addDecimal(reserved, r.reserved)
+          if (r.onOrder) onOrder = addDecimal(onOrder, r.onOrder)
+          if (r.available) available = addDecimal(available, r.available)
+        }
       }
-      return ok({ data: { itemId, onHand, inTransit, warehouses: rows }, msg: "Item stock retrieved successfully" })
+      return ok({
+        data: { itemId, onHand, inTransit, reserved, onOrder, available, warehouses: rows },
+        msg: "Item stock retrieved successfully",
+      })
     },
 
     /** How much of each batch of a batch-tracked item is on hand (real warehouses, non-zero only). */
