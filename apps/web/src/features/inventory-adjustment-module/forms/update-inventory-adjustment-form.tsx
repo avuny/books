@@ -25,18 +25,20 @@ import type {
 
 export type UpdateInventoryAdjustmentFormValues = UpdateInventoryAdjustmentInput
 
-const updateAdjustmentResolver: Resolver<UpdateInventoryAdjustmentFormValues> = async (
-  values,
-  context,
-  options
-) => {
+const updateAdjustmentResolver: Resolver<
+  UpdateInventoryAdjustmentFormValues
+> = async (values, context, options) => {
   const sanitized = {
     ...values,
     lines: Array.isArray(values.lines)
       ? values.lines.filter((l) => Boolean(l && l.itemId))
       : values.lines,
   }
-  return zodResolver(UpdateInventoryAdjustmentSchema)(sanitized as any, context, options)
+  return zodResolver(UpdateInventoryAdjustmentSchema)(
+    sanitized as any,
+    context,
+    options
+  )
 }
 
 type UpdateInventoryAdjustmentFormProps = {
@@ -48,6 +50,12 @@ type UpdateInventoryAdjustmentFormProps = {
   itemSource: AsyncOptionsSource
   itemComboboxCopy: AsyncComboboxCopy
   unitOptionsMap?: Record<string, OptionItem[]>
+  batchOptionsMap?: Record<string, OptionItem[]>
+  itemBatchTrackedMap?: Record<string, boolean>
+  onCreateBatch?: (
+    itemId: string,
+    batchNumber: string
+  ) => Promise<string | null>
   onWarehouseChange?: (warehouseId: string) => void
   onItemChange?: (index: number, itemId: string) => void
   onSubmit: (values: UpdateInventoryAdjustmentFormValues) => void
@@ -65,21 +73,33 @@ export function UpdateInventoryAdjustmentForm({
   itemSource,
   itemComboboxCopy,
   unitOptionsMap = {},
+  batchOptionsMap = {},
+  itemBatchTrackedMap = {},
+  onCreateBatch: _onCreateBatch,
   onWarehouseChange,
   onItemChange,
   onSubmit,
   isPending,
   errorMessage,
 }: UpdateInventoryAdjustmentFormProps) {
-  const initialReason = reasonOptions.find((r) => r.value === adjustment.reasonId)
-  const initialDirection =
-    (initialReason?.direction as "DECREASE" | "INCREASE" | "BOTH") || "BOTH"
-  const [direction, setDirection] = useState<"DECREASE" | "INCREASE" | "BOTH">(initialDirection)
+  const initialReason = reasonOptions.find(
+    (r) => r.value === adjustment.reasonId
+  )
+  const initialDirection: "DECREASE" | "INCREASE" =
+    initialReason?.direction === "INCREASE" ? "INCREASE" : "DECREASE"
+  const [direction, setDirection] = useState<"DECREASE" | "INCREASE">(
+    initialDirection
+  )
 
   const filteredReasonOptions = useMemo(() => {
-    if (direction === "BOTH") return reasonOptions
     return reasonOptions.filter(
-      (r) => !r.direction || r.direction === direction || r.direction === "BOTH"
+      (r) =>
+        !r.direction ||
+        r.direction === direction ||
+        r.direction === "BOTH" ||
+        r.code === "OTHER" ||
+        r.label.toLowerCase().includes("other") ||
+        r.label.includes("أخرى")
     )
   }, [reasonOptions, direction])
 
@@ -111,7 +131,9 @@ export function UpdateInventoryAdjustmentForm({
   useEffect(() => {
     const currentReasonId = form.getValues("reasonId")
     if (filteredReasonOptions.length > 0) {
-      const exists = filteredReasonOptions.some((r) => r.value === currentReasonId)
+      const exists = filteredReasonOptions.some(
+        (r) => r.value === currentReasonId
+      )
       if (!exists) {
         form.setValue("reasonId", filteredReasonOptions[0].value)
       }
@@ -163,18 +185,16 @@ export function UpdateInventoryAdjustmentForm({
           />
 
           <div className="space-y-2">
-            <label className="text-sm font-medium leading-none text-foreground peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+            <label className="text-sm leading-none font-medium text-foreground peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
               {copy.direction.label}
             </label>
-            <div className="flex rounded-md border border-input p-1 bg-muted/40">
-              {(["DECREASE", "INCREASE", "BOTH"] as const).map((dir) => {
+            <div className="flex rounded-md border border-input bg-muted/40 p-1">
+              {(["DECREASE", "INCREASE"] as const).map((dir) => {
                 const isSelected = direction === dir
                 const label =
                   dir === "DECREASE"
                     ? copy.direction.decrease
-                    : dir === "INCREASE"
-                      ? copy.direction.increase
-                      : copy.direction.both
+                    : copy.direction.increase
                 return (
                   <button
                     key={dir}
@@ -182,9 +202,9 @@ export function UpdateInventoryAdjustmentForm({
                     disabled={isPending}
                     onClick={() => setDirection(dir)}
                     className={cn(
-                      "flex-1 rounded-sm px-3 py-1.5 text-xs font-medium transition-all cursor-pointer",
+                      "flex-1 cursor-pointer rounded-sm px-3 py-1.5 text-xs font-medium transition-all",
                       isSelected
-                        ? "bg-background text-foreground shadow-xs font-semibold"
+                        ? "bg-background font-semibold text-foreground shadow-xs"
                         : "text-muted-foreground hover:text-foreground"
                     )}
                   >
@@ -240,14 +260,24 @@ export function UpdateInventoryAdjustmentForm({
           disabled={isPending}
           onItemChange={(index, itemId) => {
             onItemChange?.(index, itemId)
-            const currentLoc = form.getValues(`lines.${index}.locationId` as any)
+            const currentLoc = form.getValues(
+              `lines.${index}.locationId` as any
+            )
             if (!currentLoc && locationOptions.length > 0) {
-              form.setValue(`lines.${index}.locationId` as any, locationOptions[0].value)
+              form.setValue(
+                `lines.${index}.locationId` as any,
+                locationOptions[0].value
+              )
             }
           }}
           renderFields={({ index, disabled, line }) => {
             const lineData = line as any
-            const itemUnits = lineData?.itemId ? unitOptionsMap[lineData.itemId] ?? [] : []
+            const itemId: string = lineData?.itemId ?? ""
+            const itemUnits = itemId ? (unitOptionsMap[itemId] ?? []) : []
+            const isBatchTracked = itemId
+              ? (itemBatchTrackedMap[itemId] ?? false)
+              : false
+            const batchOptions = itemId ? (batchOptionsMap[itemId] ?? []) : []
 
             return (
               <>
@@ -262,7 +292,7 @@ export function UpdateInventoryAdjustmentForm({
                   />
                 </div>
 
-                {/* Row 2: Unit, Counted Quantity, Notes */}
+                {/* Row 2: Unit, Batch (conditional), Counted Quantity, Notes */}
                 <div className="sm:col-span-3">
                   <SelectField
                     control={form.control}
@@ -272,15 +302,29 @@ export function UpdateInventoryAdjustmentForm({
                       itemUnits.length > 0
                         ? itemUnits
                         : [
-                          {
-                            value: lineData?.unitId || "base",
-                            label: lineData?.unitId ? "Selected unit" : "Select unit",
-                          },
-                        ]
+                            {
+                              value: lineData?.unitId || "base",
+                              label: lineData?.unitId
+                                ? "Selected unit"
+                                : "Select unit",
+                            },
+                          ]
                     }
                     disabled={disabled}
                   />
                 </div>
+
+                {isBatchTracked && (
+                  <div className="sm:col-span-3">
+                    <SelectField
+                      control={form.control}
+                      name={`lines.${index}.batchId` as const}
+                      copy={copy.fields.batch}
+                      options={batchOptions}
+                      disabled={disabled}
+                    />
+                  </div>
+                )}
 
                 <div className="sm:col-span-3">
                   <InputField
@@ -306,12 +350,15 @@ export function UpdateInventoryAdjustmentForm({
           }}
           renderRowFooter={({ line }) => {
             const lineData = line as any
-            const provisionalDiff = calculateLineDifference(lineData?.countedQuantity, 0)
+            const provisionalDiff = calculateLineDifference(
+              lineData?.countedQuantity,
+              0
+            )
             return (
               <div className="flex items-center justify-between text-xs text-muted-foreground">
                 <span>
                   {copy.fields.difference}:{" "}
-                  <strong className="tabular-nums text-foreground">
+                  <strong className="text-foreground tabular-nums">
                     {provisionalDiff}
                   </strong>
                 </span>

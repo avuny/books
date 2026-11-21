@@ -26,6 +26,7 @@ import {
   useDeleteInventoryAdjustment,
   useGetInventoryAdjustment,
   useGetInventoryAdjustmentSnapshot,
+  getInventoryAdjustmentSnapshot,
   useGetMyPermissions,
   useListWarehouseLocationOptions,
   useListWarehouseOptions,
@@ -188,6 +189,30 @@ export function useStockSnapshot(orgId: string, queryParams: StockSnapshotQuery,
     isFetching: query.isFetching,
     error: query.error,
     refetch: query.refetch,
+  }
+}
+
+export async function fetchStockSnapshot(
+  orgId: string,
+  params: {
+    warehouseId: string
+    itemId: string
+    locationId: string
+    unitId: string
+    batchId?: string | null
+  }
+): Promise<StockSnapshotDto | null> {
+  try {
+    const res = await getInventoryAdjustmentSnapshot(orgId, {
+      warehouseId: params.warehouseId,
+      itemId: params.itemId,
+      locationId: params.locationId,
+      unitId: params.unitId,
+      batchId: params.batchId || undefined,
+    })
+    return (res.data as StockSnapshotDto) ?? null
+  } catch {
+    return null
   }
 }
 

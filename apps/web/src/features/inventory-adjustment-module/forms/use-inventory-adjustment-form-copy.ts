@@ -72,5 +72,8 @@ export function useInventoryAdjustmentFormCopy(
     submittingDraftLabel: t("create.saveDraft"),
     submitConfirmLabel: t("create.confirm"),
     submittingConfirmLabel: t("create.confirm"),
+    confirmDialogTitle: t("actions.confirmTitle"),
+    confirmDialogDescription: t("actions.confirmDescription"),
+    cancelLabel: t("actions.cancelDialog"),
   }
 }

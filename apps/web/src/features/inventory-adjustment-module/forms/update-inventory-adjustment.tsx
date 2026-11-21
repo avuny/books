@@ -38,11 +38,20 @@ export function UpdateInventoryAdjustment({
 }: UpdateInventoryAdjustmentProps) {
   const [serverError, setServerError] = useState<string | null>(null)
   const [selectedWarehouseId, setSelectedWarehouseId] = useState<string>("")
-  const [unitOptionsMap, setUnitOptionsMap] = useState<Record<string, OptionItem[]>>({})
-  const [batchOptionsMap, setBatchOptionsMap] = useState<Record<string, OptionItem[]>>({})
-  const [itemBatchTrackedMap, setItemBatchTrackedMap] = useState<Record<string, boolean>>({})
+  const [unitOptionsMap, setUnitOptionsMap] = useState<
+    Record<string, OptionItem[]>
+  >({})
+  const [batchOptionsMap, setBatchOptionsMap] = useState<
+    Record<string, OptionItem[]>
+  >({})
+  const [itemBatchTrackedMap, setItemBatchTrackedMap] = useState<
+    Record<string, boolean>
+  >({})
 
-  const { adjustment, isLoading, error } = useInventoryAdjustment(orgId, adjustmentId)
+  const { adjustment, isLoading, error } = useInventoryAdjustment(
+    orgId,
+    adjustmentId
+  )
   const updateMutation = useUpdateInventoryAdjustmentMutation(orgId)
   const copy = useInventoryAdjustmentFormCopy("update")
   const itemComboboxCopy = useAsyncComboboxCopy()
@@ -67,6 +76,7 @@ export function UpdateInventoryAdjustment({
       reasons.map((r) => ({
         value: r.id,
         label: r.name,
+        code: r.code,
         direction: r.direction,
       })),
     [reasons]
@@ -150,7 +160,9 @@ export function UpdateInventoryAdjustment({
           description: values.description?.trim() || null,
           lines: activeLines.map((l) => ({
             ...l,
-            batchId: itemBatchTrackedMap[l.itemId] ? (l.batchId?.trim() || null) : null,
+            batchId: itemBatchTrackedMap[l.itemId]
+              ? l.batchId?.trim() || null
+              : null,
             countedQuantity: String(l.countedQuantity),
             notes: l.notes?.trim() || null,
           })),

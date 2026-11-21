@@ -4,6 +4,7 @@ export type OptionItem = {
   value: string
   label: string
   direction?: string
+  code?: string
 }
 
 export type InventoryAdjustmentFormCopy = {
@@ -39,4 +40,7 @@ export type InventoryAdjustmentFormCopy = {
   submittingDraftLabel: string
   submitConfirmLabel: string
   submittingConfirmLabel: string
+  confirmDialogTitle: string
+  confirmDialogDescription: string
+  cancelLabel: string
 }
