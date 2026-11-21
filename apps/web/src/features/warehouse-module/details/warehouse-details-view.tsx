@@ -81,10 +81,17 @@ export function WarehouseDetailsView({
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div className="min-w-0 space-y-1">
               <div className="flex flex-wrap items-center gap-2">
-                <h1 className="text-xl font-semibold text-foreground">{warehouse.name}</h1>
-                <WarehouseBadges warehouse={warehouse} copy={{ ...copy.badges, type: "" }} />
+                <h1 className="text-xl font-semibold text-foreground">
+                  {warehouse.name}
+                </h1>
+                <WarehouseBadges
+                  warehouse={warehouse}
+                  copy={{ ...copy.badges, type: "" }}
+                />
               </div>
-              <p className="font-mono text-sm text-muted-foreground">{warehouse.code}</p>
+              <p className="font-mono text-sm text-muted-foreground">
+                {warehouse.code}
+              </p>
             </div>
             <div className="flex items-center gap-2">
               {locationsAction}
@@ -100,31 +107,47 @@ export function WarehouseDetailsView({
 
           <dl className="grid grid-cols-1 gap-4 text-sm sm:grid-cols-2">
             <div>
-              <dt className="text-xs text-muted-foreground">{copy.codeLabel}</dt>
+              <dt className="text-xs text-muted-foreground">
+                {copy.codeLabel}
+              </dt>
               <dd className="font-mono text-foreground">{warehouse.code}</dd>
             </div>
             <div>
-              <dt className="text-xs text-muted-foreground">{copy.typeLabel}</dt>
+              <dt className="text-xs text-muted-foreground">
+                {copy.typeLabel}
+              </dt>
               <dd className="text-foreground">{copy.typeValue}</dd>
             </div>
             <div>
-              <dt className="text-xs text-muted-foreground">{copy.statusLabel}</dt>
+              <dt className="text-xs text-muted-foreground">
+                {copy.statusLabel}
+              </dt>
               <dd className="text-foreground">{copy.statusValue}</dd>
             </div>
             <div>
-              <dt className="text-xs text-muted-foreground">{copy.descriptionLabel}</dt>
-              <dd className="text-foreground">{warehouse.description ?? copy.none}</dd>
+              <dt className="text-xs text-muted-foreground">
+                {copy.descriptionLabel}
+              </dt>
+              <dd className="text-foreground">
+                {warehouse.description ?? copy.none}
+              </dd>
             </div>
             <div className="sm:col-span-2">
-              <dt className="text-xs text-muted-foreground">{copy.addressLabel}</dt>
+              <dt className="text-xs text-muted-foreground">
+                {copy.addressLabel}
+              </dt>
               <dd className="text-foreground">{address || copy.none}</dd>
             </div>
             <div>
-              <dt className="text-xs text-muted-foreground">{copy.createdLabel}</dt>
+              <dt className="text-xs text-muted-foreground">
+                {copy.createdLabel}
+              </dt>
               <dd className="text-foreground">{createdAt}</dd>
             </div>
             <div>
-              <dt className="text-xs text-muted-foreground">{copy.updatedLabel}</dt>
+              <dt className="text-xs text-muted-foreground">
+                {copy.updatedLabel}
+              </dt>
               <dd className="text-foreground">{updatedAt}</dd>
             </div>
           </dl>

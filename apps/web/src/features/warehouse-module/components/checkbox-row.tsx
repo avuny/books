@@ -1,5 +1,10 @@
 import { useId } from "react"
-import { Controller, type Control, type FieldPath, type FieldValues } from "react-hook-form"
+import {
+  Controller,
+  type Control,
+  type FieldPath,
+  type FieldValues,
+} from "react-hook-form"
 import { Checkbox } from "@workspace/ui/components/checkbox"
 import { Label } from "@workspace/ui/components/label"
 
@@ -13,7 +18,13 @@ export interface CheckboxRowProps<T extends FieldValues> {
 }
 
 /** A labelled checkbox bound to a boolean form field. */
-export function CheckboxRow<T extends FieldValues>({ control, name, label, description, disabled }: CheckboxRowProps<T>) {
+export function CheckboxRow<T extends FieldValues>({
+  control,
+  name,
+  label,
+  description,
+  disabled,
+}: CheckboxRowProps<T>) {
   const id = useId()
   return (
     <Controller
@@ -30,7 +41,9 @@ export function CheckboxRow<T extends FieldValues>({ control, name, label, descr
           />
           <div className="grid gap-0.5">
             <Label htmlFor={id}>{label}</Label>
-            {description ? <p className="text-xs text-muted-foreground">{description}</p> : null}
+            {description ? (
+              <p className="text-xs text-muted-foreground">{description}</p>
+            ) : null}
           </div>
         </div>
       )}

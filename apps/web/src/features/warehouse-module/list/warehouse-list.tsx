@@ -34,8 +34,14 @@ export function WarehouseList({ orgId, onViewWarehouse }: WarehouseListProps) {
   /* state */
   const [scope, setScope] = useState<WarehouseScope>("all")
   const [search, setSearch] = useState("")
-  const [pagination, setPagination] = useState<PaginationState>({ pageIndex: 0, pageSize: 20 })
-  const resetPage = useCallback(() => setPagination((c) => ({ ...c, pageIndex: 0 })), [])
+  const [pagination, setPagination] = useState<PaginationState>({
+    pageIndex: 0,
+    pageSize: 20,
+  })
+  const resetPage = useCallback(
+    () => setPagination((c) => ({ ...c, pageIndex: 0 })),
+    []
+  )
 
   /* data */
   const { warehouses, total, isLoading } = useWarehouseList(orgId, {
@@ -45,7 +51,8 @@ export function WarehouseList({ orgId, onViewWarehouse }: WarehouseListProps) {
     search,
   })
   const { getTypeLabel } = useWarehouseLabels()
-  const { abilities, getActions, dialogs, actionError, clearActionError } = useWarehouseActions(orgId)
+  const { abilities, getActions, dialogs, actionError, clearActionError } =
+    useWarehouseActions(orgId)
 
   // Deleting the last row of the last page leaves an empty page: step back.
   useEffect(() => {
@@ -56,11 +63,16 @@ export function WarehouseList({ orgId, onViewWarehouse }: WarehouseListProps) {
   }, [isLoading, warehouses.length, pagination.pageIndex])
 
   const badges = useMemo(
-    () => ({ default: t("badges.default"), system: t("badges.system"), inactive: t("badges.inactive") }),
+    () => ({
+      default: t("badges.default"),
+      system: t("badges.system"),
+      inactive: t("badges.inactive"),
+    }),
     [t]
   )
   const rowActions = useCallback(
-    (warehouse: WarehouseListItemDto) => getActions(warehouse, { onView: () => onViewWarehouse(warehouse.id) }),
+    (warehouse: WarehouseListItemDto) =>
+      getActions(warehouse, { onView: () => onViewWarehouse(warehouse.id) }),
     [getActions, onViewWarehouse]
   )
 
@@ -96,12 +108,18 @@ export function WarehouseList({ orgId, onViewWarehouse }: WarehouseListProps) {
   return (
     <div className="flex flex-col gap-4">
       <div className="min-w-0">
-        <h1 className="text-xl font-semibold text-foreground">{t("list.title")}</h1>
+        <h1 className="text-xl font-semibold text-foreground">
+          {t("list.title")}
+        </h1>
         <p className="text-sm text-muted-foreground">{t("list.description")}</p>
       </div>
 
       {actionError ? (
-        <p role="alert" className="text-sm text-destructive" onClick={clearActionError}>
+        <p
+          role="alert"
+          className="text-sm text-destructive"
+          onClick={clearActionError}
+        >
           {actionError}
         </p>
       ) : null}
@@ -115,7 +133,10 @@ export function WarehouseList({ orgId, onViewWarehouse }: WarehouseListProps) {
           setScope(next)
           resetPage()
         }}
-        tabs={SCOPES.map((item) => ({ value: item, label: t(`list.tabs.${item}`) }))}
+        tabs={SCOPES.map((item) => ({
+          value: item,
+          label: t(`list.tabs.${item}`),
+        }))}
       />
 
       <DataTableToolbar
@@ -139,16 +160,27 @@ export function WarehouseList({ orgId, onViewWarehouse }: WarehouseListProps) {
         onRowClick={(w) => onViewWarehouse(w.id)}
         emptyState={
           <div className="flex flex-col items-center gap-1 px-6 py-16 text-center">
-            <p className="text-sm font-medium text-foreground">{t("empty.title")}</p>
-            <p className="text-sm text-muted-foreground">{t("empty.description")}</p>
+            <p className="text-sm font-medium text-foreground">
+              {t("empty.title")}
+            </p>
+            <p className="text-sm text-muted-foreground">
+              {t("empty.description")}
+            </p>
           </div>
         }
         renderMobileCard={(row) => (
           <WarehouseMobileCard
             warehouse={row.original}
-            copy={{ codeLabel: t("table.code"), typeLabel: t("table.type"), getTypeLabel, badges }}
+            copy={{
+              codeLabel: t("table.code"),
+              typeLabel: t("table.type"),
+              getTypeLabel,
+              badges,
+            }}
             actions={rowActions(row.original)}
-            actionsTriggerLabel={t("table.actionsFor", { name: row.original.name })}
+            actionsTriggerLabel={t("table.actionsFor", {
+              name: row.original.name,
+            })}
             onClick={() => onViewWarehouse(row.original.id)}
           />
         )}
@@ -160,8 +192,10 @@ export function WarehouseList({ orgId, onViewWarehouse }: WarehouseListProps) {
               previous: t("pagination.previous"),
               next: t("pagination.next"),
               rowsPerPage: t("pagination.rowsPerPage"),
-              summary: ({ from, to, total: count }) => t("pagination.summary", { from, to, total: count }),
-              pageOf: (page, pageCount) => t("pagination.pageOf", { page, pageCount }),
+              summary: ({ from, to, total: count }) =>
+                t("pagination.summary", { from, to, total: count }),
+              pageOf: (page, pageCount) =>
+                t("pagination.pageOf", { page, pageCount }),
               pageLabel: (page) => t("pagination.goTo", { page }),
             }}
           />

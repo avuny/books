@@ -3,7 +3,9 @@ import { WAREHOUSE_TYPES } from "@avuny/contracts"
 
 import type { WarehouseFormCopy } from "./warehouse-form-types"
 
-export function useWarehouseFormCopy(mode: "create" | "update"): WarehouseFormCopy {
+export function useWarehouseFormCopy(
+  mode: "create" | "update"
+): WarehouseFormCopy {
   const { t } = useTranslation("warehouse")
   return {
     title: t(`${mode}.title`),
@@ -48,7 +50,10 @@ export function useWarehouseFormCopy(mode: "create" | "update"): WarehouseFormCo
       label: t("fields.createDefaultLocation.label"),
       description: t("fields.createDefaultLocation.description"),
     },
-    typeOptions: WAREHOUSE_TYPES.map((value) => ({ value, label: t(`labels.types.${value}`, { defaultValue: value }) })),
+    typeOptions: WAREHOUSE_TYPES.map((value) => ({
+      value,
+      label: t(`labels.types.${value}`, { defaultValue: value }),
+    })),
     submitLabel: t(`${mode}.submitLabel`),
     submittingLabel: t(`${mode}.submittingLabel`),
   }

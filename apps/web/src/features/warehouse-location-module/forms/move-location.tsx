@@ -3,8 +3,14 @@ import { useTranslation } from "react-i18next"
 import { useAsyncComboboxCopy } from "@/features/lib/options/use-async-combobox-copy"
 import { parseApiError } from "@workspace/ui/lib/api-error"
 
-import { useLocationOptions, useMoveLocationMutation } from "../warehouse-location-api"
-import { MoveLocationForm, type MoveLocationFormValues } from "./move-location-form"
+import {
+  useLocationOptions,
+  useMoveLocationMutation,
+} from "../warehouse-location-api"
+import {
+  MoveLocationForm,
+  type MoveLocationFormValues,
+} from "./move-location-form"
 import { useLocationActionFormCopy } from "./use-location-form-copy"
 
 type MoveLocationProps = {
@@ -15,13 +21,21 @@ type MoveLocationProps = {
 }
 
 // Composition only: strings + API behavior wired into the pure form.
-export function MoveLocation({ orgId, warehouseId, locationId, onSuccess }: MoveLocationProps) {
+export function MoveLocation({
+  orgId,
+  warehouseId,
+  locationId,
+  onSuccess,
+}: MoveLocationProps) {
   const { t } = useTranslation("warehouse-location")
   const [serverError, setServerError] = useState<string | null>(null)
   const moveMutation = useMoveLocationMutation(orgId, warehouseId)
   const copy = useLocationActionFormCopy("move")
   const comboboxCopy = useAsyncComboboxCopy()
-  const parentSource = useLocationOptions(orgId, { warehouseId, containerOnly: true })
+  const parentSource = useLocationOptions(orgId, {
+    warehouseId,
+    containerOnly: true,
+  })
 
   const handleSubmit = async (values: MoveLocationFormValues) => {
     setServerError(null)
@@ -35,7 +49,13 @@ export function MoveLocation({ orgId, warehouseId, locationId, onSuccess }: Move
 
   return (
     <MoveLocationForm
-      copy={{ ...copy, parent: { label: t("fields.parent.label"), placeholder: t("fields.parent.placeholder") } }}
+      copy={{
+        ...copy,
+        parent: {
+          label: t("fields.parent.label"),
+          placeholder: t("fields.parent.placeholder"),
+        },
+      }}
       comboboxCopy={comboboxCopy}
       parentSource={parentSource}
       onSubmit={handleSubmit}

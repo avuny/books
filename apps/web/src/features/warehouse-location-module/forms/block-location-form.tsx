@@ -18,17 +18,43 @@ type BlockLocationFormProps = {
 }
 
 // UI + validation only. No i18n, API, auth or navigation knowledge.
-export function BlockLocationForm({ copy, onSubmit, isPending, errorMessage }: BlockLocationFormProps) {
+export function BlockLocationForm({
+  copy,
+  onSubmit,
+  isPending,
+  errorMessage,
+}: BlockLocationFormProps) {
   const form = useForm<BlockLocationFormValues>({
     resolver: zodResolver(BlockWarehouseLocationSchema),
     defaultValues: { reason: "" },
   })
 
   return (
-    <FormShell title={copy.title} description={copy.description} errorMessage={errorMessage}>
-      <form onSubmit={form.handleSubmit((values) => onSubmit(values))} noValidate className="space-y-6">
-        <InputField control={form.control} name="reason" copy={copy.reason} type="text" autoComplete="off" autoFocus disabled={isPending} />
-        <SubmitButton className="w-full" loading={isPending} label={copy.submitLabel} loadingLabel={copy.submittingLabel} />
+    <FormShell
+      title={copy.title}
+      description={copy.description}
+      errorMessage={errorMessage}
+    >
+      <form
+        onSubmit={form.handleSubmit((values) => onSubmit(values))}
+        noValidate
+        className="space-y-6"
+      >
+        <InputField
+          control={form.control}
+          name="reason"
+          copy={copy.reason}
+          type="text"
+          autoComplete="off"
+          autoFocus
+          disabled={isPending}
+        />
+        <SubmitButton
+          className="w-full"
+          loading={isPending}
+          label={copy.submitLabel}
+          loadingLabel={copy.submittingLabel}
+        />
       </form>
     </FormShell>
   )

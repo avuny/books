@@ -9,26 +9,74 @@ import {
   type LocationAbilities,
 } from "./location-rules"
 
-const all: LocationAbilities = { canCreate: true, canUpdate: true, canDeactivate: true, canDelete: true, canMove: true, canBlock: true, canChangeBarcode: true }
-const none: LocationAbilities = { canCreate: false, canUpdate: false, canDeactivate: false, canDelete: false, canMove: false, canBlock: false, canChangeBarcode: false }
+const all: LocationAbilities = {
+  canCreate: true,
+  canUpdate: true,
+  canDeactivate: true,
+  canDelete: true,
+  canMove: true,
+  canBlock: true,
+  canChangeBarcode: true,
+}
+const none: LocationAbilities = {
+  canCreate: false,
+  canUpdate: false,
+  canDeactivate: false,
+  canDelete: false,
+  canMove: false,
+  canBlock: false,
+  canChangeBarcode: false,
+}
 const container = { isStockable: false, isActive: true, isBlocked: false }
 
 describe("getLocationActionAvailability", () => {
   it("offers add-child only for active containers", () => {
-    expect(getLocationActionAvailability(container, all, false).canAddChild).toBe(true)
-    expect(getLocationActionAvailability({ ...container, isStockable: true }, all, false).canAddChild).toBe(false)
-    expect(getLocationActionAvailability({ ...container, isActive: false }, all, false).canAddChild).toBe(false)
+    expect(
+      getLocationActionAvailability(container, all, false).canAddChild
+    ).toBe(true)
+    expect(
+      getLocationActionAvailability(
+        { ...container, isStockable: true },
+        all,
+        false
+      ).canAddChild
+    ).toBe(false)
+    expect(
+      getLocationActionAvailability(
+        { ...container, isActive: false },
+        all,
+        false
+      ).canAddChild
+    ).toBe(false)
   })
   it("swaps block and unblock with the blocked state", () => {
-    expect(getLocationActionAvailability(container, all, false)).toMatchObject({ canBlock: true, canUnblock: false })
-    expect(getLocationActionAvailability({ ...container, isBlocked: true }, all, false)).toMatchObject({ canBlock: false, canUnblock: true })
+    expect(getLocationActionAvailability(container, all, false)).toMatchObject({
+      canBlock: true,
+      canUnblock: false,
+    })
+    expect(
+      getLocationActionAvailability(
+        { ...container, isBlocked: true },
+        all,
+        false
+      )
+    ).toMatchObject({ canBlock: false, canUnblock: true })
   })
   it("swaps deactivate and reactivate with the active state", () => {
-    expect(getLocationActionAvailability({ ...container, isActive: false }, all, false)).toMatchObject({ canDeactivate: false, canReactivate: true })
+    expect(
+      getLocationActionAvailability(
+        { ...container, isActive: false },
+        all,
+        false
+      )
+    ).toMatchObject({ canDeactivate: false, canReactivate: true })
   })
   it("offers nothing without permissions or in a read-only warehouse", () => {
-    const off = (a: ReturnType<typeof getLocationActionAvailability>) => Object.values(a).every((v) => v === false)
-    expect(off(getLocationActionAvailability(container, none, false))).toBe(true)
+    const off = (a: ReturnType<typeof getLocationActionAvailability>) =>
+      Object.values(a).every((v) => v === false)
+    expect(off(getLocationActionAvailability(container, none, false))).toBe(
+      true
+    )
     expect(off(getLocationActionAvailability(container, all, true))).toBe(true)
   })
 })
@@ -50,11 +98,19 @@ describe("getAllowedLocationTypes", () => {
     expect(types).not.toContain("virtual_bin")
   })
   it("only allows lower ranks under a parent", () => {
-    expect(getAllowedLocationTypes("rack", "physical")).toEqual(["bay", "level", "shelf", "bin"])
+    expect(getAllowedLocationTypes("rack", "physical")).toEqual([
+      "bay",
+      "level",
+      "shelf",
+      "bin",
+    ])
     expect(getAllowedLocationTypes("bin", "physical")).toEqual([])
   })
   it("limits virtual warehouses to virtual_bin and area", () => {
-    expect(getAllowedLocationTypes(null, "virtual")).toEqual(["area", "virtual_bin"])
+    expect(getAllowedLocationTypes(null, "virtual")).toEqual([
+      "area",
+      "virtual_bin",
+    ])
   })
 })
 

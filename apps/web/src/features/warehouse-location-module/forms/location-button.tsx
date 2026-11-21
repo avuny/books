@@ -16,20 +16,40 @@ type LocationButtonProps = {
   className?: string
 }
 
-export function LocationButton({ orgId, warehouse, locationId, parent, className }: LocationButtonProps) {
+export function LocationButton({
+  orgId,
+  warehouse,
+  locationId,
+  parent,
+  className,
+}: LocationButtonProps) {
   const { t } = useTranslation("warehouse-location")
   const [open, setOpen] = useState(false)
   const isUpdate = Boolean(locationId)
-  const label = t(isUpdate ? "actions.edit" : parent ? "actions.addChild" : "actions.create")
+  const label = t(
+    isUpdate ? "actions.edit" : parent ? "actions.addChild" : "actions.create"
+  )
   const Icon = isUpdate ? Pencil : Plus
 
   return (
     <>
-      <Button type="button" variant={isUpdate ? "outline" : "default"} className={className} onClick={() => setOpen(true)}>
+      <Button
+        type="button"
+        variant={isUpdate ? "outline" : "default"}
+        className={className}
+        onClick={() => setOpen(true)}
+      >
         <Icon className="size-4" aria-hidden />
         {label}
       </Button>
-      <LocationDialog orgId={orgId} warehouse={warehouse} locationId={locationId} parent={parent} open={open} onOpenChange={setOpen} />
+      <LocationDialog
+        orgId={orgId}
+        warehouse={warehouse}
+        locationId={locationId}
+        parent={parent}
+        open={open}
+        onOpenChange={setOpen}
+      />
     </>
   )
 }
@@ -41,16 +61,32 @@ type BulkGenerateButtonProps = {
   className?: string
 }
 
-export function BulkGenerateButton({ orgId, warehouse, parent, className }: BulkGenerateButtonProps) {
+export function BulkGenerateButton({
+  orgId,
+  warehouse,
+  parent,
+  className,
+}: BulkGenerateButtonProps) {
   const { t } = useTranslation("warehouse-location")
   const [open, setOpen] = useState(false)
   return (
     <>
-      <Button type="button" variant="outline" className={className} onClick={() => setOpen(true)}>
+      <Button
+        type="button"
+        variant="outline"
+        className={className}
+        onClick={() => setOpen(true)}
+      >
         <Boxes className="size-4" aria-hidden />
         {t("actions.bulk")}
       </Button>
-      <BulkGenerateLocationsDialog orgId={orgId} warehouse={warehouse} parent={parent} open={open} onOpenChange={setOpen} />
+      <BulkGenerateLocationsDialog
+        orgId={orgId}
+        warehouse={warehouse}
+        parent={parent}
+        open={open}
+        onOpenChange={setOpen}
+      />
     </>
   )
 }

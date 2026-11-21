@@ -2,8 +2,14 @@ import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { parseApiError } from "@workspace/ui/lib/api-error"
 
-import { useChangeLocationBarcodeMutation, useLocation } from "../warehouse-location-api"
-import { BarcodeLocationForm, type BarcodeLocationFormValues } from "./barcode-location-form"
+import {
+  useChangeLocationBarcodeMutation,
+  useLocation,
+} from "../warehouse-location-api"
+import {
+  BarcodeLocationForm,
+  type BarcodeLocationFormValues,
+} from "./barcode-location-form"
 import { useLocationActionFormCopy } from "./use-location-form-copy"
 
 type BarcodeLocationProps = {
@@ -14,7 +20,12 @@ type BarcodeLocationProps = {
 }
 
 // Composition only: strings + API behavior wired into the pure form.
-export function BarcodeLocation({ orgId, warehouseId, locationId, onSuccess }: BarcodeLocationProps) {
+export function BarcodeLocation({
+  orgId,
+  warehouseId,
+  locationId,
+  onSuccess,
+}: BarcodeLocationProps) {
   const { t } = useTranslation("warehouse-location")
   const [serverError, setServerError] = useState<string | null>(null)
   const { location } = useLocation(orgId, locationId)
@@ -35,7 +46,13 @@ export function BarcodeLocation({ orgId, warehouseId, locationId, onSuccess }: B
     <BarcodeLocationForm
       // Remount when the stored barcode arrives so the field starts with it.
       key={location?.barcode ?? "none"}
-      copy={{ ...copy, barcode: { label: t("fields.barcode.label"), placeholder: t("fields.barcode.placeholder") } }}
+      copy={{
+        ...copy,
+        barcode: {
+          label: t("fields.barcode.label"),
+          placeholder: t("fields.barcode.placeholder"),
+        },
+      }}
       currentBarcode={location?.barcode ?? null}
       onSubmit={handleSubmit}
       isPending={barcodeMutation.isPending}

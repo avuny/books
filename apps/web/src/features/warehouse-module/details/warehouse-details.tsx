@@ -6,7 +6,11 @@ import { parseApiError } from "@workspace/ui/lib/api-error"
 
 import { useWarehouseActions } from "../actions"
 import { WarehouseButton } from "../forms"
-import { formatAddress, getWarehouseActionAvailability, useWarehouseLabels } from "../lib"
+import {
+  formatAddress,
+  getWarehouseActionAvailability,
+  useWarehouseLabels,
+} from "../lib"
 import { useWarehouse } from "../warehouse-api"
 import { WarehouseDetailsView } from "./warehouse-details-view"
 
@@ -20,15 +24,28 @@ type WarehouseDetailsProps = {
 }
 
 // Composition only: strings + API behavior wired into the pure view.
-export function WarehouseDetails({ orgId, warehouseId, onBack, onViewLocations }: WarehouseDetailsProps) {
+export function WarehouseDetails({
+  orgId,
+  warehouseId,
+  onBack,
+  onViewLocations,
+}: WarehouseDetailsProps) {
   const { t, i18n } = useTranslation("warehouse")
   const { warehouse, isLoading, error } = useWarehouse(orgId, warehouseId)
   const { getTypeLabel } = useWarehouseLabels()
-  const { abilities, getActions, dialogs, actionError } = useWarehouseActions(orgId, { onDeleted: () => onBack?.() })
+  const { abilities, getActions, dialogs, actionError } = useWarehouseActions(
+    orgId,
+    { onDeleted: () => onBack?.() }
+  )
 
-  const formatDate = (iso: string) => new Intl.DateTimeFormat(i18n.language, { dateStyle: "medium" }).format(new Date(iso))
+  const formatDate = (iso: string) =>
+    new Intl.DateTimeFormat(i18n.language, { dateStyle: "medium" }).format(
+      new Date(iso)
+    )
 
-  const availability = warehouse ? getWarehouseActionAvailability(warehouse, abilities) : null
+  const availability = warehouse
+    ? getWarehouseActionAvailability(warehouse, abilities)
+    : null
   const menu = warehouse ? getActions(warehouse, { includeEdit: false }) : []
 
   return (
@@ -49,8 +66,14 @@ export function WarehouseDetails({ orgId, warehouseId, onBack, onViewLocations }
           updatedLabel: t("details.updatedAt"),
           none: t("details.none"),
           typeValue: warehouse ? getTypeLabel(warehouse.type) : "",
-          statusValue: warehouse ? t(warehouse.isActive ? "badges.active" : "badges.inactive") : "",
-          badges: { default: t("badges.default"), system: t("badges.system"), inactive: t("badges.inactive") },
+          statusValue: warehouse
+            ? t(warehouse.isActive ? "badges.active" : "badges.inactive")
+            : "",
+          badges: {
+            default: t("badges.default"),
+            system: t("badges.system"),
+            inactive: t("badges.inactive"),
+          },
         }}
         address={warehouse ? formatAddress(warehouse) : ""}
         createdAt={warehouse ? formatDate(warehouse.createdAt) : ""}
@@ -67,8 +90,15 @@ export function WarehouseDetails({ orgId, warehouseId, onBack, onViewLocations }
         actions={
           warehouse ? (
             <>
-              {availability?.canEdit ? <WarehouseButton orgId={orgId} warehouseId={warehouseId} /> : null}
-              {menu.length > 0 ? <DataTableRowActions actions={menu} triggerLabel={t("actions.more")} /> : null}
+              {availability?.canEdit ? (
+                <WarehouseButton orgId={orgId} warehouseId={warehouseId} />
+              ) : null}
+              {menu.length > 0 ? (
+                <DataTableRowActions
+                  actions={menu}
+                  triggerLabel={t("actions.more")}
+                />
+              ) : null}
             </>
           ) : undefined
         }

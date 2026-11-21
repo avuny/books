@@ -1,9 +1,15 @@
 import { useState } from "react"
 import { parseApiError } from "@workspace/ui/lib/api-error"
 
-import { normalizeWarehouse, useCreateWarehouseMutation } from "../warehouse-api"
+import {
+  normalizeWarehouse,
+  useCreateWarehouseMutation,
+} from "../warehouse-api"
 import type { WarehouseDto } from "../types"
-import { CreateWarehouseForm, type CreateWarehouseFormValues } from "./create-warehouse-form"
+import {
+  CreateWarehouseForm,
+  type CreateWarehouseFormValues,
+} from "./create-warehouse-form"
 import { useWarehouseFormCopy } from "./use-warehouse-form-copy"
 
 type CreateWarehouseProps = {
@@ -29,6 +35,11 @@ export function CreateWarehouse({ orgId, onSuccess }: CreateWarehouseProps) {
   }
 
   return (
-    <CreateWarehouseForm copy={copy} onSubmit={handleSubmit} isPending={createMutation.isPending} errorMessage={serverError} />
+    <CreateWarehouseForm
+      copy={copy}
+      onSubmit={handleSubmit}
+      isPending={createMutation.isPending}
+      errorMessage={serverError}
+    />
   )
 }

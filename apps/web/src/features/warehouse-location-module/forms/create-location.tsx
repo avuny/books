@@ -2,10 +2,25 @@ import { useState } from "react"
 import { useAsyncComboboxCopy } from "@/features/lib/options/use-async-combobox-copy"
 import { parseApiError } from "@workspace/ui/lib/api-error"
 
-import { getAllowedLocationTypes, suggestedCodePrefix, useWarehouseLocationLabels } from "../lib"
-import type { LocationParentRef, LocationWarehouse, WarehouseLocationDto } from "../types"
-import { fetchNextLocationCode, useCreateLocationMutation, useLocationOptions } from "../warehouse-location-api"
-import { CreateLocationForm, type CreateLocationFormValues } from "./create-location-form"
+import {
+  getAllowedLocationTypes,
+  suggestedCodePrefix,
+  useWarehouseLocationLabels,
+} from "../lib"
+import type {
+  LocationParentRef,
+  LocationWarehouse,
+  WarehouseLocationDto,
+} from "../types"
+import {
+  fetchNextLocationCode,
+  useCreateLocationMutation,
+  useLocationOptions,
+} from "../warehouse-location-api"
+import {
+  CreateLocationForm,
+  type CreateLocationFormValues,
+} from "./create-location-form"
 import { useLocationFormCopy } from "./use-location-form-copy"
 
 type CreateLocationProps = {
@@ -17,15 +32,26 @@ type CreateLocationProps = {
 }
 
 // Composition only: strings + API behavior wired into the pure form.
-export function CreateLocation({ orgId, warehouse, parent, onSuccess }: CreateLocationProps) {
+export function CreateLocation({
+  orgId,
+  warehouse,
+  parent,
+  onSuccess,
+}: CreateLocationProps) {
   const [serverError, setServerError] = useState<string | null>(null)
   const createMutation = useCreateLocationMutation(orgId, warehouse.id)
   const copy = useLocationFormCopy("create")
   const comboboxCopy = useAsyncComboboxCopy()
-  const parentSource = useLocationOptions(orgId, { warehouseId: warehouse.id, containerOnly: true })
+  const parentSource = useLocationOptions(orgId, {
+    warehouseId: warehouse.id,
+    containerOnly: true,
+  })
   const { getTypeLabel } = useWarehouseLocationLabels()
 
-  const typeOptions = getAllowedLocationTypes(parent?.type ?? null, warehouse.type).map((value) => ({
+  const typeOptions = getAllowedLocationTypes(
+    parent?.type ?? null,
+    warehouse.type
+  ).map((value) => ({
     value,
     label: getTypeLabel(value),
   }))
@@ -54,7 +80,10 @@ export function CreateLocation({ orgId, warehouse, parent, onSuccess }: CreateLo
       typeOptions={typeOptions}
       onSuggestCode={async ({ type, parentId }) => {
         try {
-          return await fetchNextLocationCode(orgId, warehouse.id, { parentId, prefix: suggestedCodePrefix(type) })
+          return await fetchNextLocationCode(orgId, warehouse.id, {
+            parentId,
+            prefix: suggestedCodePrefix(type),
+          })
         } catch {
           return null // a missed suggestion is not worth an error message
         }

@@ -31,7 +31,8 @@ export type {
   WarehouseType,
 }
 
-export type WarehouseLocationTreeNode = WarehouseLocationTreeResponse["items"][number]
+export type WarehouseLocationTreeNode =
+  WarehouseLocationTreeResponse["items"][number]
 
 // UI-only types live here, never in the contracts.
 export type LocationScope = "all" | "stockable" | "blocked" | "inactive"
@@ -48,4 +49,8 @@ export type LocationWarehouse = {
 }
 
 /** A fixed parent for "add child" flows. */
-export type LocationParentRef = { id: string; name: string; type: WarehouseLocationType }
+export type LocationParentRef = {
+  id: string
+  name: string
+  type: WarehouseLocationType
+}

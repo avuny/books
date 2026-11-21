@@ -1,6 +1,13 @@
-import { DataTableMobileCard, DataTableRowActions, type RowAction } from "@workspace/ui/blocks/data-table"
+import {
+  DataTableMobileCard,
+  DataTableRowActions,
+  type RowAction,
+} from "@workspace/ui/blocks/data-table"
 
-import { LocationStatusBadges, type LocationStatusBadgesCopy } from "../components"
+import {
+  LocationStatusBadges,
+  type LocationStatusBadgesCopy,
+} from "../components"
 import type { WarehouseLocationListItemDto } from "../types"
 
 export type LocationMobileCardCopy = {
@@ -20,7 +27,13 @@ export interface LocationMobileCardProps {
   onClick: () => void
 }
 
-export function LocationMobileCard({ location, copy, actions, actionsTriggerLabel, onClick }: LocationMobileCardProps) {
+export function LocationMobileCard({
+  location,
+  copy,
+  actions,
+  actionsTriggerLabel,
+  onClick,
+}: LocationMobileCardProps) {
   return (
     <DataTableMobileCard
       title={location.fullCode}
@@ -35,9 +48,17 @@ export function LocationMobileCard({ location, copy, actions, actionsTriggerLabe
       fields={[
         { label: copy.nameLabel, value: location.name },
         { label: copy.typeLabel, value: copy.getTypeLabel(location.type) },
-        { label: copy.purposeLabel, value: copy.getPurposeLabel(location.purpose) },
+        {
+          label: copy.purposeLabel,
+          value: copy.getPurposeLabel(location.purpose),
+        },
       ]}
-      actions={<DataTableRowActions actions={actions} triggerLabel={actionsTriggerLabel} />}
+      actions={
+        <DataTableRowActions
+          actions={actions}
+          triggerLabel={actionsTriggerLabel}
+        />
+      }
       onClick={onClick}
     />
   )

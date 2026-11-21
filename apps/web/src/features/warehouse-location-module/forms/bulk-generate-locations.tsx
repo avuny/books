@@ -3,9 +3,19 @@ import { useAsyncComboboxCopy } from "@/features/lib/options/use-async-combobox-
 import { parseApiError } from "@workspace/ui/lib/api-error"
 
 import { getAllowedLocationTypes, useWarehouseLocationLabels } from "../lib"
-import type { BulkCreateWarehouseLocationsResult, LocationParentRef, LocationWarehouse } from "../types"
-import { useBulkCreateLocationsMutation, useLocationOptions } from "../warehouse-location-api"
-import { BulkGenerateForm, type BulkGenerateFormValues } from "./bulk-generate-form"
+import type {
+  BulkCreateWarehouseLocationsResult,
+  LocationParentRef,
+  LocationWarehouse,
+} from "../types"
+import {
+  useBulkCreateLocationsMutation,
+  useLocationOptions,
+} from "../warehouse-location-api"
+import {
+  BulkGenerateForm,
+  type BulkGenerateFormValues,
+} from "./bulk-generate-form"
 import { useLocationBulkFormCopy } from "./use-location-form-copy"
 
 type BulkGenerateLocationsProps = {
@@ -17,16 +27,28 @@ type BulkGenerateLocationsProps = {
 }
 
 // Composition only: strings + API behavior wired into the pure form (preview = dry run, submit = real run).
-export function BulkGenerateLocations({ orgId, warehouse, parent, onSuccess }: BulkGenerateLocationsProps) {
+export function BulkGenerateLocations({
+  orgId,
+  warehouse,
+  parent,
+  onSuccess,
+}: BulkGenerateLocationsProps) {
   const [serverError, setServerError] = useState<string | null>(null)
-  const [preview, setPreview] = useState<BulkCreateWarehouseLocationsResult | null>(null)
+  const [preview, setPreview] =
+    useState<BulkCreateWarehouseLocationsResult | null>(null)
   const mutation = useBulkCreateLocationsMutation(orgId, warehouse.id)
   const copy = useLocationBulkFormCopy()
   const comboboxCopy = useAsyncComboboxCopy()
-  const parentSource = useLocationOptions(orgId, { warehouseId: warehouse.id, containerOnly: true })
+  const parentSource = useLocationOptions(orgId, {
+    warehouseId: warehouse.id,
+    containerOnly: true,
+  })
   const { getTypeLabel } = useWarehouseLocationLabels()
 
-  const typeOptions = getAllowedLocationTypes(parent?.type ?? null, warehouse.type).map((value) => ({
+  const typeOptions = getAllowedLocationTypes(
+    parent?.type ?? null,
+    warehouse.type
+  ).map((value) => ({
     value,
     label: getTypeLabel(value),
   }))
@@ -64,7 +86,9 @@ export function BulkGenerateLocations({ orgId, warehouse, parent, onSuccess }: B
       warehouseType={warehouse.type}
       typeOptions={typeOptions}
       preview={preview}
-      isPreviewing={mutation.isPending && mutation.variables?.data.dryRun === true}
+      isPreviewing={
+        mutation.isPending && mutation.variables?.data.dryRun === true
+      }
       onPreview={handlePreview}
       onSubmit={handleSubmit}
       isPending={mutation.isPending && mutation.variables?.data.dryRun !== true}

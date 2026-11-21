@@ -8,7 +8,10 @@ export type WarehouseAbilities = {
   canDelete: boolean
 }
 
-type WarehouseFacts = Pick<WarehouseListItemDto, "type" | "isDefault" | "isSystem" | "isActive">
+type WarehouseFacts = Pick<
+  WarehouseListItemDto,
+  "type" | "isDefault" | "isSystem" | "isActive"
+>
 
 export type WarehouseActionAvailability = {
   canEdit: boolean
@@ -33,7 +36,11 @@ export function getWarehouseActionAvailability(
   return {
     canEdit: editable && abilities.canUpdate,
     canSetDefault:
-      editable && abilities.canUpdate && warehouse.isActive && warehouse.type === "physical" && !warehouse.isDefault,
+      editable &&
+      abilities.canUpdate &&
+      warehouse.isActive &&
+      warehouse.type === "physical" &&
+      !warehouse.isDefault,
     canDeactivate: editable && abilities.canDeactivate && warehouse.isActive,
     canReactivate: editable && abilities.canDeactivate && !warehouse.isActive,
     canDelete: editable && abilities.canDelete,
@@ -50,7 +57,13 @@ export function formatAddress(parts: {
   postalCode: string | null
   countryCode: string | null
 }): string {
-  return [parts.addressLine, parts.city, parts.region, parts.postalCode, parts.countryCode]
+  return [
+    parts.addressLine,
+    parts.city,
+    parts.region,
+    parts.postalCode,
+    parts.countryCode,
+  ]
     .map((part) => part?.trim())
     .filter((part): part is string => Boolean(part))
     .join(", ")

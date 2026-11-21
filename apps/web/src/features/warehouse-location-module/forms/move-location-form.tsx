@@ -33,16 +33,32 @@ type MoveLocationFormProps = {
 const baseResolver = zodResolver(MoveWarehouseLocationSchema)
 
 // UI + validation only. No i18n, API, auth or navigation knowledge.
-export function MoveLocationForm({ copy, comboboxCopy, parentSource, onSubmit, isPending, errorMessage }: MoveLocationFormProps) {
+export function MoveLocationForm({
+  copy,
+  comboboxCopy,
+  parentSource,
+  onSubmit,
+  isPending,
+  errorMessage,
+}: MoveLocationFormProps) {
   const form = useForm<MoveLocationFormInput, unknown, MoveLocationFormValues>({
     // No parent chosen means "move to the top level": the contract wants null, the field gives "".
-    resolver: (values, context, options) => baseResolver(mapBlanks(values, ["parentId"], null), context, options),
+    resolver: (values, context, options) =>
+      baseResolver(mapBlanks(values, ["parentId"], null), context, options),
     defaultValues: { parentId: "" },
   })
 
   return (
-    <FormShell title={copy.title} description={copy.description} errorMessage={errorMessage}>
-      <form onSubmit={form.handleSubmit((values) => onSubmit(values))} noValidate className="space-y-6">
+    <FormShell
+      title={copy.title}
+      description={copy.description}
+      errorMessage={errorMessage}
+    >
+      <form
+        onSubmit={form.handleSubmit((values) => onSubmit(values))}
+        noValidate
+        className="space-y-6"
+      >
         <AsyncComboboxField
           control={form.control}
           name="parentId"
@@ -52,7 +68,12 @@ export function MoveLocationForm({ copy, comboboxCopy, parentSource, onSubmit, i
           disabled={isPending}
           placeholder={copy.parent.placeholder}
         />
-        <SubmitButton className="w-full" loading={isPending} label={copy.submitLabel} loadingLabel={copy.submittingLabel} />
+        <SubmitButton
+          className="w-full"
+          loading={isPending}
+          label={copy.submitLabel}
+          loadingLabel={copy.submittingLabel}
+        />
       </form>
     </FormShell>
   )

@@ -25,7 +25,13 @@ type FormDialogProps = {
   children: ReactNode
 }
 
-function LocationFormDialog({ open, onOpenChange, title, description, children }: FormDialogProps) {
+function LocationFormDialog({
+  open,
+  onOpenChange,
+  title,
+  description,
+  children,
+}: FormDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[90dvh] overflow-y-auto sm:max-w-lg">
@@ -49,16 +55,37 @@ export function LocationDialog({
   parent,
   open,
   onOpenChange,
-}: DialogBase & { orgId: string; warehouse: LocationWarehouse; locationId?: string; parent?: LocationParentRef }) {
+}: DialogBase & {
+  orgId: string
+  warehouse: LocationWarehouse
+  locationId?: string
+  parent?: LocationParentRef
+}) {
   const { t } = useTranslation("warehouse-location")
   const mode = locationId ? "update" : "create"
   const close = () => onOpenChange(false)
   return (
-    <LocationFormDialog open={open} onOpenChange={onOpenChange} title={t(`${mode}.title`)} description={t(`${mode}.description`)}>
+    <LocationFormDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      title={t(`${mode}.title`)}
+      description={t(`${mode}.description`)}
+    >
       {locationId ? (
-        <UpdateLocation key={locationId} orgId={orgId} warehouseId={warehouse.id} locationId={locationId} onSuccess={close} />
+        <UpdateLocation
+          key={locationId}
+          orgId={orgId}
+          warehouseId={warehouse.id}
+          locationId={locationId}
+          onSuccess={close}
+        />
       ) : (
-        <CreateLocation orgId={orgId} warehouse={warehouse} parent={parent} onSuccess={close} />
+        <CreateLocation
+          orgId={orgId}
+          warehouse={warehouse}
+          parent={parent}
+          onSuccess={close}
+        />
       )}
     </LocationFormDialog>
   )
@@ -73,8 +100,19 @@ export function MoveLocationDialog({
 }: DialogBase & { orgId: string; warehouseId: string; locationId: string }) {
   const { t } = useTranslation("warehouse-location")
   return (
-    <LocationFormDialog open={open} onOpenChange={onOpenChange} title={t("move.title")} description={t("move.description")}>
-      <MoveLocation key={locationId} orgId={orgId} warehouseId={warehouseId} locationId={locationId} onSuccess={() => onOpenChange(false)} />
+    <LocationFormDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      title={t("move.title")}
+      description={t("move.description")}
+    >
+      <MoveLocation
+        key={locationId}
+        orgId={orgId}
+        warehouseId={warehouseId}
+        locationId={locationId}
+        onSuccess={() => onOpenChange(false)}
+      />
     </LocationFormDialog>
   )
 }
@@ -88,8 +126,19 @@ export function BlockLocationDialog({
 }: DialogBase & { orgId: string; warehouseId: string; locationId: string }) {
   const { t } = useTranslation("warehouse-location")
   return (
-    <LocationFormDialog open={open} onOpenChange={onOpenChange} title={t("block.title")} description={t("block.description")}>
-      <BlockLocation key={locationId} orgId={orgId} warehouseId={warehouseId} locationId={locationId} onSuccess={() => onOpenChange(false)} />
+    <LocationFormDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      title={t("block.title")}
+      description={t("block.description")}
+    >
+      <BlockLocation
+        key={locationId}
+        orgId={orgId}
+        warehouseId={warehouseId}
+        locationId={locationId}
+        onSuccess={() => onOpenChange(false)}
+      />
     </LocationFormDialog>
   )
 }
@@ -103,8 +152,19 @@ export function BarcodeLocationDialog({
 }: DialogBase & { orgId: string; warehouseId: string; locationId: string }) {
   const { t } = useTranslation("warehouse-location")
   return (
-    <LocationFormDialog open={open} onOpenChange={onOpenChange} title={t("barcode.title")} description={t("barcode.description")}>
-      <BarcodeLocation key={locationId} orgId={orgId} warehouseId={warehouseId} locationId={locationId} onSuccess={() => onOpenChange(false)} />
+    <LocationFormDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      title={t("barcode.title")}
+      description={t("barcode.description")}
+    >
+      <BarcodeLocation
+        key={locationId}
+        orgId={orgId}
+        warehouseId={warehouseId}
+        locationId={locationId}
+        onSuccess={() => onOpenChange(false)}
+      />
     </LocationFormDialog>
   )
 }
@@ -115,11 +175,25 @@ export function BulkGenerateLocationsDialog({
   parent,
   open,
   onOpenChange,
-}: DialogBase & { orgId: string; warehouse: LocationWarehouse; parent?: LocationParentRef }) {
+}: DialogBase & {
+  orgId: string
+  warehouse: LocationWarehouse
+  parent?: LocationParentRef
+}) {
   const { t } = useTranslation("warehouse-location")
   return (
-    <LocationFormDialog open={open} onOpenChange={onOpenChange} title={t("bulk.title")} description={t("bulk.description")}>
-      <BulkGenerateLocations orgId={orgId} warehouse={warehouse} parent={parent} onSuccess={() => onOpenChange(false)} />
+    <LocationFormDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      title={t("bulk.title")}
+      description={t("bulk.description")}
+    >
+      <BulkGenerateLocations
+        orgId={orgId}
+        warehouse={warehouse}
+        parent={parent}
+        onSuccess={() => onOpenChange(false)}
+      />
     </LocationFormDialog>
   )
 }

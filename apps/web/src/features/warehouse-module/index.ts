@@ -3,4 +3,9 @@ export * from "./components"
 export * from "./details"
 export * from "./forms"
 export * from "./list"
-export type { WarehouseDto, WarehouseListItemDto, WarehouseScope, WarehouseType } from "./types"
+export type {
+  WarehouseDto,
+  WarehouseListItemDto,
+  WarehouseScope,
+  WarehouseType,
+} from "./types"

@@ -3,7 +3,12 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm, useWatch } from "react-hook-form"
 import { CreateWarehouseSchema } from "@avuny/contracts"
 
-import { FormShell, InputField, SelectField, SubmitButton } from "@workspace/ui/blocks/form"
+import {
+  FormShell,
+  InputField,
+  SelectField,
+  SubmitButton,
+} from "@workspace/ui/blocks/form"
 import { mapBlanks } from "@/features/lib/forms/blank-values"
 
 import { CheckboxRow } from "../components"
@@ -15,8 +20,21 @@ import type { z } from "@avuny/zod"
 export type CreateWarehouseFormValues = CreateWarehouseInput
 type CreateWarehouseFormInput = z.input<typeof CreateWarehouseSchema> // pre-transform shape
 
-const OPTIONAL_TEXT = ["description", "addressLine", "city", "region", "postalCode", "countryCode"] as const
-const ADDRESS_KEYS = ["addressLine", "city", "region", "postalCode", "countryCode"] as const
+const OPTIONAL_TEXT = [
+  "description",
+  "addressLine",
+  "city",
+  "region",
+  "postalCode",
+  "countryCode",
+] as const
+const ADDRESS_KEYS = [
+  "addressLine",
+  "city",
+  "region",
+  "postalCode",
+  "countryCode",
+] as const
 
 type CreateWarehouseFormProps = {
   copy: WarehouseFormCopy
@@ -29,10 +47,24 @@ type CreateWarehouseFormProps = {
 const baseResolver = zodResolver(CreateWarehouseSchema)
 
 // UI + validation only. No i18n, API, auth or navigation knowledge.
-export function CreateWarehouseForm({ copy, onSubmit, isPending, errorMessage }: CreateWarehouseFormProps) {
-  const form = useForm<CreateWarehouseFormInput, unknown, CreateWarehouseFormValues>({
+export function CreateWarehouseForm({
+  copy,
+  onSubmit,
+  isPending,
+  errorMessage,
+}: CreateWarehouseFormProps) {
+  const form = useForm<
+    CreateWarehouseFormInput,
+    unknown,
+    CreateWarehouseFormValues
+  >({
     // Empty text inputs are "", the contract wants them absent.
-    resolver: (values, context, options) => baseResolver(mapBlanks(values, OPTIONAL_TEXT, undefined), context, options),
+    resolver: (values, context, options) =>
+      baseResolver(
+        mapBlanks(values, OPTIONAL_TEXT, undefined),
+        context,
+        options
+      ),
     defaultValues: {
       code: "",
       name: "",
@@ -55,22 +87,93 @@ export function CreateWarehouseForm({ copy, onSubmit, isPending, errorMessage }:
   }, [isVirtual, form])
 
   return (
-    <FormShell title={copy.title} description={copy.description} errorMessage={errorMessage}>
-      <form onSubmit={form.handleSubmit((values) => onSubmit(values))} noValidate className="space-y-6">
-        <InputField control={form.control} name="code" copy={copy.code} type="text" autoComplete="off" autoFocus disabled={isPending} />
-        <InputField control={form.control} name="name" copy={copy.name} type="text" autoComplete="off" disabled={isPending} />
-        <SelectField control={form.control} name="type" copy={copy.type} options={copy.typeOptions} disabled={isPending} />
-        <InputField control={form.control} name="description" copy={copy.warehouseDescription} type="text" autoComplete="off" disabled={isPending} />
+    <FormShell
+      title={copy.title}
+      description={copy.description}
+      errorMessage={errorMessage}
+    >
+      <form
+        onSubmit={form.handleSubmit((values) => onSubmit(values))}
+        noValidate
+        className="space-y-6"
+      >
+        <InputField
+          control={form.control}
+          name="code"
+          copy={copy.code}
+          type="text"
+          autoComplete="off"
+          autoFocus
+          disabled={isPending}
+        />
+        <InputField
+          control={form.control}
+          name="name"
+          copy={copy.name}
+          type="text"
+          autoComplete="off"
+          disabled={isPending}
+        />
+        <SelectField
+          control={form.control}
+          name="type"
+          copy={copy.type}
+          options={copy.typeOptions}
+          disabled={isPending}
+        />
+        <InputField
+          control={form.control}
+          name="description"
+          copy={copy.warehouseDescription}
+          type="text"
+          autoComplete="off"
+          disabled={isPending}
+        />
 
         {isVirtual ? null : (
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="sm:col-span-2">
-              <InputField control={form.control} name="addressLine" copy={copy.addressLine} type="text" autoComplete="off" disabled={isPending} />
+              <InputField
+                control={form.control}
+                name="addressLine"
+                copy={copy.addressLine}
+                type="text"
+                autoComplete="off"
+                disabled={isPending}
+              />
             </div>
-            <InputField control={form.control} name="city" copy={copy.city} type="text" autoComplete="off" disabled={isPending} />
-            <InputField control={form.control} name="region" copy={copy.region} type="text" autoComplete="off" disabled={isPending} />
-            <InputField control={form.control} name="postalCode" copy={copy.postalCode} type="text" autoComplete="off" disabled={isPending} />
-            <InputField control={form.control} name="countryCode" copy={copy.countryCode} type="text" autoComplete="off" disabled={isPending} />
+            <InputField
+              control={form.control}
+              name="city"
+              copy={copy.city}
+              type="text"
+              autoComplete="off"
+              disabled={isPending}
+            />
+            <InputField
+              control={form.control}
+              name="region"
+              copy={copy.region}
+              type="text"
+              autoComplete="off"
+              disabled={isPending}
+            />
+            <InputField
+              control={form.control}
+              name="postalCode"
+              copy={copy.postalCode}
+              type="text"
+              autoComplete="off"
+              disabled={isPending}
+            />
+            <InputField
+              control={form.control}
+              name="countryCode"
+              copy={copy.countryCode}
+              type="text"
+              autoComplete="off"
+              disabled={isPending}
+            />
           </div>
         )}
 
@@ -82,7 +185,12 @@ export function CreateWarehouseForm({ copy, onSubmit, isPending, errorMessage }:
           disabled={isPending}
         />
 
-        <SubmitButton className="w-full" loading={isPending} label={copy.submitLabel} loadingLabel={copy.submittingLabel} />
+        <SubmitButton
+          className="w-full"
+          loading={isPending}
+          label={copy.submitLabel}
+          loadingLabel={copy.submittingLabel}
+        />
       </form>
     </FormShell>
   )

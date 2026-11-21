@@ -3,7 +3,10 @@ import { useTranslation } from "react-i18next"
 import { parseApiError } from "@workspace/ui/lib/api-error"
 
 import { useBlockLocationMutation } from "../warehouse-location-api"
-import { BlockLocationForm, type BlockLocationFormValues } from "./block-location-form"
+import {
+  BlockLocationForm,
+  type BlockLocationFormValues,
+} from "./block-location-form"
 import { useLocationActionFormCopy } from "./use-location-form-copy"
 
 type BlockLocationProps = {
@@ -14,7 +17,12 @@ type BlockLocationProps = {
 }
 
 // Composition only: strings + API behavior wired into the pure form.
-export function BlockLocation({ orgId, warehouseId, locationId, onSuccess }: BlockLocationProps) {
+export function BlockLocation({
+  orgId,
+  warehouseId,
+  locationId,
+  onSuccess,
+}: BlockLocationProps) {
   const { t } = useTranslation("warehouse-location")
   const [serverError, setServerError] = useState<string | null>(null)
   const blockMutation = useBlockLocationMutation(orgId, warehouseId)
@@ -32,7 +40,13 @@ export function BlockLocation({ orgId, warehouseId, locationId, onSuccess }: Blo
 
   return (
     <BlockLocationForm
-      copy={{ ...copy, reason: { label: t("fields.reason.label"), placeholder: t("fields.reason.placeholder") } }}
+      copy={{
+        ...copy,
+        reason: {
+          label: t("fields.reason.label"),
+          placeholder: t("fields.reason.placeholder"),
+        },
+      }}
       onSubmit={handleSubmit}
       isPending={blockMutation.isPending}
       errorMessage={serverError}

@@ -48,5 +48,13 @@ export type LocationBulkFormCopy = LocationActionFormCopy & {
   badOrder: string
   examples: string
   level: (number: number) => string
-  levelFields: { type: string; prefix: string; start: string; count: string; pad: string; add: string; remove: string }
+  levelFields: {
+    type: string
+    prefix: string
+    start: string
+    count: string
+    pad: string
+    add: string
+    remove: string
+  }
 }

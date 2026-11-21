@@ -34,12 +34,16 @@ type UseWarehouseActionsOptions = {
 
 // Composition only: wires permissions, rules, mutations and confirm dialogs into row/menu actions
 // shared by the list and the details page.
-export function useWarehouseActions(orgId: string, { onDeleted }: UseWarehouseActionsOptions = {}) {
+export function useWarehouseActions(
+  orgId: string,
+  { onDeleted }: UseWarehouseActionsOptions = {}
+) {
   const { t } = useTranslation("warehouse")
   const abilities = useWarehouseAbilities(orgId)
 
   const [toEdit, setToEdit] = useState<WarehouseActionTarget | null>(null)
-  const [toDeactivate, setToDeactivate] = useState<WarehouseActionTarget | null>(null)
+  const [toDeactivate, setToDeactivate] =
+    useState<WarehouseActionTarget | null>(null)
   const [toDelete, setToDelete] = useState<WarehouseActionTarget | null>(null)
   const [dialogError, setDialogError] = useState<string | null>(null)
   /** Errors of actions without a dialog (set default, reactivate); shown by the page. */
@@ -69,7 +73,10 @@ export function useWarehouseActions(orgId: string, { onDeleted }: UseWarehouseAc
     if (!toDeactivate) return
     setDialogError(null)
     try {
-      await deactivateMutation.mutateAsync({ orgId, warehouseId: toDeactivate.id })
+      await deactivateMutation.mutateAsync({
+        orgId,
+        warehouseId: toDeactivate.id,
+      })
       closeDialogs()
     } catch (e) {
       setDialogError(parseApiError(e).message || null) // dialog stays open and shows the server message
@@ -91,21 +98,40 @@ export function useWarehouseActions(orgId: string, { onDeleted }: UseWarehouseAc
 
   /** Menu entries: view → edit → default → retire/reactivate → delete (destructive, separated). */
   const getActions = useCallback(
-    (warehouse: WarehouseActionTarget, { onView, includeEdit = true }: GetActionsOptions = {}): RowAction[] => {
+    (
+      warehouse: WarehouseActionTarget,
+      { onView, includeEdit = true }: GetActionsOptions = {}
+    ): RowAction[] => {
       const a = getWarehouseActionAvailability(warehouse, abilities)
       const actions: RowAction[] = []
       if (onView) {
-        actions.push({ id: "view", label: t("actions.view"), icon: <Eye className="size-4" />, onSelect: onView })
+        actions.push({
+          id: "view",
+          label: t("actions.view"),
+          icon: <Eye className="size-4" />,
+          onSelect: onView,
+        })
       }
       if (includeEdit && a.canEdit) {
-        actions.push({ id: "edit", label: t("actions.edit"), icon: <Pencil className="size-4" />, onSelect: () => setToEdit(warehouse) })
+        actions.push({
+          id: "edit",
+          label: t("actions.edit"),
+          icon: <Pencil className="size-4" />,
+          onSelect: () => setToEdit(warehouse),
+        })
       }
       if (a.canSetDefault) {
         actions.push({
           id: "set-default",
           label: t("actions.setDefault"),
           icon: <Star className="size-4" />,
-          onSelect: () => void runDirect(() => setDefaultMutation.mutateAsync({ orgId, warehouseId: warehouse.id })),
+          onSelect: () =>
+            void runDirect(() =>
+              setDefaultMutation.mutateAsync({
+                orgId,
+                warehouseId: warehouse.id,
+              })
+            ),
         })
       }
       if (a.canDeactivate) {
@@ -122,7 +148,13 @@ export function useWarehouseActions(orgId: string, { onDeleted }: UseWarehouseAc
           id: "reactivate",
           label: t("actions.reactivate"),
           icon: <Power className="size-4" />,
-          onSelect: () => void runDirect(() => reactivateMutation.mutateAsync({ orgId, warehouseId: warehouse.id })),
+          onSelect: () =>
+            void runDirect(() =>
+              reactivateMutation.mutateAsync({
+                orgId,
+                warehouseId: warehouse.id,
+              })
+            ),
         })
       }
       if (a.canDelete) {
@@ -145,14 +177,26 @@ export function useWarehouseActions(orgId: string, { onDeleted }: UseWarehouseAc
   const dialogs = (
     <>
       {toEdit ? (
-        <WarehouseDialog orgId={orgId} warehouseId={toEdit.id} open onOpenChange={(open) => { if (!open) setToEdit(null) }} />
+        <WarehouseDialog
+          orgId={orgId}
+          warehouseId={toEdit.id}
+          open
+          onOpenChange={(open) => {
+            if (!open) setToEdit(null)
+          }}
+        />
       ) : null}
 
       <ConfirmDialog
         open={toDeactivate !== null}
-        onOpenChange={(open) => { if (!open) closeDialogs() }}
+        onOpenChange={(open) => {
+          if (!open) closeDialogs()
+        }}
         title={t("deactivate.title")}
-        description={dialogError ?? t("deactivate.description", { name: toDeactivate?.name })}
+        description={
+          dialogError ??
+          t("deactivate.description", { name: toDeactivate?.name })
+        }
         confirmLabel={t("actions.deactivate")}
         cancelLabel={t("actions.cancel")}
         isLoading={deactivateMutation.isPending}
@@ -161,9 +205,13 @@ export function useWarehouseActions(orgId: string, { onDeleted }: UseWarehouseAc
 
       <ConfirmDialog
         open={toDelete !== null}
-        onOpenChange={(open) => { if (!open) closeDialogs() }}
+        onOpenChange={(open) => {
+          if (!open) closeDialogs()
+        }}
         title={t("delete.title")}
-        description={dialogError ?? t("delete.description", { name: toDelete?.name })}
+        description={
+          dialogError ?? t("delete.description", { name: toDelete?.name })
+        }
         confirmLabel={t("actions.delete")}
         cancelLabel={t("actions.cancel")}
         isLoading={deleteMutation.isPending}
@@ -172,5 +220,11 @@ export function useWarehouseActions(orgId: string, { onDeleted }: UseWarehouseAc
     </>
   )
 
-  return { abilities, getActions, dialogs, actionError, clearActionError: () => setActionError(null) }
+  return {
+    abilities,
+    getActions,
+    dialogs,
+    actionError,
+    clearActionError: () => setActionError(null),
+  }
 }

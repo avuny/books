@@ -17,7 +17,12 @@ import { useLocationList } from "../warehouse-location-api"
 import { createLocationColumns } from "./location-columns"
 import { LocationMobileCard } from "./location-mobile-card"
 
-const SCOPES: readonly LocationScope[] = ["all", "stockable", "blocked", "inactive"]
+const SCOPES: readonly LocationScope[] = [
+  "all",
+  "stockable",
+  "blocked",
+  "inactive",
+]
 
 type LocationListProps = {
   orgId: string
@@ -29,14 +34,25 @@ type LocationListProps = {
 }
 
 // Composition only: strings + API behavior wired into the pure data-table kit.
-export function LocationList({ orgId, warehouseId, getActions, onViewLocation }: LocationListProps) {
+export function LocationList({
+  orgId,
+  warehouseId,
+  getActions,
+  onViewLocation,
+}: LocationListProps) {
   const { t } = useTranslation("warehouse-location")
 
   /* state */
   const [scope, setScope] = useState<LocationScope>("all")
   const [search, setSearch] = useState("")
-  const [pagination, setPagination] = useState<PaginationState>({ pageIndex: 0, pageSize: 20 })
-  const resetPage = useCallback(() => setPagination((c) => ({ ...c, pageIndex: 0 })), [])
+  const [pagination, setPagination] = useState<PaginationState>({
+    pageIndex: 0,
+    pageSize: 20,
+  })
+  const resetPage = useCallback(
+    () => setPagination((c) => ({ ...c, pageIndex: 0 })),
+    []
+  )
 
   /* data */
   const { locations, total, isLoading } = useLocationList(orgId, {
@@ -107,7 +123,10 @@ export function LocationList({ orgId, warehouseId, getActions, onViewLocation }:
           setScope(next)
           resetPage()
         }}
-        tabs={SCOPES.map((item) => ({ value: item, label: t(`list.tabs.${item}`) }))}
+        tabs={SCOPES.map((item) => ({
+          value: item,
+          label: t(`list.tabs.${item}`),
+        }))}
       />
 
       <DataTableSearch
@@ -126,8 +145,12 @@ export function LocationList({ orgId, warehouseId, getActions, onViewLocation }:
         onRowClick={(l) => onViewLocation(l.id)}
         emptyState={
           <div className="flex flex-col items-center gap-1 px-6 py-16 text-center">
-            <p className="text-sm font-medium text-foreground">{t("empty.title")}</p>
-            <p className="text-sm text-muted-foreground">{t("empty.description")}</p>
+            <p className="text-sm font-medium text-foreground">
+              {t("empty.title")}
+            </p>
+            <p className="text-sm text-muted-foreground">
+              {t("empty.description")}
+            </p>
           </div>
         }
         renderMobileCard={(row) => (
@@ -142,7 +165,9 @@ export function LocationList({ orgId, warehouseId, getActions, onViewLocation }:
               badges,
             }}
             actions={getActions(row.original)}
-            actionsTriggerLabel={t("table.actionsFor", { name: row.original.name })}
+            actionsTriggerLabel={t("table.actionsFor", {
+              name: row.original.name,
+            })}
             onClick={() => onViewLocation(row.original.id)}
           />
         )}
@@ -154,8 +179,10 @@ export function LocationList({ orgId, warehouseId, getActions, onViewLocation }:
               previous: t("pagination.previous"),
               next: t("pagination.next"),
               rowsPerPage: t("pagination.rowsPerPage"),
-              summary: ({ from, to, total: count }) => t("pagination.summary", { from, to, total: count }),
-              pageOf: (page, pageCount) => t("pagination.pageOf", { page, pageCount }),
+              summary: ({ from, to, total: count }) =>
+                t("pagination.summary", { from, to, total: count }),
+              pageOf: (page, pageCount) =>
+                t("pagination.pageOf", { page, pageCount }),
               pageLabel: (page) => t("pagination.goTo", { page }),
             }}
           />

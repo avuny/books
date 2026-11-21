@@ -49,22 +49,43 @@ export function DeactivateLocationDialog({
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>{copy.title}</DialogTitle>
-          <DialogDescription className={errorMessage ? "text-destructive" : undefined} role={errorMessage ? "alert" : undefined}>
+          <DialogDescription
+            className={errorMessage ? "text-destructive" : undefined}
+            role={errorMessage ? "alert" : undefined}
+          >
             {errorMessage ?? copy.description}
           </DialogDescription>
         </DialogHeader>
         <div className="flex items-start gap-2">
-          <Checkbox id={id} checked={cascade} onCheckedChange={(checked) => onCascadeChange(checked === true)} disabled={isLoading} className="mt-0.5" />
+          <Checkbox
+            id={id}
+            checked={cascade}
+            onCheckedChange={(checked) => onCascadeChange(checked === true)}
+            disabled={isLoading}
+            className="mt-0.5"
+          />
           <div className="grid gap-0.5">
             <Label htmlFor={id}>{copy.cascadeLabel}</Label>
-            <p className="text-xs text-muted-foreground">{copy.cascadeDescription}</p>
+            <p className="text-xs text-muted-foreground">
+              {copy.cascadeDescription}
+            </p>
           </div>
         </div>
         <DialogFooter>
-          <Button type="button" variant="outline" disabled={isLoading} onClick={() => onOpenChange(false)}>
+          <Button
+            type="button"
+            variant="outline"
+            disabled={isLoading}
+            onClick={() => onOpenChange(false)}
+          >
             {copy.cancelLabel}
           </Button>
-          <Button type="button" variant="destructive" disabled={isLoading} onClick={onConfirm}>
+          <Button
+            type="button"
+            variant="destructive"
+            disabled={isLoading}
+            onClick={onConfirm}
+          >
             {copy.confirmLabel}
           </Button>
         </DialogFooter>

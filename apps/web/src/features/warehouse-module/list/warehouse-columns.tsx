@@ -1,5 +1,8 @@
 import type { ColumnDef } from "@tanstack/react-table"
-import { createActionsColumn, type RowAction } from "@workspace/ui/blocks/data-table"
+import {
+  createActionsColumn,
+  type RowAction,
+} from "@workspace/ui/blocks/data-table"
 
 import { WarehouseBadges, type WarehouseBadgesCopy } from "../components"
 import type { WarehouseListItemDto } from "../types"
@@ -20,13 +23,20 @@ type WarehouseColumnsOptions = {
   getActions: (warehouse: WarehouseListItemDto) => RowAction[]
 }
 
-export function createWarehouseColumns({ copy, getActions }: WarehouseColumnsOptions): ColumnDef<WarehouseListItemDto>[] {
+export function createWarehouseColumns({
+  copy,
+  getActions,
+}: WarehouseColumnsOptions): ColumnDef<WarehouseListItemDto>[] {
   return [
     {
       accessorKey: "code",
       header: copy.code,
       enableSorting: false, // server-side paging: sorting off unless the API supports it
-      cell: ({ row }) => <span className="font-mono text-sm text-foreground">{row.original.code}</span>,
+      cell: ({ row }) => (
+        <span className="font-mono text-sm text-foreground">
+          {row.original.code}
+        </span>
+      ),
     },
     {
       accessorKey: "name",
@@ -34,8 +44,13 @@ export function createWarehouseColumns({ copy, getActions }: WarehouseColumnsOpt
       enableSorting: false,
       cell: ({ row }) => (
         <div className="flex flex-wrap items-center gap-2">
-          <span className="font-medium text-foreground">{row.original.name}</span>
-          <WarehouseBadges warehouse={row.original} copy={{ ...copy.badges, type: "" }} />
+          <span className="font-medium text-foreground">
+            {row.original.name}
+          </span>
+          <WarehouseBadges
+            warehouse={row.original}
+            copy={{ ...copy.badges, type: "" }}
+          />
         </div>
       ),
     },
@@ -43,7 +58,11 @@ export function createWarehouseColumns({ copy, getActions }: WarehouseColumnsOpt
       id: "type",
       header: copy.type,
       enableSorting: false,
-      cell: ({ row }) => <span className="text-muted-foreground">{copy.getTypeLabel(row.original.type)}</span>,
+      cell: ({ row }) => (
+        <span className="text-muted-foreground">
+          {copy.getTypeLabel(row.original.type)}
+        </span>
+      ),
     },
     createActionsColumn<WarehouseListItemDto>({
       headerLabel: copy.actions,

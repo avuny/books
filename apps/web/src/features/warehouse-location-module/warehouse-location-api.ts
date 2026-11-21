@@ -4,7 +4,11 @@
  */
 import { useMemo } from "react"
 import { keepPreviousData, useQueryClient } from "@tanstack/react-query"
-import { hasPermission, type PermissionSnapshot, type PermissionStatement } from "@avuny/contracts"
+import {
+  hasPermission,
+  type PermissionSnapshot,
+  type PermissionStatement,
+} from "@avuny/contracts"
 
 import {
   getGetWarehouseLocationQueryKey,
@@ -72,7 +76,9 @@ export function normalizeLocationListItem(
   }
 }
 
-export function normalizeLocationTreeNode(data: Loose<WarehouseLocationTreeNode, "type" | "purpose">): WarehouseLocationTreeNode {
+export function normalizeLocationTreeNode(
+  data: Loose<WarehouseLocationTreeNode, "type" | "purpose">
+): WarehouseLocationTreeNode {
   return {
     ...data,
     type: data.type as WarehouseLocationTreeNode["type"],
@@ -81,19 +87,34 @@ export function normalizeLocationTreeNode(data: Loose<WarehouseLocationTreeNode,
 }
 
 export function normalizeLocationDetail(
-  data: Omit<WarehouseLocationDetailDto, "type" | "purpose" | "path" | "warehouse"> & {
+  data: Omit<
+    WarehouseLocationDetailDto,
+    "type" | "purpose" | "path" | "warehouse"
+  > & {
     type: string
     purpose: string
     path: { id: string; code: string; name: string; type: string }[]
-    warehouse: { id: string; code: string; name: string; type: string; isActive: boolean }
+    warehouse: {
+      id: string
+      code: string
+      name: string
+      type: string
+      isActive: boolean
+    }
   }
 ): WarehouseLocationDetailDto {
   return {
     ...data,
     type: data.type as WarehouseLocationDetailDto["type"],
     purpose: data.purpose as WarehouseLocationDetailDto["purpose"],
-    path: data.path.map((p) => ({ ...p, type: p.type as WarehouseLocationDetailDto["type"] })),
-    warehouse: { ...data.warehouse, type: data.warehouse.type as LocationWarehouse["type"] },
+    path: data.path.map((p) => ({
+      ...p,
+      type: p.type as WarehouseLocationDetailDto["type"],
+    })),
+    warehouse: {
+      ...data.warehouse,
+      type: data.warehouse.type as LocationWarehouse["type"],
+    },
   }
 }
 
@@ -106,14 +127,20 @@ export type LocationListParams = {
   search: string
 }
 
-const SCOPE_FILTERS: Record<LocationScope, { isStockable?: boolean; isBlocked?: boolean; isActive?: boolean }> = {
+const SCOPE_FILTERS: Record<
+  LocationScope,
+  { isStockable?: boolean; isBlocked?: boolean; isActive?: boolean }
+> = {
   all: {},
   stockable: { isStockable: true },
   blocked: { isBlocked: true },
   inactive: { isActive: false },
 }
 
-export function useLocationList(orgId: string, { warehouseId, page, pageSize, scope, search }: LocationListParams) {
+export function useLocationList(
+  orgId: string,
+  { warehouseId, page, pageSize, scope, search }: LocationListParams
+) {
   const filters = SCOPE_FILTERS[scope]
   const query = useListWarehouseLocations(
     orgId,
@@ -130,7 +157,10 @@ export function useLocationList(orgId: string, { warehouseId, page, pageSize, sc
   )
   const items = query.data?.data.items
   return {
-    locations: useMemo(() => (items ? items.map(normalizeLocationListItem) : NO_LOCATIONS), [items]),
+    locations: useMemo(
+      () => (items ? items.map(normalizeLocationListItem) : NO_LOCATIONS),
+      [items]
+    ),
     total: query.data?.data.total ?? 0,
     isLoading: query.isLoading,
   }
@@ -139,12 +169,20 @@ export function useLocationList(orgId: string, { warehouseId, page, pageSize, sc
 export function useLocation(orgId: string, locationId: string) {
   const query = useGetWarehouseLocation(orgId, locationId)
   const data = query.data?.data
-  const location = useMemo<WarehouseLocationDetailDto | null>(() => (data ? normalizeLocationDetail(data) : null), [data])
+  const location = useMemo<WarehouseLocationDetailDto | null>(
+    () => (data ? normalizeLocationDetail(data) : null),
+    [data]
+  )
   return { location, isLoading: query.isLoading, error: query.error }
 }
 
 /** One level of the tree: the roots (no parentId) or the direct children of `parentId`. Loaded lazily. */
-export function useLocationTreeLevel(orgId: string, warehouseId: string, parentId: string | undefined, enabled = true) {
+export function useLocationTreeLevel(
+  orgId: string,
+  warehouseId: string,
+  parentId: string | undefined,
+  enabled = true
+) {
   const query = useGetWarehouseLocationTree(
     orgId,
     warehouseId,
@@ -153,7 +191,10 @@ export function useLocationTreeLevel(orgId: string, warehouseId: string, parentI
   )
   const items = query.data?.data.items
   return {
-    nodes: useMemo(() => (items ? items.map(normalizeLocationTreeNode) : NO_NODES), [items]),
+    nodes: useMemo(
+      () => (items ? items.map(normalizeLocationTreeNode) : NO_NODES),
+      [items]
+    ),
     isLoading: query.isLoading,
     error: query.error,
   }
@@ -190,7 +231,10 @@ export type LocationOptionFilters = {
   receivableOnly?: boolean
 }
 
-export function useLocationOptions(orgId: string, filters: LocationOptionFilters = {}) {
+export function useLocationOptions(
+  orgId: string,
+  filters: LocationOptionFilters = {}
+) {
   return useCursorOptions({
     queryKey: [...getListWarehouseLocationOptionsQueryKey(orgId), filters],
     fetchPage: async ({ cursor, search, limit, signal }) =>
@@ -234,7 +278,15 @@ export function useLocationAbilities(orgId: string): LocationAbilities {
   const snapshot = query.data?.data
   return useMemo(() => {
     if (!snapshot) {
-      return { canCreate: false, canUpdate: false, canDeactivate: false, canDelete: false, canMove: false, canBlock: false, canChangeBarcode: false }
+      return {
+        canCreate: false,
+        canUpdate: false,
+        canDeactivate: false,
+        canDelete: false,
+        canMove: false,
+        canBlock: false,
+        canChangeBarcode: false,
+      }
     }
     const s: PermissionSnapshot = {
       isOwner: snapshot.isOwner,
@@ -258,13 +310,21 @@ function useInvalidateLocations(orgId: string, warehouseId: string) {
   const queryClient = useQueryClient()
   return (locationId?: string) =>
     Promise.all([
-      queryClient.invalidateQueries({ queryKey: getListWarehouseLocationsQueryKey(orgId) }),
+      queryClient.invalidateQueries({
+        queryKey: getListWarehouseLocationsQueryKey(orgId),
+      }),
       // The prefix covers every expanded level of the warehouse's tree.
-      queryClient.invalidateQueries({ queryKey: getGetWarehouseLocationTreeQueryKey(orgId, warehouseId) }),
+      queryClient.invalidateQueries({
+        queryKey: getGetWarehouseLocationTreeQueryKey(orgId, warehouseId),
+      }),
       // …and every search term and page of the pickers.
-      queryClient.invalidateQueries({ queryKey: getListWarehouseLocationOptionsQueryKey(orgId) }),
+      queryClient.invalidateQueries({
+        queryKey: getListWarehouseLocationOptionsQueryKey(orgId),
+      }),
       locationId
-        ? queryClient.invalidateQueries({ queryKey: getGetWarehouseLocationQueryKey(orgId, locationId) })
+        ? queryClient.invalidateQueries({
+            queryKey: getGetWarehouseLocationQueryKey(orgId, locationId),
+          })
         : Promise.resolve(),
     ])
 }
@@ -272,52 +332,84 @@ function useInvalidateLocations(orgId: string, warehouseId: string) {
 /** `mutateAsync({ orgId, warehouseId, data })` */
 export function useCreateLocationMutation(orgId: string, warehouseId: string) {
   const invalidate = useInvalidateLocations(orgId, warehouseId)
-  return useCreateWarehouseLocation({ mutation: { onSuccess: () => invalidate() } })
+  return useCreateWarehouseLocation({
+    mutation: { onSuccess: () => invalidate() },
+  })
 }
 /** `mutateAsync({ orgId, warehouseId, data })`; with `dryRun: true` nothing is written. */
-export function useBulkCreateLocationsMutation(orgId: string, warehouseId: string) {
+export function useBulkCreateLocationsMutation(
+  orgId: string,
+  warehouseId: string
+) {
   const invalidate = useInvalidateLocations(orgId, warehouseId)
   return useBulkCreateWarehouseLocations({
-    mutation: { onSuccess: (res) => (res.data.dryRun ? undefined : invalidate()) },
+    mutation: {
+      onSuccess: (res) => (res.data.dryRun ? undefined : invalidate()),
+    },
   })
 }
 /** `mutateAsync({ orgId, locationId, data })` */
 export function useUpdateLocationMutation(orgId: string, warehouseId: string) {
   const invalidate = useInvalidateLocations(orgId, warehouseId)
-  return useUpdateWarehouseLocation({ mutation: { onSuccess: (_res, vars) => invalidate(vars.locationId) } })
+  return useUpdateWarehouseLocation({
+    mutation: { onSuccess: (_res, vars) => invalidate(vars.locationId) },
+  })
 }
 /** `mutateAsync({ orgId, locationId, data })` */
 export function useMoveLocationMutation(orgId: string, warehouseId: string) {
   const invalidate = useInvalidateLocations(orgId, warehouseId)
-  return useMoveWarehouseLocation({ mutation: { onSuccess: (_res, vars) => invalidate(vars.locationId) } })
+  return useMoveWarehouseLocation({
+    mutation: { onSuccess: (_res, vars) => invalidate(vars.locationId) },
+  })
 }
 /** `mutateAsync({ orgId, locationId, data })` */
 export function useBlockLocationMutation(orgId: string, warehouseId: string) {
   const invalidate = useInvalidateLocations(orgId, warehouseId)
-  return useBlockWarehouseLocation({ mutation: { onSuccess: (_res, vars) => invalidate(vars.locationId) } })
+  return useBlockWarehouseLocation({
+    mutation: { onSuccess: (_res, vars) => invalidate(vars.locationId) },
+  })
 }
 /** `mutateAsync({ orgId, locationId })` */
 export function useUnblockLocationMutation(orgId: string, warehouseId: string) {
   const invalidate = useInvalidateLocations(orgId, warehouseId)
-  return useUnblockWarehouseLocation({ mutation: { onSuccess: (_res, vars) => invalidate(vars.locationId) } })
+  return useUnblockWarehouseLocation({
+    mutation: { onSuccess: (_res, vars) => invalidate(vars.locationId) },
+  })
 }
 /** `mutateAsync({ orgId, locationId, params: { cascade } })` ⚠ query params travel as `params` */
-export function useDeactivateLocationMutation(orgId: string, warehouseId: string) {
+export function useDeactivateLocationMutation(
+  orgId: string,
+  warehouseId: string
+) {
   const invalidate = useInvalidateLocations(orgId, warehouseId)
-  return useDeactivateWarehouseLocation({ mutation: { onSuccess: (_res, vars) => invalidate(vars.locationId) } })
+  return useDeactivateWarehouseLocation({
+    mutation: { onSuccess: (_res, vars) => invalidate(vars.locationId) },
+  })
 }
 /** `mutateAsync({ orgId, locationId })` */
-export function useReactivateLocationMutation(orgId: string, warehouseId: string) {
+export function useReactivateLocationMutation(
+  orgId: string,
+  warehouseId: string
+) {
   const invalidate = useInvalidateLocations(orgId, warehouseId)
-  return useReactivateWarehouseLocation({ mutation: { onSuccess: (_res, vars) => invalidate(vars.locationId) } })
+  return useReactivateWarehouseLocation({
+    mutation: { onSuccess: (_res, vars) => invalidate(vars.locationId) },
+  })
 }
 /** `mutateAsync({ orgId, locationId, data })` */
-export function useChangeLocationBarcodeMutation(orgId: string, warehouseId: string) {
+export function useChangeLocationBarcodeMutation(
+  orgId: string,
+  warehouseId: string
+) {
   const invalidate = useInvalidateLocations(orgId, warehouseId)
-  return useChangeWarehouseLocationBarcode({ mutation: { onSuccess: (_res, vars) => invalidate(vars.locationId) } })
+  return useChangeWarehouseLocationBarcode({
+    mutation: { onSuccess: (_res, vars) => invalidate(vars.locationId) },
+  })
 }
 /** `mutateAsync({ orgId, locationId })` */
 export function useDeleteLocationMutation(orgId: string, warehouseId: string) {
   const invalidate = useInvalidateLocations(orgId, warehouseId)
-  return useDeleteWarehouseLocation({ mutation: { onSuccess: () => invalidate() } })
+  return useDeleteWarehouseLocation({
+    mutation: { onSuccess: () => invalidate() },
+  })
 }

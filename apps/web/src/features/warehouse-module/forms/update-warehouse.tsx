@@ -2,9 +2,16 @@ import { useState } from "react"
 import { Skeleton } from "@workspace/ui/components/skeleton"
 import { parseApiError } from "@workspace/ui/lib/api-error"
 
-import { normalizeWarehouse, useUpdateWarehouseMutation, useWarehouse } from "../warehouse-api"
+import {
+  normalizeWarehouse,
+  useUpdateWarehouseMutation,
+  useWarehouse,
+} from "../warehouse-api"
 import type { WarehouseDto } from "../types"
-import { UpdateWarehouseForm, type UpdateWarehouseFormValues } from "./update-warehouse-form"
+import {
+  UpdateWarehouseForm,
+  type UpdateWarehouseFormValues,
+} from "./update-warehouse-form"
 import { useWarehouseFormCopy } from "./use-warehouse-form-copy"
 
 type UpdateWarehouseProps = {
@@ -14,7 +21,11 @@ type UpdateWarehouseProps = {
 }
 
 // Composition only: strings + API behavior wired into the pure form. Loads by id because list rows lack fields.
-export function UpdateWarehouse({ orgId, warehouseId, onSuccess }: UpdateWarehouseProps) {
+export function UpdateWarehouse({
+  orgId,
+  warehouseId,
+  onSuccess,
+}: UpdateWarehouseProps) {
   const [serverError, setServerError] = useState<string | null>(null)
   const { warehouse, isLoading, error } = useWarehouse(orgId, warehouseId)
   const updateMutation = useUpdateWarehouseMutation(orgId)
@@ -23,7 +34,11 @@ export function UpdateWarehouse({ orgId, warehouseId, onSuccess }: UpdateWarehou
   const handleSubmit = async (values: UpdateWarehouseFormValues) => {
     setServerError(null)
     try {
-      const response = await updateMutation.mutateAsync({ orgId, warehouseId, data: values })
+      const response = await updateMutation.mutateAsync({
+        orgId,
+        warehouseId,
+        data: values,
+      })
       onSuccess?.(normalizeWarehouse(response.data))
     } catch (e) {
       setServerError(parseApiError(e).message || null)

@@ -1,5 +1,16 @@
 import { useCallback, useState } from "react"
-import { Barcode, Eye, FolderPlus, Lock, LockOpen, MoveRight, Pencil, Power, PowerOff, Trash2 } from "lucide-react"
+import {
+  Barcode,
+  Eye,
+  FolderPlus,
+  Lock,
+  LockOpen,
+  MoveRight,
+  Pencil,
+  Power,
+  PowerOff,
+  Trash2,
+} from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { ConfirmDialog, type RowAction } from "@workspace/ui/blocks/data-table"
 import { parseApiError } from "@workspace/ui/lib/api-error"
@@ -12,7 +23,11 @@ import {
   MoveLocationDialog,
 } from "../forms"
 import { getLocationActionAvailability, isLocationReadOnly } from "../lib"
-import type { LocationParentRef, LocationWarehouse, WarehouseLocationListItemDto } from "../types"
+import type {
+  LocationParentRef,
+  LocationWarehouse,
+  WarehouseLocationListItemDto,
+} from "../types"
 import {
   useDeactivateLocationMutation,
   useDeleteLocationMutation,
@@ -28,7 +43,10 @@ export type LocationActionTarget = Pick<
 >
 
 type DialogState =
-  | { kind: "edit" | "move" | "block" | "barcode" | "deactivate" | "delete"; location: LocationActionTarget }
+  | {
+      kind: "edit" | "move" | "block" | "barcode" | "deactivate" | "delete"
+      location: LocationActionTarget
+    }
   | { kind: "addChild"; location: LocationActionTarget }
   | null
 
@@ -101,7 +119,10 @@ export function useLocationActions(
     if (dialog?.kind !== "delete") return
     setDialogError(null)
     try {
-      await deleteMutation.mutateAsync({ orgId, locationId: dialog.location.id })
+      await deleteMutation.mutateAsync({
+        orgId,
+        locationId: dialog.location.id,
+      })
       const deletedId = dialog.location.id
       closeDialog()
       onDeleted?.(deletedId)
@@ -112,34 +133,93 @@ export function useLocationActions(
 
   /** Menu entries: view → edit → add child → move → block → barcode → retire/reactivate → delete (separated). */
   const getActions = useCallback(
-    (location: LocationActionTarget, { onView, includeEdit = true }: GetActionsOptions = {}): RowAction[] => {
+    (
+      location: LocationActionTarget,
+      { onView, includeEdit = true }: GetActionsOptions = {}
+    ): RowAction[] => {
       const a = getLocationActionAvailability(location, abilities, readOnly)
       const icon = "size-4"
       const actions: RowAction[] = []
-      if (onView) actions.push({ id: "view", label: t("actions.view"), icon: <Eye className={icon} />, onSelect: onView })
-      if (includeEdit && a.canEdit) actions.push({ id: "edit", label: t("actions.edit"), icon: <Pencil className={icon} />, onSelect: () => setDialog({ kind: "edit", location }) })
-      if (a.canAddChild) actions.push({ id: "add-child", label: t("actions.addChild"), icon: <FolderPlus className={icon} />, onSelect: () => setDialog({ kind: "addChild", location }) })
-      if (a.canMove) actions.push({ id: "move", label: t("actions.move"), icon: <MoveRight className={`${icon} rtl:rotate-180`} />, onSelect: () => setDialog({ kind: "move", location }) })
-      if (a.canBlock) actions.push({ id: "block", label: t("actions.block"), icon: <Lock className={icon} />, onSelect: () => setDialog({ kind: "block", location }) })
+      if (onView)
+        actions.push({
+          id: "view",
+          label: t("actions.view"),
+          icon: <Eye className={icon} />,
+          onSelect: onView,
+        })
+      if (includeEdit && a.canEdit)
+        actions.push({
+          id: "edit",
+          label: t("actions.edit"),
+          icon: <Pencil className={icon} />,
+          onSelect: () => setDialog({ kind: "edit", location }),
+        })
+      if (a.canAddChild)
+        actions.push({
+          id: "add-child",
+          label: t("actions.addChild"),
+          icon: <FolderPlus className={icon} />,
+          onSelect: () => setDialog({ kind: "addChild", location }),
+        })
+      if (a.canMove)
+        actions.push({
+          id: "move",
+          label: t("actions.move"),
+          icon: <MoveRight className={`${icon} rtl:rotate-180`} />,
+          onSelect: () => setDialog({ kind: "move", location }),
+        })
+      if (a.canBlock)
+        actions.push({
+          id: "block",
+          label: t("actions.block"),
+          icon: <Lock className={icon} />,
+          onSelect: () => setDialog({ kind: "block", location }),
+        })
       if (a.canUnblock) {
         actions.push({
           id: "unblock",
           label: t("actions.unblock"),
           icon: <LockOpen className={icon} />,
-          onSelect: () => void runDirect(() => unblockMutation.mutateAsync({ orgId, locationId: location.id })),
+          onSelect: () =>
+            void runDirect(() =>
+              unblockMutation.mutateAsync({ orgId, locationId: location.id })
+            ),
         })
       }
-      if (a.canChangeBarcode) actions.push({ id: "barcode", label: t("actions.changeBarcode"), icon: <Barcode className={icon} />, onSelect: () => setDialog({ kind: "barcode", location }) })
-      if (a.canDeactivate) actions.push({ id: "deactivate", label: t("actions.deactivate"), icon: <PowerOff className={icon} />, onSelect: () => setDialog({ kind: "deactivate", location }) })
+      if (a.canChangeBarcode)
+        actions.push({
+          id: "barcode",
+          label: t("actions.changeBarcode"),
+          icon: <Barcode className={icon} />,
+          onSelect: () => setDialog({ kind: "barcode", location }),
+        })
+      if (a.canDeactivate)
+        actions.push({
+          id: "deactivate",
+          label: t("actions.deactivate"),
+          icon: <PowerOff className={icon} />,
+          onSelect: () => setDialog({ kind: "deactivate", location }),
+        })
       if (a.canReactivate) {
         actions.push({
           id: "reactivate",
           label: t("actions.reactivate"),
           icon: <Power className={icon} />,
-          onSelect: () => void runDirect(() => reactivateMutation.mutateAsync({ orgId, locationId: location.id })),
+          onSelect: () =>
+            void runDirect(() =>
+              reactivateMutation.mutateAsync({ orgId, locationId: location.id })
+            ),
         })
       }
-      if (a.canDelete) actions.push({ id: "delete", label: t("actions.delete"), icon: <Trash2 className={icon} />, variant: "destructive", separatorBefore: true, onSelect: () => setDialog({ kind: "delete", location }) })
+      if (a.canDelete)
+        actions.push({
+          id: "delete",
+          label: t("actions.delete"),
+          icon: <Trash2 className={icon} />,
+          variant: "destructive",
+          separatorBefore: true,
+          onSelect: () => setDialog({ kind: "delete", location }),
+        })
       return actions
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps -- mutation objects are stable enough; orgId drives them
@@ -147,29 +227,75 @@ export function useLocationActions(
   )
 
   const target = dialog?.location
-  const asParent = (l: LocationActionTarget): LocationParentRef => ({ id: l.id, name: l.fullCode, type: l.type })
+  const asParent = (l: LocationActionTarget): LocationParentRef => ({
+    id: l.id,
+    name: l.fullCode,
+    type: l.type,
+  })
 
   const dialogs = warehouse ? (
     <>
       {dialog?.kind === "edit" && target ? (
-        <LocationDialog orgId={orgId} warehouse={warehouse} locationId={target.id} open onOpenChange={(open) => { if (!open) closeDialog() }} />
+        <LocationDialog
+          orgId={orgId}
+          warehouse={warehouse}
+          locationId={target.id}
+          open
+          onOpenChange={(open) => {
+            if (!open) closeDialog()
+          }}
+        />
       ) : null}
       {dialog?.kind === "addChild" && target ? (
-        <LocationDialog orgId={orgId} warehouse={warehouse} parent={asParent(target)} open onOpenChange={(open) => { if (!open) closeDialog() }} />
+        <LocationDialog
+          orgId={orgId}
+          warehouse={warehouse}
+          parent={asParent(target)}
+          open
+          onOpenChange={(open) => {
+            if (!open) closeDialog()
+          }}
+        />
       ) : null}
       {dialog?.kind === "move" && target ? (
-        <MoveLocationDialog orgId={orgId} warehouseId={warehouse.id} locationId={target.id} open onOpenChange={(open) => { if (!open) closeDialog() }} />
+        <MoveLocationDialog
+          orgId={orgId}
+          warehouseId={warehouse.id}
+          locationId={target.id}
+          open
+          onOpenChange={(open) => {
+            if (!open) closeDialog()
+          }}
+        />
       ) : null}
       {dialog?.kind === "block" && target ? (
-        <BlockLocationDialog orgId={orgId} warehouseId={warehouse.id} locationId={target.id} open onOpenChange={(open) => { if (!open) closeDialog() }} />
+        <BlockLocationDialog
+          orgId={orgId}
+          warehouseId={warehouse.id}
+          locationId={target.id}
+          open
+          onOpenChange={(open) => {
+            if (!open) closeDialog()
+          }}
+        />
       ) : null}
       {dialog?.kind === "barcode" && target ? (
-        <BarcodeLocationDialog orgId={orgId} warehouseId={warehouse.id} locationId={target.id} open onOpenChange={(open) => { if (!open) closeDialog() }} />
+        <BarcodeLocationDialog
+          orgId={orgId}
+          warehouseId={warehouse.id}
+          locationId={target.id}
+          open
+          onOpenChange={(open) => {
+            if (!open) closeDialog()
+          }}
+        />
       ) : null}
 
       <DeactivateLocationDialog
         open={dialog?.kind === "deactivate"}
-        onOpenChange={(open) => { if (!open) closeDialog() }}
+        onOpenChange={(open) => {
+          if (!open) closeDialog()
+        }}
         copy={{
           title: t("deactivate.title"),
           description: t("deactivate.description", { name: target?.fullCode }),
@@ -187,9 +313,13 @@ export function useLocationActions(
 
       <ConfirmDialog
         open={dialog?.kind === "delete"}
-        onOpenChange={(open) => { if (!open) closeDialog() }}
+        onOpenChange={(open) => {
+          if (!open) closeDialog()
+        }}
         title={t("delete.title")}
-        description={dialogError ?? t("delete.description", { name: target?.fullCode })}
+        description={
+          dialogError ?? t("delete.description", { name: target?.fullCode })
+        }
         confirmLabel={t("actions.delete")}
         cancelLabel={t("actions.cancel")}
         isLoading={deleteMutation.isPending}
@@ -198,5 +328,12 @@ export function useLocationActions(
     </>
   ) : null
 
-  return { abilities, readOnly, getActions, dialogs, actionError, clearActionError: () => setActionError(null) }
+  return {
+    abilities,
+    readOnly,
+    getActions,
+    dialogs,
+    actionError,
+    clearActionError: () => setActionError(null),
+  }
 }

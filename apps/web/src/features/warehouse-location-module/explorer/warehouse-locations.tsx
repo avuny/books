@@ -23,14 +23,27 @@ type WarehouseLocationsProps = {
 }
 
 // Composition only: one warehouse's locations as a table or a lazy tree, sharing one set of row actions.
-export function WarehouseLocations({ orgId, warehouseId, onViewLocation, onBack }: WarehouseLocationsProps) {
+export function WarehouseLocations({
+  orgId,
+  warehouseId,
+  onViewLocation,
+  onBack,
+}: WarehouseLocationsProps) {
   const { t } = useTranslation("warehouse-location")
   const [view, setView] = useState<LocationView>("table")
   const { warehouse, isLoading } = useLocationWarehouse(orgId, warehouseId)
-  const { abilities, readOnly, getActions, dialogs, actionError, clearActionError } = useLocationActions(orgId, warehouse)
+  const {
+    abilities,
+    readOnly,
+    getActions,
+    dialogs,
+    actionError,
+    clearActionError,
+  } = useLocationActions(orgId, warehouse)
 
   const actionsFor = useCallback(
-    (location: LocationActionTarget) => getActions(location, { onView: () => onViewLocation(location.id) }),
+    (location: LocationActionTarget) =>
+      getActions(location, { onView: () => onViewLocation(location.id) }),
     [getActions, onViewLocation]
   )
 
@@ -49,7 +62,9 @@ export function WarehouseLocations({ orgId, warehouseId, onViewLocation, onBack 
 
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
-          <h1 className="text-xl font-semibold text-foreground">{t("list.title")}</h1>
+          <h1 className="text-xl font-semibold text-foreground">
+            {t("list.title")}
+          </h1>
           {isLoading ? (
             <Skeleton className="mt-1 h-4 w-48" aria-busy />
           ) : (
@@ -60,9 +75,20 @@ export function WarehouseLocations({ orgId, warehouseId, onViewLocation, onBack 
           )}
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <div role="group" aria-label={t("list.view.aria")} className="flex items-center gap-1">
+          <div
+            role="group"
+            aria-label={t("list.view.aria")}
+            className="flex items-center gap-1"
+          >
             {VIEWS.map((item) => (
-              <Button key={item} type="button" size="sm" variant={view === item ? "default" : "outline"} aria-pressed={view === item} onClick={() => setView(item)}>
+              <Button
+                key={item}
+                type="button"
+                size="sm"
+                variant={view === item ? "default" : "outline"}
+                aria-pressed={view === item}
+                onClick={() => setView(item)}
+              >
                 {t(`list.view.${item}`)}
               </Button>
             ))}
@@ -77,15 +103,29 @@ export function WarehouseLocations({ orgId, warehouseId, onViewLocation, onBack 
       </div>
 
       {actionError ? (
-        <p role="alert" className="text-sm text-destructive" onClick={clearActionError}>
+        <p
+          role="alert"
+          className="text-sm text-destructive"
+          onClick={clearActionError}
+        >
           {actionError}
         </p>
       ) : null}
 
       {view === "table" ? (
-        <LocationList orgId={orgId} warehouseId={warehouseId} getActions={actionsFor} onViewLocation={onViewLocation} />
+        <LocationList
+          orgId={orgId}
+          warehouseId={warehouseId}
+          getActions={actionsFor}
+          onViewLocation={onViewLocation}
+        />
       ) : (
-        <LocationTree orgId={orgId} warehouseId={warehouseId} getActions={actionsFor} onViewLocation={onViewLocation} />
+        <LocationTree
+          orgId={orgId}
+          warehouseId={warehouseId}
+          getActions={actionsFor}
+          onViewLocation={onViewLocation}
+        />
       )}
 
       {dialogs}

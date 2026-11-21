@@ -1,9 +1,18 @@
 import { useTranslation } from "react-i18next"
-import { WAREHOUSE_LOCATION_BULK_MAX_NODES, WAREHOUSE_LOCATION_PURPOSES } from "@avuny/contracts"
+import {
+  WAREHOUSE_LOCATION_BULK_MAX_NODES,
+  WAREHOUSE_LOCATION_PURPOSES,
+} from "@avuny/contracts"
 
-import type { LocationActionFormCopy, LocationBulkFormCopy, LocationFormCopy } from "./location-form-types"
+import type {
+  LocationActionFormCopy,
+  LocationBulkFormCopy,
+  LocationFormCopy,
+} from "./location-form-types"
 
-export function useLocationFormCopy(mode: "create" | "update"): LocationFormCopy {
+export function useLocationFormCopy(
+  mode: "create" | "update"
+): LocationFormCopy {
   const { t } = useTranslation("warehouse-location")
   return {
     title: t(`${mode}.title`),
@@ -78,7 +87,9 @@ export function useLocationFormCopy(mode: "create" | "update"): LocationFormCopy
   }
 }
 
-export function useLocationActionFormCopy(kind: "move" | "block" | "barcode"): LocationActionFormCopy {
+export function useLocationActionFormCopy(
+  kind: "move" | "block" | "barcode"
+): LocationActionFormCopy {
   const { t } = useTranslation("warehouse-location")
   return {
     title: t(`${kind}.title`),

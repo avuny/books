@@ -4,7 +4,11 @@
  */
 import { useMemo } from "react"
 import { keepPreviousData, useQueryClient } from "@tanstack/react-query"
-import { hasPermission, type PermissionSnapshot, type PermissionStatement } from "@avuny/contracts"
+import {
+  hasPermission,
+  type PermissionSnapshot,
+  type PermissionStatement,
+} from "@avuny/contracts"
 
 import {
   getGetWarehouseQueryKey,
@@ -22,9 +26,12 @@ import {
   useUpdateWarehouse,
 } from "@/api"
 
-
 import type { WarehouseAbilities } from "./lib/warehouse-rules"
-import type { WarehouseDto, WarehouseListItemDto, WarehouseScope } from "./types"
+import type {
+  WarehouseDto,
+  WarehouseListItemDto,
+  WarehouseScope,
+} from "./types"
 import { toQueryBoolean } from "../lib/api/query-boolean"
 import { useCursorOptions } from "../lib/options/use-cursor-options"
 
@@ -89,22 +96,35 @@ export function normalizeWarehouseListItem(data: {
 }
 
 /* -------------------------------- queries -------------------------------- */
-export type WarehouseListParams = { page: number /* 1-based */; pageSize: number; scope: WarehouseScope; search: string }
+export type WarehouseListParams = {
+  page: number /* 1-based */
+  pageSize: number
+  scope: WarehouseScope
+  search: string
+}
 
-export function useWarehouseList(orgId: string, { page, pageSize, scope, search }: WarehouseListParams) {
+export function useWarehouseList(
+  orgId: string,
+  { page, pageSize, scope, search }: WarehouseListParams
+) {
   const query = useListWarehouses(
     orgId,
     {
       page,
       pageSize,
-      isActive: toQueryBoolean(scope === "all" ? undefined : scope === "active"),
+      isActive: toQueryBoolean(
+        scope === "all" ? undefined : scope === "active"
+      ),
       search: search || undefined,
     },
     { query: { placeholderData: keepPreviousData } } // no flash between pages
   )
   const items = query.data?.data.items
   return {
-    warehouses: useMemo(() => (items ? items.map(normalizeWarehouseListItem) : NO_WAREHOUSES), [items]),
+    warehouses: useMemo(
+      () => (items ? items.map(normalizeWarehouseListItem) : NO_WAREHOUSES),
+      [items]
+    ),
     total: query.data?.data.total ?? 0,
     isLoading: query.isLoading,
   }
@@ -113,7 +133,10 @@ export function useWarehouseList(orgId: string, { page, pageSize, scope, search 
 export function useWarehouse(orgId: string, warehouseId: string) {
   const query = useGetWarehouse(orgId, warehouseId)
   const data = query.data?.data
-  const warehouse = useMemo<WarehouseDto | null>(() => (data ? normalizeWarehouse(data) : null), [data])
+  const warehouse = useMemo<WarehouseDto | null>(
+    () => (data ? normalizeWarehouse(data) : null),
+    [data]
+  )
   return { warehouse, isLoading: query.isLoading, error: query.error }
 }
 
@@ -122,7 +145,8 @@ export function useWarehouseOptions(orgId: string) {
   return useCursorOptions({
     queryKey: getListWarehouseOptionsQueryKey(orgId),
     fetchPage: async ({ cursor, search, limit, signal }) =>
-      (await listWarehouseOptions(orgId, { cursor, search, limit }, { signal })).data,
+      (await listWarehouseOptions(orgId, { cursor, search, limit }, { signal }))
+        .data,
     enabled: Boolean(orgId),
   })
 }
@@ -132,7 +156,13 @@ export function useWarehouseAbilities(orgId: string): WarehouseAbilities {
   const query = useGetMyPermissions(orgId)
   const snapshot = query.data?.data
   return useMemo(() => {
-    if (!snapshot) return { canCreate: false, canUpdate: false, canDeactivate: false, canDelete: false }
+    if (!snapshot)
+      return {
+        canCreate: false,
+        canUpdate: false,
+        canDeactivate: false,
+        canDelete: false,
+      }
     const s: PermissionSnapshot = {
       isOwner: snapshot.isOwner,
       statements: snapshot.statements.map(normalizeStatement),
@@ -151,11 +181,17 @@ function useInvalidateWarehouses(orgId: string) {
   const queryClient = useQueryClient()
   return (warehouseId?: string) =>
     Promise.all([
-      queryClient.invalidateQueries({ queryKey: getListWarehousesQueryKey(orgId) }),
+      queryClient.invalidateQueries({
+        queryKey: getListWarehousesQueryKey(orgId),
+      }),
       // The prefix covers every search term and page of the picker.
-      queryClient.invalidateQueries({ queryKey: getListWarehouseOptionsQueryKey(orgId) }),
+      queryClient.invalidateQueries({
+        queryKey: getListWarehouseOptionsQueryKey(orgId),
+      }),
       warehouseId
-        ? queryClient.invalidateQueries({ queryKey: getGetWarehouseQueryKey(orgId, warehouseId) })
+        ? queryClient.invalidateQueries({
+            queryKey: getGetWarehouseQueryKey(orgId, warehouseId),
+          })
         : Promise.resolve(),
     ])
 }
@@ -168,22 +204,30 @@ export function useCreateWarehouseMutation(orgId: string) {
 /** `mutateAsync({ orgId, warehouseId, data })` */
 export function useUpdateWarehouseMutation(orgId: string) {
   const invalidate = useInvalidateWarehouses(orgId)
-  return useUpdateWarehouse({ mutation: { onSuccess: (_res, vars) => invalidate(vars.warehouseId) } })
+  return useUpdateWarehouse({
+    mutation: { onSuccess: (_res, vars) => invalidate(vars.warehouseId) },
+  })
 }
 /** `mutateAsync({ orgId, warehouseId })` */
 export function useDeactivateWarehouseMutation(orgId: string) {
   const invalidate = useInvalidateWarehouses(orgId)
-  return useDeactivateWarehouse({ mutation: { onSuccess: (_res, vars) => invalidate(vars.warehouseId) } })
+  return useDeactivateWarehouse({
+    mutation: { onSuccess: (_res, vars) => invalidate(vars.warehouseId) },
+  })
 }
 /** `mutateAsync({ orgId, warehouseId })` */
 export function useReactivateWarehouseMutation(orgId: string) {
   const invalidate = useInvalidateWarehouses(orgId)
-  return useReactivateWarehouse({ mutation: { onSuccess: (_res, vars) => invalidate(vars.warehouseId) } })
+  return useReactivateWarehouse({
+    mutation: { onSuccess: (_res, vars) => invalidate(vars.warehouseId) },
+  })
 }
 /** `mutateAsync({ orgId, warehouseId })`. Changes two rows, so the whole list is refreshed. */
 export function useSetDefaultWarehouseMutation(orgId: string) {
   const invalidate = useInvalidateWarehouses(orgId)
-  return useSetDefaultWarehouse({ mutation: { onSuccess: (_res, vars) => invalidate(vars.warehouseId) } })
+  return useSetDefaultWarehouse({
+    mutation: { onSuccess: (_res, vars) => invalidate(vars.warehouseId) },
+  })
 }
 /** `mutateAsync({ orgId, warehouseId })` */
 export function useDeleteWarehouseMutation(orgId: string) {

@@ -1,7 +1,13 @@
 import type { ColumnDef } from "@tanstack/react-table"
-import { createActionsColumn, type RowAction } from "@workspace/ui/blocks/data-table"
+import {
+  createActionsColumn,
+  type RowAction,
+} from "@workspace/ui/blocks/data-table"
 
-import { LocationStatusBadges, type LocationStatusBadgesCopy } from "../components"
+import {
+  LocationStatusBadges,
+  type LocationStatusBadgesCopy,
+} from "../components"
 import type { WarehouseLocationListItemDto } from "../types"
 
 export type LocationColumnsCopy = {
@@ -22,7 +28,10 @@ type LocationColumnsOptions = {
   getActions: (location: WarehouseLocationListItemDto) => RowAction[]
 }
 
-export function createLocationColumns({ copy, getActions }: LocationColumnsOptions): ColumnDef<WarehouseLocationListItemDto>[] {
+export function createLocationColumns({
+  copy,
+  getActions,
+}: LocationColumnsOptions): ColumnDef<WarehouseLocationListItemDto>[] {
   return [
     {
       accessorKey: "fullCode",
@@ -30,7 +39,9 @@ export function createLocationColumns({ copy, getActions }: LocationColumnsOptio
       enableSorting: false, // server-side paging: sorting off unless the API supports it
       cell: ({ row }) => (
         <div className="flex flex-wrap items-center gap-2">
-          <span className="font-mono text-sm text-foreground">{row.original.fullCode}</span>
+          <span className="font-mono text-sm text-foreground">
+            {row.original.fullCode}
+          </span>
           <LocationStatusBadges
             isActive={row.original.isActive}
             isBlocked={row.original.isBlocked}
@@ -44,19 +55,29 @@ export function createLocationColumns({ copy, getActions }: LocationColumnsOptio
       accessorKey: "name",
       header: copy.name,
       enableSorting: false,
-      cell: ({ row }) => <span className="font-medium text-foreground">{row.original.name}</span>,
+      cell: ({ row }) => (
+        <span className="font-medium text-foreground">{row.original.name}</span>
+      ),
     },
     {
       id: "type",
       header: copy.type,
       enableSorting: false,
-      cell: ({ row }) => <span className="text-muted-foreground">{copy.getTypeLabel(row.original.type)}</span>,
+      cell: ({ row }) => (
+        <span className="text-muted-foreground">
+          {copy.getTypeLabel(row.original.type)}
+        </span>
+      ),
     },
     {
       id: "purpose",
       header: copy.purpose,
       enableSorting: false,
-      cell: ({ row }) => <span className="text-muted-foreground">{copy.getPurposeLabel(row.original.purpose)}</span>,
+      cell: ({ row }) => (
+        <span className="text-muted-foreground">
+          {copy.getPurposeLabel(row.original.purpose)}
+        </span>
+      ),
     },
     createActionsColumn<WarehouseLocationListItemDto>({
       headerLabel: copy.actions,

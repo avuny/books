@@ -13,7 +13,12 @@ type WarehouseButtonProps = {
   className?: string
 }
 
-export function WarehouseButton({ orgId, warehouseId, display = "text", className }: WarehouseButtonProps) {
+export function WarehouseButton({
+  orgId,
+  warehouseId,
+  display = "text",
+  className,
+}: WarehouseButtonProps) {
   const { t } = useTranslation("warehouse")
   const [open, setOpen] = useState(false)
   const isUpdate = Boolean(warehouseId)
@@ -23,16 +28,33 @@ export function WarehouseButton({ orgId, warehouseId, display = "text", classNam
   return (
     <>
       {isUpdate && display === "icon" ? (
-        <Button type="button" variant="ghost" size="icon" className={className} aria-label={label} onClick={() => setOpen(true)}>
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          className={className}
+          aria-label={label}
+          onClick={() => setOpen(true)}
+        >
           <Icon className="size-4" aria-hidden />
         </Button>
       ) : (
-        <Button type="button" variant={isUpdate ? "outline" : "default"} className={className} onClick={() => setOpen(true)}>
+        <Button
+          type="button"
+          variant={isUpdate ? "outline" : "default"}
+          className={className}
+          onClick={() => setOpen(true)}
+        >
           <Icon className="size-4" aria-hidden />
           {label}
         </Button>
       )}
-      <WarehouseDialog orgId={orgId} warehouseId={warehouseId} open={open} onOpenChange={setOpen} />
+      <WarehouseDialog
+        orgId={orgId}
+        warehouseId={warehouseId}
+        open={open}
+        onOpenChange={setOpen}
+      />
     </>
   )
 }

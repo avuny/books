@@ -18,7 +18,12 @@ type WarehouseDialogProps = {
   onOpenChange: (open: boolean) => void
 }
 
-export function WarehouseDialog({ orgId, warehouseId, open, onOpenChange }: WarehouseDialogProps) {
+export function WarehouseDialog({
+  orgId,
+  warehouseId,
+  open,
+  onOpenChange,
+}: WarehouseDialogProps) {
   const { t } = useTranslation("warehouse")
   const mode = warehouseId ? "update" : "create"
   const close = () => onOpenChange(false)
@@ -32,7 +37,12 @@ export function WarehouseDialog({ orgId, warehouseId, open, onOpenChange }: Ware
           <DialogDescription>{t(`${mode}.description`)}</DialogDescription>
         </DialogHeader>
         {warehouseId ? (
-          <UpdateWarehouse key={warehouseId} orgId={orgId} warehouseId={warehouseId} onSuccess={close} />
+          <UpdateWarehouse
+            key={warehouseId}
+            orgId={orgId}
+            warehouseId={warehouseId}
+            onSuccess={close}
+          />
         ) : (
           <CreateWarehouse orgId={orgId} onSuccess={close} />
         )}

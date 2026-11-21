@@ -24,9 +24,20 @@ type BranchProps = LocationTreeProps & {
 }
 
 // Composition only: one level of the tree, loaded when its parent is expanded.
-function LocationTreeBranch({ orgId, warehouseId, parentId, depth, getActions, onViewLocation }: BranchProps) {
+function LocationTreeBranch({
+  orgId,
+  warehouseId,
+  parentId,
+  depth,
+  getActions,
+  onViewLocation,
+}: BranchProps) {
   const { t } = useTranslation("warehouse-location")
-  const { nodes, isLoading, error } = useLocationTreeLevel(orgId, warehouseId, parentId)
+  const { nodes, isLoading, error } = useLocationTreeLevel(
+    orgId,
+    warehouseId,
+    parentId
+  )
   const { getTypeLabel } = useWarehouseLocationLabels()
   const [expanded, setExpanded] = useState<ReadonlySet<string>>(new Set())
 
@@ -54,15 +65,28 @@ function LocationTreeBranch({ orgId, warehouseId, parentId, depth, getActions, o
     )
   }
   if (nodes.length === 0 && depth === 0) {
-    return <p className="px-2 py-8 text-center text-sm text-muted-foreground">{t("tree.empty")}</p>
+    return (
+      <p className="px-2 py-8 text-center text-sm text-muted-foreground">
+        {t("tree.empty")}
+      </p>
+    )
   }
 
   return (
-    <ul role={depth === 0 ? "tree" : "group"} aria-label={depth === 0 ? t("tree.aria") : undefined} className={depth === 0 ? "grid gap-0.5" : "grid gap-0.5 ps-6"}>
+    <ul
+      role={depth === 0 ? "tree" : "group"}
+      aria-label={depth === 0 ? t("tree.aria") : undefined}
+      className={depth === 0 ? "grid gap-0.5" : "grid gap-0.5 ps-6"}
+    >
       {nodes.map((node) => {
         const isOpen = expanded.has(node.id)
         return (
-          <li key={node.id} role="treeitem" aria-expanded={node.hasChildren ? isOpen : undefined} aria-selected={false}>
+          <li
+            key={node.id}
+            role="treeitem"
+            aria-expanded={node.hasChildren ? isOpen : undefined}
+            aria-selected={false}
+          >
             <LocationTreeNode
               node={node}
               copy={{

@@ -4,7 +4,10 @@ import { parseApiError } from "@workspace/ui/lib/api-error"
 
 import { useLocationActions } from "../actions"
 import { LocationButton } from "../forms"
-import { getLocationActionAvailability, useWarehouseLocationLabels } from "../lib"
+import {
+  getLocationActionAvailability,
+  useWarehouseLocationLabels,
+} from "../lib"
 import { useLocation, useLocationWarehouse } from "../warehouse-location-api"
 import { LocationDetailsView } from "./location-details-view"
 
@@ -19,18 +22,30 @@ type LocationDetailsProps = {
 }
 
 // Composition only: strings + API behavior wired into the pure view.
-export function LocationDetails({ orgId, warehouseId, locationId, onBack, onViewLocation }: LocationDetailsProps) {
+export function LocationDetails({
+  orgId,
+  warehouseId,
+  locationId,
+  onBack,
+  onViewLocation,
+}: LocationDetailsProps) {
   const { t, i18n } = useTranslation("warehouse-location")
   const { location, isLoading, error } = useLocation(orgId, locationId)
   const { warehouse } = useLocationWarehouse(orgId, warehouseId)
   const { getTypeLabel, getPurposeLabel } = useWarehouseLocationLabels()
-  const { abilities, readOnly, getActions, dialogs, actionError } = useLocationActions(orgId, warehouse, {
-    onDeleted: () => onBack?.(),
-  })
+  const { abilities, readOnly, getActions, dialogs, actionError } =
+    useLocationActions(orgId, warehouse, {
+      onDeleted: () => onBack?.(),
+    })
 
-  const formatDate = (iso: string) => new Intl.DateTimeFormat(i18n.language, { dateStyle: "medium" }).format(new Date(iso))
+  const formatDate = (iso: string) =>
+    new Intl.DateTimeFormat(i18n.language, { dateStyle: "medium" }).format(
+      new Date(iso)
+    )
 
-  const availability = location ? getLocationActionAvailability(location, abilities, readOnly) : null
+  const availability = location
+    ? getLocationActionAvailability(location, abilities, readOnly)
+    : null
   const menu = location ? getActions(location, { includeEdit: false }) : []
 
   return (
@@ -65,8 +80,16 @@ export function LocationDetails({ orgId, warehouseId, locationId, onBack, onView
           noBarcode: t("details.noBarcode"),
           typeValue: location ? getTypeLabel(location.type) : "",
           purposeValue: location ? getPurposeLabel(location.purpose) : "",
-          badges: { inactive: t("badges.inactive"), blocked: t("badges.blocked"), inheritedBlock: t("badges.inheritedBlock") },
-          capabilities: { stockable: t("badges.stockable"), pickable: t("badges.pickable"), receivable: t("badges.receivable") },
+          badges: {
+            inactive: t("badges.inactive"),
+            blocked: t("badges.blocked"),
+            inheritedBlock: t("badges.inheritedBlock"),
+          },
+          capabilities: {
+            stockable: t("badges.stockable"),
+            pickable: t("badges.pickable"),
+            receivable: t("badges.receivable"),
+          },
         }}
         createdAt={location ? formatDate(location.createdAt) : ""}
         updatedAt={location ? formatDate(location.updatedAt) : ""}
@@ -75,8 +98,19 @@ export function LocationDetails({ orgId, warehouseId, locationId, onBack, onView
         actions={
           location && warehouse ? (
             <>
-              {availability?.canEdit ? <LocationButton orgId={orgId} warehouse={warehouse} locationId={locationId} /> : null}
-              {menu.length > 0 ? <DataTableRowActions actions={menu} triggerLabel={t("actions.more")} /> : null}
+              {availability?.canEdit ? (
+                <LocationButton
+                  orgId={orgId}
+                  warehouse={warehouse}
+                  locationId={locationId}
+                />
+              ) : null}
+              {menu.length > 0 ? (
+                <DataTableRowActions
+                  actions={menu}
+                  triggerLabel={t("actions.more")}
+                />
+              ) : null}
             </>
           ) : undefined
         }

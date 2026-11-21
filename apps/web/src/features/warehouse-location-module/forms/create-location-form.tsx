@@ -21,7 +21,10 @@ import { Button } from "@workspace/ui/components/button"
 import { mapBlanks } from "@/features/lib/forms/blank-values"
 
 import { CheckboxRow } from "../components"
-import type { CreateWarehouseLocationInput, WarehouseLocationType } from "../types"
+import type {
+  CreateWarehouseLocationInput,
+  WarehouseLocationType,
+} from "../types"
 import type { LocationFormCopy } from "./location-form-types"
 
 import type { z } from "@avuny/zod"
@@ -29,7 +32,15 @@ import type { z } from "@avuny/zod"
 export type CreateLocationFormValues = CreateWarehouseLocationInput
 type CreateLocationFormInput = z.input<typeof CreateWarehouseLocationSchema> // pre-transform shape
 
-const BLANK_TO_UNDEFINED = ["parentId", "name", "width", "height", "depth", "maxWeight", "maxVolume"] as const
+const BLANK_TO_UNDEFINED = [
+  "parentId",
+  "name",
+  "width",
+  "height",
+  "depth",
+  "maxWeight",
+  "maxVolume",
+] as const
 
 type CreateLocationFormProps = {
   copy: LocationFormCopy
@@ -41,7 +52,10 @@ type CreateLocationFormProps = {
   /** Types allowed here, already translated. */
   typeOptions: { value: string; label: string }[]
   /** Fetches the next free code for a type; null when none could be suggested. */
-  onSuggestCode?: (input: { type: WarehouseLocationType; parentId?: string }) => Promise<string | null>
+  onSuggestCode?: (input: {
+    type: WarehouseLocationType
+    parentId?: string
+  }) => Promise<string | null>
   onSubmit: (values: CreateLocationFormValues) => void
   isPending: boolean
   /** Already localized. Shown in the form-level alert. */
@@ -62,11 +76,22 @@ export function CreateLocationForm({
   isPending,
   errorMessage,
 }: CreateLocationFormProps) {
-  const initialType = (typeOptions.find((o) => o.value === "bin")?.value ?? typeOptions[0]?.value ?? "bin") as WarehouseLocationType
+  const initialType = (typeOptions.find((o) => o.value === "bin")?.value ??
+    typeOptions[0]?.value ??
+    "bin") as WarehouseLocationType
   const initialFlags = defaultFlags(initialType, "storage")
 
-  const form = useForm<CreateLocationFormInput, unknown, CreateLocationFormValues>({
-    resolver: (values, context, options) => baseResolver(mapBlanks(values, BLANK_TO_UNDEFINED, undefined), context, options),
+  const form = useForm<
+    CreateLocationFormInput,
+    unknown,
+    CreateLocationFormValues
+  >({
+    resolver: (values, context, options) =>
+      baseResolver(
+        mapBlanks(values, BLANK_TO_UNDEFINED, undefined),
+        context,
+        options
+      ),
     defaultValues: {
       parentId: fixedParent?.id ?? "",
       code: "",
@@ -98,7 +123,8 @@ export function CreateLocationForm({
       }
       if (name === "purpose" && value.type) {
         const stockable = Boolean(value.isStockable)
-        const fromPurpose = WAREHOUSE_LOCATION_PURPOSE_FLAGS[value.purpose ?? "storage"]
+        const fromPurpose =
+          WAREHOUSE_LOCATION_PURPOSE_FLAGS[value.purpose ?? "storage"]
         form.setValue("isPickable", stockable && fromPurpose.isPickable)
         form.setValue("isReceivable", stockable && fromPurpose.isReceivable)
       }
@@ -114,17 +140,30 @@ export function CreateLocationForm({
 
   const suggestCode = async () => {
     if (!onSuggestCode) return
-    const parentId = fixedParent?.id ?? (form.getValues("parentId") || undefined)
+    const parentId =
+      fixedParent?.id ?? (form.getValues("parentId") || undefined)
     const code = await onSuggestCode({ type: form.getValues("type"), parentId })
-    if (code) form.setValue("code", code, { shouldValidate: true, shouldDirty: true })
+    if (code)
+      form.setValue("code", code, { shouldValidate: true, shouldDirty: true })
   }
 
   return (
-    <FormShell title={copy.title} description={copy.description} errorMessage={errorMessage}>
-      <form onSubmit={form.handleSubmit((values) => onSubmit(values))} noValidate className="space-y-6">
+    <FormShell
+      title={copy.title}
+      description={copy.description}
+      errorMessage={errorMessage}
+    >
+      <form
+        onSubmit={form.handleSubmit((values) => onSubmit(values))}
+        noValidate
+        className="space-y-6"
+      >
         {fixedParent ? (
           <p className="text-sm text-muted-foreground">
-            {copy.parent.fixed} <span className="font-medium text-foreground">{fixedParent.name}</span>
+            {copy.parent.fixed}{" "}
+            <span className="font-medium text-foreground">
+              {fixedParent.name}
+            </span>
           </p>
         ) : (
           <AsyncComboboxField
@@ -138,19 +177,52 @@ export function CreateLocationForm({
           />
         )}
 
-        <SelectField control={form.control} name="type" copy={copy.type} options={typeOptions} disabled={isPending} />
+        <SelectField
+          control={form.control}
+          name="type"
+          copy={copy.type}
+          options={typeOptions}
+          disabled={isPending}
+        />
 
         <div className="space-y-2">
-          <InputField control={form.control} name="code" copy={copy.code} type="text" autoComplete="off" autoFocus disabled={isPending} />
+          <InputField
+            control={form.control}
+            name="code"
+            copy={copy.code}
+            type="text"
+            autoComplete="off"
+            autoFocus
+            disabled={isPending}
+          />
           {onSuggestCode ? (
-            <Button type="button" variant="ghost" size="sm" disabled={isPending} onClick={() => void suggestCode()}>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              disabled={isPending}
+              onClick={() => void suggestCode()}
+            >
               {copy.code.suggest}
             </Button>
           ) : null}
         </div>
 
-        <InputField control={form.control} name="name" copy={copy.name} type="text" autoComplete="off" disabled={isPending} />
-        <SelectField control={form.control} name="purpose" copy={copy.purpose} options={copy.purposeOptions} disabled={isPending} />
+        <InputField
+          control={form.control}
+          name="name"
+          copy={copy.name}
+          type="text"
+          autoComplete="off"
+          disabled={isPending}
+        />
+        <SelectField
+          control={form.control}
+          name="purpose"
+          copy={copy.purpose}
+          options={copy.purposeOptions}
+          disabled={isPending}
+        />
 
         <fieldset className="space-y-3">
           <CheckboxRow
@@ -160,22 +232,81 @@ export function CreateLocationForm({
             description={copy.isStockable.description}
             disabled={isPending || !canBeStockable}
           />
-          <CheckboxRow control={form.control} name="isPickable" label={copy.isPickable.label} description={copy.isPickable.description} disabled={isPending || !isStockable} />
-          <CheckboxRow control={form.control} name="isReceivable" label={copy.isReceivable.label} description={copy.isReceivable.description} disabled={isPending || !isStockable} />
+          <CheckboxRow
+            control={form.control}
+            name="isPickable"
+            label={copy.isPickable.label}
+            description={copy.isPickable.description}
+            disabled={isPending || !isStockable}
+          />
+          <CheckboxRow
+            control={form.control}
+            name="isReceivable"
+            label={copy.isReceivable.label}
+            description={copy.isReceivable.description}
+            disabled={isPending || !isStockable}
+          />
         </fieldset>
 
         <details className="rounded-lg border border-border p-3">
-          <summary className="cursor-pointer text-sm font-medium text-foreground">{copy.measures.title}</summary>
+          <summary className="cursor-pointer text-sm font-medium text-foreground">
+            {copy.measures.title}
+          </summary>
           <div className="mt-3 grid gap-4 sm:grid-cols-2">
-            <InputField control={form.control} name="width" copy={copy.measures.width} type="text" inputMode="decimal" autoComplete="off" disabled={isPending} />
-            <InputField control={form.control} name="height" copy={copy.measures.height} type="text" inputMode="decimal" autoComplete="off" disabled={isPending} />
-            <InputField control={form.control} name="depth" copy={copy.measures.depth} type="text" inputMode="decimal" autoComplete="off" disabled={isPending} />
-            <InputField control={form.control} name="maxWeight" copy={copy.measures.maxWeight} type="text" inputMode="decimal" autoComplete="off" disabled={isPending} />
-            <InputField control={form.control} name="maxVolume" copy={copy.measures.maxVolume} type="text" inputMode="decimal" autoComplete="off" disabled={isPending} />
+            <InputField
+              control={form.control}
+              name="width"
+              copy={copy.measures.width}
+              type="text"
+              inputMode="decimal"
+              autoComplete="off"
+              disabled={isPending}
+            />
+            <InputField
+              control={form.control}
+              name="height"
+              copy={copy.measures.height}
+              type="text"
+              inputMode="decimal"
+              autoComplete="off"
+              disabled={isPending}
+            />
+            <InputField
+              control={form.control}
+              name="depth"
+              copy={copy.measures.depth}
+              type="text"
+              inputMode="decimal"
+              autoComplete="off"
+              disabled={isPending}
+            />
+            <InputField
+              control={form.control}
+              name="maxWeight"
+              copy={copy.measures.maxWeight}
+              type="text"
+              inputMode="decimal"
+              autoComplete="off"
+              disabled={isPending}
+            />
+            <InputField
+              control={form.control}
+              name="maxVolume"
+              copy={copy.measures.maxVolume}
+              type="text"
+              inputMode="decimal"
+              autoComplete="off"
+              disabled={isPending}
+            />
           </div>
         </details>
 
-        <SubmitButton className="w-full" loading={isPending} label={copy.submitLabel} loadingLabel={copy.submittingLabel} />
+        <SubmitButton
+          className="w-full"
+          loading={isPending}
+          label={copy.submitLabel}
+          loadingLabel={copy.submittingLabel}
+        />
       </form>
     </FormShell>
   )

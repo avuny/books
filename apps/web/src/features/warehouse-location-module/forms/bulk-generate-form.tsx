@@ -1,7 +1,12 @@
 import { useEffect } from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useFieldArray, useForm, useWatch } from "react-hook-form"
-import { BulkCreateWarehouseLocationsSchema, countBulkNodes, validateBulkLevels, type BulkLevel } from "@avuny/contracts"
+import {
+  BulkCreateWarehouseLocationsSchema,
+  countBulkNodes,
+  validateBulkLevels,
+  type BulkLevel,
+} from "@avuny/contracts"
 
 import {
   AsyncComboboxField,
@@ -16,8 +21,17 @@ import { Input } from "@workspace/ui/components/input"
 import { Label } from "@workspace/ui/components/label"
 import { mapBlanks } from "@/features/lib/forms/blank-values"
 
-import { isDefaultCodePrefix, suggestBulkLevelType, suggestedCodePrefix } from "../lib"
-import type { BulkCreateWarehouseLocationsInput, BulkCreateWarehouseLocationsResult, WarehouseLocationType, WarehouseType } from "../types"
+import {
+  isDefaultCodePrefix,
+  suggestBulkLevelType,
+  suggestedCodePrefix,
+} from "../lib"
+import type {
+  BulkCreateWarehouseLocationsInput,
+  BulkCreateWarehouseLocationsResult,
+  WarehouseLocationType,
+  WarehouseType,
+} from "../types"
 import type { LocationBulkFormCopy } from "./location-form-types"
 
 import type { z } from "@avuny/zod"
@@ -45,7 +59,10 @@ type BulkGenerateFormProps = {
 
 const baseResolver = zodResolver(BulkCreateWarehouseLocationsSchema)
 
-function newLevel(previous: WarehouseLocationType | null, warehouseType: WarehouseType) {
+function newLevel(
+  previous: WarehouseLocationType | null,
+  warehouseType: WarehouseType
+) {
   const type = suggestBulkLevelType(previous, warehouseType)
   return { type, prefix: suggestedCodePrefix(type), start: 1, count: 1, pad: 2 }
 }
@@ -66,14 +83,22 @@ export function BulkGenerateForm({
   errorMessage,
 }: BulkGenerateFormProps) {
   const form = useForm<BulkGenerateFormInput, unknown, BulkGenerateFormValues>({
-    resolver: (values, context, options) => baseResolver(mapBlanks(values, ["parentId"], undefined), context, options),
+    resolver: (values, context, options) =>
+      baseResolver(
+        mapBlanks(values, ["parentId"], undefined),
+        context,
+        options
+      ),
     defaultValues: {
       parentId: fixedParent?.id ?? "",
       levels: [newLevel(fixedParent?.type ?? null, warehouseType)],
       dryRun: false,
     },
   })
-  const { fields, append, remove } = useFieldArray({ control: form.control, name: "levels" })
+  const { fields, append, remove } = useFieldArray({
+    control: form.control,
+    name: "levels",
+  })
   const levels = useWatch({ control: form.control, name: "levels" })
 
   // Changing a level's type proposes that type's usual prefix, unless the user already typed their own.
@@ -106,13 +131,24 @@ export function BulkGenerateForm({
   const errors = form.formState.errors.levels
 
   return (
-    <FormShell title={copy.title} description={copy.description} errorMessage={errorMessage}>
-      <form onSubmit={form.handleSubmit((values) => {
+    <FormShell
+      title={copy.title}
+      description={copy.description}
+      errorMessage={errorMessage}
+    >
+      <form
+        onSubmit={form.handleSubmit((values) => {
           if (canRun) onSubmit({ ...values, dryRun: false })
-        })} noValidate className="space-y-6">
+        })}
+        noValidate
+        className="space-y-6"
+      >
         {fixedParent ? (
           <p className="text-sm text-muted-foreground">
-            {copy.parent.fixed} <span className="font-medium text-foreground">{fixedParent.name}</span>
+            {copy.parent.fixed}{" "}
+            <span className="font-medium text-foreground">
+              {fixedParent.name}
+            </span>
           </p>
         ) : (
           <AsyncComboboxField
@@ -128,8 +164,13 @@ export function BulkGenerateForm({
 
         <div className="space-y-4">
           {fields.map((field, index) => (
-            <fieldset key={field.id} className="space-y-3 rounded-lg border border-border p-3">
-              <legend className="px-1 text-sm font-medium text-foreground">{copy.level(index + 1)}</legend>
+            <fieldset
+              key={field.id}
+              className="space-y-3 rounded-lg border border-border p-3"
+            >
+              <legend className="px-1 text-sm font-medium text-foreground">
+                {copy.level(index + 1)}
+              </legend>
               <SelectField
                 control={form.control}
                 name={`levels.${index}.type`}
@@ -154,7 +195,12 @@ export function BulkGenerateForm({
                       inputMode={inputType === "number" ? "numeric" : undefined}
                       autoComplete="off"
                       disabled={isPending}
-                      {...form.register(`levels.${index}.${key}`, inputType === "number" ? { valueAsNumber: true } : undefined)}
+                      {...form.register(
+                        `levels.${index}.${key}`,
+                        inputType === "number"
+                          ? { valueAsNumber: true }
+                          : undefined
+                      )}
                     />
                     {errors?.[index]?.[key]?.message ? (
                       <p role="alert" className="text-xs text-destructive">
@@ -165,7 +211,13 @@ export function BulkGenerateForm({
                 ))}
               </div>
               {fields.length > 1 ? (
-                <Button type="button" variant="ghost" size="sm" disabled={isPending} onClick={() => remove(index)}>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  disabled={isPending}
+                  onClick={() => remove(index)}
+                >
                   {copy.levelFields.remove}
                 </Button>
               ) : null}
@@ -176,7 +228,14 @@ export function BulkGenerateForm({
             variant="outline"
             size="sm"
             disabled={isPending || fields.length >= 7}
-            onClick={() => append(newLevel(parsed.at(-1)?.type ?? fixedParent?.type ?? null, warehouseType))}
+            onClick={() =>
+              append(
+                newLevel(
+                  parsed.at(-1)?.type ?? fixedParent?.type ?? null,
+                  warehouseType
+                )
+              )
+            }
           >
             {copy.levelFields.add}
           </Button>
@@ -184,18 +243,28 @@ export function BulkGenerateForm({
 
         <div className="space-y-1 text-sm" aria-live="polite">
           {tooMany ? (
-            <p role="alert" className="text-destructive">{copy.tooMany}</p>
+            <p role="alert" className="text-destructive">
+              {copy.tooMany}
+            </p>
           ) : (
             <p className="text-foreground">{copy.total(total)}</p>
           )}
-          {!orderOk ? <p role="alert" className="text-destructive">{copy.badOrder}</p> : null}
+          {!orderOk ? (
+            <p role="alert" className="text-destructive">
+              {copy.badOrder}
+            </p>
+          ) : null}
         </div>
 
         {preview ? (
           <div className="space-y-1 rounded-lg border border-dashed border-border p-3 text-sm">
-            <p className="font-medium text-foreground">{copy.total(preview.total)}</p>
+            <p className="font-medium text-foreground">
+              {copy.total(preview.total)}
+            </p>
             <p className="text-xs text-muted-foreground">{copy.examples}</p>
-            <p className="break-words font-mono text-xs text-muted-foreground">{preview.sampleFullCodes.join(" · ")}</p>
+            <p className="font-mono text-xs break-words text-muted-foreground">
+              {preview.sampleFullCodes.join(" · ")}
+            </p>
           </div>
         ) : null}
 
@@ -205,11 +274,20 @@ export function BulkGenerateForm({
             variant="outline"
             className="sm:flex-1"
             disabled={isPending || isPreviewing || !canRun}
-            onClick={() => void form.handleSubmit((values) => onPreview({ ...values, dryRun: true }))()}
+            onClick={() =>
+              void form.handleSubmit((values) =>
+                onPreview({ ...values, dryRun: true })
+              )()
+            }
           >
             {isPreviewing ? copy.previewing : copy.preview}
           </Button>
-          <SubmitButton className="sm:flex-1" loading={isPending} label={copy.submitLabel} loadingLabel={copy.submittingLabel} />
+          <SubmitButton
+            className="sm:flex-1"
+            loading={isPending}
+            label={copy.submitLabel}
+            loadingLabel={copy.submittingLabel}
+          />
         </div>
       </form>
     </FormShell>

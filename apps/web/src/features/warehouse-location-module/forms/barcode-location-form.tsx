@@ -23,18 +23,46 @@ type BarcodeLocationFormProps = {
 const baseResolver = zodResolver(ChangeWarehouseLocationBarcodeSchema)
 
 // UI + validation only. No i18n, API, auth or navigation knowledge.
-export function BarcodeLocationForm({ copy, currentBarcode, onSubmit, isPending, errorMessage }: BarcodeLocationFormProps) {
+export function BarcodeLocationForm({
+  copy,
+  currentBarcode,
+  onSubmit,
+  isPending,
+  errorMessage,
+}: BarcodeLocationFormProps) {
   const form = useForm<BarcodeLocationFormValues>({
     // An empty field asks the server to generate a new barcode.
-    resolver: (values, context, options) => baseResolver(mapBlanks(values, ["barcode"], undefined), context, options),
+    resolver: (values, context, options) =>
+      baseResolver(mapBlanks(values, ["barcode"], undefined), context, options),
     defaultValues: { barcode: currentBarcode ?? "" },
   })
 
   return (
-    <FormShell title={copy.title} description={copy.description} errorMessage={errorMessage}>
-      <form onSubmit={form.handleSubmit((values) => onSubmit(values))} noValidate className="space-y-6">
-        <InputField control={form.control} name="barcode" copy={copy.barcode} type="text" autoComplete="off" autoFocus disabled={isPending} />
-        <SubmitButton className="w-full" loading={isPending} label={copy.submitLabel} loadingLabel={copy.submittingLabel} />
+    <FormShell
+      title={copy.title}
+      description={copy.description}
+      errorMessage={errorMessage}
+    >
+      <form
+        onSubmit={form.handleSubmit((values) => onSubmit(values))}
+        noValidate
+        className="space-y-6"
+      >
+        <InputField
+          control={form.control}
+          name="barcode"
+          copy={copy.barcode}
+          type="text"
+          autoComplete="off"
+          autoFocus
+          disabled={isPending}
+        />
+        <SubmitButton
+          className="w-full"
+          loading={isPending}
+          label={copy.submitLabel}
+          loadingLabel={copy.submittingLabel}
+        />
       </form>
     </FormShell>
   )

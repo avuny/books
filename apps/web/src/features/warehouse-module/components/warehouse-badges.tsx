@@ -17,13 +17,23 @@ export interface WarehouseBadgesProps {
   showType?: boolean
 }
 
-export function WarehouseBadges({ warehouse, copy, showType = false }: WarehouseBadgesProps) {
+export function WarehouseBadges({
+  warehouse,
+  copy,
+  showType = false,
+}: WarehouseBadgesProps) {
   return (
     <div className="flex flex-wrap items-center gap-1.5">
       {showType ? <Badge variant="outline">{copy.type}</Badge> : null}
-      {warehouse.isDefault ? <Badge variant="secondary">{copy.default}</Badge> : null}
-      {warehouse.isSystem ? <Badge variant="outline">{copy.system}</Badge> : null}
-      {!warehouse.isActive ? <Badge variant="outline">{copy.inactive}</Badge> : null}
+      {warehouse.isDefault ? (
+        <Badge variant="secondary">{copy.default}</Badge>
+      ) : null}
+      {warehouse.isSystem ? (
+        <Badge variant="outline">{copy.system}</Badge>
+      ) : null}
+      {!warehouse.isActive ? (
+        <Badge variant="outline">{copy.inactive}</Badge>
+      ) : null}
     </div>
   )
 }
