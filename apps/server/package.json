@@ -29,6 +29,7 @@
     "routes:generate": "tsx ./scripts/generate-routes.ts",
     "routes:watch": "tsx ./scripts/generate-routes.ts --watch",
     "seed:sidebar": "tsx src/api/modules/sidebar/sidebar.seed.ts",
+    "seed:reasons": "tsx src/api/modules/inventory-adjustment/inventory-adjustment.seed.ts",
     "seed": "tsx src/api/seed.ts"
   },
   "dependencies": {
