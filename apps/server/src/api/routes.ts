@@ -15,6 +15,7 @@ import { cors } from "hono/cors"
 import { accountingRoutes } from "./modules/accounting/index.js"
 import { adminRoutes } from "./modules/admin/index.js"
 import { authRoutes } from "./modules/auth/index.js"
+import { batchRoutes } from "./modules/batch/index.js"
 import { geoRoutes } from "./modules/geo/index.js"
 import { inventoryAdjustmentRoutes } from "./modules/inventory-adjustment/index.js"
 import { itemRoutes } from "./modules/item/index.js"
@@ -92,6 +93,7 @@ app.route("/", healthRoute)
 app.route("/accounting", accountingRoutes)
 app.route("/admin", adminRoutes)
 app.route("/auth", authRoutes)
+app.route("/batch", batchRoutes)
 app.route("/geo", geoRoutes)
 app.route("/inventoryAdjustment", inventoryAdjustmentRoutes)
 app.route("/item", itemRoutes)
