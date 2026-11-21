@@ -17,6 +17,10 @@ import {
 import { parseApiError } from "@workspace/ui/lib/api-error"
 
 import { unitLabel } from "../../unit-module"
+import {
+  WarehouseLocationFilter,
+  type WarehouseLocationFilterValue,
+} from "../../warehouse-module"
 import { ItemButton, ItemDialog } from "../forms"
 import {
   useDeleteItemMutation,
@@ -41,6 +45,11 @@ export function ItemList({ orgId, onViewItem }: ItemListProps) {
 
   const [status, setStatus] = useState<ItemStatus>("all")
   const [search, setSearch] = useState("")
+  const [warehouseFilter, setWarehouseFilter] =
+    useState<WarehouseLocationFilterValue>({
+      warehouseIds: [],
+      locationIds: [],
+    })
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
     pageSize: 20,
@@ -59,6 +68,8 @@ export function ItemList({ orgId, onViewItem }: ItemListProps) {
     pageSize: pagination.pageSize,
     status,
     search,
+    warehouseId: warehouseFilter.warehouseIds[0],
+    locationId: warehouseFilter.locationIds[0],
   })
   const abilities = useItemAbilities(orgId)
   const deleteMutation = useDeleteItemMutation(orgId)
@@ -119,6 +130,7 @@ export function ItemList({ orgId, onViewItem }: ItemListProps) {
           baseUnit: t("table.baseUnit"),
           tracking: t("table.tracking"),
           status: t("table.status"),
+          availableStock: t("table.availableStock", "Available stock"),
           actions: t("table.actions"),
           activeLabel: t("type.active"),
           inactiveLabel: t("type.inactive"),
@@ -196,6 +208,16 @@ export function ItemList({ orgId, onViewItem }: ItemListProps) {
             }}
             placeholder={t("list.search.placeholder")}
             clearLabel={t("list.search.clear")}
+          />
+        }
+        filter={
+          <WarehouseLocationFilter
+            orgId={orgId}
+            value={warehouseFilter}
+            onChange={(next) => {
+              setWarehouseFilter(next)
+              resetPage()
+            }}
           />
         }
         actions={abilities.canCreate ? <ItemButton orgId={orgId} /> : null}

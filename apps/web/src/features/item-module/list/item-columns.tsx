@@ -14,6 +14,7 @@ export type ItemColumnsCopy = {
   baseUnit: string
   tracking: string
   status: string
+  availableStock: string
   actions: string
   activeLabel: string
   inactiveLabel: string
@@ -77,6 +78,23 @@ export function createItemColumns({
           batchLabel={copy.batchLabel}
         />
       ),
+    },
+    {
+      id: "availableStock",
+      header: copy.availableStock,
+      enableSorting: false,
+      cell: ({ row }) => {
+        const item = row.original
+        if (!item.isInventoryTracked) {
+          return <span className="text-muted-foreground">—</span>
+        }
+        const qty = item.availableQuantity ?? "0"
+        return (
+          <span className="font-mono text-sm font-medium text-foreground tabular-nums">
+            {qty} {item.baseUnit.symbol}
+          </span>
+        )
+      },
     },
     {
       id: "status",

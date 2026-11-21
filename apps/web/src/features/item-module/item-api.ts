@@ -52,11 +52,13 @@ export type ItemListParams = {
   pageSize: number
   status: ItemStatus
   search: string
+  warehouseId?: string
+  locationId?: string
 }
 
 export function useItemList(
   orgId: string,
-  { page, pageSize, status, search }: ItemListParams
+  { page, pageSize, status, search, warehouseId, locationId }: ItemListParams
 ) {
   const query = useListItems(
     orgId,
@@ -65,6 +67,8 @@ export function useItemList(
       pageSize,
       isActive: statusToIsActive(status),
       search: search || undefined,
+      warehouseId: warehouseId || undefined,
+      locationId: locationId || undefined,
     },
     { query: { placeholderData: keepPreviousData } }
   )
