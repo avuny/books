@@ -36,6 +36,7 @@ export const inventoryItems = pgTable(
         locationId: uuid("location_id").notNull(),
         onHandQty: quantity("on_hand_qty").notNull().default("0"),
         reservedQty: quantity("reserved_qty").notNull().default("0"),
+        onOrderQty: quantity("on_order_qty").notNull().default("0"),
         ...timestamps(),
     },
     (t) => [
@@ -61,6 +62,7 @@ export const inventoryItems = pgTable(
             foreignColumns: [warehouses.orgId, warehouses.id],
         }).onDelete("restrict"),
         check("ck_inventory_item_reserved_non_negative", sql`${t.reservedQty} >= 0`),
+        check("ck_inventory_item_on_order_non_negative", sql`${t.onOrderQty} >= 0`),
         index("ix_inventory_item_org_location").on(t.orgId, t.locationId),
         index("ix_inventory_item_org_warehouse_item").on(t.orgId, t.warehouseId, t.itemId),
         index("ix_inventory_item_org_item").on(t.orgId, t.itemId),
@@ -94,6 +96,7 @@ export const inventoryItemBatches = pgTable(
         batchId: uuid("batch_id").notNull(),
         onHandQty: quantity("on_hand_qty").notNull().default("0"),
         reservedQty: quantity("reserved_qty").notNull().default("0"),
+        onOrderQty: quantity("on_order_qty").notNull().default("0"),
         ...timestamps(),
     },
     (t) => [
@@ -123,6 +126,7 @@ export const inventoryItemBatches = pgTable(
             foreignColumns: [batches.orgId, batches.itemId, batches.id],
         }).onDelete("restrict"),
         check("ck_inventory_item_batch_reserved_non_negative", sql`${t.reservedQty} >= 0`),
+        check("ck_inventory_item_batch_on_order_non_negative", sql`${t.onOrderQty} >= 0`),
         index("ix_inventory_item_batch_org_batch").on(t.orgId, t.batchId),
         index("ix_inventory_item_batch_inventory_item").on(t.orgId, t.inventoryItemId),
         index("ix_inventory_item_batch_org_item").on(t.orgId, t.itemId),
