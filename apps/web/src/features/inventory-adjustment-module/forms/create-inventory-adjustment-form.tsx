@@ -44,6 +44,9 @@ type CreateInventoryAdjustmentFormProps = {
   itemSource: AsyncOptionsSource
   itemComboboxCopy: AsyncComboboxCopy
   unitOptionsMap?: Record<string, OptionItem[]> // itemId -> unit options
+  batchOptionsMap?: Record<string, OptionItem[]> // itemId -> batch options
+  itemBatchTrackedMap?: Record<string, boolean> // itemId -> isBatchTracked
+  onCreateBatch?: (itemId: string, batchNumber: string) => Promise<string | null>
   onWarehouseChange?: (warehouseId: string) => void
   onItemChange?: (index: number, itemId: string) => void
   onSubmit: (values: CreateInventoryAdjustmentFormValues) => void
@@ -60,6 +63,9 @@ export function CreateInventoryAdjustmentForm({
   itemSource,
   itemComboboxCopy,
   unitOptionsMap = {},
+  batchOptionsMap = {},
+  itemBatchTrackedMap = {},
+  onCreateBatch,
   onWarehouseChange,
   onItemChange,
   onSubmit,
@@ -252,7 +258,10 @@ export function CreateInventoryAdjustmentForm({
           }}
           renderFields={({ index, disabled, line }) => {
             const lineData = line as any
-            const itemUnits = lineData?.itemId ? unitOptionsMap[lineData.itemId] ?? [] : []
+            const itemId: string = lineData?.itemId ?? ""
+            const itemUnits = itemId ? unitOptionsMap[itemId] ?? [] : []
+            const isBatchTracked = itemId ? (itemBatchTrackedMap[itemId] ?? false) : false
+            const batchOptions = itemId ? (batchOptionsMap[itemId] ?? []) : []
 
             return (
               <>
@@ -267,7 +276,7 @@ export function CreateInventoryAdjustmentForm({
                   />
                 </div>
 
-                {/* Row 2: Unit, Counted Quantity, Notes */}
+                {/* Row 2: Unit, Batch (conditional), Counted Quantity, Notes */}
                 <div className="sm:col-span-3">
                   <SelectField
                     control={form.control}
@@ -286,6 +295,18 @@ export function CreateInventoryAdjustmentForm({
                     disabled={disabled}
                   />
                 </div>
+
+                {isBatchTracked && (
+                  <div className="sm:col-span-3">
+                    <SelectField
+                      control={form.control}
+                      name={`lines.${index}.batchId` as const}
+                      copy={copy.fields.batch}
+                      options={batchOptions}
+                      disabled={disabled}
+                    />
+                  </div>
+                )}
 
                 <div className="sm:col-span-3">
                   <InputField
