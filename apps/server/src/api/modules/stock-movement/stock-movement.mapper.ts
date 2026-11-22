@@ -43,7 +43,10 @@ export function toStockMovementDto(
 }
 
 export function toHistoryItemDto(row: HistoryRow): StockMovementLineHistoryItem {
-  return { ...row, postedAt: row.postedAt.toISOString() }
+  return {
+    ...row,
+    postedAt: row.postedAt instanceof Date ? row.postedAt.toISOString() : new Date(row.postedAt).toISOString(),
+  }
 }
 
 export function toStockBalanceDto(row: StockBalanceRow): StockBalanceDto {

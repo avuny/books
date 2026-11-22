@@ -1,72 +1,72 @@
-# Stock Movement Module — Specification
-> Update this file whenever a requirement changes: new error code, rule or behavior.
-> Internal module: no HTTP routes yet. Other modules call the service.
+# Stock Movement Module — Backend Implementation Specification
 
-## 1. Purpose
-The stock ledger of an organization. Every change of quantity on hand is a posted **movement**: one or
-more **lines**, each moving a quantity of an item from one location to another. Current quantities are
-kept in **balances**, updated in the same transaction. Purchasing, sales, transfers, returns,
-assembly, adjustments and opening stock all post here; the warehouse and item modules read from here.
+> Canonical Contract Specification: `../../../../../packages/contracts/src/stock-movement/SPEC.md`  
+> Location: `apps/server/src/api/modules/stock-movement/SPEC.md`  
+> Status: Implemented backend stock ledger, balance calculations, and history endpoints.
 
-## 2. Domain Model
-| Table | What it is |
-|---|---|
-| `stock_movements` | Header: type, posted_at, source document (type, id, ref), note, reversal_of_id, created_by |
-| `stock_movement_lines` | One item from `from_location_id` to `to_location_id`, quantity > 0 in the item's base unit |
-| `inventory_items` | Aggregate on-hand and reserved quantity per (location, item), with the location's warehouse |
-| `inventory_item_batches` | Batch-level on-hand and reserved quantity per (inventory_item, batch) |
+---
 
-Lines carry an optional `batch_id`: set exactly when the item is batch tracked (see the batch module).
-Core invariant: `InventoryItem.onHandQty = SUM(InventoryItemBatch.onHandQty)` for every batch-tracked item/location, maintained transactionally. Non-batch-tracked items exist only in `inventory_items`.
+## 1. Implementation Overview
+The stock-movement module implements the inventory ledger and stock on-hand balances for organizations. It handles:
+1. Transactional ledger posting of movements (`postMovement`).
+2. Atomic reversal of posted movements (`reverseMovement`).
+3. Maintenance of `inventory_items` and `inventory_item_batches`.
+4. History listing with post-movement running balances via SQL window functions (`listLines`).
+5. On-hand balance queries (`listBalances`, `getItemStock`, `getOnHand`, `getItemBatchStock`).
 
-Both sides of a line are always set. An end outside the business is a **system location** (role
-`supplier`, `customer`, `adjustment`, `production`) in the VIRTUAL system warehouse; `transit` is the
-IN-TRANSIT location of the TRANSIT warehouse and does hold stock. System locations are seeded with the
-organization (see warehouse.defaults.ts).
+Internal files:
+- `stock-movement.service.ts`: Domain service with transactional validations and posting.
+- `stock-movement.repository.ts`: Drizzle ORM operations, row-level locking, and CTE window queries.
+- `stock-movement.mapper.ts`: DTO mappers.
+- `hono-routes/`:
+  - `list-stock-movements.route.ts` (`listStockMovements`)
+  - `list-stock-balances.route.ts` (`listStockBalances`)
+  - `get-item-stock.route.ts` (`getItemStock`)
 
-| Type | From | To |
-|---|---|---|
-| opening | adjustment | real (receive) |
-| purchase | supplier | real (receive) |
-| purchase_return | real (issue) | supplier |
-| sale | real (issue) | customer |
-| sale_return | customer | real (receive) |
-| transfer | real (move_out) | real (move_in); between warehouses via transit |
-| adjustment | real (adjust) or adjustment | adjustment or real (adjust); exactly one side given |
-| assembly_consume | real (issue) | production |
-| assembly_produce | production | real (receive) |
+---
 
-## 3. Business Rules & Policies
-1. The caller supplies only real locations; the type fills the counterparty side (`STOCK_MOVEMENT_INVALID_SIDES` if a system side is supplied or a real side is missing, `STOCK_MOVEMENT_SYSTEM_LOCATION_MISSING` if the system location was not seeded).
-2. From and to differ (`STOCK_MOVEMENT_SAME_LOCATION`). Quantity is a positive decimal string (`STOCK_MOVEMENT_INVALID_QUANTITY`). 1 to 1000 lines (`STOCK_MOVEMENT_NO_LINES`, `STOCK_MOVEMENT_TOO_MANY_LINES`).
-3. Every real location must pass `assertPostable` with the intent of its side; its error codes are returned unchanged.
-4. Items must exist, be active and track stock (`..._ITEM_NOT_FOUND`, `..._ITEM_INACTIVE`, `..._ITEM_NOT_STOCKED`). Reversals skip the active and tracking checks.
-4b. Batches: a batch-tracked item needs a batch on every line and any other item must have none (`STOCK_MOVEMENT_BATCH_REQUIRED`, `STOCK_MOVEMENT_BATCH_NOT_TRACKED`); the batch must exist and belong to the item (`STOCK_MOVEMENT_BATCH_NOT_FOUND`); for forward postings its status must allow the intent of each real side (`batchAllowsIntent`: issue needs available, receive needs available or quarantined; moves and adjustments always work) (`STOCK_MOVEMENT_BATCH_NOT_AVAILABLE`). Reversals skip these checks.
-5. Stock cannot leave a location (and batch) (`STOCK_MOVEMENT_INSUFFICIENT_STOCK`), checked under row locks. Only items that allow negative stock may go negative, and never in transit.
-6. A source document (`source_type` + `source_id`) can be posted once (`STOCK_MOVEMENT_SOURCE_ALREADY_POSTED`).
-7. A movement can be reversed once (`STOCK_MOVEMENT_ALREADY_REVERSED`); a reversal cannot be reversed (`STOCK_MOVEMENT_CANNOT_REVERSE_REVERSAL`). A reversal swaps from and to on every line, keeps type and source, uses the `adjust` intent, and must still satisfy rule 5.
-8. Append only: the repository has no update or delete. Corrections are reversals.
-9. Counterparty locations get no balance rows.
-10. Posting needs no permission check and writes no activity log row: the calling module authorizes its operation and the ledger is the audit trail. Callers pass their transaction (`tx`) so the document and its stock commit together.
-11. All balance rows a posting touches (both sides) are locked up front in key order; this also keeps two opposite transfers from deadlocking.
-12. A failure never leaves partial rows: all checks run before the first write (header), and the whole posting is one transaction.
+## 2. Endpoint Implementation
 
-## 4. Error Codes
-Own codes are in `StockMovementErrorCode` (contracts, with en/ar messages); location failures use `WarehouseLocationErrorCode`. HTTP mapping (`*.errors.ts`, `*.error-map.ts`) is added together with the routes.
+### 2.1 `listStockMovements`
+- **Operation ID**: `listStockMovements`
+- **Route**: `GET /organizations/{orgId}/stock-movements`
+- **Handler**: `hono-routes/list-stock-movements.route.ts` $\rightarrow$ `service.listLines(orgId, query)` $\rightarrow$ `repo.listLines(orgId, query)`
+- **Auth & Permission**: `requireAuth`, `requirePermission("read:stock-movement")`
+- **Input Validation**: `StockMovementLineHistoryQuerySchema`
+- **Output Schema**: `StockMovementLineHistoryResponseSchema`
 
-## 5. Queries used by other modules
-- Warehouses: `warehouseUsage`, `locationUsage` (stock and history; open documents come from other modules), `listBalances` (stock in a warehouse or location), `listLines` (history).
-- Items: `getOnHand` (many items at once, optionally one warehouse), `getItemBatchStock` (per batch), `getItemStock` (per warehouse, on hand and in transit), `itemUsage` (holds stock or was moved), `listLines` (stock card).
-
-## 6. Not here yet
-Valuation and costing (cost layers point at `stock_movement_lines.(org_id, id)`), reservations, serial numbers, expiry-based picking, units other than the base unit, HTTP routes, permission keys and audit events (register the module in `modules/registry.ts` when routes arrive).
-
-## 7. File Structure
+#### Running Balance Calculation:
+Running balance represents the stock on hand immediately after each movement for each physical location. It is computed in `listLines` using a SQL Common Table Expression (CTE) with a window function:
+```sql
+SUM(
+  CASE
+    WHEN to_wh.type = 'physical' THEN sml.quantity::numeric
+    ELSE -sml.quantity::numeric
+  END
+) OVER (
+  PARTITION BY sml.item_id, CASE WHEN to_wh.type = 'physical' THEN to_loc.id ELSE from_loc.id END
+  ORDER BY sm.posted_at ASC, sm.id ASC, sml.line_no ASC
+) AS running_balance
 ```
-stock-movement/
-├── SPEC.md  index.ts  deps.ts  testing.ts
-├── stock-movement.types.ts  stock-movement.mapper.ts
-├── stock-movement.repository.ts  stock-movement.service.ts
-└── stock-movement.service.spec.ts
-```
-Contracts: `packages/contracts/src/stock-movement/` (constants, errors, rules, schemas, locales). Database: `packages/db/src/schema/inventory/stock-movement.ts`.
+Because the CTE computes the running balance over all chronological movements before outer filtering (e.g. date ranges `from`/`to`, pagination `limit`/`offset`), every returned row preserves its exact historical running balance.
+
+#### Virtual Warehouse Protection:
+- If `to_wh.type === 'physical'`, direction is `IN`, and physical location/warehouse is `to_loc` / `to_wh`.
+- If `from_wh.type === 'physical'`, direction is `OUT`, and physical location/warehouse is `from_loc` / `from_wh`.
+- Virtual warehouses (and system counterparty locations) are never exposed to the client in the physical fields.
+
+---
+
+## 3. Database Responsibilities
+- `stock_movements`: Header table (org_id, type, posted_at, source_type, source_id, source_ref, note, reversal_of_id).
+- `stock_movement_lines`: Lines table (org_id, movement_id, line_no, item_id, batch_id, from_location_id, to_location_id, quantity).
+- `inventory_items`: Aggregated location on-hand and reserved quantities.
+- `inventory_item_batches`: Batch-specific quantities for batch-tracked items.
+
+---
+
+## 4. Backend Acceptance Criteria
+- [x] All stock-affecting operations commit atomically with ledger entries and balance updates.
+- [x] `listLines` computes post-movement running balances chronologically per `(item, physical_location)`.
+- [x] Pagination and date filters do not alter historical running balances.
+- [x] Virtual warehouse names and locations are excluded from client responses.

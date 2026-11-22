@@ -8,8 +8,10 @@ import {
 import {
   inventoryItemBatches,
   inventoryItems,
+  items,
   stockMovementLines,
   stockMovements,
+  units,
   warehouseLocations,
   warehouses,
   type DB,
@@ -45,22 +47,35 @@ export type HistoryRow = {
   movementId: string
   lineNo: number
   type: StockMovement["type"]
-  postedAt: Date
+  postedAt: Date | string
   sourceType: string | null
   sourceId: string | null
   sourceRef: string | null
   isReversal: boolean
   itemId: string
+  itemName?: string | null
+  baseUnitSymbol?: string | null
   batchId: string | null
   fromLocationId: string
   fromLocationCode?: string | null
   fromLocationName?: string | null
+  fromWarehouseId?: string | null
   fromWarehouseName?: string | null
+  fromWarehouseType?: "physical" | "virtual" | null
   toLocationId: string
   toLocationCode?: string | null
   toLocationName?: string | null
+  toWarehouseId?: string | null
   toWarehouseName?: string | null
+  toWarehouseType?: "physical" | "virtual" | null
+  physicalWarehouseId?: string | null
+  physicalWarehouseName?: string | null
+  physicalLocationId?: string | null
+  physicalLocationCode?: string | null
+  physicalLocationName?: string | null
+  direction?: "IN" | "OUT"
   quantity: string
+  runningBalance?: string
 }
 
 export type StockBalanceRow = {
@@ -405,62 +420,62 @@ export function createStockMovementRepository({ db }: { db: DB }) {
         .orderBy(asc(stockMovementLines.lineNo))
     },
 
-    /** Stock card: movement lines in reverse chronological order, optionally narrowed down. */
+    /** Stock card: movement lines in reverse chronological order, optionally narrowed down, with running balances. */
     async listLines(
       orgId: string,
       q: StockMovementLineHistoryQuery
     ): Promise<{ rows: HistoryRow[]; total: number }> {
-      const where = and(
-        eq(stockMovements.orgId, orgId),
-        q.itemId ? eq(stockMovementLines.itemId, q.itemId) : undefined,
-        q.batchId ? eq(stockMovementLines.batchId, q.batchId) : undefined,
-        q.locationId
-          ? or(
-              eq(stockMovementLines.fromLocationId, q.locationId),
-              eq(stockMovementLines.toLocationId, q.locationId)
-            )
-          : undefined,
-        q.warehouseId
-          ? or(
-              inArray(stockMovementLines.fromLocationId, warehouseLocationIds(db, orgId, q.warehouseId)),
-              inArray(stockMovementLines.toLocationId, warehouseLocationIds(db, orgId, q.warehouseId))
-            )
-          : undefined,
-        q.type ? eq(stockMovements.type, q.type) : undefined,
-        q.from ? sql`${stockMovements.postedAt} >= ${q.from}` : undefined,
-        q.to ? sql`${stockMovements.postedAt} <= ${q.to}` : undefined
-      )
       const fromLoc = aliasedTable(warehouseLocations, "from_loc")
       const toLoc = aliasedTable(warehouseLocations, "to_loc")
       const fromWh = aliasedTable(warehouses, "from_wh")
       const toWh = aliasedTable(warehouses, "to_wh")
 
-      const [rows, [totalRow]] = await Promise.all([
+      const baseWhere = and(
+        eq(stockMovements.orgId, orgId),
+        q.itemId ? eq(stockMovementLines.itemId, q.itemId) : undefined
+      )
+
+      const ledgerCte = db.$with("ledger").as(
         db
           .select({
-            lineId: stockMovementLines.id,
-            movementId: stockMovementLines.movementId,
-            lineNo: stockMovementLines.lineNo,
-            type: stockMovements.type,
-            postedAt: stockMovements.postedAt,
-            sourceType: stockMovements.sourceType,
-            sourceId: stockMovements.sourceId,
-            sourceRef: stockMovements.sourceRef,
-            isReversal: sql<boolean>`${stockMovements.reversalOfId} is not null`,
-            itemId: stockMovementLines.itemId,
-            batchId: stockMovementLines.batchId,
-            fromLocationId: stockMovementLines.fromLocationId,
-            fromLocationCode: fromLoc.fullCode,
-            fromLocationName: fromLoc.name,
-            fromWarehouseName: fromWh.name,
-            toLocationId: stockMovementLines.toLocationId,
-            toLocationCode: toLoc.fullCode,
-            toLocationName: toLoc.name,
-            toWarehouseName: toWh.name,
-            quantity: stockMovementLines.quantity,
+            lineId: sql<string>`${stockMovementLines.id}`.as("line_id"),
+            movementId: sql<string>`${stockMovementLines.movementId}`.as("movement_id"),
+            lineNo: sql<number>`${stockMovementLines.lineNo}`.as("line_no"),
+            type: sql<StockMovement["type"]>`${stockMovements.type}`.as("type"),
+            postedAt: sql<Date | string>`${stockMovements.postedAt}`.as("posted_at"),
+            sourceType: sql<string | null>`${stockMovements.sourceType}`.as("source_type"),
+            sourceId: sql<string | null>`${stockMovements.sourceId}`.as("source_id"),
+            sourceRef: sql<string | null>`${stockMovements.sourceRef}`.as("source_ref"),
+            isReversal: sql<boolean>`${stockMovements.reversalOfId} is not null`.as("is_reversal"),
+            itemId: sql<string>`${stockMovementLines.itemId}`.as("item_id"),
+            itemName: sql<string | null>`${items.name}`.as("item_name"),
+            baseUnitSymbol: sql<string | null>`${units.symbol}`.as("base_unit_symbol"),
+            batchId: sql<string | null>`${stockMovementLines.batchId}`.as("batch_id"),
+            fromLocationId: sql<string>`${stockMovementLines.fromLocationId}`.as("from_location_id"),
+            fromLocationCode: sql<string | null>`${fromLoc.fullCode}`.as("from_location_code"),
+            fromLocationName: sql<string | null>`${fromLoc.name}`.as("from_location_name"),
+            fromWarehouseId: sql<string | null>`${fromWh.id}`.as("from_warehouse_id"),
+            fromWarehouseName: sql<string | null>`${fromWh.name}`.as("from_warehouse_name"),
+            fromWarehouseType: sql<"physical" | "virtual" | null>`${fromWh.type}`.as("from_warehouse_type"),
+            toLocationId: sql<string>`${stockMovementLines.toLocationId}`.as("to_location_id"),
+            toLocationCode: sql<string | null>`${toLoc.fullCode}`.as("to_location_code"),
+            toLocationName: sql<string | null>`${toLoc.name}`.as("to_location_name"),
+            toWarehouseId: sql<string | null>`${toWh.id}`.as("to_warehouse_id"),
+            toWarehouseName: sql<string | null>`${toWh.name}`.as("to_warehouse_name"),
+            toWarehouseType: sql<"physical" | "virtual" | null>`${toWh.type}`.as("to_warehouse_type"),
+            physicalLocationId: sql<string>`case when ${toWh.type} = 'physical' then ${toLoc.id} else ${fromLoc.id} end`.as("physical_location_id"),
+            physicalLocationCode: sql<string | null>`case when ${toWh.type} = 'physical' then ${toLoc.fullCode} else ${fromLoc.fullCode} end`.as("physical_location_code"),
+            physicalLocationName: sql<string | null>`case when ${toWh.type} = 'physical' then ${toLoc.name} else ${fromLoc.name} end`.as("physical_location_name"),
+            physicalWarehouseId: sql<string | null>`case when ${toWh.type} = 'physical' then ${toWh.id} else ${fromWh.id} end`.as("physical_warehouse_id"),
+            physicalWarehouseName: sql<string | null>`case when ${toWh.type} = 'physical' then ${toWh.name} else ${fromWh.name} end`.as("physical_warehouse_name"),
+            direction: sql<"IN" | "OUT">`case when ${toWh.type} = 'physical' then 'IN' else 'OUT' end`.as("direction"),
+            quantity: sql<string>`${stockMovementLines.quantity}`.as("quantity"),
+            runningBalance: sql<string>`(sum(case when ${toWh.type} = 'physical' then ${stockMovementLines.quantity}::numeric else -${stockMovementLines.quantity}::numeric end) over (partition by ${stockMovementLines.itemId}, case when ${toWh.type} = 'physical' then ${toLoc.id} else ${fromLoc.id} end order by ${stockMovements.postedAt} asc, ${stockMovements.id} asc, ${stockMovementLines.lineNo} asc))::text`.as("running_balance"),
           })
           .from(stockMovementLines)
           .innerJoin(stockMovements, linesJoin)
+          .leftJoin(items, and(eq(items.orgId, stockMovementLines.orgId), eq(items.id, stockMovementLines.itemId)))
+          .leftJoin(units, eq(units.id, items.baseUnitId))
           .leftJoin(
             fromLoc,
             and(eq(fromLoc.orgId, stockMovementLines.orgId), eq(fromLoc.id, stockMovementLines.fromLocationId))
@@ -471,21 +486,50 @@ export function createStockMovementRepository({ db }: { db: DB }) {
             and(eq(toLoc.orgId, stockMovementLines.orgId), eq(toLoc.id, stockMovementLines.toLocationId))
           )
           .leftJoin(toWh, and(eq(toWh.orgId, toLoc.orgId), eq(toWh.id, toLoc.warehouseId)))
-          .where(where)
+          .where(baseWhere)
+      )
+
+      const outerWhere = and(
+        q.batchId ? eq(ledgerCte.batchId, q.batchId) : undefined,
+        q.locationId
+          ? or(
+              eq(ledgerCte.physicalLocationId, q.locationId),
+              eq(ledgerCte.fromLocationId, q.locationId),
+              eq(ledgerCte.toLocationId, q.locationId)
+            )
+          : undefined,
+        q.warehouseId
+          ? or(
+              eq(ledgerCte.physicalWarehouseId, q.warehouseId),
+              eq(ledgerCte.fromWarehouseId, q.warehouseId),
+              eq(ledgerCte.toWarehouseId, q.warehouseId)
+            )
+          : undefined,
+        q.type ? eq(ledgerCte.type, q.type) : undefined,
+        q.from ? sql`${ledgerCte.postedAt} >= ${q.from}` : undefined,
+        q.to ? sql`${ledgerCte.postedAt} <= ${q.to}` : undefined
+      )
+
+      const [rows, [totalRow]] = await Promise.all([
+        db
+          .with(ledgerCte)
+          .select()
+          .from(ledgerCte)
+          .where(outerWhere)
           .orderBy(
-            desc(stockMovements.postedAt),
-            desc(stockMovements.id),
-            desc(stockMovementLines.lineNo)
+            desc(ledgerCte.postedAt),
+            desc(ledgerCte.movementId),
+            desc(ledgerCte.lineNo)
           )
           .limit(q.pageSize)
           .offset((q.page - 1) * q.pageSize),
         db
+          .with(ledgerCte)
           .select({ total: count() })
-          .from(stockMovementLines)
-          .innerJoin(stockMovements, linesJoin)
-          .where(where),
+          .from(ledgerCte)
+          .where(outerWhere),
       ])
-      return { rows, total: totalRow?.total ?? 0 }
+      return { rows: rows as HistoryRow[], total: totalRow?.total ?? 0 }
     },
 
     /** Balance rows (stock on hand per location and item/batch), real warehouses only unless asked. */
