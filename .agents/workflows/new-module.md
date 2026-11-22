@@ -35,6 +35,10 @@ Catalog entry, `SYSTEM_ROLES` update, `labels.resources.project` + actions in bo
 `_shared.ts`, one route file per endpoint, `hono-routes/index.ts`, mount in app router. Regenerate the client.
 **Gate:** OpenAPI shows each `operationId`; typecheck; web `@/api` exports `useListProjects`, `useCreateProject`, …
 
+## Phase 4b — Route integration tests → `skills/api-integration-tests`
+One `<module>.routes.int.test.ts` that drives the real app against the test database through real user flows (create → read → update → delete, 401, 403, tenant isolation, every DB-decided conflict, 422).
+**Gate:** `pnpm --filter @avuny/books-server test:int` green; the file covers every route and every `ErrorCode` the module's routes can return.
+
 ## Phase 5 — Web feature → `skills/web-feature-module`
 types → `project-api.ts` (+test) → lib → components → forms → list → details → barrels.
 **Gate:** `@/api` imported only in `project-api.ts`; no `useTranslation` in pure views; vitest passes.
@@ -49,6 +53,8 @@ Add the web string map (`list.*`, `create.*`, …) for **en and ar**.
 
 ## Phase 8 — Verify
 - `typecheck`, `lint`, `test` green ⚠ commands in `AGENTS.md`.
+- `pnpm --filter @avuny/books-server test:int` green (needs the test database: `docker compose -f apps/server/docker-compose.test.yml up -d --wait`).
+- New screen or flow in the web app? Add or extend a spec under `apps/web/e2e/specs` (`skills/web-e2e-tests`) and run `pnpm --filter @avuny/books-web e2e`.
 - Manual: create, edit, delete (with and without the blocking rule), search, tabs, pagination, empty state, a forbidden user (buttons hidden **and** server returns 403), Arabic/RTL.
 - Definition of done in `AGENTS.md` §6 fully ticked.
 
