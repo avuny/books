@@ -1,5 +1,5 @@
 import { drizzle } from "drizzle-orm/neon-http"
-import { neon } from "@neondatabase/serverless"
+import { neon, neonConfig } from "@neondatabase/serverless"
 import type { PgDatabase, PgTransaction } from "drizzle-orm/pg-core"
 import * as schema from "./schema/index.js"
 
@@ -19,7 +19,34 @@ export type Database = PgDatabase<any, typeof schema>
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type Tx = PgTransaction<any, typeof schema, any>
 
+/**
+ * Host of the local Neon HTTP proxy (apps/server/docker-compose.test.yml). `*.localtest.me`
+ * resolves to 127.0.0.1 through public DNS, so a URL with this host reaches a plain local
+ * Postgres through the same driver production uses. Any other host is left untouched.
+ */
+export const LOCAL_NEON_PROXY_HOST = "db.localtest.me"
+const LOCAL_NEON_PROXY_PORT = 4444
+
+const isLocalNeonProxy = (connectionString: string): boolean => {
+  try {
+    return new URL(connectionString).hostname === LOCAL_NEON_PROXY_HOST
+  } catch {
+    return false
+  }
+}
+
+const configureLocalNeonProxy = () => {
+  neonConfig.fetchEndpoint = (host) =>
+    host === LOCAL_NEON_PROXY_HOST
+      ? `http://${host}:${LOCAL_NEON_PROXY_PORT}/sql`
+      : `https://${host}/sql`
+  neonConfig.useSecureWebSocket = false
+  neonConfig.pipelineTLS = false
+  neonConfig.pipelineConnect = false
+}
+
 export const createDbClient = (connectionString: string): Database => {
+  if (isLocalNeonProxy(connectionString)) configureLocalNeonProxy()
   const sql = neon(connectionString)
   const db = drizzle(sql, { schema }) as unknown as Database
 
