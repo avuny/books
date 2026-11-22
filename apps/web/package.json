@@ -12,6 +12,9 @@
     "typecheck": "tsc -b --noEmit",
     "preview": "vite preview",
     "test": "vitest run",
+    "e2e": "playwright test",
+    "e2e:ui": "playwright test --ui",
+    "e2e:report": "playwright show-report",
     "api:generate": "orval --config orval.config.ts",
     "sync:i18n": "node --experimental-strip-types scripts/sync-i18n.ts",
     "sync:i18n:check": "node --experimental-strip-types scripts/sync-i18n.ts --check"
@@ -44,6 +47,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^10",
+    "@playwright/test": "^1.65.1",
     "@tailwindcss/vite": "^4",
     "@tanstack/router-plugin": "^1.168.47",
     "@types/js-cookie": "^3.0.6",
