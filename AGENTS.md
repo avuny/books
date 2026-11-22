@@ -51,6 +51,12 @@ pnpm typecheck        # Run type checking across the entire monorepo
 pnpm lint             # Run ESLint across all projects
 pnpm format           # Format with Prettier
 
+# Tests (see docs/TESTING.md; the integration/e2e suites need the test database)
+docker compose -f apps/server/docker-compose.test.yml up -d --wait
+pnpm --filter @avuny/books-server test        # unit tests (no database)
+pnpm --filter @avuny/books-server test:int    # route integration tests (real app + real test DB)
+pnpm --filter @avuny/books-web e2e            # browser e2e (Playwright)
+
 # API & Schema Generation Pipeline
 pnpm intl:generate    # Re-generate server i18next registration & typing from locales/
 pnpm openapi:generate # Generate OpenAPI spec from backend route definitions
@@ -116,6 +122,7 @@ Detailed architectural standards and design patterns are documented in `/docs`. 
 | [docs/FORMS.md](file:///Users/khaled/Dev/projects-2026-october/books/docs/FORMS.md)       | Building or modifying web forms     | Enforces 3-layer architecture: Form (`<name>-form.tsx`) → Container (`<name>.tsx`) → Route (`routes/**`). Use `@workspace/ui/blocks/form` primitives and contract schemas.       |
 | [docs/COPY.md](file:///Users/khaled/Dev/projects-2026-october/books/docs/COPY.md)         | Adding or changing user-facing text | **Zero hardcoded strings**. Text lives in `@avuny/contracts/<module>/locales/{en,ar}.json`. Containers read keys via `t()` and pass a `copy` object down into forms.             |
 | [docs/FRONTEND.md](file:///Users/khaled/Dev/projects-2026-october/books/docs/FRONTEND.md) | Writing UI components or styling    | Small, testable components with dependency injection. Strict use of semantic theme tokens (`bg-background`, `text-foreground`, `border-border`) supporting light and dark modes. |
+| [docs/TESTING.md](docs/TESTING.md) | Writing or running tests | Unit vs route-integration vs web-e2e: what each layer is for, the dedicated test database (same Neon HTTP driver as production, dropped and rebuilt per run), per-test isolation by fresh tenants, captured OTPs, CI. |
 | [docs/GIT.md](file:///Users/khaled/Dev/projects-2026-october/books/docs/GIT.md)           | Creating commit messages            | Conventional Commits rules, subject line conventions, and body bullet formatting.                                                                                                |
 # AGENTS.md — how to build modules in this monorepo
 
@@ -157,6 +164,8 @@ Never define a request/response shape twice. If the web needs a type, it comes f
 | Add a page, layout, redirect, search param, public page | `.agents/skills/web-routes/SKILL.md` |
 | Add or change any translated string (contracts or web) | `.agents/skills/locales/SKILL.md` |
 | Add a permission, resource, system role, hide a button by permission | `.agents/skills/rbac-permissions/SKILL.md` |
+| Write or extend integration tests for a module's HTTP routes (real DB, real user flows) | `.agents/skills/api-integration-tests/SKILL.md` |
+| Write or extend browser end-to-end tests for the web app | `.agents/skills/web-e2e-tests/SKILL.md` |
 | Build a whole new module end to end | `.agents/workflows/new-module.md` (it links the skills in order) |
 
 Rules (read the ones touching your task, they are short): `.agents/rules/*.md`.
@@ -196,6 +205,7 @@ Rules (read the ones touching your task, they are short): `.agents/rules/*.md`.
 - [ ] Web: views are pure; containers build `copy`; list/forms/details export through folder `index.ts` barrels.
 - [ ] Route files created under the right path; `createFileRoute("<path>")` string matches the file location.
 - [ ] Tests for pure logic (`lib/*.test.ts`) and normalizers (`<name>-api.test.ts`).
+- [ ] Backend module: `<module>.routes.int.test.ts` covers every route and every reachable error code (`skills/api-integration-tests`). New web journey: an e2e spec (`skills/web-e2e-tests`).
 - [ ] Typecheck, lint, tests pass. Checked in LTR **and** RTL (Arabic).
 
 ## 7. When unsure

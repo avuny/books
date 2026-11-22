@@ -46,7 +46,8 @@ apps/server/src/api/modules/<module-name>/
 ├── <module-name>.mapper.ts             # when row-to-DTO mapping is needed
 ├── deps.ts
 ├── testing.ts
-├── <module-name>.service.spec.ts
+├── <module-name>.service.spec.ts          # unit tests: fakes, no database
+├── <module-name>.routes.int.test.ts       # route integration tests: real app + real test database
 ├── hono-routes/
 │   ├── module-routes.types.ts
 │   ├── create-<module-name>.route.ts
@@ -909,6 +910,18 @@ it.each(requiredCalls)("denies %s without permission", async (_name, run) => {
 
 Add tests for each additional domain operation as well. Repository tests should cover SQL-specific behavior and named constraint translation separately from service tests.
 
+### 11.1 Route integration tests (`<module-name>.routes.int.test.ts`)
+
+Service tests prove branches with fakes. Route integration tests prove the **wiring and the real infrastructure**: route → auth → permission → service → repository → Postgres, tenant isolation, database constraints becoming the right error code, status codes and envelopes. Every module has exactly one such file at the module root; follow `.agents/skills/api-integration-tests/SKILL.md` and `docs/TESTING.md`.
+
+Rules:
+
+- They run the real app (`app.request`) against the dedicated test database. No `vi.mock` of services, repositories, permission checks, the database or the clock. Only external providers are substituted, by environment (`MESSAGE_SENDER_MODE=capture`).
+- Arrange through the public API with the `test-support` factories (`createUser`, `createOrganization`, …). Every test builds its own tenant, so tests never share rows and run in parallel. Tests never delete or truncate; the database is rebuilt before the run and emptied after it.
+- Each file covers every route of the module and every error code in the module's `errorsHttpMap` that can be reached over HTTP: 401 without a token; 403/404 for a user outside the organization on every read and write; the create → get → list → options → update → delete lifecycle; aggregate rules (child lines belong to the parent and the organization); unique/foreign-key/state conflicts triggered for real; 422 validation.
+- Assert status, `success`, error `code` (from the `*ErrorCode` constants) and DTO fields, never message text.
+- A repository that lets a known unique/FK violation escape as a 500 is a bug; the integration test for that error code must fail until the repository maps the constraint (§4.3).
+
 ## 12. `index.ts` — public module API
 
 Export only what other modules and API composition need. A typical module entry point:
@@ -1011,7 +1024,7 @@ For a feature that introduces new persisted data, work in dependency order:
 6. **Dependency wiring and exports:** implement `deps.ts`, `index.ts`, route dependency types, and public module exports.
 7. **Routes:** implement OpenAPI routes for the required methods and additional operations; mount the module in the API router composition.
 8. **API translations:** add matching `en.json` and `ar.json` error translations under `apps/server/src/api/intl/locales/<module-name>/` and register the namespace wherever the API translation setup requires it.
-9. **Tests:** add repository tests, service tests, route/OpenAPI tests where established, and coverage for all six authorization paths.
+9. **Tests:** repository tests where SQL-specific behavior matters; service tests (all six authorization paths); `<module-name>.routes.int.test.ts` (route integration, §11.1); route/OpenAPI tests where established.
 10. **Verify:** build, typecheck, lint, and run the relevant tests for contracts, database, and server. Do not treat a successful API typecheck as proof that the contracts package or migration is correct.
 
 ## 15. Final checklist
@@ -1033,5 +1046,7 @@ Before considering a module complete, verify all of the following:
 - [ ] The contracts registry includes the correct resource/actions and optional sidebar metadata.
 - [ ] The module is mounted in the API router and exposes only its intended public API.
 - [ ] Service tests cover denied access for all six mandatory methods, successful paths, errors, aggregate behavior, pagination, options, and audit behavior.
+- [ ] `<module-name>.routes.int.test.ts` exists, hits every route, triggers every reachable error code, and `pnpm --filter @avuny/books-server test:int` passes.
+- [ ] No test deletes, skips or weakens another test to pass; a bug fix starts with a failing regression test.
 - [ ] No `any` is introduced to bypass a typing issue.
 - [ ] Contracts build, database migration checks, server typecheck/lint, and relevant tests pass.
