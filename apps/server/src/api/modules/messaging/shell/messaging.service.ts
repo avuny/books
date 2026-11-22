@@ -1,6 +1,7 @@
 import { logger } from "@avuny/logger"
 import { Resend } from "resend"
 import { config } from "../../../config.js"
+import { CaptureMessageSender } from "./capture-message-sender.js"
 /* -------------------------------------------------------------------------- */
 /*                                  Contracts                                 */
 /* -------------------------------------------------------------------------- */
@@ -319,7 +320,7 @@ let instance: MessageSender | undefined
 
 /**
  * Resolves the message sender.
- * - MESSAGE_SENDER_MODE=console | live (optional)
+ * - MESSAGE_SENDER_MODE=console | live | capture (optional; capture is test-only)
  * - Default: "live" in production, "console" everywhere else unless live credentials exist.
  */
 export function getMessageSender(): MessageSender {
@@ -337,6 +338,16 @@ export function getMessageSender(): MessageSender {
     return (instance = new ConsoleMessageSender())
   }
 
+  if (mode === "capture") {
+    // Test-only sink (see capture-message-sender.ts). Never allow it to swallow real messages.
+    if (process.env.NODE_ENV === "production") {
+      throw new Error(
+        "MESSAGE_SENDER_MODE=capture is test-only and refused in production"
+      )
+    }
+    return (instance = new CaptureMessageSender())
+  }
+
   return (instance = new ChannelMessageSender({
     email: new ResendEmailSender({
       apiKey: config.RESEND_API_KEY,
@@ -350,4 +361,16 @@ export function getMessageSender(): MessageSender {
       defaultLang: config.WHATSAPP_DEFAULT_LANG ?? "en",
     }),
   }))
+}
+
+/**
+ * Test helper: the capture sender, so a test can read the OTP / invitation link the real
+ * flow produced. Throws unless MESSAGE_SENDER_MODE=capture.
+ */
+export function getCaptureOutbox(): CaptureMessageSender {
+  const sender = getMessageSender()
+  if (!(sender instanceof CaptureMessageSender)) {
+    throw new Error("getCaptureOutbox() needs MESSAGE_SENDER_MODE=capture")
+  }
+  return sender
 }
