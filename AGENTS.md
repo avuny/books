@@ -87,6 +87,23 @@ pnpm dlx shadcn@latest add <component-name> -c apps/web
    - When executing multi-step or multi-module refactorings or implementations, AI agents must maintain a `TODO.md` in the working package (e.g. `apps/server/TODO.md`).
    - Group tasks by module into `Todo`, `InProgress`, and `Done` sections with exact dates and timestamps (`YYYY-MM-DD HH:mm`).
    - Always work sequentially: finish one module completely (all files, tests, typecheck) before moving to the next, keeping `TODO.md` continuously synced.
+6. **Stock Movement Conventions & Future Stock-Affecting Modules**:
+   - Every module or transaction that affects inventory quantities must integrate with the centralized Stock Movement ledger (`stock_movements` / `stock_movement_lines`).
+   - **Reusable Component**: All views displaying stock movements (General page, Item details movements tab, Warehouse history) MUST reuse the canonical component from `apps/web/src/features/stock-movement-module`. Never duplicate table components, queries, or conversion logic.
+   - **Virtual Warehouse Rules**: Virtual warehouses (System, Adjustment, Transit, Supplier, Customer) are internal implementation details. NEVER expose virtual warehouse names or internal location details to users in tables, badges, or filters.
+   - **Direction & Warehouse Display**: Movements involving a virtual counterparty display only the physical warehouse/location with direction `IN` or `OUT`.
+   - **Base Unit Storage**: All stock ledger quantities and balances are stored as positive numeric strings in the item's base unit.
+   - **Running Balance**: Computed post-movement, strictly partitioned per `(item_id, physical_location_id)` pair, and evaluated chronologically. Outer filters (date ranges, pagination) must never alter historical balances.
+   - **Display Unit Conversion**: When scoped to a single item, allow unit conversion using the item's unit collection. Convert running balances and quantities dynamically for display without altering stored data.
+   - **Protocol for Future Stock-Affecting Modules** (Inventory Transfer, Sales, Purchases, Returns, Assembly):
+     1. Define the movement type in `STOCK_MOVEMENT_TYPES` (`packages/contracts/src/stock-movement/constants.ts`).
+     2. Define stock impact and direction (`IN`, `OUT`, or `TRANSFER`).
+     3. Define physical or virtual warehouse involvement.
+     4. Define how its Warehouse - Location information should appear.
+     5. Integrate with the reusable Stock Movement component.
+     6. Persist quantities strictly in the item's base unit.
+     7. Update centralized documentation (`packages/contracts/src/stock-movement/SPEC.md` and `AGENTS.md`).
+     *(Note: Inventory Transfer is a future feature. Do not introduce From/To columns until transfer support is formally implemented).*
 
 ---
 
