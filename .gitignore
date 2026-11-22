@@ -14,6 +14,7 @@ dist-ssr
 
 # env files (can opt-in for committing if needed)
 .env*
+!.env.test.example
 
 # turbo
 .turbo
@@ -40,3 +41,8 @@ dist-ssr
 .tmp/
 
 openapi/
+
+# Test artifacts
+playwright-report/
+test-results/
+.e2e/
