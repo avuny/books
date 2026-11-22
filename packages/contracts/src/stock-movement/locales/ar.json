@@ -19,5 +19,49 @@
     "STOCK_MOVEMENT_BATCH_NOT_FOUND": "الدفعة غير موجودة لهذا الصنف",
     "STOCK_MOVEMENT_BATCH_NOT_AVAILABLE": "حالة الدفعة لا تسمح بحركة المخزون هذه",
     "STOCK_MOVEMENT_EXPIRY_DATE_REQUIRED": "تاريخ الصلاحية مطلوب قبل ترحيل مخزون لهذا الصنف"
+  },
+  "table": {
+    "title": "حركات المخزون",
+    "description": "سجل حركات المخزون الفعلية من استلام وصرف وتسويات.",
+    "reference": "المرجع",
+    "date": "التاريخ",
+    "item": "الصنف",
+    "movementType": "نوع الحركة",
+    "warehouseLocation": "المستودع - الموقع",
+    "direction": "الاتجاه",
+    "quantity": "الكمية",
+    "runningBalance": "الرصيد التراكمي",
+    "empty": "لا توجد حركات مخزون مسجلة.",
+    "emptyFiltered": "لا توجد حركات مخزون تطابق الفلاتر المحددة."
+  },
+  "types": {
+    "opening": "بضاعة أول المدة",
+    "adjustment": "تسوية جردية",
+    "purchase": "شراء",
+    "purchase_return": "مرتجع شراء",
+    "sale": "بيع",
+    "sale_return": "مرتجع بيع",
+    "transfer": "نقل",
+    "assembly_consume": "تجميع (استهلاك)",
+    "assembly_produce": "تجميع (إنتاج)"
+  },
+  "direction": {
+    "in": "وارد",
+    "out": "صادر"
+  },
+  "filter": {
+    "allTypes": "جميع الأنواع",
+    "item": "تصفية حسب الصنف...",
+    "search": "بحث بالمرجع...",
+    "fromDate": "من تاريخ",
+    "toDate": "إلى تاريخ",
+    "displayUnit": "وحدة العرض",
+    "baseUnit": "الوحدة الأساسية",
+    "reset": "إعادة تعيين الفلاتر"
+  },
+  "pagination": {
+    "previous": "السابق",
+    "next": "التالي",
+    "summary": "{{from}}–{{to}} من {{total}}"
   }
 }

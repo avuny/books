@@ -19,5 +19,49 @@
     "STOCK_MOVEMENT_BATCH_NOT_FOUND": "The batch does not exist for this item",
     "STOCK_MOVEMENT_BATCH_NOT_AVAILABLE": "The batch status does not allow this stock movement",
     "STOCK_MOVEMENT_EXPIRY_DATE_REQUIRED": "An expiry date is required before posting stock for this item"
+  },
+  "table": {
+    "title": "Stock Movements",
+    "description": "Ledger of physical inventory movements, receipts, issues, and adjustments.",
+    "reference": "Reference",
+    "date": "Date",
+    "item": "Item",
+    "movementType": "Movement Type",
+    "warehouseLocation": "Warehouse - Location",
+    "direction": "Direction",
+    "quantity": "Quantity",
+    "runningBalance": "Running Balance",
+    "empty": "No stock movements recorded.",
+    "emptyFiltered": "No stock movements match the selected filters."
+  },
+  "types": {
+    "opening": "Opening Stock",
+    "adjustment": "Inventory Adjustment",
+    "purchase": "Purchase",
+    "purchase_return": "Purchase Return",
+    "sale": "Sale",
+    "sale_return": "Sale Return",
+    "transfer": "Transfer",
+    "assembly_consume": "Assembly (Consume)",
+    "assembly_produce": "Assembly (Produce)"
+  },
+  "direction": {
+    "in": "IN",
+    "out": "OUT"
+  },
+  "filter": {
+    "allTypes": "All types",
+    "item": "Filter by item...",
+    "search": "Search reference...",
+    "fromDate": "From date",
+    "toDate": "To date",
+    "displayUnit": "Display Unit",
+    "baseUnit": "Base Unit",
+    "reset": "Reset filters"
+  },
+  "pagination": {
+    "previous": "Previous",
+    "next": "Next",
+    "summary": "{{from}}–{{to}} of {{total}}"
   }
 }
