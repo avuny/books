@@ -27,6 +27,8 @@ export interface WarehouseLocationFilterProps {
   onChange: (value: WarehouseLocationFilterValue) => void
   disabled?: boolean
   className?: string
+  /** If true, strictly physical non-system warehouses and their locations are shown. Virtual warehouses are hidden. */
+  physicalOnly?: boolean
 }
 
 function PhysicalVirtualBadge({
@@ -55,6 +57,7 @@ export function WarehouseLocationFilter({
   onChange,
   disabled = false,
   className,
+  physicalOnly = false,
 }: WarehouseLocationFilterProps) {
   const { t } = useTranslation("warehouse")
 
@@ -86,10 +89,13 @@ export function WarehouseLocationFilter({
       isActive: "true",
     })
 
-  const warehouses = React.useMemo(
-    () => warehousesData?.data.items ?? [],
-    [warehousesData]
-  )
+  const warehouses = React.useMemo(() => {
+    const items = warehousesData?.data.items ?? []
+    if (physicalOnly) {
+      return items.filter((w) => w.type === "physical" && !w.isSystem)
+    }
+    return items
+  }, [warehousesData, physicalOnly])
 
   // Filtered warehouses by search input
   const filteredWarehouses = React.useMemo(() => {
@@ -321,11 +327,13 @@ export function WarehouseLocationFilter({
                           ({wh.code})
                         </span>
                       </div>
-                      <PhysicalVirtualBadge
-                        isVirtual={isVirtual}
-                        physicalLabel={copy.physical}
-                        virtualLabel={copy.virtual}
-                      />
+                      {!physicalOnly && (
+                        <PhysicalVirtualBadge
+                          isVirtual={isVirtual}
+                          physicalLabel={copy.physical}
+                          virtualLabel={copy.virtual}
+                        />
+                      )}
                     </div>
                   )
                 })
