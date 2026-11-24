@@ -20,7 +20,8 @@ import {
     BATCH_STATUSES,
 } from "@avuny/contracts/batch"
 import { lengthBetween, pk, timestamps } from "../_helpers.js"
-import { items, orgRef, shelfLifeUnitEnum } from "../index.js"
+import { items, shelfLifeUnitEnum } from "../item/item.js"
+import { orgRef } from "../organization/organizations.js"
 
 export const batchStatusEnum = pgEnum("batch_status", BATCH_STATUSES)
 

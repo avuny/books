@@ -8,7 +8,9 @@ import {
     uuid,
 } from "drizzle-orm/pg-core"
 import { pk, quantity, timestamps } from "../_helpers.js"
-import { items, orgRef, warehouseLocations, warehouses } from "../index.js"
+import { orgRef } from "../organization/organizations.js"
+import { items } from "../item/item.js"
+import { warehouseLocations, warehouses } from "../warehouse/warehouse.js"
 import { batches } from "./batch.js"
 
 /**

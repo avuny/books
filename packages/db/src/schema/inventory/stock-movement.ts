@@ -19,7 +19,9 @@ import {
     STOCK_MOVEMENT_TYPES,
 } from "@avuny/contracts/stock-movement"
 import { pk, quantity, timestamps } from "../_helpers.js"
-import { items, orgRef, warehouseLocations } from "../index.js"
+import { orgRef } from "../organization/organizations.js"
+import { items } from "../item/item.js"
+import { warehouseLocations } from "../warehouse/warehouse.js"
 import { batches } from "./batch.js"
 
 export const stockMovementTypeEnum = pgEnum("stock_movement_type", STOCK_MOVEMENT_TYPES)

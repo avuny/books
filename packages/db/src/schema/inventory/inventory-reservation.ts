@@ -19,7 +19,7 @@ import {
     INVENTORY_RESERVATION_STATUSES,
 } from "@avuny/contracts/inventory-reservation"
 import { pk, quantity, timestamps } from "../_helpers.js"
-import { orgRef } from "../index.js"
+import { orgRef } from "../organization/organizations.js"
 import { inventoryItemBatches, inventoryItems } from "./inventory-item.js"
 
 export const inventoryReservationStatusEnum = pgEnum(

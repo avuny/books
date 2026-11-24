@@ -10,7 +10,7 @@ import {
     uuid,
 } from "drizzle-orm/pg-core"
 import { pk, quantity, money, currency, timestamps } from "../_helpers.js"
-import { orgRef } from "../index.js"
+import { orgRef } from "../organization/organizations.js"
 import { inventoryItemBatches, inventoryItems } from "./inventory-item.js"
 import { stockMovementLines } from "./stock-movement.js"
 

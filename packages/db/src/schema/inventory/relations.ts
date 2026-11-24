@@ -1,6 +1,7 @@
 
 import { relations } from "drizzle-orm"
-import { items, warehouseLocations, warehouses } from "../index.js"
+import { items } from "../item/item.js"
+import { warehouseLocations, warehouses } from "../warehouse/warehouse.js"
 import { batches } from "./batch.js"
 import { inventoryItemBatches, inventoryItems } from "./inventory-item.js"
 import {

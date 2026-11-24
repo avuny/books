@@ -47,7 +47,7 @@ import {
     WAREHOUSE_LOCATION_TYPES,
 } from "@avuny/contracts/warehouse-location"
 import { pk, timestamps, lengthBetween } from "../_helpers.js"
-import { orgRef } from "../index.js"
+import { orgRef } from "../organization/organizations.js"
 
 
 export const warehouseTypeEnum = pgEnum("warehouse_type", WAREHOUSE_TYPES)
