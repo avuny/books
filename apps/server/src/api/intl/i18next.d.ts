@@ -10,6 +10,7 @@ import type organizationEn from "./locales/organization/en.json"
 import type organizationInvitationEn from "./locales/organization-invitation/en.json"
 import type organizationUserEn from "./locales/organization-user/en.json"
 import type otpEn from "./locales/otp/en.json"
+import type partyEn from "./locales/party/en.json"
 import type roleEn from "./locales/role/en.json"
 import type sidebarEn from "./locales/sidebar/en.json"
 import type unitEn from "./locales/unit/en.json"
@@ -30,6 +31,7 @@ type OrganizationMessages = typeof organizationEn
 type OrganizationInvitationMessages = typeof organizationInvitationEn
 type OrganizationUserMessages = typeof organizationUserEn
 type OtpMessages = typeof otpEn
+type PartyMessages = typeof partyEn
 type RoleMessages = typeof roleEn
 type SidebarMessages = typeof sidebarEn
 type UnitMessages = typeof unitEn
@@ -58,6 +60,7 @@ declare module "i18next" {
       "organization-user": OrganizationUserMessages
       organizationUser: OrganizationUserMessages
       otp: OtpMessages
+      party: PartyMessages
       role: RoleMessages
       sidebar: SidebarMessages
       unit: UnitMessages

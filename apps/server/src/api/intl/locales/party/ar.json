@@ -1,0 +1,11 @@
+{
+  "errors": {
+    "PARTY_NOT_FOUND": "الجهة غير موجودة.",
+    "PARTY_ROLE_NOT_FOUND": "دور الجهة غير موجود.",
+    "PARTY_ROLE_ALREADY_ACTIVE": "هذا الدور نشط بالفعل لهذه الجهة.",
+    "PARTY_ROLE_INACTIVE": "هذا الدور غير نشط لهذه الجهة.",
+    "PARTY_CONTACT_NOT_FOUND": "بيانات الاتصال غير موجودة لهذه الجهة.",
+    "PARTY_EMAIL_ALREADY_EXISTS": "عنوان البريد الإلكتروني هذا مسجل بالفعل لهذه الجهة.",
+    "PARTY_SALUTATION_NOT_ALLOWED": "اللقب متاح فقط للأفراد."
+  }
+}
