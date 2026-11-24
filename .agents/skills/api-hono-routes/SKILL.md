@@ -8,17 +8,58 @@ description: Add or change HTTP endpoints for a module using the repo's Hono + z
 Prerequisite: the module's contracts exist (`contracts-module` skill). The service (`<module>.service.ts`) and errors map (`<module>.errors.ts`) live next to `hono-routes/`.
 
 ```
-apps/api/src/modules/project/          ⚠ verify base path
-├── project.errors.ts        projectErrorsHttpMap  (code → { status, msg key })  ⚠ copy shape from organization-invitation.errors.ts
+apps/server/src/api/modules/project/
+├── project.errors.ts        projectErrorsHttpMap (code → { statusCode, responseMessage })
 ├── project.service.ts       returns Result<Dto, Code>; checks permission + plan limits
 └── hono-routes/
-    ├── _shared.ts
+    ├── _shared.ts           jsonOk, jsonError, honoPath
+    ├── module-routes.types.ts  RouteDeps interface
     ├── list-projects.route.ts
     ├── create-project.route.ts
     ├── update-project.route.ts
     ├── delete-project.route.ts
     └── index.ts
 ```
+
+## Critical Rule: The `errorMap` and `responses` Type Pairing (Avoid The TS2345 / TS2322 Trap)
+
+When writing Hono OpenAPI routes in this repo, TypeScript enforces two simultaneous constraints on `handleResult`:
+
+1. **HTTP Status Codes Constraint (`SE` in `handleResult`)**:
+   Hono's `RouteConfigToTypedResponse` checks that every HTTP status code returned by `handleResult` is declared in `responses: { ... }`.
+   If your `rawErrorMap` contains an error with `statusCode: 404` or `422`, but `responses` only declares `201, 403, 409`, TypeScript emits **TS2345**:
+   `Types of property '_status' are incompatible. Type '404' is not assignable to type '403'.`
+
+2. **Error Code Union Constraint (`E` in `handleResult`)**:
+   `handleResult` requires `errorMap: Record<E, ...>` where `E` is the error code union returned by the service (e.g. `ProjectErrorCode | RoleErrorCode`).
+   If you try to fix TS2345 by typing `errorMap: Record<NarrowRouteCode, ...>`, TypeScript emits **TS2322**:
+   `Type 'Result<Dto, Code>' is not assignable to type 'Result<Dto, NarrowRouteCode>'`.
+
+### The Canonical Solution:
+```ts
+// 1. rawErrorMap contains ONLY the errors this specific endpoint can return.
+const rawErrorMap = {
+  ROLE_PERMISSION_DENIED: roleErrorsHttpMap.ROLE_PERMISSION_DENIED, // 403
+  PROJECT_NAME_TAKEN: errors.PROJECT_NAME_TAKEN,                   // 409
+} as const
+
+// 2. The double-satisfaction cast:
+// - Keys: `Code | RoleErrorCode` (wide: satisfies result: Result<Dto, Code | RoleErrorCode>)
+// - Values: `(typeof rawErrorMap)[keyof typeof rawErrorMap]` (narrow: preserves ONLY 403 | 409 status codes)
+const errorMap = rawErrorMap as Record<Code | RoleErrorCode, (typeof rawErrorMap)[keyof typeof rawErrorMap]>
+
+// 3. responses: MUST declare exactly the status codes present in rawErrorMap
+responses: {
+  201: jsonOk("Project created", ProjectDtoSchema),
+  403: jsonError("Forbidden", [RoleErrorCode.ROLE_PERMISSION_DENIED]),
+  409: jsonError("Conflict", [Code.PROJECT_NAME_TAKEN]),
+  ...globalErrorResponses,
+}
+```
+**Never put module errors in `rawErrorMap` that this endpoint cannot return!**
+If `responses` does not declare `404`, `rawErrorMap` MUST NOT contain any 404 error codes.
+
+---
 
 ## Step 1 — `_shared.ts` (copy verbatim into the new module)
 
@@ -48,7 +89,20 @@ export const honoPath = (openApiPath: string) =>
   openApiPath.replace(/\{([^}]+)\}/g, ":$1")
 ```
 
-## Step 2 — one route file per endpoint
+## Step 2 — `module-routes.types.ts`
+
+Define dependencies injected into route factories:
+```ts
+import type { MiddlewareHandler } from "hono"
+import type { ProjectService } from "../project.service.js"
+
+export interface RouteDeps {
+  service: ProjectService
+  requireAuth: MiddlewareHandler
+}
+```
+
+## Step 3 — Route files (Closure Factory Pattern)
 
 ### Template: create (POST, body, 201)
 
@@ -60,137 +114,143 @@ import { createOpenAPIRouter, handleResult, getRequestLocale } from "@avuny/hono
 import { globalErrorResponses } from "@avuny/utils"
 import { trans } from "../../../intl/i18next.js"
 import { projectErrorsHttpMap as errors } from "../project.errors.js"
-import { projectService } from "../project.service.js"
-import { requireAuth } from "../../auth/index.js"
+import { roleErrorsHttpMap } from "../../role/index.js"
 import { honoPath, jsonError, jsonOk } from "./_shared.js"
 import {
   CreateProjectSchema,
   ProjectDtoSchema,
   ProjectErrorCode as Code,
 } from "@avuny/contracts"
+import { RoleErrorCode } from "@avuny/contracts"
+import type { RouteDeps } from "./module-routes.types.js"
 
-const router = createOpenAPIRouter()
-
-// ONLY the codes this endpoint can return.
 const rawErrorMap = {
-  PROJECT_FORBIDDEN: errors.PROJECT_FORBIDDEN,
+  ROLE_PERMISSION_DENIED: roleErrorsHttpMap.ROLE_PERMISSION_DENIED,
   PROJECT_NAME_TAKEN: errors.PROJECT_NAME_TAKEN,
-  PROJECT_LIMIT_REACHED: errors.PROJECT_LIMIT_REACHED,
 } as const
-const errorMap = rawErrorMap as Record<Code, (typeof rawErrorMap)[keyof typeof rawErrorMap]>
 
-export const createProjectRoute = createRoute({
-  method: "post",
-  path: "/organizations/{orgId}/projects",
-  operationId: "createProject",              // → web hook useCreateProject
-  tags: ["project"],
-  summary: "Create a project in the organization",
-  middleware: [requireAuth] as const,
-  request: {
-    params: z.object({ orgId: z.string().uuid() }),
-    body: { content: { "application/json": { schema: CreateProjectSchema } } },
-  },
-  responses: {
-    201: jsonOk("Project created", ProjectDtoSchema),
-    403: jsonError("Forbidden", [Code.PROJECT_FORBIDDEN]),
-    409: jsonError("Conflict", [Code.PROJECT_NAME_TAKEN, Code.PROJECT_LIMIT_REACHED]),
-    ...globalErrorResponses,                 // always last
-  },
-})
+const errorMap = rawErrorMap as Record<Code | RoleErrorCode, (typeof rawErrorMap)[keyof typeof rawErrorMap]>
 
-router.use(honoPath(createProjectRoute.path), requireAuth)
+export const createProjectRoute = ({ service, requireAuth }: RouteDeps) => {
+  const router = createOpenAPIRouter()
 
-router.openapi(createProjectRoute, async (c) => {
-  const errorTrans = trans({ lang: getRequestLocale() })
-  const user = c.get("user")
-  const { orgId } = c.req.valid("param")
-  const body = c.req.valid("json")
-
-  const result = await projectService.create(user.id, orgId, body)
-  return handleResult({
-    c,
-    result,
-    successStatus: 201,
-    errorMap,
-    errorTrans,
-    moduleName: "project",                   // selects the locale namespace
+  const route = createRoute({
+    method: "post",
+    path: "/organizations/{orgId}/projects",
+    operationId: "createProject",              // → web hook useCreateProject
+    tags: ["project"],
+    summary: "Create a project in the organization",
+    middleware: [requireAuth] as const,
+    request: {
+      params: z.object({ orgId: z.string().uuid() }),
+      body: { content: { "application/json": { schema: CreateProjectSchema } } },
+    },
+    responses: {
+      201: jsonOk("Project created", ProjectDtoSchema),
+      403: jsonError("Forbidden", [RoleErrorCode.ROLE_PERMISSION_DENIED]),
+      409: jsonError("Conflict", [Code.PROJECT_NAME_TAKEN]),
+      ...globalErrorResponses,                 // always last
+    },
   })
-})
 
-export default router
+  router.use(honoPath(route.path), requireAuth)
+
+  router.openapi(route, async (c) => {
+    const errorTrans = trans({ lang: getRequestLocale() })
+    const user = c.get("user")
+    const { orgId } = c.req.valid("param")
+    const body = c.req.valid("json")
+
+    const result = await service.create(user.id, orgId, body)
+    return handleResult({
+      c,
+      result,
+      successStatus: 201,
+      errorMap,
+      errorTrans,
+      moduleName: "project",                   // selects the locale namespace
+    })
+  })
+
+  return router
+}
+
+export default createProjectRoute
 ```
 
 ### Variations (change only these lines)
 
-| Endpoint | method / path | request | success | service call |
-|---|---|---|---|---|
-| list | `get` `/organizations/{orgId}/projects` | `params` + `query: ProjectOffsetListQuerySchema` | `200` `ProjectOffsetListResponseSchema` | `projectService.list(user.id, orgId, query)` with `c.req.valid("query")` |
-| get | `get` `/organizations/{orgId}/projects/{projectId}` | `params` (both uuid) | `200` `ProjectDtoSchema` | `.get(user.id, orgId, projectId)` |
-| update | `patch` same path | params + body `UpdateProjectSchema` | `200` | `.update(user.id, orgId, projectId, body)` |
-| delete | `delete` same path | params | `200` `DeleteProjectResponseSchema` | `.remove(user.id, orgId, projectId)` |
-| action | `post` `…/{projectId}/archive` | params | `200` | `.archive(…)` — verbs as sub-paths, like `/revoke`, `/resend` |
+| Endpoint | method / path | request | responses | rawErrorMap | service call |
+|---|---|---|---|---|---|
+| list | `get` `/organizations/{orgId}/projects` | `params` + `query: ProjectOffsetListQuerySchema` | `200` `ProjectOffsetListResponseSchema`, `403` | `ROLE_PERMISSION_DENIED` | `service.list(user.id, orgId, query)` |
+| get | `get` `/organizations/{orgId}/projects/{projectId}` | `params` (orgId, projectId) | `200` `ProjectDtoSchema`, `403`, `404` | `ROLE_PERMISSION_DENIED`, `PROJECT_NOT_FOUND` | `service.get(user.id, orgId, projectId)` |
+| update | `patch` same path | params + body `UpdateProjectSchema` | `200`, `403`, `404`, `409` | `ROLE_PERMISSION_DENIED`, `PROJECT_NOT_FOUND`, `PROJECT_NAME_TAKEN` | `service.update(user.id, orgId, projectId, body)` |
+| delete | `delete` same path | params | `200` `DeleteProjectResponseSchema`, `403`, `404` | `ROLE_PERMISSION_DENIED`, `PROJECT_NOT_FOUND` | `service.remove(user.id, orgId, projectId)` |
 
-`get`/`update`/`delete` add `PROJECT_NOT_FOUND` under `404`.
-
-### Public endpoint (no auth)
-
-Drop `middleware` and the `router.use(... requireAuth)` line; add a doc comment and a rate-limit note. Take secrets in the **body** (POST), never the URL — see `preview-organization-invitation.route.ts`.
-
-### Handler that cannot fail
-
-```ts
-router.openapi(myProjectsRoute, async (c) => {
-  const user = c.get("user")
-  const result = await projectService.listMine(user.id)
-  if (!result.success) throw new Error("listMine cannot fail")
-  return c.json({ success: true, data: result.data }, 200)
-})
-```
-
-## Step 3 — mount in `hono-routes/index.ts`
+## Step 4 — Mount in `hono-routes/index.ts`
 
 ```ts
 import { createOpenAPIRouter } from "@avuny/hono"
-import listProjectsRoute from "./list-projects.route.js"
-import createProjectRoute from "./create-project.route.js"
-import updateProjectRoute from "./update-project.route.js"
-import deleteProjectRoute from "./delete-project.route.js"
+import { createProjectRoute } from "./create-project.route.js"
+import { listProjectsRoute } from "./list-projects.route.js"
+import { getProjectRoute } from "./get-project.route.js"
+import { updateProjectRoute } from "./update-project.route.js"
+import { deleteProjectRoute } from "./delete-project.route.js"
+import type { RouteDeps } from "./module-routes.types.js"
 
-/** Paths are absolute (e.g. /organizations/{orgId}/projects), so mount this at "/". */
-export const projectRoutes = createOpenAPIRouter()
+export const createProjectRoutes = (deps: RouteDeps) => {
+  const router = createOpenAPIRouter()
 
-projectRoutes.route("/", listProjectsRoute)
-projectRoutes.route("/", createProjectRoute)
-projectRoutes.route("/", updateProjectRoute)
-projectRoutes.route("/", deleteProjectRoute)
+  router.route("/", listProjectsRoute(deps))
+  router.route("/", createProjectRoute(deps))
+  router.route("/", getProjectRoute(deps))
+  router.route("/", updateProjectRoute(deps))
+  router.route("/", deleteProjectRoute(deps))
+
+  return router
+}
 ```
 
-Then mount `projectRoutes` at `"/"` in the app router ⚠ (find where `organizationInvitationRoutes` is mounted and add yours next to it).
+And in `deps.ts`:
+```ts
+export const projectRoutes = createProjectRoutes({
+  get service() { return getProjectService() },
+  requireAuth,
+})
+```
 
-## Step 4 — service contract (what routes expect)
+Then mount `projectRoutes` at `"/"` in `apps/server/src/api/routes.ts`.
+
+## Step 5 — Service contract (what routes expect)
 
 ```ts
-// signature style: (actorUserId, orgId, …input) => Promise<Result<Dto, ErrorCode>>
-async create(actorId: string, orgId: string, input: CreateProjectInput) {
-  if (!(await canAccess(actorId, "create:project", orgId)))   // 1. permission
-    return fail({ error: Code.PROJECT_FORBIDDEN })
-  // 2. plan limits (e.g. LIMIT_REACHED)  3. business rules  4. DB write  5. audit event
-  return ok(dto)
+// signature style: (actorUserId, orgId, …input) => Promise<Result<Dto, Code | RoleErrorCode>>
+async create(actorId: string, orgId: string, input: CreateProjectInput): Promise<Result<ProjectDto, Code | RoleErrorCode>> {
+  if (!(await canAccess(actorId, "create:project", orgId))) {
+    return fail({ error: RoleErrorCode.ROLE_PERMISSION_DENIED, msg: "Permission denied" })
+  }
+  // 1. plan limits  2. business rules  3. DB write  4. audit event
+  return ok({ data: dto, msg: "Project created" })
 }
 ```
 
 Permission checks stay **in the service** today. Don't add route-level permission middleware unless asked.
 
-## Step 5 — regenerate the client
+## Step 6 — Regenerate the client
 
-After any route change: `<pnpm … api:generate>` ⚠. Hook names follow `operationId` (`listProjects` → `useListProjects`, `getListProjectsQueryKey`). Mutation variables are `{ orgId, projectId, data }` (path params + `data` for the body).
+After any route change:
+```bash
+pnpm openapi:generate && pnpm api:generate
+```
+Hook names follow `operationId` (`listProjects` → `useListProjects`, `getListProjectsQueryKey`). Mutation variables are `{ orgId, projectId, data }` (path params + `data` for the body).
 
 ## Checklist
 
 - [ ] Each endpoint has a unique camelCase `operationId`
-- [ ] Every code in `errorMap` appears in a `responses` entry, and vice versa
+- [ ] Every code in `rawErrorMap` has its `statusCode` declared in `responses: { ... }`
+- [ ] `errorMap` uses the cast `rawErrorMap as Record<Code | RoleErrorCode, (typeof rawErrorMap)[keyof typeof rawErrorMap]>`
 - [ ] `...globalErrorResponses` last in each `responses`
 - [ ] `requireAuth` in both `middleware` **and** `router.use` (or deliberately public + commented)
 - [ ] No business logic in handlers
-- [ ] Registered in `hono-routes/index.ts` and the app router
+- [ ] Registered in `hono-routes/index.ts` and `apps/server/src/api/routes.ts`
 - [ ] Client regenerated
