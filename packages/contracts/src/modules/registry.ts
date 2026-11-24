@@ -28,7 +28,8 @@ export type Localized = Record<Locale, string>
 /** Sidebar headings. Their order is the order of the sidebar. */
 export const SIDEBAR_GROUPS = {
   users: { icon: "users", label: { en: "Users", ar: "المستخدمون" } },
-  // purchases and sales groups are defined here when their first module is uncommented
+  sales: { icon: "badge-percent", label: { en: "Sales", ar: "المبيعات" } },
+  purchases: { icon: "shopping-cart", label: { en: "Purchases", ar: "المشتريات" } },
   inventory: { icon: "boxes", label: { en: "Inventory", ar: "المخزون" } },
   accounting: { icon: "calculator", label: { en: "Accounting", ar: "المحاسبة" } },
 } as const satisfies Record<string, { icon: string; label: Localized }>
@@ -131,36 +132,37 @@ export const MODULES = {
   },
   activity_log: { actions: READ },
 
-  // -- purchases (standard CRUD assumed; adjust) ---------------------------
-  // supplier: {
-  //   sidebar: {
-  //     group: "purchases",
-  //     icon: "truck",
-  //     path: "/suppliers",
-  //     label: { en: "Suppliers", ar: "الموردون" },
-  //   },
-  //   actions: CRUD,
-  // },
-  // purchase_order: {
-  //   sidebar: {
-  //     group: "purchases",
-  //     icon: "clipboard-list",
-  //     path: "/purchase-orders",
-  //     label: { en: "Purchase orders", ar: "أوامر الشراء" },
-  //   },
-  //   actions: CRUD,
-  // },
+  // -- sales ---------------------------------------------------------------
+  customer: {
+    sidebar: {
+      group: "sales",
+      icon: "contact",
+      path: "/customers",
+      label: { en: "Customers", ar: "العملاء" },
+    },
+    actions: {
+      ...CRUD,
+      delete: { permission: true, event: "deactivated" },
+      reactivate: { event: "reactivated" },
+    },
+    scopable: false,
+  },
 
-  // // -- sales ---------------------------------------------------------------
-  // customer: {
-  //   sidebar: {
-  //     group: "sales",
-  //     icon: "contact",
-  //     path: "/customers",
-  //     label: { en: "Customers", ar: "العملاء" },
-  //   },
-  //   actions: CRUD,
-  // },
+  // -- purchases -----------------------------------------------------------
+  vendor: {
+    sidebar: {
+      group: "purchases",
+      icon: "truck",
+      path: "/vendors",
+      label: { en: "Vendors", ar: "الموردون" },
+    },
+    actions: {
+      ...CRUD,
+      delete: { permission: true, event: "deactivated" },
+      reactivate: { event: "reactivated" },
+    },
+    scopable: false,
+  },
   // sales_order: {
   //   sidebar: {
   //     group: "sales",

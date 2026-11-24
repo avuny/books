@@ -18,6 +18,8 @@
       "organization_invitation": "الدعوات",
       "role": "الأدوار",
       "inventory_adjustment": "تسويات المخزون",
+      "customer": "العملاء",
+      "vendor": "الموردون",
       "*": "كل شيء"
     },
     "actions": {

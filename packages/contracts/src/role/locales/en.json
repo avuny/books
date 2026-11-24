@@ -18,6 +18,8 @@
       "organization_invitation": "Invitations",
       "role": "Roles",
       "inventory_adjustment": "Inventory adjustments",
+      "customer": "Customers",
+      "vendor": "Vendors",
       "*": "Everything"
     },
     "actions": {
