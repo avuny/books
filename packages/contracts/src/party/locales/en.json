@@ -1,0 +1,243 @@
+{
+  "errors": {
+    "PARTY_NOT_FOUND": "Party not found.",
+    "PARTY_ROLE_NOT_FOUND": "Party role not found.",
+    "PARTY_ROLE_ALREADY_ACTIVE": "This role is already active for this party.",
+    "PARTY_ROLE_INACTIVE": "This role is inactive for this party.",
+    "PARTY_CONTACT_NOT_FOUND": "Contact entry not found for this party.",
+    "PARTY_EMAIL_ALREADY_EXISTS": "This email address is already registered for this party.",
+    "PARTY_SALUTATION_NOT_ALLOWED": "Salutation is only allowed for individuals (persons)."
+  },
+  "labels": {
+    "roles": {
+      "CUSTOMER": "Customer",
+      "VENDOR": "Vendor"
+    },
+    "types": {
+      "PERSON": "Person",
+      "ORGANIZATION": "Organization"
+    },
+    "salutations": {
+      "MR": "Mr.",
+      "MS": "Ms.",
+      "MRS": "Mrs.",
+      "DR": "Dr.",
+      "PROF": "Prof.",
+      "OTHER": "Other"
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive"
+    }
+  },
+  "msgs": {
+    "PARTY_CREATED": "Party created successfully.",
+    "PARTY_UPDATED": "Party updated successfully.",
+    "PARTY_ROLE_ADDED": "Role added successfully.",
+    "PARTY_ROLE_REACTIVATED": "Role reactivated successfully.",
+    "PARTY_ROLE_DEACTIVATED": "Role deactivated successfully."
+  },
+  "list": {
+    "CUSTOMER": {
+      "title": "Customers",
+      "description": "Manage your customer directory, contacts and relationships."
+    },
+    "VENDOR": {
+      "title": "Vendors",
+      "description": "Manage your vendor directory, supplier details and contacts."
+    },
+    "tabs": {
+      "aria": "Party status",
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "search": {
+      "placeholder": "Search by name, legal name, tax number, email or phone...",
+      "clear": "Clear search"
+    }
+  },
+  "create": {
+    "CUSTOMER": {
+      "title": "New Customer",
+      "description": "Add a new customer to your organization."
+    },
+    "VENDOR": {
+      "title": "New Vendor",
+      "description": "Add a new vendor to your organization."
+    },
+    "alsoAdd": {
+      "CUSTOMER": "Also add as Customer",
+      "VENDOR": "Also add as Vendor"
+    },
+    "submitLabel": "Save",
+    "submittingLabel": "Saving..."
+  },
+  "update": {
+    "title": "Edit Party",
+    "description": "Update information for this party.",
+    "submitLabel": "Save changes",
+    "submittingLabel": "Saving..."
+  },
+  "fields": {
+    "partyType": {
+      "label": "Party Type"
+    },
+    "salutation": {
+      "label": "Salutation",
+      "placeholder": "Select salutation"
+    },
+    "displayName": {
+      "label": "Display Name",
+      "placeholder": "e.g. Acme Corp or John Doe"
+    },
+    "legalName": {
+      "label": "Legal Name",
+      "placeholder": "Registered legal entity name"
+    },
+    "taxNumber": {
+      "label": "Tax Number / VAT ID",
+      "placeholder": "e.g. 123456789"
+    },
+    "website": {
+      "label": "Website",
+      "placeholder": "https://example.com"
+    },
+    "notes": {
+      "label": "Notes",
+      "placeholder": "Internal remarks or notes..."
+    },
+    "email": {
+      "label": "Email",
+      "placeholder": "name@example.com"
+    },
+    "phone": {
+      "label": "Phone",
+      "placeholder": "+1 234 567 8900"
+    },
+    "label": {
+      "label": "Label",
+      "placeholder": "e.g. Work, Home, Billing"
+    },
+    "addressLine1": {
+      "label": "Address Line 1",
+      "placeholder": "Street address, P.O. box"
+    },
+    "addressLine2": {
+      "label": "Address Line 2",
+      "placeholder": "Apartment, suite, unit, building"
+    },
+    "city": {
+      "label": "City",
+      "placeholder": "City"
+    },
+    "state": {
+      "label": "State / Province",
+      "placeholder": "State or province"
+    },
+    "postalCode": {
+      "label": "Postal Code",
+      "placeholder": "Postal code"
+    },
+    "countryCode": {
+      "label": "Country",
+      "placeholder": "Two-letter country code (e.g. US, EG)"
+    }
+  },
+  "contacts": {
+    "emails": {
+      "title": "Email Addresses",
+      "add": "Add email",
+      "remove": "Remove email",
+      "primary": "Primary email"
+    },
+    "phones": {
+      "title": "Phone Numbers",
+      "add": "Add phone",
+      "remove": "Remove phone",
+      "primary": "Primary phone"
+    },
+    "addresses": {
+      "title": "Addresses",
+      "add": "Add address",
+      "remove": "Remove address",
+      "primary": "Primary address"
+    }
+  },
+  "actions": {
+    "create": {
+      "CUSTOMER": "New customer",
+      "VENDOR": "New vendor"
+    },
+    "edit": "Edit",
+    "view": "View details",
+    "deactivate": "Deactivate",
+    "reactivate": "Reactivate",
+    "cancel": "Cancel",
+    "addAsRole": {
+      "CUSTOMER": "Add as Customer",
+      "VENDOR": "Add as Vendor"
+    },
+    "reactivateAsRole": {
+      "CUSTOMER": "Reactivate as Customer",
+      "VENDOR": "Reactivate as Vendor"
+    },
+    "viewAsRole": {
+      "CUSTOMER": "View as Customer",
+      "VENDOR": "View as Vendor"
+    }
+  },
+  "table": {
+    "name": "Name",
+    "email": "Primary Email",
+    "phone": "Primary Phone",
+    "roles": "Roles",
+    "updated": "Last Updated",
+    "actions": "Actions",
+    "actionsFor": "Actions for {{name}}"
+  },
+  "empty": {
+    "CUSTOMER": {
+      "title": "No customers found",
+      "description": "Get started by adding your first customer."
+    },
+    "VENDOR": {
+      "title": "No vendors found",
+      "description": "Get started by adding your first vendor."
+    },
+    "inactive": {
+      "title": "No inactive parties",
+      "description": "There are no inactive records in this section."
+    }
+  },
+  "delete": {
+    "CUSTOMER": {
+      "title": "Deactivate customer",
+      "description": "Are you sure you want to deactivate “{{name}}” as a Customer? Shared party information and any Vendor role will remain active."
+    },
+    "VENDOR": {
+      "title": "Deactivate vendor",
+      "description": "Are you sure you want to deactivate “{{name}}” as a Vendor? Shared party information and any Customer role will remain active."
+    }
+  },
+  "details": {
+    "back": {
+      "CUSTOMER": "Back to Customers",
+      "VENDOR": "Back to Vendors"
+    },
+    "createdAt": "Created at",
+    "updatedAt": "Updated at",
+    "inactiveNotice": {
+      "CUSTOMER": "This party is inactive as a customer.",
+      "VENDOR": "This party is inactive as a vendor."
+    }
+  },
+  "pagination": {
+    "nav": "Pagination Navigation",
+    "previous": "Previous",
+    "next": "Next",
+    "rowsPerPage": "Rows per page",
+    "summary": "{{from}}–{{to}} of {{total}}",
+    "pageOf": "Page {{page}} of {{pageCount}}",
+    "goTo": "Go to page {{page}}"
+  }
+}

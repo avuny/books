@@ -85,6 +85,11 @@
       "import": "./dist/organization-user/index.js",
       "default": "./dist/organization-user/index.js"
     },
+    "./party": {
+      "types": "./dist/party/index.d.ts",
+      "import": "./dist/party/index.js",
+      "default": "./dist/party/index.js"
+    },
     "./role": {
       "types": "./dist/role/index.d.ts",
       "import": "./dist/role/index.js",
