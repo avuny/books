@@ -24,6 +24,7 @@ import { organizationRoutes } from "./modules/organization/index.js"
 import { organizationInvitationRoutes } from "./modules/organization-invitation/index.js"
 import { organizationUserRoutes } from "./modules/organization-user/index.js"
 import { otpRoutes } from "./modules/otp/index.js"
+import { partyRoutes } from "./modules/party/index.js"
 import { roleRoutes } from "./modules/role/index.js"
 import { sidebarRoutes } from "./modules/sidebar/index.js"
 import { stockMovementRoutes } from "./modules/stock-movement/index.js"
@@ -103,6 +104,7 @@ app.route("/organizations", organizationRoutes)
 app.route("/organization-invitations", organizationInvitationRoutes)
 app.route("/organization-users", organizationUserRoutes)
 app.route("/otp", otpRoutes)
+app.route("/party", partyRoutes)
 app.route("/roles", roleRoutes)
 app.route("/sidebar", sidebarRoutes)
 app.route("/stockMovement", stockMovementRoutes)
