@@ -42,6 +42,10 @@ import {
   stockMovementTranslationsAr,
   stockMovementTranslationsEn,
 } from "@avuny/contracts/stock-movement"
+import {
+  partyTranslationsAr,
+  partyTranslationsEn,
+} from "@avuny/contracts/party"
 
 export const resources = {
   en: {
@@ -59,6 +63,7 @@ export const resources = {
     "warehouse-location": warehouseLocationTranslationsEn,
     "inventory-adjustment": inventoryAdjustmentTranslationsEn,
     "stock-movement": stockMovementTranslationsEn,
+    party: partyTranslationsEn,
   },
   ar: {
     common: commonTranslationsAr,
@@ -75,6 +80,7 @@ export const resources = {
     "warehouse-location": warehouseLocationTranslationsAr,
     "inventory-adjustment": inventoryAdjustmentTranslationsAr,
     "stock-movement": stockMovementTranslationsAr,
+    party: partyTranslationsAr,
   },
 }
 
