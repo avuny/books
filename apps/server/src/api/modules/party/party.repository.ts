@@ -2,7 +2,6 @@ import {
   and,
   asc,
   eq,
-  exists,
   ilike,
   inArray,
   or,
@@ -109,26 +108,26 @@ const escapeLike = (s: string) => s.replace(/[\\%_]/g, (m) => `\\${m}`)
 function searchCondition(search: string | undefined): SQL | undefined {
   if (!search) return undefined
   const pattern = `%${escapeLike(search)}%`
+  // Use raw SQL for the correlated EXISTS subqueries so that the outer-table
+  // column references (parties.id / parties.org_id) are emitted with their
+  // table qualifier. Drizzle column refs inside a raw sql`` template produce
+  // unqualified names ("id", "org_id") which break the correlation.
   return or(
     ilike(parties.displayName, pattern),
     ilike(parties.legalName, pattern),
     ilike(parties.taxNumber, pattern),
-    exists(
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (sql as any)`select 1 from ${partyEmails} where ${and(
-        eq(partyEmails.orgId, parties.orgId),
-        eq(partyEmails.partyId, parties.id),
-        ilike(partyEmails.email, pattern)
-      )}`
-    ),
-    exists(
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (sql as any)`select 1 from ${partyPhones} where ${and(
-        eq(partyPhones.orgId, parties.orgId),
-        eq(partyPhones.partyId, parties.id),
-        ilike(partyPhones.phone, pattern)
-      )}`
-    )
+    sql`exists (
+      select 1 from party_emails pe
+      where pe.org_id  = ${parties.orgId}
+        and pe.party_id = ${parties.id}
+        and pe.email ilike ${pattern}
+    )`,
+    sql`exists (
+      select 1 from party_phones pp
+      where pp.org_id  = ${parties.orgId}
+        and pp.party_id = ${parties.id}
+        and pp.phone ilike ${pattern}
+    )`
   )
 }
 
