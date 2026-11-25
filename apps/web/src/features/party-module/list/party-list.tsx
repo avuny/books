@@ -45,7 +45,7 @@ export function PartyList({ orgId, role, onViewParty }: PartyListProps) {
   )
 
   /* data */
-  const { parties, total, isLoading } = usePartyList(orgId, role, {
+  const { parties, total, isFetching } = usePartyList(orgId, role, {
     page: pagination.pageIndex + 1,
     pageSize: pagination.pageSize,
     scope,
@@ -58,11 +58,11 @@ export function PartyList({ orgId, role, onViewParty }: PartyListProps) {
 
   // Stepping back if last page is empty after deletions/deactivations
   useEffect(() => {
-    if (!isLoading && parties.length === 0 && pagination.pageIndex > 0) {
+    if (!isFetching && parties.length === 0 && pagination.pageIndex > 0) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setPagination((c) => ({ ...c, pageIndex: c.pageIndex - 1 }))
     }
-  }, [isLoading, parties.length, pagination.pageIndex])
+  }, [isFetching, parties.length, pagination.pageIndex])
 
   const formatDate = useCallback(
     (isoString: string) => {
@@ -194,7 +194,7 @@ export function PartyList({ orgId, role, onViewParty }: PartyListProps) {
 
       <DataTable
         table={table}
-        isLoading={isLoading}
+        isLoading={isFetching}
         onRowClick={(party) => onViewParty?.(party.id)}
         emptyState={
           <div className="flex flex-col items-center gap-1 px-6 py-16 text-center">
