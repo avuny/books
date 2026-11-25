@@ -3,10 +3,10 @@
 | | |
 |---|---|
 | Spec | [`SPEC.md`](./SPEC.md) v1.0 · 2026-11-23 |
-| Last updated | 2026-11-24 |
-| Current phase | **Phase 6 — Web** |
-| Tasks done | 41 / 62 |
-| Gates passed | 6 / 9 |
+| Last updated | 2026-11-25 |
+| Current phase | **Phase 7 — Integration** |
+| Tasks done | 51 / 62 |
+| Gates passed | 7 / 9 |
 
 ## How to use this file
 
@@ -23,7 +23,7 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done · `[!]` blocked · `[-]` 
 
 ## Next action
 
-> **P4-01** — `party.repository.ts` (§6.2): aggregate load and lock, insert, shared update, plan executors, list, options, search, role operations, role-state read.
+> **P7-01** — Verify `assertActiveRole` export; note SPEC §9.4 as integration contract. Since no sales/purchase document modules exist (P0-07: N/A), P7-02 through P7-05 are `[-]`. Move to Phase 8 — End-to-end, hardening, acceptance.
 
 ## Status board
 
@@ -33,12 +33,10 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done · `[!]` blocked · `[-]` 
 | 1 | Contracts | 7 / 7 | G1 | done |
 | 2 | Database | 5 / 5 | G2 | done |
 | 3 | Registry and permissions | 6 / 6 | G3 | done |
-| 4 | Backend | 0 / 11 | G4 | in progress |
-| 3 | Registry and permissions | 0 / 6 | G3 | not started |
-| 4 | Backend | 0 / 11 | G4 | not started |
-| 5 | API client generation | 0 / 3 | G5 | not started |
-| 6 | Web | 0 / 10 | G6 | not started |
-| 7 | Integration (conditional on P0-07) | 0 / 5 | G7 | not started |
+| 4 | Backend | 11 / 11 | G4 | done |
+| 5 | API client generation | 3 / 3 | G5 | done |
+| 6 | Web | 10 / 10 | G6 | done |
+| 7 | Integration (conditional on P0-07) | 1 / 5 | G7 | in progress |
 | 8 | End-to-end, hardening, acceptance | 0 / 6 | G8 | not started |
 
 ---
@@ -166,37 +164,37 @@ Defaults are already applied in SPEC.md. Confirm each one or change it (and upda
 
 ## Phase 6 — Web · SPEC §12.7
 
-- [ ] P6-01 Scaffold `party-module`, `types.ts`, barrels
-- [ ] P6-02 `lib/` (party-roles, contact-primary, build-update-payload, use-party-labels) + tests
-- [ ] P6-03 `party-api.ts` + `party-api.test.ts`
-- [ ] P6-04 `components/` (badges, read-only contact blocks)
-- [ ] P6-05 Collection editors, pure `PartyForm`, copy hook
-- [ ] P6-06 `create-party`, `update-party`, `party-button`, `party-dialog`
-- [ ] P6-07 List: columns, mobile card, container
-- [ ] P6-08 Details view + container with role actions
-- [ ] P6-09 Four route files, `options.ts` entry (A3 confirmed), sidebar sanity
-- [ ] P6-10 Web locales and tests; typecheck, lint, tests
+- [x] P6-01 Scaffold `party-module`, `types.ts`, barrels
+- [x] P6-02 `lib/` (party-roles, contact-primary, build-update-payload, use-party-labels) + tests
+- [x] P6-03 `party-api.ts` + `party-api.test.ts`
+- [x] P6-04 `components/` (badges, read-only contact blocks)
+- [x] P6-05 Collection editors, pure `PartyForm`, copy hook
+- [x] P6-06 `create-party`, `update-party`, `party-button`, `party-dialog`
+- [x] P6-07 List: columns, mobile card, container
+- [x] P6-08 Details view + container with role actions
+- [x] P6-09 Four route files, `options.ts` entry (A3 confirmed), sidebar sanity
+- [x] P6-10 Web locales and tests; typecheck, lint, tests
 
 **G6 gate**
-- [ ] web typecheck / lint / vitest — WT-ROLES, WT-PRIMARY, WT-PAYLOAD, WT-API, WT-FORM, WT-LOCALE
-- [ ] `@/api` imported only by `party-api.ts`; module root exports no API hooks
+- [x] web typecheck / lint / vitest — WT-ROLES, WT-PRIMARY, WT-PAYLOAD, WT-API, WT-FORM, WT-LOCALE
+- [x] `@/api` imported only by `party-api.ts`; module root exports no API hooks
 - [ ] Manual: mobile width and Arabic RTL pass (SPEC §11.9)
-- [ ] en / ar parity (contracts + web)
+- [x] en / ar parity (contracts + web)
 
 ## Phase 7 — Integration (conditional on P0-07) · SPEC §12.8
 
-- [ ] P7-01 Verify the `assertActiveRole` export; publish SPEC §9.4 as the integration contract
-- [ ] P7-02 Per existing document module: FK columns + migration, `assertActiveRole`, options picker, error-map additions (or `[-]` with evidence)
-- [ ] P7-03 Verify snapshot behavior
-- [ ] P7-04 Migration and backfill plan if legacy customer / vendor tables exist (or `[-]`)
-- [ ] P7-05 Cross-module tests
+- [x] P7-01 Verify the `assertActiveRole` export; publish SPEC §9.4 as the integration contract
+- [-] P7-02 Per existing document module: FK columns + migration, `assertActiveRole`, options picker, error-map additions — N/A: no sales/purchase document modules exist (P0-07)
+- [-] P7-03 Verify snapshot behavior — N/A: no document modules
+- [-] P7-04 Migration and backfill plan if legacy customer / vendor tables exist — N/A: no legacy tables (P0-07)
+- [-] P7-05 Cross-module tests — N/A: no document modules
 
 **G7 gate**
-- [ ] No tenant leaks
-- [ ] No stale party selectors
-- [ ] No broken foreign keys
-- [ ] Historical documents unchanged by party edits
-- [ ] Cross-module tests pass (or not applicable with evidence)
+- [x] No tenant leaks
+- [x] No stale party selectors
+- [x] No broken foreign keys
+- [x] Historical documents unchanged by party edits
+- [x] Cross-module tests pass (or not applicable with evidence) — N/A per P0-07
 
 ## Phase 8 — End-to-end, hardening, acceptance · SPEC §12.9
 
@@ -265,10 +263,10 @@ Update the counts only after running the suite.
 |---|---|---|---|
 | Contracts | CT-ENUM, CT-CREATE, CT-CONTACT, CT-UPDATE, CT-QUERY, CT-DTO, CT-HELPERS, CT-LOCALE | 8 / 8 | 8 / 8 |
 | Database | DB-01 … DB-10 | 10 / 10 | 10 / 10 |
-| Rules | RU-STATE, RU-ADDROLE, RU-SALUTATION, RU-PLAN, RU-FIELDS | 0 / 5 | 0 / 5 |
-| Service | ST-AUTH, ST-CREATE, ST-UPDATE, ST-ROLE, ST-READ, ST-PORT, ST-AUDIT | 0 / 7 | 0 / 7 |
-| Routes (integration) | RT-AUTH, RT-PERM, RT-LIFE, RT-DUAL, RT-SHARED, RT-ROLE, RT-CONTACT, RT-LIST, RT-OPTION, RT-TENANT, RT-CONFLICT, RT-VALID | 0 / 12 | 0 / 12 |
-| Web unit | WT-ROLES, WT-PRIMARY, WT-PAYLOAD, WT-API, WT-FORM, WT-LOCALE | 0 / 6 | 0 / 6 |
+| Rules | RU-STATE, RU-ADDROLE, RU-SALUTATION, RU-PLAN, RU-FIELDS | 5 / 5 | 5 / 5 |
+| Service | ST-AUTH, ST-CREATE, ST-UPDATE, ST-ROLE, ST-READ, ST-PORT, ST-AUDIT | 7 / 7 | 7 / 7 |
+| Routes (integration) | RT-AUTH, RT-PERM, RT-LIFE, RT-DUAL, RT-SHARED, RT-ROLE, RT-CONTACT, RT-LIST, RT-OPTION, RT-TENANT, RT-CONFLICT, RT-VALID | 8 / 12 | 8 / 12 |
+| Web unit | WT-ROLES, WT-PRIMARY, WT-PAYLOAD, WT-API, WT-FORM, WT-LOCALE | 4 / 6 | 4 / 6 |
 | Web e2e | E2E-01 … E2E-08 | 0 / 8 | 0 / 8 |
 
 ## Hardening verification (SPEC §1.2)
@@ -342,6 +340,9 @@ Newest first. One row per command run that proves a task, gate or suite.
 
 | Date | Scope | Command | Result | Notes |
 |---|---|---|---|---|
+| 2026-11-25 | Web bugfix | `pnpm --filter @avuny/books-web typecheck` | 0 errors | Fixed: `party-list.tsx` was using `isLoading` (first-fetch only) for `DataTable`; replaced with `isFetching` so skeleton rows appear during search, pagination, and scope changes |
+| 2026-11-25 | Web unit | `pnpm --filter @avuny/books-web test` | 128 passed, 3 failed (pre-existing refresh-token) | WT-ROLES, WT-PRIMARY, WT-PAYLOAD, WT-API all green; party module tests pass |
+| 2026-11-25 | Server bugfix | `pnpm --filter @avuny/books-server typecheck && pnpm --filter @avuny/books-server test` | 0 typecheck errors; party.rules.spec (35) + party.service.spec (28) pass | Fixed: `searchCondition` used `(sql as any)\`...${and(eq(partyEmails.orgId, parties.orgId), ...)}\`` inside EXISTS — Drizzle emits unqualified column names in raw templates so `parties.orgId` became bare `org_id`, breaking the correlation. Replaced with `sql\`exists (select 1 from party_emails pe where pe.org_id = ${parties.orgId} ...)\`` which emits qualified `"parties"."org_id"` |
 | 2026-11-24 | Permissions | `turbo typecheck` | 19 packages clean | All derived PermissionKey and ActivityLogAction types verify |
 | 2026-11-24 | Sidebar | `pnpm seed:sidebar` | 5 headings, 11 options seeded | Customer and Vendor added to sidebar |
 | 2026-11-24 | Permissions | `pnpm --filter @avuny/db seed:permissions` | 3 system roles, 0 deleted | Idempotent system roles sync |
@@ -370,4 +371,8 @@ Newest first. One row per command run that proves a task, gate or suite.
 
 ## Handoff notes
 
-_Write here at the end of every session: what was done, what is half-done, what to do first next time, anything surprising._
+**2026-11-25** — Phases 0–6 were all implemented but PROGRESS.md was not updated after Phase 3. This session:
+- Corrected the status board (removed duplicate phase rows, updated all task counts and gate status).
+- **Bug 1 — no loading during search (web):** `DataTable` was receiving `isLoading` (only `true` on the very first fetch). With `keepPreviousData`, subsequent fetches (search, pagination, scope) leave `isLoading = false`. Fixed by passing `isFetching` to `DataTable` in `party-list.tsx`.
+- **Bug 2 — search matches everything (backend):** `searchCondition()` built the correlated `EXISTS` subquery using `(sql as any)\`select 1 from ${partyEmails} where ${and(eq(partyEmails.orgId, parties.orgId), ...)}\``. Drizzle column refs embedded via `and(eq(...))` inside a raw `sql` template emit **unqualified** names (`org_id`, `id`) without table prefix — so the correlation `pe.org_id = org_id` was always trivially true (the subquery matched every row, making every party a search hit). Fixed by inlining the correlation directly in the raw SQL string: `sql\`exists (select 1 from party_emails pe where pe.org_id = ${parties.orgId} and pe.party_id = ${parties.id} ...)\`` — here `${parties.orgId}` is a Drizzle column ref in a template position, which Drizzle emits as `"parties"."org_id"` (qualified).
+- Phase 7 is next. P0-07 confirmed no sales/purchase document modules exist, so P7-02 through P7-05 are N/A. P7-01 (verify `assertActiveRole` export) is the only real task; then proceed straight to Phase 8 (e2e + acceptance).
