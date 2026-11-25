@@ -184,6 +184,7 @@ Rules (read the ones touching your task, they are short): `.agents/rules/*.md`.
 10. **UI hiding is cosmetic; the server enforces permissions.** Never rely on `hasPermission` in the web alone.
 11. **RTL-safe + semantic tokens**: `ps-/pe-/ms-/me-/start/end`, `rtl:rotate-180` on directional icons; `text-foreground`, `bg-card`, `border-border` — no hard-coded colors, no `left/right`.
 12. **No hard-coded user-facing strings** — not even "coming soon" placeholders (existing `users.tsx` does this; don't copy it).
+13. **Locale interpolation uses single braces `{variable}`**, never double braces `{{variable}}`. All `en.json` and `ar.json` files in this repo must use `{name}`, `{count}`, `{from}`, etc. Double braces are rendered literally and will not be substituted at runtime.
 
 ## 5. Commands ⚠ (fill in once)
 

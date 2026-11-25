@@ -44,18 +44,22 @@ The web reads both through one namespace (`useTranslation("role")` reads `labels
     "tabs":   { "aria": "Filter by status", "all": "All", "draft": "Draft", "active": "Active", "archived": "Archived" },
     "search": { "placeholder": "Search projects", "clear": "Clear search" }
   },
-  "table":  { "name": "Name", "status": "Status", "members": "Members", "actions": "Actions", "actionsFor": "Actions for {{name}}" },
+  "table":  { "name": "Name", "status": "Status", "members": "Members", "actions": "Actions", "actionsFor": "Actions for {name}" },
   "empty":  { "title": "No projects yet", "description": "Create your first project." },
   "pagination": {
     "nav": "Pagination", "previous": "Previous", "next": "Next", "rowsPerPage": "Rows per page",
-    "summary": "{{from}}–{{to}} of {{total}}", "pageOf": "Page {{page}} of {{pageCount}}", "goTo": "Go to page {{page}}"
+    "summary": "{from}–{to} of {total}", "pageOf": "Page {page} of {pageCount}", "goTo": "Go to page {page}"
   },
-  "delete":  { "title": "Delete project?", "description": "“{{name}}” will be permanently deleted." },
+  "delete":  { "title": "Delete project?", "description": "\u201c{name}\u201d will be permanently deleted." },
   "details": { "back": "Back to projects", "createdAt": "Created", "updatedAt": "Updated" }
 }
 ```
 
-i18next interpolation is `{{name}}`. Plurals: pass `count` and add `_one`/`_other` (Arabic needs `_zero/_one/_two/_few/_many/_other` — provide at least `_one` and `_other` and let the fallback handle the rest unless the text shows a count).
+> [!IMPORTANT]
+> **Interpolation syntax: use single braces `{variable}`, never double braces `{{variable}}`.**
+> This project's i18next configuration uses single-brace interpolation. Double braces (`{{name}}`) will be rendered literally instead of substituted. All locale JSON files in this repo must use `{name}`, `{count}`, `{from}`, etc.
+
+i18next interpolation is `{name}`. Plurals: pass `count` and add `_one`/`_other` (Arabic needs `_zero/_one/_two/_few/_many/_other` — provide at least `_one` and `_other` and let the fallback handle the rest unless the text shows a count).
 
 ## How code uses them
 
@@ -73,7 +77,7 @@ Server messages are already localized: show `parseApiError(e).message`, never ma
 ## Arabic / RTL
 
 - Translate meaning, not words; keep product nouns consistent with the existing `ar.json` (e.g. "المؤسسة" for organization, "الدعوة" for invitation).
-- Do not put punctuation that depends on direction inside translated strings; keep numbers/placeholders as `{{x}}`.
+- Do not put punctuation that depends on direction inside translated strings; keep numbers/placeholders as `{x}`.
 - Layout: logical utilities only (`ps-/pe-/ms-/me-/start/end`), `rtl:rotate-180` on directional icons.
 
 ## Parity check (run before finishing)
@@ -89,5 +93,5 @@ Exit code 1 lists keys missing from either language. Also confirm every code in 
 - [ ] en and ar have identical key sets
 - [ ] Every error code has a message; every service `msg` code has an `msgs` entry
 - [ ] No hard-coded strings in TSX (including placeholders and aria-labels)
-- [ ] Interpolations use `{{name}}`, not string concatenation
+- [ ] Interpolations use single-brace `{name}`, **not** `{{name}}` and not string concatenation
 - [ ] Checked the screen in Arabic (layout flips, no clipped text)
