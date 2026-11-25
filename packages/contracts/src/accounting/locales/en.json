@@ -241,7 +241,7 @@
     "type": "Type",
     "balance": "Balance",
     "actions": "Actions",
-    "actionsFor": "Actions for {{name}}"
+    "actionsFor": "Actions for {name}"
   },
   "empty": {
     "title": "No accounts yet",
@@ -249,7 +249,7 @@
   },
   "delete": {
     "title": "Delete account?",
-    "description": "“{{name}}” will be permanently deleted. This only works for accounts that were never used."
+    "description": "“{name}” will be permanently deleted. This only works for accounts that were never used."
   },
   "details": {
     "back": "Back to accounts",
@@ -263,8 +263,8 @@
     "previous": "Previous",
     "next": "Next",
     "rowsPerPage": "Rows per page",
-    "summary": "{{from}}–{{to}} of {{total}}",
-    "pageOf": "Page {{page}} of {{pageCount}}",
-    "goTo": "Go to page {{page}}"
+    "summary": "{from}–{to} of {total}",
+    "pageOf": "Page {page} of {pageCount}",
+    "goTo": "Go to page {page}"
   }
 }

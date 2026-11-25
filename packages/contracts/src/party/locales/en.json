@@ -193,7 +193,7 @@
     "roles": "Roles",
     "updated": "Last Updated",
     "actions": "Actions",
-    "actionsFor": "Actions for {{name}}"
+    "actionsFor": "Actions for {name}"
   },
   "empty": {
     "CUSTOMER": {
@@ -212,11 +212,11 @@
   "delete": {
     "CUSTOMER": {
       "title": "Deactivate customer",
-      "description": "Are you sure you want to deactivate “{{name}}” as a Customer? Shared party information and any Vendor role will remain active."
+      "description": "Are you sure you want to deactivate “{name}” as a Customer? Shared party information and any Vendor role will remain active."
     },
     "VENDOR": {
       "title": "Deactivate vendor",
-      "description": "Are you sure you want to deactivate “{{name}}” as a Vendor? Shared party information and any Customer role will remain active."
+      "description": "Are you sure you want to deactivate “{name}” as a Vendor? Shared party information and any Customer role will remain active."
     }
   },
   "details": {
@@ -236,8 +236,8 @@
     "previous": "Previous",
     "next": "Next",
     "rowsPerPage": "Rows per page",
-    "summary": "{{from}}–{{to}} of {{total}}",
-    "pageOf": "Page {{page}} of {{pageCount}}",
-    "goTo": "Go to page {{page}}"
+    "summary": "{from}–{to} of {total}",
+    "pageOf": "Page {page} of {pageCount}",
+    "goTo": "Go to page {page}"
   }
 }

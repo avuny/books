@@ -33,7 +33,7 @@
     "searchLocation": "Search locations...",
     "noWarehouses": "No warehouses found",
     "noLocations": "No locations found",
-    "selectedCount": "{{count}} selected",
+    "selectedCount": "{count} selected",
     "physical": "Physical",
     "virtual": "Virtual"
   },
@@ -131,7 +131,7 @@
     "type": "Type",
     "status": "Status",
     "actions": "Actions",
-    "actionsFor": "Actions for {{name}}"
+    "actionsFor": "Actions for {name}"
   },
   "empty": {
     "title": "No warehouses yet",
@@ -139,11 +139,11 @@
   },
   "delete": {
     "title": "Delete warehouse?",
-    "description": "“{{name}}” will be permanently deleted. This only works for warehouses that were never used."
+    "description": "“{name}” will be permanently deleted. This only works for warehouses that were never used."
   },
   "deactivate": {
     "title": "Deactivate warehouse?",
-    "description": "“{{name}}” will stop accepting stock. It must be empty and have no open documents."
+    "description": "“{name}” will stop accepting stock. It must be empty and have no open documents."
   },
   "details": {
     "back": "Back to warehouses",
@@ -167,8 +167,8 @@
     "previous": "Previous",
     "next": "Next",
     "rowsPerPage": "Rows per page",
-    "summary": "{{from}}–{{to}} of {{total}}",
-    "pageOf": "Page {{page}} of {{pageCount}}",
-    "goTo": "Go to page {{page}}"
+    "summary": "{from}–{to} of {total}",
+    "pageOf": "Page {page} of {pageCount}",
+    "goTo": "Go to page {page}"
   }
 }

@@ -127,12 +127,12 @@
     "submittingLabel": "Creating…",
     "preview": "Preview",
     "previewing": "Checking…",
-    "total": "Locations to create: {{count}}",
-    "created": "Locations created: {{count}}",
-    "tooMany": "That is more than {{max}} locations. Reduce the counts.",
+    "total": "Locations to create: {count}",
+    "created": "Locations created: {count}",
+    "tooMany": "That is more than {max} locations. Reduce the counts.",
     "badOrder": "Each level must sit below the one before it.",
     "examples": "Examples",
-    "level": "Level {{number}}"
+    "level": "Level {number}"
   },
   "fields": {
     "parent": {
@@ -231,7 +231,7 @@
     "purpose": "Purpose",
     "status": "Status",
     "actions": "Actions",
-    "actionsFor": "Actions for {{name}}"
+    "actionsFor": "Actions for {name}"
   },
   "empty": {
     "title": "No locations yet",
@@ -239,17 +239,17 @@
   },
   "delete": {
     "title": "Delete location?",
-    "description": "“{{name}}” will be permanently deleted. This only works for locations that were never used."
+    "description": "“{name}” will be permanently deleted. This only works for locations that were never used."
   },
   "deactivate": {
     "title": "Deactivate location?",
-    "description": "“{{name}}” will stop accepting stock. It must be empty and not used by open documents.",
+    "description": "“{name}” will stop accepting stock. It must be empty and not used by open documents.",
     "submitLabel": "Deactivate"
   },
   "tree": {
     "aria": "Location tree",
-    "expand": "Expand {{name}}",
-    "collapse": "Collapse {{name}}",
+    "expand": "Expand {name}",
+    "collapse": "Collapse {name}",
     "loading": "Loading…",
     "empty": "No locations yet",
     "error": "Could not load this level"
@@ -287,8 +287,8 @@
     "previous": "Previous",
     "next": "Next",
     "rowsPerPage": "Rows per page",
-    "summary": "{{from}}–{{to}} of {{total}}",
-    "pageOf": "Page {{page}} of {{pageCount}}",
-    "goTo": "Go to page {{page}}"
+    "summary": "{from}–{to} of {total}",
+    "pageOf": "Page {page} of {pageCount}",
+    "goTo": "Go to page {page}"
   }
 }

@@ -62,6 +62,6 @@
   "pagination": {
     "previous": "السابق",
     "next": "التالي",
-    "summary": "{{from}}–{{to}} من {{total}}"
+    "summary": "{from}–{to} من {total}"
   }
 }

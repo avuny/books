@@ -241,7 +241,7 @@
     "type": "النوع",
     "balance": "الرصيد",
     "actions": "الإجراءات",
-    "actionsFor": "إجراءات {{name}}"
+    "actionsFor": "إجراءات {name}"
   },
   "empty": {
     "title": "لا توجد حسابات بعد",
@@ -249,7 +249,7 @@
   },
   "delete": {
     "title": "حذف الحساب؟",
-    "description": "سيتم حذف «{{name}}» نهائيًا. يعمل هذا فقط للحسابات التي لم تُستخدم قط."
+    "description": "سيتم حذف «{name}» نهائيًا. يعمل هذا فقط للحسابات التي لم تُستخدم قط."
   },
   "details": {
     "back": "العودة إلى الحسابات",
@@ -263,8 +263,8 @@
     "previous": "السابق",
     "next": "التالي",
     "rowsPerPage": "عدد الصفوف في الصفحة",
-    "summary": "{{from}}–{{to}} من {{total}}",
-    "pageOf": "الصفحة {{page}} من {{pageCount}}",
-    "goTo": "اذهب إلى الصفحة {{page}}"
+    "summary": "{from}–{to} من {total}",
+    "pageOf": "الصفحة {page} من {pageCount}",
+    "goTo": "اذهب إلى الصفحة {page}"
   }
 }

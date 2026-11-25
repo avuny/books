@@ -62,6 +62,6 @@
   "pagination": {
     "previous": "Previous",
     "next": "Next",
-    "summary": "{{from}}–{{to}} of {{total}}"
+    "summary": "{from}–{to} of {total}"
   }
 }
