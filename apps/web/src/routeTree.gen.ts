@@ -26,6 +26,7 @@ import { Route as OrganizationCreateRouteImport } from './routes/organization/cr
 import { Route as UserIndexRouteImport } from './routes/user/index'
 import { Route as UserSettingsRouteImport } from './routes/user/settings'
 import { Route as OrganizationOrgIdIndexRouteImport } from './routes/organization/$orgId/index'
+import { Route as OrganizationOrgIdPaymentTermsRouteImport } from './routes/organization/$orgId/payment-terms'
 import { Route as OrganizationOrgIdRoleRouteImport } from './routes/organization/$orgId/role'
 import { Route as OrganizationOrgIdSettingsRouteRouteImport } from './routes/organization/$orgId/settings/route'
 import { Route as OrganizationOrgIdWarehouseRouteImport } from './routes/organization/$orgId/warehouse'
@@ -38,6 +39,9 @@ import { Route as OrganizationOrgIdItemCategoriesIndexRouteImport } from './rout
 import { Route as OrganizationOrgIdItemCategoriesCategoryIdRouteImport } from './routes/organization/$orgId/item-categories/$categoryId'
 import { Route as OrganizationOrgIdItemsIndexRouteImport } from './routes/organization/$orgId/items/index'
 import { Route as OrganizationOrgIdItemsItemIdRouteImport } from './routes/organization/$orgId/items/$itemId'
+import { Route as OrganizationOrgIdPurchaseOrdersIndexRouteImport } from './routes/organization/$orgId/purchase-orders/index'
+import { Route as OrganizationOrgIdPurchaseOrdersOrderIdRouteImport } from './routes/organization/$orgId/purchase-orders/$orderId'
+import { Route as OrganizationOrgIdPurchaseOrdersNewRouteImport } from './routes/organization/$orgId/purchase-orders/new'
 import { Route as OrganizationOrgIdRolesIndexRouteImport } from './routes/organization/$orgId/roles/index'
 import { Route as OrganizationOrgIdRolesRoleIdRouteImport } from './routes/organization/$orgId/roles/$roleId'
 import { Route as OrganizationOrgIdSettingsIndexRouteImport } from './routes/organization/$orgId/settings/index'
@@ -50,6 +54,7 @@ import { Route as OrganizationOrgIdUsersIndexRouteImport } from './routes/organi
 import { Route as OrganizationOrgIdVendorsIndexRouteImport } from './routes/organization/$orgId/vendors/index'
 import { Route as OrganizationOrgIdVendorsPartyIdRouteImport } from './routes/organization/$orgId/vendors/$partyId'
 import { Route as OrganizationOrgIdWarehousesIndexRouteImport } from './routes/organization/$orgId/warehouses/index'
+import { Route as OrganizationOrgIdPurchaseOrdersEditOrderIdRouteImport } from './routes/organization/$orgId/purchase-orders/edit.$orderId'
 import { Route as OrganizationOrgIdWarehousesWarehouseIdIndexRouteImport } from './routes/organization/$orgId/warehouses/$warehouseId/index'
 import { Route as OrganizationOrgIdWarehousesWarehouseIdLocationsIndexRouteImport } from './routes/organization/$orgId/warehouses/$warehouseId/locations/index'
 import { Route as OrganizationOrgIdWarehousesWarehouseIdLocationsLocationIdRouteImport } from './routes/organization/$orgId/warehouses/$warehouseId/locations/$locationId'
@@ -139,6 +144,12 @@ const OrganizationOrgIdIndexRoute = OrganizationOrgIdIndexRouteImport.update({
   path: '/',
   getParentRoute: () => OrganizationOrgIdRouteRoute,
 } as any)
+const OrganizationOrgIdPaymentTermsRoute =
+  OrganizationOrgIdPaymentTermsRouteImport.update({
+    id: '/payment-terms',
+    path: '/payment-terms',
+    getParentRoute: () => OrganizationOrgIdRouteRoute,
+  } as any)
 const OrganizationOrgIdRoleRoute = OrganizationOrgIdRoleRouteImport.update({
   id: '/role',
   path: '/role',
@@ -208,6 +219,24 @@ const OrganizationOrgIdItemsItemIdRoute =
   OrganizationOrgIdItemsItemIdRouteImport.update({
     id: '/items/$itemId',
     path: '/items/$itemId',
+    getParentRoute: () => OrganizationOrgIdRouteRoute,
+  } as any)
+const OrganizationOrgIdPurchaseOrdersIndexRoute =
+  OrganizationOrgIdPurchaseOrdersIndexRouteImport.update({
+    id: '/purchase-orders/',
+    path: '/purchase-orders/',
+    getParentRoute: () => OrganizationOrgIdRouteRoute,
+  } as any)
+const OrganizationOrgIdPurchaseOrdersOrderIdRoute =
+  OrganizationOrgIdPurchaseOrdersOrderIdRouteImport.update({
+    id: '/purchase-orders/$orderId',
+    path: '/purchase-orders/$orderId',
+    getParentRoute: () => OrganizationOrgIdRouteRoute,
+  } as any)
+const OrganizationOrgIdPurchaseOrdersNewRoute =
+  OrganizationOrgIdPurchaseOrdersNewRouteImport.update({
+    id: '/purchase-orders/new',
+    path: '/purchase-orders/new',
     getParentRoute: () => OrganizationOrgIdRouteRoute,
   } as any)
 const OrganizationOrgIdRolesIndexRoute =
@@ -282,6 +311,12 @@ const OrganizationOrgIdWarehousesIndexRoute =
     path: '/warehouses/',
     getParentRoute: () => OrganizationOrgIdRouteRoute,
   } as any)
+const OrganizationOrgIdPurchaseOrdersEditOrderIdRoute =
+  OrganizationOrgIdPurchaseOrdersEditOrderIdRouteImport.update({
+    id: '/purchase-orders/edit/$orderId',
+    path: '/purchase-orders/edit/$orderId',
+    getParentRoute: () => OrganizationOrgIdRouteRoute,
+  } as any)
 const OrganizationOrgIdWarehousesWarehouseIdIndexRoute =
   OrganizationOrgIdWarehousesWarehouseIdIndexRouteImport.update({
     id: '/warehouses/$warehouseId/',
@@ -319,6 +354,7 @@ export interface FileRoutesByFullPath {
   '/organization/': typeof OrganizationIndexRoute
   '/user/': typeof UserIndexRoute
   '/organization/$orgId/settings': typeof OrganizationOrgIdSettingsRouteRouteWithChildren
+  '/organization/$orgId/payment-terms': typeof OrganizationOrgIdPaymentTermsRoute
   '/organization/$orgId/role': typeof OrganizationOrgIdRoleRoute
   '/organization/$orgId/warehouse': typeof OrganizationOrgIdWarehouseRoute
   '/organization/$orgId/': typeof OrganizationOrgIdIndexRoute
@@ -326,6 +362,8 @@ export interface FileRoutesByFullPath {
   '/organization/$orgId/inventory-adjustments/$adjustmentId': typeof OrganizationOrgIdInventoryAdjustmentsAdjustmentIdRoute
   '/organization/$orgId/item-categories/$categoryId': typeof OrganizationOrgIdItemCategoriesCategoryIdRoute
   '/organization/$orgId/items/$itemId': typeof OrganizationOrgIdItemsItemIdRoute
+  '/organization/$orgId/purchase-orders/$orderId': typeof OrganizationOrgIdPurchaseOrdersOrderIdRoute
+  '/organization/$orgId/purchase-orders/new': typeof OrganizationOrgIdPurchaseOrdersNewRoute
   '/organization/$orgId/roles/$roleId': typeof OrganizationOrgIdRolesRoleIdRoute
   '/organization/$orgId/unit-collections/$collectionId': typeof OrganizationOrgIdUnitCollectionsCollectionIdRoute
   '/organization/$orgId/units/$unitId': typeof OrganizationOrgIdUnitsUnitIdRoute
@@ -335,6 +373,7 @@ export interface FileRoutesByFullPath {
   '/organization/$orgId/invitations/': typeof OrganizationOrgIdInvitationsIndexRoute
   '/organization/$orgId/item-categories/': typeof OrganizationOrgIdItemCategoriesIndexRoute
   '/organization/$orgId/items/': typeof OrganizationOrgIdItemsIndexRoute
+  '/organization/$orgId/purchase-orders/': typeof OrganizationOrgIdPurchaseOrdersIndexRoute
   '/organization/$orgId/roles/': typeof OrganizationOrgIdRolesIndexRoute
   '/organization/$orgId/settings/': typeof OrganizationOrgIdSettingsIndexRoute
   '/organization/$orgId/stock-movements/': typeof OrganizationOrgIdStockMovementsIndexRoute
@@ -343,6 +382,7 @@ export interface FileRoutesByFullPath {
   '/organization/$orgId/users/': typeof OrganizationOrgIdUsersIndexRoute
   '/organization/$orgId/vendors/': typeof OrganizationOrgIdVendorsIndexRoute
   '/organization/$orgId/warehouses/': typeof OrganizationOrgIdWarehousesIndexRoute
+  '/organization/$orgId/purchase-orders/edit/$orderId': typeof OrganizationOrgIdPurchaseOrdersEditOrderIdRoute
   '/organization/$orgId/warehouses/$warehouseId/': typeof OrganizationOrgIdWarehousesWarehouseIdIndexRoute
   '/organization/$orgId/warehouses/$warehouseId/locations/$locationId': typeof OrganizationOrgIdWarehousesWarehouseIdLocationsLocationIdRoute
   '/organization/$orgId/warehouses/$warehouseId/locations/': typeof OrganizationOrgIdWarehousesWarehouseIdLocationsIndexRoute
@@ -359,6 +399,7 @@ export interface FileRoutesByTo {
   '/invitations': typeof InvitationsIndexRoute
   '/organization': typeof OrganizationIndexRoute
   '/user': typeof UserIndexRoute
+  '/organization/$orgId/payment-terms': typeof OrganizationOrgIdPaymentTermsRoute
   '/organization/$orgId/role': typeof OrganizationOrgIdRoleRoute
   '/organization/$orgId/warehouse': typeof OrganizationOrgIdWarehouseRoute
   '/organization/$orgId': typeof OrganizationOrgIdIndexRoute
@@ -366,6 +407,8 @@ export interface FileRoutesByTo {
   '/organization/$orgId/inventory-adjustments/$adjustmentId': typeof OrganizationOrgIdInventoryAdjustmentsAdjustmentIdRoute
   '/organization/$orgId/item-categories/$categoryId': typeof OrganizationOrgIdItemCategoriesCategoryIdRoute
   '/organization/$orgId/items/$itemId': typeof OrganizationOrgIdItemsItemIdRoute
+  '/organization/$orgId/purchase-orders/$orderId': typeof OrganizationOrgIdPurchaseOrdersOrderIdRoute
+  '/organization/$orgId/purchase-orders/new': typeof OrganizationOrgIdPurchaseOrdersNewRoute
   '/organization/$orgId/roles/$roleId': typeof OrganizationOrgIdRolesRoleIdRoute
   '/organization/$orgId/unit-collections/$collectionId': typeof OrganizationOrgIdUnitCollectionsCollectionIdRoute
   '/organization/$orgId/units/$unitId': typeof OrganizationOrgIdUnitsUnitIdRoute
@@ -375,6 +418,7 @@ export interface FileRoutesByTo {
   '/organization/$orgId/invitations': typeof OrganizationOrgIdInvitationsIndexRoute
   '/organization/$orgId/item-categories': typeof OrganizationOrgIdItemCategoriesIndexRoute
   '/organization/$orgId/items': typeof OrganizationOrgIdItemsIndexRoute
+  '/organization/$orgId/purchase-orders': typeof OrganizationOrgIdPurchaseOrdersIndexRoute
   '/organization/$orgId/roles': typeof OrganizationOrgIdRolesIndexRoute
   '/organization/$orgId/settings': typeof OrganizationOrgIdSettingsIndexRoute
   '/organization/$orgId/stock-movements': typeof OrganizationOrgIdStockMovementsIndexRoute
@@ -383,6 +427,7 @@ export interface FileRoutesByTo {
   '/organization/$orgId/users': typeof OrganizationOrgIdUsersIndexRoute
   '/organization/$orgId/vendors': typeof OrganizationOrgIdVendorsIndexRoute
   '/organization/$orgId/warehouses': typeof OrganizationOrgIdWarehousesIndexRoute
+  '/organization/$orgId/purchase-orders/edit/$orderId': typeof OrganizationOrgIdPurchaseOrdersEditOrderIdRoute
   '/organization/$orgId/warehouses/$warehouseId': typeof OrganizationOrgIdWarehousesWarehouseIdIndexRoute
   '/organization/$orgId/warehouses/$warehouseId/locations/$locationId': typeof OrganizationOrgIdWarehousesWarehouseIdLocationsLocationIdRoute
   '/organization/$orgId/warehouses/$warehouseId/locations': typeof OrganizationOrgIdWarehousesWarehouseIdLocationsIndexRoute
@@ -406,6 +451,7 @@ export interface FileRoutesById {
   '/organization/': typeof OrganizationIndexRoute
   '/user/': typeof UserIndexRoute
   '/organization/$orgId/settings': typeof OrganizationOrgIdSettingsRouteRouteWithChildren
+  '/organization/$orgId/payment-terms': typeof OrganizationOrgIdPaymentTermsRoute
   '/organization/$orgId/role': typeof OrganizationOrgIdRoleRoute
   '/organization/$orgId/warehouse': typeof OrganizationOrgIdWarehouseRoute
   '/organization/$orgId/': typeof OrganizationOrgIdIndexRoute
@@ -413,6 +459,8 @@ export interface FileRoutesById {
   '/organization/$orgId/inventory-adjustments/$adjustmentId': typeof OrganizationOrgIdInventoryAdjustmentsAdjustmentIdRoute
   '/organization/$orgId/item-categories/$categoryId': typeof OrganizationOrgIdItemCategoriesCategoryIdRoute
   '/organization/$orgId/items/$itemId': typeof OrganizationOrgIdItemsItemIdRoute
+  '/organization/$orgId/purchase-orders/$orderId': typeof OrganizationOrgIdPurchaseOrdersOrderIdRoute
+  '/organization/$orgId/purchase-orders/new': typeof OrganizationOrgIdPurchaseOrdersNewRoute
   '/organization/$orgId/roles/$roleId': typeof OrganizationOrgIdRolesRoleIdRoute
   '/organization/$orgId/unit-collections/$collectionId': typeof OrganizationOrgIdUnitCollectionsCollectionIdRoute
   '/organization/$orgId/units/$unitId': typeof OrganizationOrgIdUnitsUnitIdRoute
@@ -422,6 +470,7 @@ export interface FileRoutesById {
   '/organization/$orgId/invitations/': typeof OrganizationOrgIdInvitationsIndexRoute
   '/organization/$orgId/item-categories/': typeof OrganizationOrgIdItemCategoriesIndexRoute
   '/organization/$orgId/items/': typeof OrganizationOrgIdItemsIndexRoute
+  '/organization/$orgId/purchase-orders/': typeof OrganizationOrgIdPurchaseOrdersIndexRoute
   '/organization/$orgId/roles/': typeof OrganizationOrgIdRolesIndexRoute
   '/organization/$orgId/settings/': typeof OrganizationOrgIdSettingsIndexRoute
   '/organization/$orgId/stock-movements/': typeof OrganizationOrgIdStockMovementsIndexRoute
@@ -430,6 +479,7 @@ export interface FileRoutesById {
   '/organization/$orgId/users/': typeof OrganizationOrgIdUsersIndexRoute
   '/organization/$orgId/vendors/': typeof OrganizationOrgIdVendorsIndexRoute
   '/organization/$orgId/warehouses/': typeof OrganizationOrgIdWarehousesIndexRoute
+  '/organization/$orgId/purchase-orders/edit/$orderId': typeof OrganizationOrgIdPurchaseOrdersEditOrderIdRoute
   '/organization/$orgId/warehouses/$warehouseId/': typeof OrganizationOrgIdWarehousesWarehouseIdIndexRoute
   '/organization/$orgId/warehouses/$warehouseId/locations/$locationId': typeof OrganizationOrgIdWarehousesWarehouseIdLocationsLocationIdRoute
   '/organization/$orgId/warehouses/$warehouseId/locations/': typeof OrganizationOrgIdWarehousesWarehouseIdLocationsIndexRoute
@@ -454,6 +504,7 @@ export interface FileRouteTypes {
     | '/organization/'
     | '/user/'
     | '/organization/$orgId/settings'
+    | '/organization/$orgId/payment-terms'
     | '/organization/$orgId/role'
     | '/organization/$orgId/warehouse'
     | '/organization/$orgId/'
@@ -461,6 +512,8 @@ export interface FileRouteTypes {
     | '/organization/$orgId/inventory-adjustments/$adjustmentId'
     | '/organization/$orgId/item-categories/$categoryId'
     | '/organization/$orgId/items/$itemId'
+    | '/organization/$orgId/purchase-orders/$orderId'
+    | '/organization/$orgId/purchase-orders/new'
     | '/organization/$orgId/roles/$roleId'
     | '/organization/$orgId/unit-collections/$collectionId'
     | '/organization/$orgId/units/$unitId'
@@ -470,6 +523,7 @@ export interface FileRouteTypes {
     | '/organization/$orgId/invitations/'
     | '/organization/$orgId/item-categories/'
     | '/organization/$orgId/items/'
+    | '/organization/$orgId/purchase-orders/'
     | '/organization/$orgId/roles/'
     | '/organization/$orgId/settings/'
     | '/organization/$orgId/stock-movements/'
@@ -478,6 +532,7 @@ export interface FileRouteTypes {
     | '/organization/$orgId/users/'
     | '/organization/$orgId/vendors/'
     | '/organization/$orgId/warehouses/'
+    | '/organization/$orgId/purchase-orders/edit/$orderId'
     | '/organization/$orgId/warehouses/$warehouseId/'
     | '/organization/$orgId/warehouses/$warehouseId/locations/$locationId'
     | '/organization/$orgId/warehouses/$warehouseId/locations/'
@@ -494,6 +549,7 @@ export interface FileRouteTypes {
     | '/invitations'
     | '/organization'
     | '/user'
+    | '/organization/$orgId/payment-terms'
     | '/organization/$orgId/role'
     | '/organization/$orgId/warehouse'
     | '/organization/$orgId'
@@ -501,6 +557,8 @@ export interface FileRouteTypes {
     | '/organization/$orgId/inventory-adjustments/$adjustmentId'
     | '/organization/$orgId/item-categories/$categoryId'
     | '/organization/$orgId/items/$itemId'
+    | '/organization/$orgId/purchase-orders/$orderId'
+    | '/organization/$orgId/purchase-orders/new'
     | '/organization/$orgId/roles/$roleId'
     | '/organization/$orgId/unit-collections/$collectionId'
     | '/organization/$orgId/units/$unitId'
@@ -510,6 +568,7 @@ export interface FileRouteTypes {
     | '/organization/$orgId/invitations'
     | '/organization/$orgId/item-categories'
     | '/organization/$orgId/items'
+    | '/organization/$orgId/purchase-orders'
     | '/organization/$orgId/roles'
     | '/organization/$orgId/settings'
     | '/organization/$orgId/stock-movements'
@@ -518,6 +577,7 @@ export interface FileRouteTypes {
     | '/organization/$orgId/users'
     | '/organization/$orgId/vendors'
     | '/organization/$orgId/warehouses'
+    | '/organization/$orgId/purchase-orders/edit/$orderId'
     | '/organization/$orgId/warehouses/$warehouseId'
     | '/organization/$orgId/warehouses/$warehouseId/locations/$locationId'
     | '/organization/$orgId/warehouses/$warehouseId/locations'
@@ -540,6 +600,7 @@ export interface FileRouteTypes {
     | '/organization/'
     | '/user/'
     | '/organization/$orgId/settings'
+    | '/organization/$orgId/payment-terms'
     | '/organization/$orgId/role'
     | '/organization/$orgId/warehouse'
     | '/organization/$orgId/'
@@ -547,6 +608,8 @@ export interface FileRouteTypes {
     | '/organization/$orgId/inventory-adjustments/$adjustmentId'
     | '/organization/$orgId/item-categories/$categoryId'
     | '/organization/$orgId/items/$itemId'
+    | '/organization/$orgId/purchase-orders/$orderId'
+    | '/organization/$orgId/purchase-orders/new'
     | '/organization/$orgId/roles/$roleId'
     | '/organization/$orgId/unit-collections/$collectionId'
     | '/organization/$orgId/units/$unitId'
@@ -556,6 +619,7 @@ export interface FileRouteTypes {
     | '/organization/$orgId/invitations/'
     | '/organization/$orgId/item-categories/'
     | '/organization/$orgId/items/'
+    | '/organization/$orgId/purchase-orders/'
     | '/organization/$orgId/roles/'
     | '/organization/$orgId/settings/'
     | '/organization/$orgId/stock-movements/'
@@ -564,6 +628,7 @@ export interface FileRouteTypes {
     | '/organization/$orgId/users/'
     | '/organization/$orgId/vendors/'
     | '/organization/$orgId/warehouses/'
+    | '/organization/$orgId/purchase-orders/edit/$orderId'
     | '/organization/$orgId/warehouses/$warehouseId/'
     | '/organization/$orgId/warehouses/$warehouseId/locations/$locationId'
     | '/organization/$orgId/warehouses/$warehouseId/locations/'
@@ -698,6 +763,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OrganizationOrgIdIndexRouteImport
       parentRoute: typeof OrganizationOrgIdRouteRoute
     }
+    '/organization/$orgId/payment-terms': {
+      id: '/organization/$orgId/payment-terms'
+      path: '/payment-terms'
+      fullPath: '/organization/$orgId/payment-terms'
+      preLoaderRoute: typeof OrganizationOrgIdPaymentTermsRouteImport
+      parentRoute: typeof OrganizationOrgIdRouteRoute
+    }
     '/organization/$orgId/role': {
       id: '/organization/$orgId/role'
       path: '/role'
@@ -780,6 +852,27 @@ declare module '@tanstack/react-router' {
       path: '/items/$itemId'
       fullPath: '/organization/$orgId/items/$itemId'
       preLoaderRoute: typeof OrganizationOrgIdItemsItemIdRouteImport
+      parentRoute: typeof OrganizationOrgIdRouteRoute
+    }
+    '/organization/$orgId/purchase-orders/': {
+      id: '/organization/$orgId/purchase-orders/'
+      path: '/purchase-orders'
+      fullPath: '/organization/$orgId/purchase-orders/'
+      preLoaderRoute: typeof OrganizationOrgIdPurchaseOrdersIndexRouteImport
+      parentRoute: typeof OrganizationOrgIdRouteRoute
+    }
+    '/organization/$orgId/purchase-orders/$orderId': {
+      id: '/organization/$orgId/purchase-orders/$orderId'
+      path: '/purchase-orders/$orderId'
+      fullPath: '/organization/$orgId/purchase-orders/$orderId'
+      preLoaderRoute: typeof OrganizationOrgIdPurchaseOrdersOrderIdRouteImport
+      parentRoute: typeof OrganizationOrgIdRouteRoute
+    }
+    '/organization/$orgId/purchase-orders/new': {
+      id: '/organization/$orgId/purchase-orders/new'
+      path: '/purchase-orders/new'
+      fullPath: '/organization/$orgId/purchase-orders/new'
+      preLoaderRoute: typeof OrganizationOrgIdPurchaseOrdersNewRouteImport
       parentRoute: typeof OrganizationOrgIdRouteRoute
     }
     '/organization/$orgId/roles/': {
@@ -866,6 +959,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OrganizationOrgIdWarehousesIndexRouteImport
       parentRoute: typeof OrganizationOrgIdRouteRoute
     }
+    '/organization/$orgId/purchase-orders/edit/$orderId': {
+      id: '/organization/$orgId/purchase-orders/edit/$orderId'
+      path: '/purchase-orders/edit/$orderId'
+      fullPath: '/organization/$orgId/purchase-orders/edit/$orderId'
+      preLoaderRoute: typeof OrganizationOrgIdPurchaseOrdersEditOrderIdRouteImport
+      parentRoute: typeof OrganizationOrgIdRouteRoute
+    }
     '/organization/$orgId/warehouses/$warehouseId/': {
       id: '/organization/$orgId/warehouses/$warehouseId/'
       path: '/warehouses/$warehouseId'
@@ -937,6 +1037,7 @@ const OrganizationOrgIdSettingsRouteRouteWithChildren =
 
 interface OrganizationOrgIdRouteRouteChildren {
   OrganizationOrgIdSettingsRouteRoute: typeof OrganizationOrgIdSettingsRouteRouteWithChildren
+  OrganizationOrgIdPaymentTermsRoute: typeof OrganizationOrgIdPaymentTermsRoute
   OrganizationOrgIdRoleRoute: typeof OrganizationOrgIdRoleRoute
   OrganizationOrgIdWarehouseRoute: typeof OrganizationOrgIdWarehouseRoute
   OrganizationOrgIdIndexRoute: typeof OrganizationOrgIdIndexRoute
@@ -944,6 +1045,8 @@ interface OrganizationOrgIdRouteRouteChildren {
   OrganizationOrgIdInventoryAdjustmentsAdjustmentIdRoute: typeof OrganizationOrgIdInventoryAdjustmentsAdjustmentIdRoute
   OrganizationOrgIdItemCategoriesCategoryIdRoute: typeof OrganizationOrgIdItemCategoriesCategoryIdRoute
   OrganizationOrgIdItemsItemIdRoute: typeof OrganizationOrgIdItemsItemIdRoute
+  OrganizationOrgIdPurchaseOrdersOrderIdRoute: typeof OrganizationOrgIdPurchaseOrdersOrderIdRoute
+  OrganizationOrgIdPurchaseOrdersNewRoute: typeof OrganizationOrgIdPurchaseOrdersNewRoute
   OrganizationOrgIdRolesRoleIdRoute: typeof OrganizationOrgIdRolesRoleIdRoute
   OrganizationOrgIdUnitCollectionsCollectionIdRoute: typeof OrganizationOrgIdUnitCollectionsCollectionIdRoute
   OrganizationOrgIdUnitsUnitIdRoute: typeof OrganizationOrgIdUnitsUnitIdRoute
@@ -953,6 +1056,7 @@ interface OrganizationOrgIdRouteRouteChildren {
   OrganizationOrgIdInvitationsIndexRoute: typeof OrganizationOrgIdInvitationsIndexRoute
   OrganizationOrgIdItemCategoriesIndexRoute: typeof OrganizationOrgIdItemCategoriesIndexRoute
   OrganizationOrgIdItemsIndexRoute: typeof OrganizationOrgIdItemsIndexRoute
+  OrganizationOrgIdPurchaseOrdersIndexRoute: typeof OrganizationOrgIdPurchaseOrdersIndexRoute
   OrganizationOrgIdRolesIndexRoute: typeof OrganizationOrgIdRolesIndexRoute
   OrganizationOrgIdStockMovementsIndexRoute: typeof OrganizationOrgIdStockMovementsIndexRoute
   OrganizationOrgIdUnitCollectionsIndexRoute: typeof OrganizationOrgIdUnitCollectionsIndexRoute
@@ -960,6 +1064,7 @@ interface OrganizationOrgIdRouteRouteChildren {
   OrganizationOrgIdUsersIndexRoute: typeof OrganizationOrgIdUsersIndexRoute
   OrganizationOrgIdVendorsIndexRoute: typeof OrganizationOrgIdVendorsIndexRoute
   OrganizationOrgIdWarehousesIndexRoute: typeof OrganizationOrgIdWarehousesIndexRoute
+  OrganizationOrgIdPurchaseOrdersEditOrderIdRoute: typeof OrganizationOrgIdPurchaseOrdersEditOrderIdRoute
   OrganizationOrgIdWarehousesWarehouseIdIndexRoute: typeof OrganizationOrgIdWarehousesWarehouseIdIndexRoute
   OrganizationOrgIdWarehousesWarehouseIdLocationsLocationIdRoute: typeof OrganizationOrgIdWarehousesWarehouseIdLocationsLocationIdRoute
   OrganizationOrgIdWarehousesWarehouseIdLocationsIndexRoute: typeof OrganizationOrgIdWarehousesWarehouseIdLocationsIndexRoute
@@ -969,6 +1074,7 @@ const OrganizationOrgIdRouteRouteChildren: OrganizationOrgIdRouteRouteChildren =
   {
     OrganizationOrgIdSettingsRouteRoute:
       OrganizationOrgIdSettingsRouteRouteWithChildren,
+    OrganizationOrgIdPaymentTermsRoute: OrganizationOrgIdPaymentTermsRoute,
     OrganizationOrgIdRoleRoute: OrganizationOrgIdRoleRoute,
     OrganizationOrgIdWarehouseRoute: OrganizationOrgIdWarehouseRoute,
     OrganizationOrgIdIndexRoute: OrganizationOrgIdIndexRoute,
@@ -979,6 +1085,10 @@ const OrganizationOrgIdRouteRouteChildren: OrganizationOrgIdRouteRouteChildren =
     OrganizationOrgIdItemCategoriesCategoryIdRoute:
       OrganizationOrgIdItemCategoriesCategoryIdRoute,
     OrganizationOrgIdItemsItemIdRoute: OrganizationOrgIdItemsItemIdRoute,
+    OrganizationOrgIdPurchaseOrdersOrderIdRoute:
+      OrganizationOrgIdPurchaseOrdersOrderIdRoute,
+    OrganizationOrgIdPurchaseOrdersNewRoute:
+      OrganizationOrgIdPurchaseOrdersNewRoute,
     OrganizationOrgIdRolesRoleIdRoute: OrganizationOrgIdRolesRoleIdRoute,
     OrganizationOrgIdUnitCollectionsCollectionIdRoute:
       OrganizationOrgIdUnitCollectionsCollectionIdRoute,
@@ -992,6 +1102,8 @@ const OrganizationOrgIdRouteRouteChildren: OrganizationOrgIdRouteRouteChildren =
     OrganizationOrgIdItemCategoriesIndexRoute:
       OrganizationOrgIdItemCategoriesIndexRoute,
     OrganizationOrgIdItemsIndexRoute: OrganizationOrgIdItemsIndexRoute,
+    OrganizationOrgIdPurchaseOrdersIndexRoute:
+      OrganizationOrgIdPurchaseOrdersIndexRoute,
     OrganizationOrgIdRolesIndexRoute: OrganizationOrgIdRolesIndexRoute,
     OrganizationOrgIdStockMovementsIndexRoute:
       OrganizationOrgIdStockMovementsIndexRoute,
@@ -1002,6 +1114,8 @@ const OrganizationOrgIdRouteRouteChildren: OrganizationOrgIdRouteRouteChildren =
     OrganizationOrgIdVendorsIndexRoute: OrganizationOrgIdVendorsIndexRoute,
     OrganizationOrgIdWarehousesIndexRoute:
       OrganizationOrgIdWarehousesIndexRoute,
+    OrganizationOrgIdPurchaseOrdersEditOrderIdRoute:
+      OrganizationOrgIdPurchaseOrdersEditOrderIdRoute,
     OrganizationOrgIdWarehousesWarehouseIdIndexRoute:
       OrganizationOrgIdWarehousesWarehouseIdIndexRoute,
     OrganizationOrgIdWarehousesWarehouseIdLocationsLocationIdRoute:

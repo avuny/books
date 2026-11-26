@@ -27,6 +27,11 @@ import { batches } from "./batch.js"
  * For batch-tracked items, on_hand_qty and reserved_qty must equal the sums of the corresponding
  * inventory_item_batches columns. For non-batch-tracked items, quantities live only on this row.
  * available quantity is derived as on_hand_qty - reserved_qty and is not stored.
+ * Inbound purchasing quantities are mutually exclusive stages of outstanding supply, never double counted:
+ * on_order_qty = confirmed purchase quantity not yet dispatched by the supplier; in_transit_qty = dispatched
+ * quantity not yet received. Expected incoming = on_order_qty + in_transit_qty. Both live at this aggregate
+ * level only (the supplier batch is usually unknown before receipt, so inventory_item_batches has no in-transit
+ * column). Rows may be created by a purchase order confirmation while on_hand_qty is still 0.
  */
 export const inventoryItems = pgTable(
     "inventory_items",
@@ -39,6 +44,7 @@ export const inventoryItems = pgTable(
         onHandQty: quantity("on_hand_qty").notNull().default("0"),
         reservedQty: quantity("reserved_qty").notNull().default("0"),
         onOrderQty: quantity("on_order_qty").notNull().default("0"),
+        inTransitQty: quantity("in_transit_qty").notNull().default("0"),
         ...timestamps(),
     },
     (t) => [
@@ -65,6 +71,7 @@ export const inventoryItems = pgTable(
         }).onDelete("restrict"),
         check("ck_inventory_item_reserved_non_negative", sql`${t.reservedQty} >= 0`),
         check("ck_inventory_item_on_order_non_negative", sql`${t.onOrderQty} >= 0`),
+        check("ck_inventory_item_in_transit_non_negative", sql`${t.inTransitQty} >= 0`),
         index("ix_inventory_item_org_location").on(t.orgId, t.locationId),
         index("ix_inventory_item_org_warehouse_item").on(t.orgId, t.warehouseId, t.itemId),
         index("ix_inventory_item_org_item").on(t.orgId, t.itemId),

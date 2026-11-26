@@ -25,6 +25,12 @@ import otpEn from "./locales/otp/en.json" with { type: "json" }
 import otpAr from "./locales/otp/ar.json" with { type: "json" }
 import partyEn from "./locales/party/en.json" with { type: "json" }
 import partyAr from "./locales/party/ar.json" with { type: "json" }
+import paymentTermEn from "./locales/payment-term/en.json" with { type: "json" }
+import paymentTermAr from "./locales/payment-term/ar.json" with { type: "json" }
+import purchaseOrderEn from "./locales/purchase-order/en.json" with { type: "json" }
+import purchaseOrderAr from "./locales/purchase-order/ar.json" with { type: "json" }
+import purchaseShipmentEn from "./locales/purchase-shipment/en.json" with { type: "json" }
+import purchaseShipmentAr from "./locales/purchase-shipment/ar.json" with { type: "json" }
 import roleEn from "./locales/role/en.json" with { type: "json" }
 import roleAr from "./locales/role/ar.json" with { type: "json" }
 import sidebarEn from "./locales/sidebar/en.json" with { type: "json" }
@@ -60,6 +66,12 @@ export const resources = {
         organizationUser: organizationUserEn,
         otp: otpEn,
         party: partyEn,
+        "payment-term": paymentTermEn,
+        paymentTerm: paymentTermEn,
+        "purchase-order": purchaseOrderEn,
+        purchaseOrder: purchaseOrderEn,
+        "purchase-shipment": purchaseShipmentEn,
+        purchaseShipment: purchaseShipmentEn,
         role: roleEn,
         sidebar: sidebarEn,
         unit: unitEn,
@@ -88,6 +100,12 @@ export const resources = {
         organizationUser: organizationUserAr,
         otp: otpAr,
         party: partyAr,
+        "payment-term": paymentTermAr,
+        paymentTerm: paymentTermAr,
+        "purchase-order": purchaseOrderAr,
+        purchaseOrder: purchaseOrderAr,
+        "purchase-shipment": purchaseShipmentAr,
+        purchaseShipment: purchaseShipmentAr,
         role: roleAr,
         sidebar: sidebarAr,
         unit: unitAr,
@@ -110,7 +128,7 @@ export function installRequestLanguage(): void {
   i18next.init({
     lng: "en",
     fallbackLng: "en",
-    ns: ["accounting", "admin", "auth", "batch", "geo", "inventory-adjustment", "inventoryAdjustment", "item", "item-category", "itemCategory", "organization", "organization-invitation", "organizationInvitation", "organization-user", "organizationUser", "otp", "party", "role", "sidebar", "unit", "unit-collection", "unitCollection", "users", "warehouse", "warehouse-location", "warehouseLocation"],
+    ns: ["accounting", "admin", "auth", "batch", "geo", "inventory-adjustment", "inventoryAdjustment", "item", "item-category", "itemCategory", "organization", "organization-invitation", "organizationInvitation", "organization-user", "organizationUser", "otp", "party", "payment-term", "paymentTerm", "purchase-order", "purchaseOrder", "purchase-shipment", "purchaseShipment", "role", "sidebar", "unit", "unit-collection", "unitCollection", "users", "warehouse", "warehouse-location", "warehouseLocation"],
     defaultNS: "otp",
     resources,
     interpolation: { escapeValue: false },

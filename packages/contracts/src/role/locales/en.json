@@ -19,6 +19,9 @@
       "role": "Roles",
       "inventory_adjustment": "Inventory adjustments",
       "customer": "Customers",
+      "purchase_order": "Purchase orders",
+      "purchase_shipment": "Supplier shipments",
+      "payment_term": "Payment terms",
       "vendor": "Vendors",
       "activity_log": "Activity log",
       "item": "Items",
@@ -41,6 +44,9 @@
       "assign": "Assign to members",
       "confirm": "Confirm",
       "cancel": "Cancel",
+      "close": "Close",
+      "post": "Post",
+      "reverse": "Reverse",
       "*": "All actions"
     },
     "effects": {
