@@ -1,0 +1,206 @@
+{
+  "errors": {
+    "SERVER_ERROR": "Server Error, Please Try again later",
+    "AUTH_LOGIN_INCORRECT_CREDENTIALS": "Incorrect email or password.",
+    "AUTH_LOGIN_USER_PASSWORD_NOT_SET": "Password is not set for this account.",
+    "AUTH_USED_EMAIL": "This email is already registered.",
+    "AUTH_SIGN_UP_USER_EXIST": "This Email is already in use.",
+    "AUTH_USED_IDENTIFIER": "This Email is already in use.",
+    "AUTH_UNVERIFIED_EMAIL": "Your email address is not verified.",
+    "INCORRECT_CREDENTIALS": "Incorrect email or password.",
+    "USER_NOT_LOCAL": "This user is registered with an external provider.",
+    "REFRESH_TOKEN_INVALID": "Invalid refresh token.",
+    "MISSING_OR_MALFORMED_AUTHORIZATION_HEADER": "Missing or malformed authorization header.",
+    "INVALID_ACCESS_TOKEN": "Invalid access token.",
+    "EXPIRED_ACCESS_TOKEN": "Access token has expired.",
+    "MISSING_ACCESS_TOKEN": "Missing access token.",
+    "MISSING_REFRESH_TOKEN": "Missing refresh token.",
+    "USER_IS_NOT_EXIST": "This email does not exist.",
+    "OTP_INVALID": "Invalid OTP.",
+    "OTP_EXPIRED": "OTP has expired.",
+    "TOKEN_EXPIRED": "Token has expired.",
+    "FINDING_USER_FAILED": "Unexpected error occurred while finding the user.",
+    "AUTH_USER_CREATION_FAILED": "User creation failed.",
+    "ISSUE_TOKEN_FAILED": "Failed to issue token.",
+    "PASSWORD_RESET_FAILED": "Password reset failed.",
+    "REFRESHTOKEN_REVOKE_FAILED": "Failed to revoke refresh token.",
+    "REFRESHTOKEN_CREATE_FAILED": "Failed to create refresh token.",
+    "REFRESHTOKEN_VERIFY_FAILED": "Failed to verify refresh token.",
+    "LOGIN_FAILED": "Login failed.",
+    "OTP_CREATION_FAILED": "Failed to create OTP.",
+    "OTP_VERIFICATION_FAILED": "Failed to verify OTP.",
+    "OTP_TOKEN_INVALID": "Please request a new OTP."
+  },
+  "labels": {
+    "identifier": "Email",
+    "name": "Name",
+    "password": "Password",
+    "confirmPassword": "Confirm Password"
+  },
+  "headers": {
+    "signIn": "Sign In",
+    "signUp": "Sign Up",
+    "forgotPassword": "Forgot Password",
+    "resetPassword": "Reset Password"
+  },
+  "msgs": {
+    "welcome": "Welcome, {thing}!",
+    "orAlreadyHaveAnAccountSignIn": "Or already have an account? ",
+    "orHaveNotAnAccountSignUp": "Or don’t have an account? "
+  },
+  "auth": {
+    "signIn": {
+      "title": "Welcome back",
+      "description": "Sign in with your email.",
+      "identifier": {
+        "label": "Email",
+        "placeholder": "name@example.com"
+      },
+      "password": {
+        "label": "Password",
+        "placeholder": "Your password"
+      },
+      "submitLabel": "Sign in",
+      "submittingLabel": "Signing in…",
+      "signUpPrompt": "Don’t have an account?",
+      "signUpLabel": "Sign up",
+      "forgotPasswordLabel": "Forgot password?"
+    },
+    "signUp": {
+      "stepLabel": "Step {current} of {total}",
+      "proofExpired": "Your session has expired. Please start over.",
+      "sendOtp": {
+        "title": "Create your account",
+        "description": "Enter your email and we will send you a verification code.",
+        "identifier": {
+          "label": "Email",
+          "placeholder": "name@example.com"
+        },
+        "submitLabel": "Send code",
+        "submittingLabel": "Sending code…",
+        "signInPrompt": "Already have an account?",
+        "signInLabel": "Sign in"
+      },
+      "verifyOtp": {
+        "title": "Verify your identity",
+        "description": "Enter the code we sent to {identifier}.",
+        "codeLabel": "Verification code",
+        "submitLabel": "Verify",
+        "submittingLabel": "Verifying…",
+        "resendPrompt": "Didn’t get the code?",
+        "resendLabel": "Resend code",
+        "resendIn": "Resend in {seconds}s",
+        "resendLimitReached": "You’ve reached the maximum number of resends.",
+        "changeIdentifierLabel": "Use a different email"
+      },
+      "completeSignUp": {
+        "title": "Finish setting up",
+        "description": "Tell us your name and choose a password.",
+        "name": {
+          "label": "Full name",
+          "placeholder": "Jane Doe"
+        },
+        "password": {
+          "label": "Password",
+          "placeholder": "At least 8 characters"
+        },
+        "confirmPassword": {
+          "label": "Confirm password",
+          "placeholder": "Repeat your password"
+        },
+        "passwordMismatch": "Passwords do not match.",
+        "submitLabel": "Create account",
+        "submittingLabel": "Creating account…"
+      }
+    },
+    "forgotPassword": {
+      "stepLabel": "Step {current} of {total}",
+      "proofExpired": "Your session has expired. Please start over.",
+      "sendOtp": {
+        "title": "Forgot your password?",
+        "description": "Enter your email and we will send you a verification code.",
+        "identifier": {
+          "label": "Email",
+          "placeholder": "name@example.com"
+        },
+        "submitLabel": "Send code",
+        "submittingLabel": "Sending code…"
+      },
+      "verifyOtp": {
+        "title": "Enter your code",
+        "description": "If {identifier} matches an account, we have sent a verification code. Enter it below.",
+        "codeLabel": "Verification code",
+        "submitLabel": "Verify",
+        "submittingLabel": "Verifying…",
+        "resendPrompt": "Didn’t get the code?",
+        "resendLabel": "Resend code",
+        "resendIn": "Resend in {seconds}s",
+        "resendLimitReached": "You’ve reached the resend limit. Please try again later.",
+        "changeIdentifierLabel": "Use a different email"
+      },
+      "resetPassword": {
+        "title": "Choose a new password",
+        "description": "Enter a new password for your account.",
+        "newPassword": {
+          "label": "New password",
+          "placeholder": "Your new password"
+        },
+        "confirmPassword": {
+          "label": "Confirm new password",
+          "placeholder": "Repeat your new password"
+        },
+        "passwordMismatch": "Passwords do not match.",
+        "submitLabel": "Reset password",
+        "submittingLabel": "Resetting…"
+      }
+    },
+    "errors": {
+      "fallback": "Something went wrong. Please try again.",
+      "INVALID_CREDENTIALS": "Incorrect identifier or password.",
+      "OTP_INVALID": "That code or identifier is not valid.",
+      "OTP_EXPIRED": "This code has expired. Request a new one.",
+      "OTP_ATTEMPTS_EXCEEDED": "Too many incorrect attempts. Request a new code.",
+      "OTP_RATE_LIMITED": "Too many requests. Please wait a while and try again.",
+      "OTP_RESEND_TOO_SOON": "Please wait a moment before requesting another code.",
+      "VERIFICATION_TOKEN_INVALID": "Verification failed. Please start again.",
+      "WEAK_PASSWORD": "This password is too weak. Choose a stronger one.",
+      "INVALID_IDENTIFIER_TYPE": "Use a valid email.",
+      "proofExpired": "Your session has expired. Please start over."
+    }
+  },
+  "menu": {
+    "account": "Account",
+    "settings": "Settings",
+    "notifications": "Notifications",
+    "logout": "Log out",
+    "invitations": "Invitations"
+  },
+  "settings": {
+    "header": "Settings",
+    "sidebarLabel": "Settings navigation",
+    "sections": {
+      "settings": "Settings"
+    },
+    "nav": {
+      "personalInfo": "Personal Information"
+    },
+    "personalInfo": {
+      "title": "Personal Information",
+      "description": "Update your profile details and personal information.",
+      "name": {
+        "label": "Full name",
+        "placeholder": "Enter your name"
+      },
+      "identifier": {
+        "label": "Email"
+      },
+      "submitLabel": "Save changes",
+      "submittingLabel": "Saving…",
+      "successMessage": "Your profile has been updated successfully.",
+      "errors": {
+        "fallback": "Failed to update profile. Please try again.",
+        "IDENTIFIER_NOT_FOUND": "User not found."
+      }
+    }
+  }
+}

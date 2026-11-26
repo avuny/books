@@ -1,0 +1,11 @@
+{
+  "errors": {
+    "ITEM_CATEGORY_NOT_FOUND": "Category not found.",
+    "ITEM_CATEGORY_FORBIDDEN": "You do not have access to this category.",
+    "ITEM_CATEGORY_PARENT_NOT_FOUND": "The parent category does not exist.",
+    "ITEM_CATEGORY_NAME_TAKEN": "A category with this name already exists at this level.",
+    "ITEM_CATEGORY_CYCLE": "A category cannot be moved under itself or one of its sub-categories.",
+    "ITEM_CATEGORY_MAX_DEPTH_EXCEEDED": "Categories cannot be nested this deeply.",
+    "ITEM_CATEGORY_IN_USE": "This category has sub-categories or items. Deactivate it instead of deleting it."
+  }
+}

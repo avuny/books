@@ -1,5 +1,9 @@
 import { createRoute } from "@hono/zod-openapi"
-import { createOpenAPIRouter, handleResult, getRequestLocale } from "@avuny/hono"
+import {
+  createOpenAPIRouter,
+  handleResult,
+  getRequestLocale,
+} from "@avuny/hono"
 import {
   SignUpSendOtpBodySchema,
   SendOtpResponseSchema,
@@ -117,15 +121,17 @@ router.openapi(signUpSendOtpRoute, async (c) => {
 
   if (result.success && !isSuppressed) {
     const sender = getMessageSender()
-    scheduleBackground(async () => {
-      await sender.sendOtp({
-        to: normalized,
-        type: type as "email" | "phone",
-        code: result.data.code,
-        purpose: "SIGN_UP",
-        lang,
-      })
-    }, c)
+
+    await sender.sendOtp({
+      to: normalized,
+      type: type as "email" | "phone",
+      code: result.data.code,
+      purpose: "SIGN_UP",
+      lang,
+    })
+    // scheduleBackground(async () => {
+
+    // }, c)
   }
 
   // Map result data to SendOtpResponseSchema (omit internal code)

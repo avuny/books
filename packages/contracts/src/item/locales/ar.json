@@ -1,0 +1,274 @@
+{
+  "errors": {
+    "ITEM_NOT_FOUND": "الصنف غير موجود.",
+    "ITEM_FORBIDDEN": "ليس لديك صلاحية الوصول إلى هذا الصنف.",
+    "ITEM_NAME_TAKEN": "يوجد صنف بهذا الاسم بالفعل.",
+    "ITEM_CATEGORY_INVALID": "اختر فئة نشطة من هذه المؤسسة.",
+    "ITEM_UNIT_INVALID": "اختر وحدة أساسية نشطة.",
+    "ITEM_UNIT_COLLECTION_INVALID": "مجموعة الوحدات المحددة غير موجودة.",
+    "ITEM_BATCH_REQUIRES_TRACKING": "تتبع الدفعات يتطلب تتبع المخزون.",
+    "ITEM_EXPIRY_REQUIRES_BATCH_AND_TRACKING": "تتبع الصلاحية يتطلب تتبع المخزون وتتبع الدفعات معاً.",
+    "ITEM_OPENING_STOCK_NOT_TRACKED": "الرصيد الافتتاحي يتطلب صنفاً يتتبع المخزون.",
+    "ITEM_OPENING_STOCK_BATCH_REQUIRED": "الرصيد الافتتاحي يتطلب دفعة للأصناف متتبعة الدفعات.",
+    "ITEM_OPENING_STOCK_BATCH_NOT_TRACKED": "لا يمكن إضافة دفعة في الرصيد الافتتاحي لصنف غير متتبع للدفعات.",
+    "ITEM_OPENING_STOCK_FAILED": "فشل تسجيل الرصيد الافتتاحي.",
+    "ITEM_EXPIRY_DATE_REQUIRED": "تاريخ الصلاحية مطلوب للأصناف متتبعة الصلاحية.",
+    "ITEM_LOCKED_FIELD": "لا يمكن تغيير هذه الإعدادات بعد وجود حركات مخزون للصنف.",
+    "ITEM_HAS_HISTORY": "لهذا الصنف سجل مخزون. عطّله بدلاً من حذفه."
+  },
+  "labels": {
+    "valuation": {
+      "fifo": "الوارد أولاً يصرف أولاً (FIFO)",
+      "weighted_average": "المتوسط المرجح"
+    },
+    "shelfLifeUnit": {
+      "DAY": "أيام",
+      "MONTH": "أشهر",
+      "YEAR": "سنوات"
+    }
+  },
+  "msgs": {
+    "ITEMS_LISTED": "تم جلب الأصناف بنجاح.",
+    "ITEM_CREATED": "تم إنشاء الصنف.",
+    "ITEM_UPDATED": "تم تحديث الصنف.",
+    "ITEM_DELETED": "تم حذف الصنف."
+  },
+  "list": {
+    "title": "الأصناف",
+    "description": "كل ما تشتريه أو تبيعه أو تخزنه أو تجمّعه.",
+    "tabs": {
+      "aria": "حالة الصنف",
+      "all": "الكل",
+      "active": "نشطة",
+      "inactive": "غير نشطة"
+    },
+    "search": {
+      "placeholder": "ابحث في الأصناف",
+      "clear": "مسح البحث"
+    }
+  },
+  "create": {
+    "title": "إنشاء صنف",
+    "description": "حدد الصنف وفئته وطريقة قياسه.",
+    "submitLabel": "إنشاء الصنف",
+    "submittingLabel": "جارٍ الإنشاء…"
+  },
+  "update": {
+    "title": "تعديل الصنف",
+    "description": "بعض الإعدادات تُقفل بعد وجود حركات مخزون للصنف.",
+    "submitLabel": "حفظ التغييرات",
+    "submittingLabel": "جارٍ الحفظ…"
+  },
+  "form": {
+    "category": {
+      "createNew": "إنشاء فئة جديدة"
+    },
+    "unitCollection": {
+      "createNew": "إنشاء مجموعة وحدات جديدة"
+    }
+  },
+  "fields": {
+    "name": {
+      "label": "الاسم",
+      "placeholder": "مثال: أسمنت رويال"
+    },
+    "description": {
+      "label": "الوصف",
+      "placeholder": "اختياري"
+    },
+    "category": {
+      "label": "الفئة",
+      "placeholder": "اختر فئة"
+    },
+    "baseUnit": {
+      "label": "الوحدة الأساسية",
+      "placeholder": "اختر وحدة",
+      "description": "تُنشأ للصنف مجموعة وحدات تحتوي هذه الوحدة فقط."
+    },
+    "unitCollection": {
+      "label": "مجموعة الوحدات",
+      "placeholder": "اختر مجموعة وحدات",
+      "description": "تصبح وحدتها الأساسية هي الوحدة الأساسية للصنف."
+    },
+    "unitExclusive": "اختر وحدة أساسية أو مجموعة وحدات، وليس الاثنين.",
+    "canAssembled": {
+      "label": "يمكن تجميعه"
+    },
+    "isReturnable": {
+      "label": "قابل للإرجاع"
+    },
+    "isInventoryTracked": {
+      "label": "تتبع المخزون"
+    },
+    "isBatchTracked": {
+      "label": "تتبع الدفعات",
+      "description": "يتطلب تتبع المخزون."
+    },
+    "isExpiryTracked": {
+      "label": "تتبع الصلاحية",
+      "description": "يتطلب تتبع الدفعات وتتبع المخزون."
+    },
+    "shelfLifeValue": {
+      "label": "مدة الصلاحية الافتراضية",
+      "placeholder": "مثال: 12"
+    },
+    "shelfLifeUnit": {
+      "label": "وحدة مدة الصلاحية",
+      "placeholder": "اختر الوحدة"
+    },
+    "valuationMethod": {
+      "label": "طريقة التقييم",
+      "placeholder": "اختر طريقة"
+    },
+    "allowNegativeStock": {
+      "label": "السماح بالمخزون السالب"
+    },
+    "reorderPoint": {
+      "label": "حد إعادة الطلب",
+      "placeholder": "مثال: 20",
+      "description": "بالوحدة الأساسية للصنف. اختياري."
+    },
+    "isActive": {
+      "label": "نشط"
+    },
+    "lockedHint": "مقفل لأن للصنف حركات مخزون.",
+    "openingStock": {
+      "sectionTitle": "الرصيد الافتتاحي",
+      "sectionDescription": "سجّل المخزون الابتدائي عبر المواقع. اختياري.",
+      "postedAt": {
+        "label": "تاريخ الترحيل",
+        "placeholder": "YYYY-MM-DD",
+        "description": "يُعيَّن افتراضياً لتاريخ اليوم إذا تُرك فارغاً."
+      },
+      "addLine": "إضافة سطر",
+      "removeLine": "حذف",
+      "empty": "لم تتم إضافة سطور رصيد افتتاحي.",
+      "linesHeader": "سطور الرصيد الافتتاحي",
+      "line": {
+        "location": {
+          "label": "الموقع",
+          "placeholder": "اختر موقعاً"
+        },
+        "quantity": {
+          "label": "الكمية",
+          "placeholder": "مثال: 100"
+        },
+        "cost": {
+          "label": "التكلفة",
+          "placeholder": "مثال: 10.00"
+        }
+      },
+      "batch": {
+        "toggle": "إضافة تفاصيل الدفعة",
+        "number": {
+          "label": "رقم الدفعة",
+          "placeholder": "مثال: BT-001"
+        },
+        "manufacturedOn": {
+          "label": "تاريخ الصنع",
+          "placeholder": "YYYY-MM-DD"
+        },
+        "expiresOn": {
+          "label": "تاريخ انتهاء الصلاحية",
+          "placeholder": "YYYY-MM-DD"
+        }
+      }
+    }
+  },
+  "actions": {
+    "create": "إنشاء صنف",
+    "edit": "تعديل",
+    "view": "عرض",
+    "delete": "حذف",
+    "cancel": "إلغاء"
+  },
+  "type": {
+    "tracked": "متتبع",
+    "untracked": "غير متتبع",
+    "batch": "دفعات",
+    "expiry": "صلاحية",
+    "active": "نشط",
+    "inactive": "غير نشط"
+  },
+  "table": {
+    "name": "الصنف",
+    "category": "الفئة",
+    "baseUnit": "الوحدة الأساسية",
+    "tracking": "التتبع",
+    "status": "الحالة",
+    "availableStock": "المخزون المتوفر",
+    "actions": "الإجراءات",
+    "actionsFor": "إجراءات {name}"
+  },
+  "empty": {
+    "title": "لا توجد أصناف",
+    "description": "جرّب بحثاً أو حالة مختلفة."
+  },
+  "delete": {
+    "title": "حذف الصنف؟",
+    "description": "سيتم حذف «{name}» نهائياً. لا يمكن التراجع عن ذلك."
+  },
+  "details": {
+    "back": "العودة إلى الأصناف",
+    "tabs": {
+      "overview": "نظرة عامة",
+      "inventory": "المخزون",
+      "movements": "حركات المخزون"
+    },
+    "inventory": {
+      "title": "عناصر المخزون",
+      "description": "مستويات المخزون عبر المستودعات ومواقع التخزين.",
+      "empty": "لا توجد سجلات مخزون للمستودع أو الموقع المحدد.",
+      "available": "المتوفر",
+      "onHand": "في اليد",
+      "reserved": "المحجوز",
+      "onOrder": "قيد الطلب",
+      "inTransit": "في الطريق",
+      "warehouse": "المستودع",
+      "location": "الموقع",
+      "totalAvailable": "إجمالي المتوفر",
+      "totalOnHand": "إجمالي في اليد",
+      "totalReserved": "إجمالي المحجوز",
+      "totalOnOrder": "إجمالي قيد الطلب",
+      "totalInTransit": "إجمالي في الطريق"
+    },
+    "movements": {
+      "title": "حركات المخزون",
+      "description": "سجل حركات المخزون، الاستلام، التحويل، التسوية والصرف.",
+      "empty": "لا توجد حركات مخزون مسجلة لهذا الصنف.",
+      "date": "التاريخ",
+      "type": "النوع",
+      "reference": "المرجع",
+      "from": "من",
+      "to": "إلى",
+      "quantity": "الكمية",
+      "reversal": "حركة عكسية",
+      "note": "ملاحظة"
+    },
+    "category": "الفئة",
+    "baseUnit": "الوحدة الأساسية",
+    "valuation": "طريقة التقييم",
+    "reorderPoint": "حد إعادة الطلب",
+    "allowNegativeStock": "المخزون السالب",
+    "createdAt": "تاريخ الإنشاء",
+    "updatedAt": "آخر تحديث",
+    "settingsTitle": "الإعدادات",
+    "expiryTracked": "تتبع الصلاحية",
+    "defaultShelfLife": "فترة الصلاحية الافتراضية",
+    "yes": "مسموح",
+    "no": "غير مسموح",
+    "none": "غير محدد",
+    "flagsTitle": "السلوك",
+    "assemblable": "يمكن تجميعه",
+    "returnable": "قابل للإرجاع"
+  },
+  "pagination": {
+    "nav": "ترقيم صفحات الأصناف",
+    "previous": "السابق",
+    "next": "التالي",
+    "rowsPerPage": "عدد الصفوف في الصفحة",
+    "summary": "{from}–{to} من {total}",
+    "pageOf": "الصفحة {page} من {pageCount}",
+    "goTo": "الانتقال إلى الصفحة {page}"
+  }
+}

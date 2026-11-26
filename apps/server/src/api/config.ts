@@ -84,6 +84,7 @@ export const envSchema = z
     SIGNIN_THROTTLE_WINDOW: duration("15m"),
 
     // Web / CORS
+    WEB_APP_URL: z.string().default("http://localhost:5173"),
     COOKIE_SAMESITE: z.enum(["strict", "lax", "none"]).default("lax"),
     COOKIE_DOMAIN: z.string().optional(),
     CORS_ORIGINS: z
@@ -109,16 +110,20 @@ export const envSchema = z
     STORAGE_PUBLIC_BASE_URL: z.string().optional(),
 
     // Delivery — email
+    RESEND_API_KEY: z.string(),
+    EMAIL_FROM: z.string(),
     EMAIL_HOST: z.string().optional(),
     EMAIL_PORT: z.coerce.number().int().optional(),
     EMAIL_USER: z.string().optional(),
     EMAIL_PASS: z.string().optional(),
-    EMAIL_FROM: z.string().optional(),
 
     // Delivery — WhatsApp
     WHATSAPP_API_URL: z.string().optional(),
     WHATSAPP_API_TOKEN: z.string().optional(),
     WHATSAPP_PHONE_NUMBER_ID: z.string().optional(),
+    WHATSAPP_OTP_TEMPLATE_NAME: z.string().optional(),
+    WHATSAPP_API_VERSION: z.string().default("v23.0"),
+    WHATSAPP_DEFAULT_LANG: z.string().default("en"),
 
     // Audit
     AUDIT_RETENTION_DAYS: z.coerce.number().int().positive().default(365),

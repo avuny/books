@@ -11,13 +11,129 @@
   },
   "exports": {
     ".": {
+      "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
-      "types": "./dist/index.d.ts"
+      "default": "./dist/index.js"
+    },
+    "./accounting": {
+      "types": "./dist/accounting/index.d.ts",
+      "import": "./dist/accounting/index.js",
+      "default": "./dist/accounting/index.js"
+    },
+    "./activity-log": {
+      "types": "./dist/activity-log/index.d.ts",
+      "import": "./dist/activity-log/index.js",
+      "default": "./dist/activity-log/index.js"
+    },
+    "./batch": {
+      "types": "./dist/batch/index.d.ts",
+      "import": "./dist/batch/index.js",
+      "default": "./dist/batch/index.js"
+    },
+    "./common": {
+      "types": "./dist/common/index.d.ts",
+      "import": "./dist/common/index.js",
+      "default": "./dist/common/index.js"
+    },
+    "./errors": {
+      "types": "./dist/errors/index.d.ts",
+      "import": "./dist/errors/index.js",
+      "default": "./dist/errors/index.js"
+    },
+    "./geo": {
+      "types": "./dist/geo/index.d.ts",
+      "import": "./dist/geo/index.js",
+      "default": "./dist/geo/index.js"
+    },
+    "./inventory-adjustment": {
+      "types": "./dist/inventory-adjustment/index.d.ts",
+      "import": "./dist/inventory-adjustment/index.js",
+      "default": "./dist/inventory-adjustment/index.js"
+    },
+    "./inventory-reservation": {
+      "types": "./dist/inventory-reservation/index.d.ts",
+      "import": "./dist/inventory-reservation/index.js",
+      "default": "./dist/inventory-reservation/index.js"
+    },
+    "./item": {
+      "types": "./dist/item/index.d.ts",
+      "import": "./dist/item/index.js",
+      "default": "./dist/item/index.js"
+    },
+    "./item-category": {
+      "types": "./dist/item-category/index.d.ts",
+      "import": "./dist/item-category/index.js",
+      "default": "./dist/item-category/index.js"
+    },
+    "./modules": {
+      "types": "./dist/modules/index.d.ts",
+      "import": "./dist/modules/index.js",
+      "default": "./dist/modules/index.js"
+    },
+    "./organization": {
+      "types": "./dist/organization/index.d.ts",
+      "import": "./dist/organization/index.js",
+      "default": "./dist/organization/index.js"
+    },
+    "./organization-invitation": {
+      "types": "./dist/organization-invitation/index.d.ts",
+      "import": "./dist/organization-invitation/index.js",
+      "default": "./dist/organization-invitation/index.js"
+    },
+    "./organization-user": {
+      "types": "./dist/organization-user/index.d.ts",
+      "import": "./dist/organization-user/index.js",
+      "default": "./dist/organization-user/index.js"
+    },
+    "./party": {
+      "types": "./dist/party/index.d.ts",
+      "import": "./dist/party/index.js",
+      "default": "./dist/party/index.js"
+    },
+    "./role": {
+      "types": "./dist/role/index.d.ts",
+      "import": "./dist/role/index.js",
+      "default": "./dist/role/index.js"
+    },
+    "./sidebar": {
+      "types": "./dist/sidebar/index.d.ts",
+      "import": "./dist/sidebar/index.js",
+      "default": "./dist/sidebar/index.js"
+    },
+    "./stock-movement": {
+      "types": "./dist/stock-movement/index.d.ts",
+      "import": "./dist/stock-movement/index.js",
+      "default": "./dist/stock-movement/index.js"
+    },
+    "./unit": {
+      "types": "./dist/unit/index.d.ts",
+      "import": "./dist/unit/index.js",
+      "default": "./dist/unit/index.js"
+    },
+    "./unit-collection": {
+      "types": "./dist/unit-collection/index.d.ts",
+      "import": "./dist/unit-collection/index.js",
+      "default": "./dist/unit-collection/index.js"
+    },
+    "./user": {
+      "types": "./dist/user/index.d.ts",
+      "import": "./dist/user/index.js",
+      "default": "./dist/user/index.js"
+    },
+    "./warehouse": {
+      "types": "./dist/warehouse/index.d.ts",
+      "import": "./dist/warehouse/index.js",
+      "default": "./dist/warehouse/index.js"
+    },
+    "./warehouse-location": {
+      "types": "./dist/warehouse-location/index.d.ts",
+      "import": "./dist/warehouse-location/index.js",
+      "default": "./dist/warehouse-location/index.js"
     }
   },
   "scripts": {
     "dev": "tsc -p tsconfig.build.json --watch --preserveWatchOutput",
-    "build": "tsc -p tsconfig.build.json",
+    "build": "tsx ./scripts/generate-barrel.ts && tsc -p tsconfig.build.json",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
@@ -28,7 +144,11 @@
     "api:docs": "api-documenter markdown -i temp -o docs",
     "clean:build": "rm -rf dist tsconfig.build.tsbuildinfo .turbo",
     "clean:modules": "rm -rf node_modules",
-    "clean:all": "pnpm clean:modules && pnpm clean:build"
+    "clean:all": "pnpm clean:modules && pnpm clean:build",
+    "barrel:generate": "tsx ./scripts/generate-barrel.ts",
+    "barrel:watch": "tsx ./scripts/generate-barrel.ts --watch",
+    "sync": "tsx ./scripts/generate-barrel.ts",
+    "sync:watch": "tsx ./scripts/generate-barrel.ts --watch"
   },
   "devDependencies": {
     "@changesets/cli": "^2.29.7",
@@ -37,6 +157,7 @@
     "@vitest/coverage-v8": "3.2.4",
     "@vitest/ui": "^3.2.3",
     "eslint": "^9.28.0",
+    "tsx": "^4.19.0",
     "typescript": "~5.8.3",
     "vitest": "^3.2.3"
   },

@@ -1,4 +1,10 @@
 import { logger } from "@avuny/logger"
+import { Resend } from "resend"
+import { config } from "../../../config.js"
+import { CaptureMessageSender } from "./capture-message-sender.js"
+/* -------------------------------------------------------------------------- */
+/*                                  Contracts                                 */
+/* -------------------------------------------------------------------------- */
 
 export interface SendOtpMessageInput {
   to: string
@@ -15,15 +21,50 @@ export interface SendSecurityNoticeInput {
   lang?: string
 }
 
+export interface SendInvitationInput {
+  to: string
+  type: "email" | "phone"
+  orgName: string
+  link: string
+  expiresAt: Date
+}
+
 export interface MessageSender {
   sendOtp(input: SendOtpMessageInput): Promise<void>
   sendSecurityNotice?(input: SendSecurityNoticeInput): Promise<void>
+  sendInvitation?(input: SendInvitationInput): Promise<void>
 }
 
-/**
- * Console message sender for development and testing.
- * Prints the OTP code to logger (never used in production).
- */
+type Channel = SendOtpMessageInput["type"]
+
+/* -------------------------------------------------------------------------- */
+/*                                   Helpers                                  */
+/* -------------------------------------------------------------------------- */
+
+function requireEnv(name: string): string {
+  const value = process.env[name]
+  if (!value) throw new Error(`Missing required env var: ${name}`)
+  return value
+}
+
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+}
+
+async function assertOk(res: Response, provider: string): Promise<void> {
+  if (res.ok) return
+  const body = await res.text().catch(() => "")
+  throw new Error(`${provider} request failed (${res.status}): ${body}`)
+}
+
+/* -------------------------------------------------------------------------- */
+/*                         Strategy: Console (dev only)                       */
+/* -------------------------------------------------------------------------- */
+
 export class ConsoleMessageSender implements MessageSender {
   async sendOtp(input: SendOtpMessageInput): Promise<void> {
     logger.info(
@@ -39,19 +80,297 @@ export class ConsoleMessageSender implements MessageSender {
 
   async sendSecurityNotice(input: SendSecurityNoticeInput): Promise<void> {
     logger.info(
-      {
-        to: input.to,
-        type: input.type,
-        event: input.event,
-      },
+      { to: input.to, type: input.type, event: input.event },
       `[DEV SECURITY NOTICE] Security notice for ${input.to}: ${input.event}`
+    )
+  }
+
+  async sendInvitation(input: SendInvitationInput): Promise<void> {
+    logger.info(
+      { to: input.to, type: input.type, orgName: input.orgName, link: input.link },
+      `[DEV INVITATION] Invitation for ${input.to} to join "${input.orgName}": ${input.link}`
     )
   }
 }
 
+/* -------------------------------------------------------------------------- */
+/*                          Strategy: Email (Resend)                          */
+/* -------------------------------------------------------------------------- */
+
+interface ResendConfig {
+  apiKey: string
+  from: string
+}
+
+export class ResendEmailSender implements MessageSender {
+  private readonly resend: Resend
+
+  constructor(private readonly config: ResendConfig) {
+    this.resend = new Resend(config.apiKey)
+  }
+
+  async sendOtp({ to, code, purpose }: SendOtpMessageInput): Promise<void> {
+    console.log("resend is called!!!!!!!!!!!!!!")
+    await this.send({
+      to,
+      subject: "Your verification code",
+      html: `
+        <div style="font-family:sans-serif;max-width:480px;margin:auto">
+          <p>Use this code to complete your <b>${escapeHtml(purpose)}</b>:</p>
+          <p style="font-size:32px;letter-spacing:6px;font-weight:700">${escapeHtml(code)}</p>
+          <p style="color:#666">If you didn't request this, you can ignore this email.</p>
+        </div>`,
+    })
+  }
+
+  async sendSecurityNotice({
+    to,
+    event,
+  }: SendSecurityNoticeInput): Promise<void> {
+    await this.send({
+      to,
+      subject: "Security notice",
+      html: `
+        <div style="font-family:sans-serif;max-width:480px;margin:auto">
+          <p>${escapeHtml(event)}</p>
+          <p style="color:#666">If this wasn't you, please secure your account immediately.</p>
+        </div>`,
+    })
+  }
+
+  async sendInvitation({
+    to,
+    orgName,
+    link,
+    expiresAt,
+  }: SendInvitationInput): Promise<void> {
+    await this.send({
+      to,
+      subject: `Invitation to join ${orgName}`,
+      html: `
+        <div style="font-family:sans-serif;max-width:520px;margin:auto;padding:24px;border:1px solid #eaeaea;border-radius:8px">
+          <h2 style="color:#111;margin-top:0">You've been invited!</h2>
+          <p style="color:#444;font-size:16px;line-height:24px">
+            You have been invited to join <b>${escapeHtml(orgName)}</b>.
+          </p>
+          <div style="margin:28px 0">
+            <a href="${escapeHtml(link)}" style="background-color:#111827;color:#ffffff;padding:12px 24px;text-decoration:none;border-radius:6px;font-weight:600;display:inline-block">Accept Invitation</a>
+          </div>
+          <p style="color:#666;font-size:13px;line-height:20px">
+            This invitation expires on ${expiresAt.toLocaleDateString()}.
+          </p>
+          <hr style="border:none;border-top:1px solid #eaeaea;margin:24px 0" />
+          <p style="color:#888;font-size:12px;word-break:break-all">
+            If the button doesn't work, copy and paste this link into your browser:<br/>
+            <a href="${escapeHtml(link)}" style="color:#2563eb">${escapeHtml(link)}</a>
+          </p>
+        </div>`,
+    })
+  }
+
+  private async send(msg: {
+    to: string
+    subject: string
+    html: string
+  }): Promise<void> {
+    const { error } = await this.resend.emails.send({
+      from: this.config.from,
+      to: [msg.to],
+      subject: msg.subject,
+      html: msg.html,
+    })
+
+    if (error) {
+      throw new Error(`Resend email failed: ${error.message}`)
+    }
+  }
+}
+
+/* -------------------------------------------------------------------------- */
+/*                 Strategy: Phone (WhatsApp Cloud API / Graph)               */
+/* -------------------------------------------------------------------------- */
+
+interface WhatsAppConfig {
+  accessToken: string
+  phoneNumberId: string
+  otpTemplateName: string
+  apiVersion: string
+  defaultLang: string
+}
+
+export class WhatsAppMessageSender implements MessageSender {
+  constructor(private readonly config: WhatsAppConfig) {}
+
+  async sendOtp({ to, code, lang }: SendOtpMessageInput): Promise<void> {
+    const {
+      accessToken,
+      phoneNumberId,
+      otpTemplateName,
+      apiVersion,
+      defaultLang,
+    } = this.config
+
+    const res = await fetch(
+      `https://graph.facebook.com/${apiVersion}/${phoneNumberId}/messages`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          messaging_product: "whatsapp",
+          // WhatsApp expects international format with digits only (no "+")
+          to: to.replace(/\D/g, ""),
+          type: "template",
+          template: {
+            name: otpTemplateName,
+            language: { code: lang ?? defaultLang },
+            components: [
+              // Body: {{1}} = code
+              { type: "body", parameters: [{ type: "text", text: code }] },
+              // "Copy code" button of an Authentication template
+              {
+                type: "button",
+                sub_type: "url",
+                index: "0",
+                parameters: [{ type: "text", text: code }],
+              },
+            ],
+          },
+        }),
+      }
+    )
+    await assertOk(res, "WhatsApp")
+  }
+
+  async sendInvitation({ to, orgName, link }: SendInvitationInput): Promise<void> {
+    const { accessToken, phoneNumberId, apiVersion } = this.config
+    if (!accessToken || !phoneNumberId) {
+      logger.warn(
+        { to, orgName },
+        `[WhatsApp DEV/FALLBACK] WhatsApp credentials not configured. Invitation link: ${link}`
+      )
+      return
+    }
+    const res = await fetch(
+      `https://graph.facebook.com/${apiVersion || "v23.0"}/${phoneNumberId}/messages`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          messaging_product: "whatsapp",
+          to: to.replace(/\D/g, ""),
+          type: "text",
+          text: {
+            body: `You have been invited to join ${orgName}. Click here to accept your invitation: ${link}`,
+          },
+        }),
+      }
+    )
+    await assertOk(res, "WhatsApp")
+  }
+}
+
+/* -------------------------------------------------------------------------- */
+/*              Context: picks the strategy by channel ("type")               */
+/* -------------------------------------------------------------------------- */
+
+export class ChannelMessageSender implements MessageSender {
+  constructor(private readonly strategies: Record<Channel, MessageSender>) {}
+
+  async sendOtp(input: SendOtpMessageInput): Promise<void> {
+    await this.strategies[input.type].sendOtp(input)
+    logger.info({ type: input.type, purpose: input.purpose }, "OTP sent")
+  }
+
+  async sendSecurityNotice(input: SendSecurityNoticeInput): Promise<void> {
+    const strategy = this.strategies[input.type]
+    if (!strategy.sendSecurityNotice) {
+      logger.debug(
+        { type: input.type },
+        "Security notice not supported for channel"
+      )
+      return
+    }
+    await strategy.sendSecurityNotice(input)
+  }
+
+  async sendInvitation(input: SendInvitationInput): Promise<void> {
+    const strategy = this.strategies[input.type]
+    if (!strategy?.sendInvitation) {
+      logger.warn(
+        { type: input.type },
+        "Invitation sending not supported for channel"
+      )
+      return
+    }
+    await strategy.sendInvitation(input)
+  }
+}
+
+/* -------------------------------------------------------------------------- */
+/*                                   Factory                                  */
+/* -------------------------------------------------------------------------- */
+
+let instance: MessageSender | undefined
+
 /**
- * Resolves the message sender based on environment.
+ * Resolves the message sender.
+ * - MESSAGE_SENDER_MODE=console | live | capture (optional; capture is test-only)
+ * - Default: "live" in production, "console" everywhere else unless live credentials exist.
  */
 export function getMessageSender(): MessageSender {
-  return new ConsoleMessageSender()
+  if (instance) return instance
+
+  const mode =
+    process.env.MESSAGE_SENDER_MODE ??
+    (process.env.NODE_ENV === "production"
+      ? "live"
+      : config.RESEND_API_KEY
+        ? "live"
+        : "console")
+
+  if (mode === "console") {
+    return (instance = new ConsoleMessageSender())
+  }
+
+  if (mode === "capture") {
+    // Test-only sink (see capture-message-sender.ts). Never allow it to swallow real messages.
+    if (process.env.NODE_ENV === "production") {
+      throw new Error(
+        "MESSAGE_SENDER_MODE=capture is test-only and refused in production"
+      )
+    }
+    return (instance = new CaptureMessageSender())
+  }
+
+  return (instance = new ChannelMessageSender({
+    email: new ResendEmailSender({
+      apiKey: config.RESEND_API_KEY,
+      from: config.EMAIL_FROM,
+    }),
+    phone: new WhatsAppMessageSender({
+      accessToken: config.WHATSAPP_API_TOKEN || "",
+      phoneNumberId: config.WHATSAPP_PHONE_NUMBER_ID || "",
+      otpTemplateName: config.WHATSAPP_OTP_TEMPLATE_NAME || "",
+      apiVersion: config.WHATSAPP_API_VERSION ?? "v23.0",
+      defaultLang: config.WHATSAPP_DEFAULT_LANG ?? "en",
+    }),
+  }))
+}
+
+/**
+ * Test helper: the capture sender, so a test can read the OTP / invitation link the real
+ * flow produced. Throws unless MESSAGE_SENDER_MODE=capture.
+ */
+export function getCaptureOutbox(): CaptureMessageSender {
+  const sender = getMessageSender()
+  if (!(sender instanceof CaptureMessageSender)) {
+    throw new Error("getCaptureOutbox() needs MESSAGE_SENDER_MODE=capture")
+  }
+  return sender
 }

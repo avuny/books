@@ -1,0 +1,11 @@
+{
+  "errors": {
+    "PARTY_NOT_FOUND": "Party not found.",
+    "PARTY_ROLE_NOT_FOUND": "Party role not found.",
+    "PARTY_ROLE_ALREADY_ACTIVE": "This role is already active for this party.",
+    "PARTY_ROLE_INACTIVE": "This role is inactive for this party.",
+    "PARTY_CONTACT_NOT_FOUND": "Contact entry not found for this party.",
+    "PARTY_EMAIL_ALREADY_EXISTS": "This email address is already registered for this party.",
+    "PARTY_SALUTATION_NOT_ALLOWED": "Salutation is only allowed for individuals (persons)."
+  }
+}

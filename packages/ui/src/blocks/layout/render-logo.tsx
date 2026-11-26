@@ -12,5 +12,5 @@ export const renderLogo = (
         .slice(0, 2)
         .join("")}
     </span>
-  );
-};
+  )
+}

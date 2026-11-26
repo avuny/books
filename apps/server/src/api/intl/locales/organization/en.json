@@ -1,0 +1,10 @@
+{
+  "errors": {
+    "ORGANIZATION_NOT_FOUND": "Organization not found.",
+    "ORGANIZATION_FORBIDDEN": "You are not allowed to perform this action.",
+    "ORGANIZATION_LIMIT_REACHED": "Organization limit reached.",
+    "ORGANIZATION_NAME_TAKEN": "You already have an organization with this name.",
+    "ORGANIZATION_CODE_TAKEN": "Organization code is already taken.",
+    "ORGANIZATION_CODE_RESERVED": "This organization code is reserved."
+  }
+}

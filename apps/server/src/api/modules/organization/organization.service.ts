@@ -1,0 +1,290 @@
+import { ok, fail } from "@avuny/utils"
+import {
+  ActivityLogAction,
+  OrganizationErrorCode as Err,
+  RESERVED_ORGANIZATION_CODES,
+  type CreateOrganizationInput,
+  type OrganizationDto,
+  type OrganizationListQuery,
+  type UpdateOrganizationInput,
+  type PermissionKey,
+} from "@avuny/contracts"
+import { isUniqueViolation } from "./organization.repository.js"
+import { toOrganizationDto } from "./organization.mapper.js"
+import { seedInventoryDefaults } from "../warehouse/warehouse.defaults.js"
+import type { OrganizationServiceDeps } from "./organization.types.js"
+
+export type {
+  CreateOrganizationInput,
+  UpdateOrganizationInput,
+  OrganizationListQuery,
+  OrganizationDto,
+}
+
+/* ---------- constants ---------- */
+
+const CACHE_TTL_SECONDS = 300
+const DEFAULT_PAGE_SIZE = 20
+const MAX_PAGE_SIZE = 100
+
+/** Subdomain labels that must never become an organization code. */
+const RESERVED_CODES = new Set<string>(RESERVED_ORGANIZATION_CODES)
+
+const cacheKey = (id: string) => `organization:${id}`
+const clamp = (n: number, min: number, max: number) =>
+  Math.min(Math.max(n, min), max)
+
+/* ---------- service ---------- */
+
+export const createOrganizationService = ({
+  repo,
+  permissions,
+  cache,
+  activityLog,
+  limits,
+  seedDefaults = seedInventoryDefaults,
+}: OrganizationServiceDeps) => {
+  const can = (
+    userId: string,
+    action: PermissionKey | readonly [PermissionKey, ...PermissionKey[]],
+    resourceId?: string
+  ) => permissions.check({ userId }, action, { resourceId })
+
+  const forbidden = () =>
+    fail({
+      error: Err.ORGANIZATION_FORBIDDEN,
+      msg: "You are not allowed to perform this action",
+    })
+  const notFound = () =>
+    fail({ error: Err.ORGANIZATION_NOT_FOUND, msg: "Organization not found" })
+  const nameTaken = () =>
+    fail({
+      error: Err.ORGANIZATION_NAME_TAKEN,
+      msg: "You already have an organization with this name",
+    })
+
+  return {
+    async create(actorId: string, input: CreateOrganizationInput) {
+      const { ownerUsername, ...fields } = input
+      const data = { ...fields, name: fields.name.trim() }
+
+      if (RESERVED_CODES.has(data.code)) {
+        return fail({
+          error: Err.ORGANIZATION_CODE_RESERVED,
+          msg: "This organization code is reserved",
+        })
+      }
+
+      const max = await limits.maxOwnedPerUser(actorId)
+
+      try {
+        return await repo.transaction(async (tx) => {
+          // Serialise concurrent creates by the same owner, so the limit and the
+          // name check below cannot both pass for two parallel requests.
+          await repo.lockOwner({ ownerId: actorId, tx })
+
+          if ((await repo.countOwned({ ownerId: actorId, tx })) >= max) {
+            return fail({
+              error: Err.ORGANIZATION_LIMIT_REACHED,
+              msg: `You can own at most ${max} organizations`,
+            })
+          }
+          if (
+            await repo.existsOwnedByName({ ownerId: actorId, name: data.name, tx })
+          ) {
+            return nameTaken()
+          }
+
+          const org = await repo.createWithOwner({
+            data,
+            ownerId: actorId,
+            ownerUsername,
+            tx,
+          })
+          if (seedDefaults) {
+            await seedDefaults(tx, org.id)
+          }
+          await activityLog.log(
+            {
+              action: ActivityLogAction.ORGANIZATION_CREATED,
+              actorId,
+              orgId: org.id,
+              resourceId: org.id,
+              metadata: { code: org.code, name: org.name },
+            },
+            { tx }
+          )
+          return ok({
+            data: toOrganizationDto(org),
+            msg: "Organization created successfully",
+          })
+        })
+      } catch (err) {
+        // The unique index on `code` is the source of truth for code races.
+        if (isUniqueViolation(err, "ux_org_code")) {
+          return fail({
+            error: Err.ORGANIZATION_CODE_TAKEN,
+            msg: "This organization code is already taken",
+          })
+        }
+        throw err
+      }
+    },
+
+    async update(actorId: string, id: string, input: UpdateOrganizationInput) {
+      if (!(await can(actorId, "update:organization", id))) return forbidden()
+
+      const name = input.name?.trim()
+
+      const result = await repo.transaction(async (tx) => {
+        const current = await repo.findById({ id, tx })
+        if (!current) return notFound()
+
+        // Only a real rename needs the lock + uniqueness check (case-only changes are fine).
+        if (name !== undefined && name.toLowerCase() !== current.name.toLowerCase()) {
+          await repo.lockOwner({ ownerId: current.ownerId, tx })
+          if (
+            await repo.existsOwnedByName({
+              ownerId: current.ownerId,
+              name,
+              excludeId: id,
+              tx,
+            })
+          ) {
+            return nameTaken()
+          }
+        }
+
+        const updated = await repo.update({
+          id,
+          data: { ...input, ...(name !== undefined && { name }) },
+          tx,
+        })
+        if (!updated) return notFound()
+
+        await activityLog.log(
+          {
+            action: ActivityLogAction.ORGANIZATION_UPDATED,
+            actorId,
+            orgId: id,
+            resourceId: id,
+            metadata: { fields: Object.keys(input) },
+          },
+          { tx }
+        )
+        return ok({
+          data: toOrganizationDto(updated),
+          msg: "Organization updated successfully",
+        })
+      })
+
+      await cache.del(cacheKey(id)) // after commit; harmless when the update failed
+      return result
+    },
+
+    /** Soft delete (status 'closed'); rows are never hard-deleted. */
+    async delete(actorId: string, id: string) {
+      if (!(await can(actorId, "delete:organization", id))) return forbidden()
+
+      const result = await repo.transaction(async (tx) => {
+        const deleted = await repo.softDelete({ id, tx })
+        if (!deleted) return notFound()
+
+        await activityLog.log(
+          {
+            action: ActivityLogAction.ORGANIZATION_DELETED,
+            actorId,
+            orgId: id,
+            resourceId: id,
+          },
+          { tx }
+        )
+        return ok({ data: { id }, msg: "Organization deleted successfully" })
+      })
+
+      await cache.del(cacheKey(id))
+      return result
+    },
+
+    /** Read-through cache. Permission is checked first, so a cache hit never bypasses it. */
+    async getById(actorId: string, id: string) {
+      if (!(await can(actorId, "read:organization", id))) return forbidden()
+
+      const cached = await cache.get<OrganizationDto>(cacheKey(id))
+      if (cached) {
+        return ok({ data: cached, msg: "Organization retrieved successfully" })
+      }
+
+      const org = await repo.findById({ id })
+      if (!org) return notFound()
+
+      const dto = toOrganizationDto(org)
+      await cache.set(cacheKey(id), dto, CACHE_TTL_SECONDS)
+      return ok({ data: dto, msg: "Organization retrieved successfully" })
+    },
+
+    /*
+     * The three methods below only ever see organizations the caller is an active member
+     * of (enforced in the repository query), so membership is the authorization:
+     * no extra permission check.
+     */
+
+    /** Tables / admin lists: page + pageSize with a total. */
+    async getOffsetPaginationList(
+      userId: string,
+      query: OrganizationListQuery & { page?: number; pageSize?: number } = {}
+    ) {
+      const pageSize = clamp(query.pageSize ?? DEFAULT_PAGE_SIZE, 1, MAX_PAGE_SIZE)
+      const page = Math.max(query.page ?? 1, 1)
+
+      const { items, total } = await repo.listPage({
+        filter: { userId, search: query.search, status: query.status },
+        limit: pageSize,
+        offset: (page - 1) * pageSize,
+      })
+
+      return ok({
+        data: {
+          items: items.map(toOrganizationDto),
+          page,
+          pageSize,
+          total,
+          totalPages: Math.ceil(total / pageSize),
+        },
+        msg: "Organizations retrieved successfully",
+      })
+    },
+
+    /** Selects / dropdowns: `{ id, label }` items and a `nextCursor` (null on the last page). */
+    async getCursorPaginationList(
+      userId: string,
+      query: OrganizationListQuery & { cursor?: string; limit?: number } = {}
+    ) {
+      const limit = clamp(query.limit ?? DEFAULT_PAGE_SIZE, 1, MAX_PAGE_SIZE)
+
+      // Fetch one extra row to know whether another page exists.
+      const rows = await repo.listOptions({
+        filter: { userId, search: query.search, status: query.status },
+        limit: limit + 1,
+        cursor: query.cursor,
+      })
+      const hasMore = rows.length > limit
+      const page = hasMore ? rows.slice(0, limit) : rows
+
+      return ok({
+        data: {
+          items: page.map((r) => ({ id: r.id, label: r.name })),
+          nextCursor: hasMore ? page[page.length - 1]!.id : null,
+        },
+        msg: "Organizations retrieved successfully",
+      })
+    },
+
+    async count(userId: string, query: OrganizationListQuery = {}) {
+      const count = await repo.count({
+        filter: { userId, search: query.search, status: query.status },
+      })
+      return ok({ data: { count }, msg: "Organizations counted successfully" })
+    },
+  }
+}

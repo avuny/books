@@ -1,0 +1,104 @@
+{
+  "errors": {
+    "ORGANIZATION_USER_NOT_FOUND": "العضو غير موجود.",
+    "ORGANIZATION_USER_FORBIDDEN": "غير مسموح لك بتنفيذ هذا الإجراء.",
+    "ORGANIZATION_USER_USERNAME_TAKEN": "اسم المستخدم مستخدم بالفعل في المؤسسة.",
+    "ORGANIZATION_USER_OWNER_PROTECTED": "لا يمكن تغيير المالك بهذه الطريقة. استخدم نقل الملكية.",
+    "ORGANIZATION_USER_SELF_ACTION_NOT_ALLOWED": "لا يمكنك تنفيذ هذا الإجراء على عضويتك.",
+    "ORGANIZATION_USER_LIMIT_REACHED": "تم الوصول إلى حد المستخدمين في باقتك لهذا النوع.",
+    "ORGANIZATION_USER_INVALID_OWNER_TARGET": "يجب أن يكون المالك الجديد عضوًا مُدارًا نشطًا.",
+    "ORGANIZATION_USER_CONFIRMATION_MISMATCH": "رمز التأكيد لا يطابق رمز المؤسسة."
+  },
+  "labels": {
+    "owner": "المالك",
+    "managed": "عضو فريق",
+    "portal": "مستخدم البوابة",
+    "username": "اسم المستخدم",
+    "status": "الحالة",
+    "active": "نشط",
+    "inactive": "غير نشط"
+  },
+  "msgs": {
+    "MEMBERS_LISTED": "تم جلب الأعضاء بنجاح.",
+    "USERNAME_UPDATED": "تم تحديث اسم المستخدم.",
+    "MEMBER_ACTIVATED": "تمت إعادة تفعيل العضو.",
+    "MEMBER_DEACTIVATED": "تم تعطيل العضو.",
+    "OWNERSHIP_TRANSFERRED": "تم نقل الملكية.",
+    "MY_ORGANIZATIONS_LISTED": "تم جلب المؤسسات بنجاح.",
+    "MEMBERSHIP_TOUCHED": "تم تحديث العضوية."
+  },
+  "actions": {
+    "edit": "تعديل اسم المستخدم",
+    "activate": "إعادة التفعيل",
+    "deactivate": "تعطيل",
+    "transferOwnership": "نقل الملكية",
+    "cancel": "تراجع"
+  },
+  "list": {
+    "title": "الأعضاء",
+    "description": "الأشخاص المنتمون إلى هذه المؤسسة. أدر أسماء المستخدمين والوصول والملكية.",
+    "search": {
+      "label": "ابحث في الأعضاء",
+      "placeholder": "ابحث باسم المستخدم أو المعرف"
+    },
+    "tabs": {
+      "typeAria": "تصفية الأعضاء حسب النوع",
+      "statusAria": "تصفية الأعضاء حسب الحالة",
+      "all": "الكل"
+    }
+  },
+  "table": {
+    "member": "العضو",
+    "identifier": "المعرف",
+    "type": "النوع",
+    "status": "الحالة",
+    "joined": "تاريخ الانضمام",
+    "lastAccessed": "آخر نشاط",
+    "never": "لا يوجد",
+    "actions": "الإجراءات",
+    "actionsFor": "إجراءات {name}"
+  },
+  "empty": {
+    "title": "لا يوجد أعضاء",
+    "description": "جرّب تغيير البحث أو عوامل التصفية."
+  },
+  "pagination": {
+    "nav": "التنقل بين الصفحات",
+    "previous": "السابق",
+    "next": "التالي",
+    "rowsPerPage": "عدد الصفوف في الصفحة",
+    "summary": "{from}–{to} من {total}",
+    "pageOf": "الصفحة {page} من {pageCount}",
+    "goTo": "اذهب إلى الصفحة {page}"
+  },
+  "fields": {
+    "username": {
+      "label": "اسم المستخدم",
+      "placeholder": "اختر اسم مستخدم"
+    },
+    "confirmCode": {
+      "label": "رمز المؤسسة",
+      "placeholder": "اكتب رمز المؤسسة للتأكيد"
+    }
+  },
+  "edit": {
+    "title": "تعديل اسم المستخدم",
+    "description": "غيّر الطريقة التي يظهر بها {name} في هذه المؤسسة.",
+    "submitLabel": "حفظ التغييرات",
+    "submittingLabel": "جارٍ الحفظ…"
+  },
+  "deactivate": {
+    "title": "تعطيل العضو؟",
+    "description": "سيفقد {name} إمكانية الوصول إلى هذه المؤسسة حتى تتم إعادة تفعيله."
+  },
+  "activate": {
+    "title": "إعادة تفعيل العضو؟",
+    "description": "سيتمكن {name} من الوصول إلى هذه المؤسسة مجددًا."
+  },
+  "transfer": {
+    "title": "نقل الملكية إلى {name}؟",
+    "description": "سيصبح {name} مالك المؤسسة ولن تكون أنت المالك بعد الآن. اكتب رمز المؤسسة للتأكيد.",
+    "submitLabel": "نقل الملكية",
+    "submittingLabel": "جارٍ النقل…"
+  }
+}

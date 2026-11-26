@@ -1,6 +1,6 @@
 import { sql } from "drizzle-orm"
 import { check, index, pgEnum, pgTable, text } from "drizzle-orm/pg-core"
-import { pk, timestamps, timestamptz } from "./_helpers.js"
+import { pk, timestamps, timestamptz } from "../_helpers.js"
 
 export const userStatusEnum = pgEnum("user_status", ["active", "suspended"])
 export type UserStatus = (typeof userStatusEnum.enumValues)[number]

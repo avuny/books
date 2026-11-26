@@ -1,0 +1,243 @@
+{
+  "errors": {
+    "PARTY_NOT_FOUND": "الجهة غير موجودة.",
+    "PARTY_ROLE_NOT_FOUND": "دور الجهة غير موجود.",
+    "PARTY_ROLE_ALREADY_ACTIVE": "هذا الدور نشط بالفعل لهذه الجهة.",
+    "PARTY_ROLE_INACTIVE": "هذا الدور غير نشط لهذه الجهة.",
+    "PARTY_CONTACT_NOT_FOUND": "بيانات الاتصال غير موجودة لهذه الجهة.",
+    "PARTY_EMAIL_ALREADY_EXISTS": "عنوان البريد الإلكتروني هذا مسجل بالفعل لهذه الجهة.",
+    "PARTY_SALUTATION_NOT_ALLOWED": "اللقب متاح فقط للأفراد."
+  },
+  "labels": {
+    "roles": {
+      "CUSTOMER": "عميل",
+      "VENDOR": "مورد"
+    },
+    "types": {
+      "PERSON": "فرد",
+      "ORGANIZATION": "منشأة"
+    },
+    "salutations": {
+      "MR": "السيد",
+      "MS": "الآنسة",
+      "MRS": "السيدة",
+      "DR": "الدكتور",
+      "PROF": "الأستاذ",
+      "OTHER": "آخر"
+    },
+    "status": {
+      "active": "نشط",
+      "inactive": "غير نشط"
+    }
+  },
+  "msgs": {
+    "PARTY_CREATED": "تم إنشاء الجهة بنجاح.",
+    "PARTY_UPDATED": "تم تحديث بيانات الجهة بنجاح.",
+    "PARTY_ROLE_ADDED": "تمت إضافة الدور بنجاح.",
+    "PARTY_ROLE_REACTIVATED": "تمت إعادة تفعيل الدور بنجاح.",
+    "PARTY_ROLE_DEACTIVATED": "تم تعطيل الدور بنجاح."
+  },
+  "list": {
+    "CUSTOMER": {
+      "title": "العملاء",
+      "description": "إدارة دليل العملاء، جهات الاتصال والعلاقات التجارية."
+    },
+    "VENDOR": {
+      "title": "الموردون",
+      "description": "إدارة دليل الموردين، بيانات التوريد وجهات الاتصال."
+    },
+    "tabs": {
+      "aria": "حالة الجهة",
+      "active": "النشط",
+      "inactive": "غير النشط"
+    },
+    "search": {
+      "placeholder": "البحث بالاسم، الاسم القانوني، الرقم الضريبي، البريد أو الهاتف...",
+      "clear": "مسح البحث"
+    }
+  },
+  "create": {
+    "CUSTOMER": {
+      "title": "عميل جديد",
+      "description": "إضافة عميل جديد إلى مؤسستك."
+    },
+    "VENDOR": {
+      "title": "مورد جديد",
+      "description": "إضافة مورد جديد إلى مؤسستك."
+    },
+    "alsoAdd": {
+      "CUSTOMER": "إضافة كعميل أيضاً",
+      "VENDOR": "إضافة كمورد أيضاً"
+    },
+    "submitLabel": "حفظ",
+    "submittingLabel": "جارٍ الحفظ..."
+  },
+  "update": {
+    "title": "تعديل الجهة",
+    "description": "تحديث معلومات هذه الجهة.",
+    "submitLabel": "حفظ التغييرات",
+    "submittingLabel": "جارٍ الحفظ..."
+  },
+  "fields": {
+    "partyType": {
+      "label": "نوع الجهة"
+    },
+    "salutation": {
+      "label": "اللقب",
+      "placeholder": "اختر اللقب"
+    },
+    "displayName": {
+      "label": "الاسم المعروض",
+      "placeholder": "مثال: شركة النور أو أحمد محمود"
+    },
+    "legalName": {
+      "label": "الاسم القانوني",
+      "placeholder": "الاسم المسجل في السجل التجاري"
+    },
+    "taxNumber": {
+      "label": "الرقم الضريبي",
+      "placeholder": "مثال: 123456789"
+    },
+    "website": {
+      "label": "الموقع الإلكتروني",
+      "placeholder": "https://example.com"
+    },
+    "notes": {
+      "label": "ملاحظات",
+      "placeholder": "ملاحظات داخلية..."
+    },
+    "email": {
+      "label": "البريد الإلكتروني",
+      "placeholder": "name@example.com"
+    },
+    "phone": {
+      "label": "الهاتف",
+      "placeholder": "+1 234 567 8900"
+    },
+    "label": {
+      "label": "التصنيف",
+      "placeholder": "مثال: العمل، المنزل، الفواتير"
+    },
+    "addressLine1": {
+      "label": "العنوان - السطر 1",
+      "placeholder": "اسم الشارع، صندوق البريد"
+    },
+    "addressLine2": {
+      "label": "العنوان - السطر 2",
+      "placeholder": "الشقة، الجناح، الوحدة، المبنى"
+    },
+    "city": {
+      "label": "المدينة",
+      "placeholder": "المدينة"
+    },
+    "state": {
+      "label": "المنطقة / المحافظة",
+      "placeholder": "المنطقة أو المحافظة"
+    },
+    "postalCode": {
+      "label": "الرمز البريدي",
+      "placeholder": "الرمز البريدي"
+    },
+    "countryCode": {
+      "label": "الدولة",
+      "placeholder": "رمز الدولة بحرفين (مثال: EG, SA)"
+    }
+  },
+  "contacts": {
+    "emails": {
+      "title": "عناوين البريد الإلكتروني",
+      "add": "إضافة بريد",
+      "remove": "حذف البريد",
+      "primary": "البريد الرئيسي"
+    },
+    "phones": {
+      "title": "أرقام الهاتف",
+      "add": "إضافة هاتف",
+      "remove": "حذف الهاتف",
+      "primary": "الهاتف الرئيسي"
+    },
+    "addresses": {
+      "title": "العناوين",
+      "add": "إضافة عنوان",
+      "remove": "حذف العنوان",
+      "primary": "العنوان الرئيسي"
+    }
+  },
+  "actions": {
+    "create": {
+      "CUSTOMER": "عميل جديد",
+      "VENDOR": "مورد جديد"
+    },
+    "edit": "تعديل",
+    "view": "عرض التفاصيل",
+    "deactivate": "تعطيل",
+    "reactivate": "إعادة تفعيل",
+    "cancel": "إلغاء",
+    "addAsRole": {
+      "CUSTOMER": "إضافة كعميل",
+      "VENDOR": "إضافة كمورد"
+    },
+    "reactivateAsRole": {
+      "CUSTOMER": "إعادة تفعيل كعميل",
+      "VENDOR": "إعادة تفعيل كمورد"
+    },
+    "viewAsRole": {
+      "CUSTOMER": "عرض كعميل",
+      "VENDOR": "عرض كمورد"
+    }
+  },
+  "table": {
+    "name": "الاسم",
+    "email": "البريد الرئيسي",
+    "phone": "الهاتف الرئيسي",
+    "roles": "الأدوار",
+    "updated": "آخر تحديث",
+    "actions": "الإجراءات",
+    "actionsFor": "إجراءات {name}"
+  },
+  "empty": {
+    "CUSTOMER": {
+      "title": "لا يوجد عملاء",
+      "description": "ابدأ بإضافة أول عميل إلى مؤسستك."
+    },
+    "VENDOR": {
+      "title": "لا يوجد موردون",
+      "description": "ابدأ بإضافة أول مورد إلى مؤسستك."
+    },
+    "inactive": {
+      "title": "لا توجد سجلات غير نشطة",
+      "description": "لا توجد سجلات غير نشطة في هذا القسم حاليًا."
+    }
+  },
+  "delete": {
+    "CUSTOMER": {
+      "title": "تعطيل العميل",
+      "description": "هل أنت متأكد من رغبتك في تعطيل «{name}» كعميل؟ ستبقى بيانات الجهة المشتركة وأي دور كمورد نشطة دون تأثر."
+    },
+    "VENDOR": {
+      "title": "تعطيل المورد",
+      "description": "هل أنت متأكد من رغبتك في تعطيل «{name}» كمورد؟ ستبقى بيانات الجهة المشتركة وأي دور كعميل نشطة دون تأثر."
+    }
+  },
+  "details": {
+    "back": {
+      "CUSTOMER": "العودة إلى العملاء",
+      "VENDOR": "العودة إلى الموردين"
+    },
+    "createdAt": "تاريخ الإنشاء",
+    "updatedAt": "آخر تحديث",
+    "inactiveNotice": {
+      "CUSTOMER": "هذه الجهة غير نشطة كعميل.",
+      "VENDOR": "هذه الجهة غير نشطة كمورد."
+    }
+  },
+  "pagination": {
+    "nav": "التنقل بين الصفحات",
+    "previous": "السابق",
+    "next": "التالي",
+    "rowsPerPage": "عدد الصفوف في الصفحة",
+    "summary": "{from}–{to} من {total}",
+    "pageOf": "الصفحة {page} من {pageCount}",
+    "goTo": "الانتقال إلى الصفحة {page}"
+  }
+}

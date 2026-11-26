@@ -1,0 +1,421 @@
+import {
+  ITEM_AUDIT_EVENTS,
+  UNIT_BASE_CONVERSION_FACTOR,
+  itemOptionCursorSchema,
+  type CreateItemInput,
+  type ItemDto,
+  type ItemOffsetListQuery,
+  type ItemOffsetListResponse,
+  type OptionListQuery,
+  type OptionListResponse,
+  type PermissionKey,
+  type UpdateItemInput,
+} from "@avuny/contracts"
+import type { Tx } from "@avuny/db"
+import { decodeCursor, fail, ok, toCursorPage, type Result } from "@avuny/utils"
+import { createFailureKit, type Failure } from "../shared/service-helpers.js"
+import { ItemErrorCode, type ItemErrorCode as Code } from "./item.errors.js"
+import { toItemDto, toItemListItemDto } from "./item.mapper.js"
+import { checkOpeningStock } from "./item-opening-stock.rules.js"
+import { postOpeningStock } from "./item-opening-stock.js"
+import { itemRules, type UnitSource } from "./item.rules.js"
+import { DummyItemActivityLog, DummyPermissionChecker, DummyStockHistory } from "./testing.js"
+import type { ItemServiceDeps } from "./item.types.js"
+
+export { DummyItemActivityLog, DummyPermissionChecker, DummyStockHistory }
+
+const Err = ItemErrorCode
+const { failure, fromViolation, isFailure, toFail, failWith, abort, abortable } =
+  createFailureKit<Code>()
+
+const MSG = {
+  notFound: "Item not found",
+  forbidden: "You do not have access to this item",
+  nameTaken: "An item with this name already exists",
+  unitRequired: "Provide a base unit or a unit collection",
+  collectionInvalid: "The selected unit collection does not exist",
+} as const
+
+type ResolvedUnit = { baseUnitId: string; unitCollectionId: string }
+
+/**
+ * The service ORCHESTRATES: it takes the organization lock, loads rows through the
+ * repositories, asks the pure `rules` (item.rules.ts) what is allowed, then writes.
+ * Authorization is enforced at the route with requirePermission(...).
+ *
+ * Transaction discipline: a `failure(...)` returned from a transaction body COMMITS what
+ * was already written, so every check runs before the first write. A failure that can
+ * only be found after a write uses `abort(...)`, which rolls the transaction back.
+ */
+export function createItemService(deps: ItemServiceDeps) {
+  const repo = deps.repository
+  const permissions = deps.permissions ?? new DummyPermissionChecker()
+  const unitRepo = deps.unitRepository
+  const categoryRepo = deps.categoryRepository
+  const stock = deps.stockHistory ?? new DummyStockHistory()
+  const activityLog = deps.activityLog ?? new DummyItemActivityLog()
+  const rules = deps.rules ?? itemRules
+
+  const can = (
+    actorId: string,
+    action: PermissionKey | readonly [PermissionKey, ...PermissionKey[]],
+    orgId: string
+  ) => permissions.check({ userId: actorId }, action, { orgId })
+
+  const forbidden = () => fail({ error: Err.ITEM_FORBIDDEN, msg: MSG.forbidden })
+
+  /** Turns "which unit" into a (base unit, collection) pair, creating the collection if needed. */
+  async function resolveUnit(
+    orgId: string,
+    source: UnitSource,
+    tx: Tx
+  ): Promise<Failure<Code> | ResolvedUnit> {
+    if (source.kind === "collection") {
+      const collection = await unitRepo.findCollection(orgId, source.collectionId, tx)
+      if (!collection) return failure(Err.ITEM_UNIT_COLLECTION_INVALID, MSG.collectionInvalid)
+      return { baseUnitId: collection.baseUnitId, unitCollectionId: collection.id }
+    }
+
+    const [found] = await unitRepo.findUnitsByIds([source.baseUnitId], tx)
+    const checked = rules.requireBaseUnit(found)
+    if (!checked.ok) return fromViolation(checked.violation)
+
+    // The collection of a single-unit item is created together with it (see the unit schema docs).
+    const collection = await unitRepo.insertCollection(
+      { orgId, baseUnitId: checked.value.id, name: rules.autoCollectionName(checked.value) },
+      tx
+    )
+    await unitRepo.insertCollectionUnits(
+      collection.id,
+      [{ unitId: checked.value.id, conversionFactor: UNIT_BASE_CONVERSION_FACTOR }],
+      tx
+    )
+    return { baseUnitId: checked.value.id, unitCollectionId: collection.id }
+  }
+
+  const loadDetail = async (orgId: string, id: string) => {
+    const row = await repo.findDetail(orgId, id)
+    return row ? toItemDto(row) : null
+  }
+
+  return {
+    async list(
+      orgId: string,
+      query: ItemOffsetListQuery,
+      actorId?: string
+    ): Promise<Result<ItemOffsetListResponse, Code>> {
+      if (actorId && !(await can(actorId, "read:item", orgId))) return forbidden()
+      const { rows, total } = await repo.list(orgId, {
+        search: query.search || undefined,
+        categoryId: query.categoryId,
+        includeSubcategories: query.includeSubcategories,
+        isActive: query.isActive,
+        warehouseId: query.warehouseId,
+        locationId: query.locationId,
+        page: query.page,
+        pageSize: query.pageSize,
+      })
+      return ok({
+        data: {
+          items: rows.map(toItemListItemDto),
+          page: query.page,
+          pageSize: query.pageSize,
+          total,
+        },
+        msg: "Items retrieved successfully",
+      })
+    },
+
+    async listOptions(
+      orgId: string,
+      query: OptionListQuery,
+      actorId?: string
+    ): Promise<Result<OptionListResponse, Code>> {
+      if (actorId && !(await can(actorId, "read:item", orgId))) return forbidden()
+      const rows = await repo.listOptions(orgId, {
+        search: query.search,
+        after: decodeCursor(query.cursor, itemOptionCursorSchema),
+        limit: query.limit + 1,
+      })
+      const page = toCursorPage(rows, query.limit, (row) => ({ name: row.name, id: row.id }))
+      return ok({
+        data: {
+          items: page.items.map((r) => ({ id: r.id, name: r.name })),
+          nextCursor: page.nextCursor,
+        },
+        msg: "Item options retrieved successfully",
+      })
+    },
+
+    async getById(orgId: string, id: string, actorId?: string): Promise<Result<ItemDto, Code>> {
+      if (actorId && !(await can(actorId, "read:item", orgId))) return forbidden()
+      const dto = await loadDetail(orgId, id)
+      if (!dto) return fail({ error: Err.ITEM_NOT_FOUND, msg: MSG.notFound })
+      return ok({ data: dto, msg: "Item retrieved" })
+    },
+
+    async create(
+      actorId: string,
+      orgId: string,
+      input: CreateItemInput,
+      outerTx?: Tx
+    ): Promise<Result<ItemDto, Code>> {
+      if (!(await can(actorId, "create:item", orgId))) return forbidden()
+      const trackingViolation = rules.checkTracking(input)
+      if (trackingViolation) return failWith(trackingViolation)
+      const openingStockViolation = checkOpeningStock(input)
+      if (openingStockViolation)
+        return fail({ error: openingStockViolation.error, msg: openingStockViolation.msg })
+      const source = rules.selectUnitSource(input)
+      if (!source) return fail({ error: Err.ITEM_UNIT_INVALID, msg: MSG.unitRequired })
+
+      const executeTx = <T>(fn: (tx: Tx) => Promise<T>): Promise<T> =>
+        outerTx ? fn(outerTx) : repo.transaction(fn)
+
+      const outcome = await abortable(() =>
+        executeTx(async (tx) => {
+          await repo.lockOrgItems(orgId, tx)
+
+          // checks first (reads only) ...
+          const category = rules.requireCategory(await categoryRepo.findById(orgId, input.categoryId, tx))
+          if (!category.ok) return fromViolation(category.violation)
+          if (await repo.nameTaken(orgId, input.name, undefined, tx))
+            return failure(Err.ITEM_NAME_TAKEN, MSG.nameTaken)
+          const unit = await resolveUnit(orgId, source, tx)
+          if (isFailure(unit)) return unit
+
+          // ... then writes
+          const res = await repo.insertItem(
+            {
+              orgId,
+              name: input.name,
+              description: input.description ?? null,
+              categoryId: input.categoryId,
+              baseUnitId: unit.baseUnitId,
+              unitCollectionId: unit.unitCollectionId,
+              canAssembled: input.canAssembled,
+              isReturnable: input.isReturnable,
+              isInventoryTracked: input.isInventoryTracked,
+              isBatchTracked: input.isBatchTracked ?? (input.isInventoryTracked ? true : false),
+              isExpiryTracked: input.isExpiryTracked,
+              inventoryValuationMethod: input.inventoryValuationMethod,
+            },
+            tx
+          )
+          if (!res.ok) return abort(failure(Err.ITEM_NAME_TAKEN, MSG.nameTaken))
+          await repo.upsertSettings(
+            orgId,
+            res.row.id,
+            { allowNegativeStock: input.allowNegativeStock, reorderPoint: input.reorderPoint ?? null },
+            tx
+          )
+          if (input.expirySettings) {
+            await repo.upsertExpirySettings(
+              orgId,
+              res.row.id,
+              {
+                defaultShelfLifeValue: input.expirySettings.defaultShelfLifeValue ?? null,
+                defaultShelfLifeUnit: input.expirySettings.defaultShelfLifeUnit ?? null,
+              },
+              tx
+            )
+          }
+
+          if (input.openingStock && deps.openingStock) {
+            const posted = await postOpeningStock(deps.openingStock, {
+              tx,
+              actorId,
+              orgId,
+              itemId: res.row.id,
+              itemName: res.row.name,
+              isBatchTracked: input.isBatchTracked ?? (input.isInventoryTracked ? true : false),
+              opening: input.openingStock,
+            })
+            if (!posted.ok) {
+              // Rollback compensation for stateless DB drivers (neon-http) where tx rollback is a no-op
+              await repo.deleteCreatedItemOnFailure(orgId, res.row.id, tx)
+
+              let errorCode: Code = Err.ITEM_OPENING_STOCK_FAILED
+              if (
+                posted.error === "STOCK_MOVEMENT_EXPIRY_DATE_REQUIRED" ||
+                posted.error === "BATCH_DATES_INVALID" ||
+                posted.error === Err.ITEM_EXPIRY_DATE_REQUIRED
+              ) {
+                errorCode = Err.ITEM_EXPIRY_DATE_REQUIRED
+              } else if (
+                posted.error === "STOCK_MOVEMENT_BATCH_REQUIRED" ||
+                posted.error === Err.ITEM_OPENING_STOCK_BATCH_REQUIRED
+              ) {
+                errorCode = Err.ITEM_OPENING_STOCK_BATCH_REQUIRED
+              } else if (
+                posted.error === "STOCK_MOVEMENT_BATCH_NOT_TRACKED" ||
+                posted.error === Err.ITEM_OPENING_STOCK_BATCH_NOT_TRACKED
+              ) {
+                errorCode = Err.ITEM_OPENING_STOCK_BATCH_NOT_TRACKED
+              } else if (posted.error && posted.error in Err) {
+                errorCode = posted.error as Code
+              }
+
+              return abort(failure(errorCode, posted.msg))
+            }
+          }
+
+          return { id: res.row.id, name: res.row.name }
+        })
+      )
+      if (isFailure(outcome)) return toFail(outcome)
+
+      const dto = await loadDetail(orgId, outcome.id)
+      if (!dto) return fail({ error: Err.ITEM_NOT_FOUND, msg: MSG.notFound })
+      await activityLog.log({
+        action: ITEM_AUDIT_EVENTS.CREATED,
+        actorId,
+        orgId,
+        resourceId: outcome.id,
+        metadata: { name: outcome.name, categoryId: input.categoryId },
+      })
+      return ok({ data: dto, msg: "Item created" })
+    },
+
+    async update(
+      actorId: string,
+      orgId: string,
+      itemId: string,
+      input: UpdateItemInput
+    ): Promise<Result<ItemDto, Code>> {
+      if (!(await can(actorId, "update:item", orgId))) return forbidden()
+      const outcome = await abortable(() =>
+        repo.transaction(async (tx) => {
+          await repo.lockOrgItems(orgId, tx)
+          const current = await repo.findById(orgId, itemId, tx)
+          if (!current) return failure(Err.ITEM_NOT_FOUND, MSG.notFound)
+
+          // checks first (reads only) ...
+          if (input.categoryId !== undefined && input.categoryId !== current.categoryId) {
+            const category = rules.requireCategory(await categoryRepo.findById(orgId, input.categoryId, tx))
+            if (!category.ok) return fromViolation(category.violation)
+          }
+          if (
+            input.name !== undefined &&
+            input.name !== current.name &&
+            (await repo.nameTaken(orgId, input.name, itemId, tx))
+          )
+            return failure(Err.ITEM_NAME_TAKEN, MSG.nameTaken)
+
+          const trackingViolation = rules.checkTracking(rules.effectiveTracking(current, input))
+          if (trackingViolation) return fromViolation(trackingViolation)
+
+          const unitChange = rules.pickUnitChange(current, input)
+          const changed = rules.changedLockedFields(current, input, unitChange !== null)
+          if (changed.length > 0) {
+            const lock = rules.checkLock(changed, await stock.hasMovements(orgId, itemId))
+            if (lock) return fromViolation(lock)
+          }
+
+          let unit: ResolvedUnit | null = null
+          if (unitChange) {
+            const resolved = await resolveUnit(orgId, unitChange, tx)
+            if (isFailure(resolved)) return resolved
+            unit = resolved
+          }
+
+          // ... then writes
+          const res = await repo.updateItem(
+            orgId,
+            itemId,
+            {
+              ...(input.name !== undefined && { name: input.name }),
+              ...(input.description !== undefined && { description: input.description }),
+              ...(input.categoryId !== undefined && { categoryId: input.categoryId }),
+              ...(unit && { baseUnitId: unit.baseUnitId, unitCollectionId: unit.unitCollectionId }),
+              ...(input.canAssembled !== undefined && { canAssembled: input.canAssembled }),
+              ...(input.isReturnable !== undefined && { isReturnable: input.isReturnable }),
+              ...(input.isInventoryTracked !== undefined && {
+                isInventoryTracked: input.isInventoryTracked,
+              }),
+              ...(input.isBatchTracked !== undefined && { isBatchTracked: input.isBatchTracked }),
+              ...(input.isExpiryTracked !== undefined && { isExpiryTracked: input.isExpiryTracked }),
+              ...(input.inventoryValuationMethod !== undefined && {
+                inventoryValuationMethod: input.inventoryValuationMethod,
+              }),
+              ...(input.isActive !== undefined && { isActive: input.isActive }),
+            },
+            tx
+          )
+          if (!res.ok)
+            return abort(
+              res.reason === "name_taken"
+                ? failure(Err.ITEM_NAME_TAKEN, MSG.nameTaken)
+                : failure(Err.ITEM_NOT_FOUND, MSG.notFound)
+            )
+
+          if (input.allowNegativeStock !== undefined || input.reorderPoint !== undefined)
+            await repo.upsertSettings(
+              orgId,
+              itemId,
+              {
+                ...(input.allowNegativeStock !== undefined && {
+                  allowNegativeStock: input.allowNegativeStock,
+                }),
+                ...(input.reorderPoint !== undefined && { reorderPoint: input.reorderPoint }),
+              },
+              tx
+            )
+
+          if (input.expirySettings !== undefined)
+            await repo.upsertExpirySettings(
+              orgId,
+              itemId,
+              {
+                defaultShelfLifeValue: input.expirySettings?.defaultShelfLifeValue ?? null,
+                defaultShelfLifeUnit: input.expirySettings?.defaultShelfLifeUnit ?? null,
+              },
+              tx
+            )
+          return { id: itemId }
+        })
+      )
+      if (isFailure(outcome)) return toFail(outcome)
+
+      const dto = await loadDetail(orgId, itemId)
+      if (!dto) return fail({ error: Err.ITEM_NOT_FOUND, msg: MSG.notFound })
+      await activityLog.log({
+        action: ITEM_AUDIT_EVENTS.UPDATED,
+        actorId,
+        orgId,
+        resourceId: itemId,
+        metadata: { name: input.name, isActive: input.isActive },
+      })
+      return ok({ data: dto, msg: "Item updated" })
+    },
+
+    async remove(actorId: string, orgId: string, itemId: string): Promise<Result<{ id: string }, Code>> {
+      if (!(await can(actorId, "delete:item", orgId))) return forbidden()
+      const outcome = await repo.transaction(async (tx) => {
+        await repo.lockOrgItems(orgId, tx)
+        const item = await repo.findById(orgId, itemId, tx)
+        if (!item) return failure(Err.ITEM_NOT_FOUND, MSG.notFound)
+
+        const bad = rules.checkDeletable(await stock.hasMovements(orgId, itemId))
+        if (bad) return fromViolation(bad)
+
+        const res = await repo.deleteItem(orgId, itemId, tx)
+        if (!res.ok)
+          return res.reason === "has_history"
+            ? failure(Err.ITEM_HAS_HISTORY, "This item has stock history")
+            : failure(Err.ITEM_NOT_FOUND, MSG.notFound)
+        return { name: item.name }
+      })
+      if (isFailure(outcome)) return toFail(outcome)
+
+      await activityLog.log({
+        action: ITEM_AUDIT_EVENTS.DELETED,
+        actorId,
+        orgId,
+        resourceId: itemId,
+        metadata: { name: outcome.name },
+      })
+      return ok({ data: { id: itemId }, msg: "Item deleted" })
+    },
+  }
+}

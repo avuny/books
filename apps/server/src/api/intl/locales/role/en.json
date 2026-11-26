@@ -1,0 +1,14 @@
+{
+  "errors": {
+    "ROLE_NOT_FOUND": "Role not found.",
+    "ROLE_PERMISSION_DENIED": "You do not have permission to perform this action.",
+    "ROLE_NAME_TAKEN": "A role with this name already exists.",
+    "ROLE_SYSTEM_READONLY": "System roles cannot be changed or deleted.",
+    "ROLE_IN_USE": "This role is still assigned to members. Unassign it first.",
+    "ROLE_FEATURE_NOT_AVAILABLE": "Custom roles are not available on your plan.",
+    "ROLE_INVALID_PERMISSION": "One of the permissions is not valid.",
+    "ROLE_MEMBER_NOT_FOUND": "Member not found.",
+    "ROLE_MEMBER_NOT_ASSIGNABLE": "Roles can only be assigned to active managed members.",
+    "ROLE_ESCALATION_NOT_ALLOWED": "You can only assign roles whose permissions you already have."
+  }
+}

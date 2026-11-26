@@ -1,0 +1,29 @@
+{
+  "errors": {
+    "ACCOUNT_NOT_FOUND": "Account not found.",
+    "ACCOUNT_CODE_TAKEN": "An account with this code already exists.",
+    "ACCOUNT_SYSTEM_READONLY": "This is a system account and this change is not allowed.",
+    "ACCOUNT_IN_USE": "The account is in use: it has postings, sub-accounts or a mapping.",
+    "ACCOUNT_PARENT_INVALID": "The parent account is not valid for this account.",
+    "ACCOUNT_CANNOT_POST": "This account does not allow direct posting.",
+    "ACCOUNT_INACTIVE": "The account is inactive.",
+    "ACCOUNT_MAPPING_MISSING": "No account is mapped to a required accounting role.",
+    "ACCOUNT_MAPPING_INVALID": "The account cannot play this accounting role.",
+    "JOURNAL_ENTRY_NOT_FOUND": "Journal entry not found.",
+    "JOURNAL_ENTRY_UNBALANCED": "Total debits must equal total credits.",
+    "JOURNAL_ENTRY_INVALID_LINE": "A journal line is not valid.",
+    "JOURNAL_ENTRY_ALREADY_POSTED": "The journal entry has already been posted.",
+    "JOURNAL_ENTRY_ALREADY_REVERSED": "The journal entry has already been reversed.",
+    "JOURNAL_ENTRY_NOT_POSTED": "Only a posted journal entry can be reversed.",
+    "JOURNAL_ENTRY_CANNOT_REVERSE_REVERSAL": "A reversal entry cannot be reversed.",
+    "JOURNAL_ENTRY_DUPLICATE_SOURCE": "A journal entry has already been posted for this document.",
+    "JOURNAL_ENTRY_PERIOD_CLOSED": "The accounting period for this date is closed.",
+    "ACCOUNTING_INVALID_AMOUNT": "The amount is not valid.",
+    "ACCOUNTING_CURRENCY_MISMATCH": "The currency does not match the organization's accounting currency.",
+    "ACCOUNTING_OPENING_BALANCE_INVALID": "The opening balance is not valid.",
+    "ACCOUNTING_INVALID_DATE_RANGE": "The date range is not valid.",
+    "ACCOUNTING_PERIOD_NOT_FOUND": "Accounting period not found.",
+    "ACCOUNTING_PERIOD_OVERLAP": "The period overlaps an existing accounting period.",
+    "ACCOUNTING_PERIOD_ALREADY_CLOSED": "The accounting period is already closed."
+  }
+}

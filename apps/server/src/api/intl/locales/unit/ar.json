@@ -1,0 +1,120 @@
+{
+  "errors": {
+    "UNIT_NOT_FOUND": "الوحدة غير موجودة.",
+    "UNIT_FORBIDDEN": "ليس لديك صلاحية الوصول إلى هذه الوحدة.",
+    "UNIT_NAME_TAKEN": "توجد وحدة بهذا الاسم بالفعل.",
+    "UNIT_SYMBOL_TAKEN": "توجد وحدة بهذا الرمز بالفعل.",
+    "UNIT_SYSTEM_IMMUTABLE": "لا يمكن تعديل أو حذف وحدات النظام القياسية.",
+    "UNIT_IN_USE": "هذه الوحدة مستخدمة في مجموعات أو أصناف ولا يمكن حذفها.",
+    "UNIT_TYPE_IMMUTABLE": "لا يمكن تغيير نوع قياس الوحدة."
+  },
+  "labels": {
+    "base": "أساسية",
+    "system": "نظام",
+    "custom": "مخصصة"
+  },
+  "msgs": {
+    "UNIT_CREATED": "تم إنشاء الوحدة.",
+    "UNIT_UPDATED": "تم تحديث الوحدة.",
+    "UNIT_DELETED": "تم حذف الوحدة.",
+    "UNIT_DEACTIVATED": "تم تعطيل الوحدة."
+  },
+  "list": {
+    "title": "الوحدات",
+    "description": "وحدات القياس المستخدمة للمنتجات وتتبع المخزون والتحويلات.",
+    "search": {
+      "placeholder": "ابحث في الوحدات",
+      "clear": "مسح البحث"
+    }
+  },
+  "create": {
+    "title": "إنشاء وحدة",
+    "description": "إضافة وحدة قياس جديدة لمؤسستك.",
+    "submitLabel": "إنشاء الوحدة",
+    "submittingLabel": "جارٍ الإنشاء…"
+  },
+  "update": {
+    "title": "تعديل الوحدة",
+    "description": "تحديث تفاصيل الوحدة أو حالة التفعيل.",
+    "submitLabel": "حفظ التغييرات",
+    "submittingLabel": "جارٍ الحفظ…"
+  },
+  "fields": {
+    "name": {
+      "label": "الاسم",
+      "placeholder": "مثال: كيلوغرام"
+    },
+    "symbol": {
+      "label": "الرمز",
+      "placeholder": "مثال: كجم"
+    },
+    "type": {
+      "label": "نوع القياس",
+      "placeholder": "اختر النوع",
+      "locked": "لا يمكن تغيير نوع القياس."
+    },
+    "isActive": {
+      "label": "نشط",
+      "description": "الوحدات المعطلة لا يمكن اختيارها للأصناف أو المجموعات الجديدة."
+    }
+  },
+  "actions": {
+    "create": "إنشاء وحدة",
+    "edit": "تعديل",
+    "view": "عرض",
+    "delete": "حذف",
+    "cancel": "إلغاء",
+    "filter": "تصفية",
+    "allTypes": "جميع الأنواع",
+    "allStatuses": "جميع الحالات"
+  },
+  "type": {
+    "count": "عدد",
+    "weight": "وزن",
+    "length": "طول",
+    "area": "مساحة",
+    "volume": "حجم"
+  },
+  "status": {
+    "active": "نشط",
+    "inactive": "معطل"
+  },
+  "table": {
+    "name": "الوحدة",
+    "symbol": "الرمز",
+    "type": "النوع",
+    "status": "الحالة",
+    "scope": "النوع",
+    "updated": "آخر تحديث",
+    "actions": "الإجراءات",
+    "actionsFor": "إجراءات {name}"
+  },
+  "empty": {
+    "title": "لا توجد وحدات",
+    "description": "جرب تعديل البحث أو الفلاتر، أو أضف وحدة مخصصة."
+  },
+  "delete": {
+    "title": "حذف الوحدة؟",
+    "description": "سيتم حذف «{name}» ({symbol}) نهائياً. لا يمكن التراجع عن ذلك."
+  },
+  "details": {
+    "back": "العودة إلى الوحدات",
+    "name": "الاسم",
+    "symbol": "الرمز",
+    "type": "نوع القياس",
+    "status": "الحالة",
+    "scope": "النوع",
+    "createdAt": "تاريخ الإنشاء",
+    "updatedAt": "آخر تحديث",
+    "systemNotice": "هذه وحدة قياسية مقدمة من النظام. لا يمكن تعديلها أو حذفها."
+  },
+  "pagination": {
+    "nav": "ترقيم صفحات الوحدات",
+    "previous": "السابق",
+    "next": "التالي",
+    "rowsPerPage": "عدد الصفوف في الصفحة",
+    "summary": "{from}–{to} من {total}",
+    "pageOf": "الصفحة {page} من {pageCount}",
+    "goTo": "الانتقال إلى الصفحة {page}"
+  }
+}

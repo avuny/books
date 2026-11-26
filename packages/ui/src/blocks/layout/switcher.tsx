@@ -12,11 +12,12 @@ import {
   DropdownMenu,
   DropdownMenuTrigger,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuLabel,
   DropdownMenuItem,
   DropdownMenuSeparator,
+  DropdownMenuShortcut,
 } from "@workspace/ui/components/dropdown-menu"
-import { DropdownMenuShortcut } from "@workspace/ui/components/dropdown-menu"
 
 import { renderLogo } from "@workspace/ui/blocks/layout/render-logo"
 
@@ -80,27 +81,29 @@ export function Switcher({
             side={isMobile ? "bottom" : "right"}
             sideOffset={4}
           >
-            {switcherTitle && (
-              <DropdownMenuLabel className="text-xs text-muted-foreground">
-                {switcherTitle}
-              </DropdownMenuLabel>
-            )}
-            {items.map((item, index) => (
-              <DropdownMenuItem
-                key={item.id}
-                onClick={() => {
-                  onItemSelect?.(item.id)
-                  setSelectedItem(item)
-                }}
-                className="gap-2 p-2"
-              >
-                <div className="flex size-6 items-center justify-center rounded-sm border">
-                  {renderLogo(item.logo, item.name)}
-                </div>
-                {item.name}
-                <DropdownMenuShortcut>⌘{index + 1}</DropdownMenuShortcut>
-              </DropdownMenuItem>
-            ))}
+            <DropdownMenuGroup>
+              {switcherTitle && (
+                <DropdownMenuLabel className="text-xs text-muted-foreground">
+                  {switcherTitle}
+                </DropdownMenuLabel>
+              )}
+              {items.map((item, index) => (
+                <DropdownMenuItem
+                  key={item.id}
+                  onClick={() => {
+                    onItemSelect?.(item.id)
+                    setSelectedItem(item)
+                  }}
+                  className="gap-2 p-2"
+                >
+                  <div className="flex size-6 items-center justify-center rounded-sm border">
+                    {renderLogo(item.logo, item.name)}
+                  </div>
+                  {item.name}
+                  <DropdownMenuShortcut>⌘{index + 1}</DropdownMenuShortcut>
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuGroup>
             {onAddClick && (
               <>
                 <DropdownMenuSeparator />

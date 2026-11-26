@@ -1,0 +1,11 @@
+export const UnitErrorCode = {
+  UNIT_NOT_FOUND: "UNIT_NOT_FOUND",
+  UNIT_FORBIDDEN: "UNIT_FORBIDDEN",
+  UNIT_NAME_TAKEN: "UNIT_NAME_TAKEN",
+  UNIT_SYMBOL_TAKEN: "UNIT_SYMBOL_TAKEN",
+  UNIT_SYSTEM_IMMUTABLE: "UNIT_SYSTEM_IMMUTABLE",
+  UNIT_IN_USE: "UNIT_IN_USE",
+  UNIT_TYPE_IMMUTABLE: "UNIT_TYPE_IMMUTABLE",
+} as const
+
+export type UnitErrorCode = (typeof UnitErrorCode)[keyof typeof UnitErrorCode]

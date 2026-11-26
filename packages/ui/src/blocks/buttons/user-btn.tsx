@@ -4,14 +4,26 @@ import { UserNav } from "@workspace/ui/blocks/layout/nav-user"
 import Loading from "@workspace/ui/blocks/loading/loading"
 import type { User } from "@workspace/ui/blocks/types"
 import { Button } from "@workspace/ui/components/button"
-
 import { LogInIcon } from "lucide-react"
+
+export type UserButtonCopy = {
+  account?: string
+  notifications?: string
+  invitations?: string
+  logout?: string
+  upgrade?: string
+  billing?: string
+}
 
 export type UserButtonProps = {
   user: User | undefined
   isLoading: boolean
-  href: string
-  onNavigate: (href: string) => void
+  onClick: () => void
+  onAccountClick?: () => void
+  onNotificationsClick?: () => void
+  /** The "My invitations" item is only shown when this is provided. */
+  onInvitationsClick?: () => void
+  copy?: UserButtonCopy
   useSignOutHandler(): {
     submit: () => Promise<void>
     isPending: boolean
@@ -21,8 +33,11 @@ export type UserButtonProps = {
 export default function UserButton({
   user,
   isLoading,
-  href,
-  onNavigate,
+  onClick,
+  onAccountClick,
+  onNotificationsClick,
+  onInvitationsClick,
+  copy,
   useSignOutHandler,
 }: UserButtonProps) {
   const { submit } = useSignOutHandler()
@@ -38,7 +53,7 @@ export default function UserButton({
   if (!user) {
     return (
       <Button
-        onClick={() => onNavigate(href)}
+        onClick={onClick}
         variant="outline"
         size="icon"
         className="cursor-pointer"
@@ -52,9 +67,26 @@ export default function UserButton({
     <UserNav
       iconOnly
       sections={{
-        account: { enabled: true },
-        notifications: { enabled: true },
-        logout: { enabled: true, onClick: submit },
+        account: {
+          enabled: true,
+          label: copy?.account,
+          onClick: onAccountClick,
+        },
+        invitations: {
+          enabled: Boolean(onInvitationsClick),
+          label: copy?.invitations,
+          onClick: onInvitationsClick,
+        },
+        notifications: {
+          enabled: true,
+          label: copy?.notifications,
+          onClick: onNotificationsClick,
+        },
+        logout: {
+          enabled: true,
+          label: copy?.logout,
+          onClick: submit,
+        },
       }}
       user={user}
     />

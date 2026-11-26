@@ -1,0 +1,29 @@
+{
+  "errors": {
+    "ACCOUNT_NOT_FOUND": "الحساب غير موجود.",
+    "ACCOUNT_CODE_TAKEN": "يوجد حساب بهذا الرمز بالفعل.",
+    "ACCOUNT_SYSTEM_READONLY": "هذا حساب نظامي ولا يُسمح بهذا التغيير.",
+    "ACCOUNT_IN_USE": "الحساب مستخدم: لديه قيود أو حسابات فرعية أو ربط.",
+    "ACCOUNT_PARENT_INVALID": "الحساب الأب غير صالح لهذا الحساب.",
+    "ACCOUNT_CANNOT_POST": "هذا الحساب لا يسمح بالترحيل المباشر.",
+    "ACCOUNT_INACTIVE": "الحساب غير نشط.",
+    "ACCOUNT_MAPPING_MISSING": "لا يوجد حساب مرتبط بدور محاسبي مطلوب.",
+    "ACCOUNT_MAPPING_INVALID": "لا يمكن للحساب أداء هذا الدور المحاسبي.",
+    "JOURNAL_ENTRY_NOT_FOUND": "قيد اليومية غير موجود.",
+    "JOURNAL_ENTRY_UNBALANCED": "يجب أن يتساوى إجمالي المدين مع إجمالي الدائن.",
+    "JOURNAL_ENTRY_INVALID_LINE": "أحد أسطر القيد غير صالح.",
+    "JOURNAL_ENTRY_ALREADY_POSTED": "تم ترحيل قيد اليومية بالفعل.",
+    "JOURNAL_ENTRY_ALREADY_REVERSED": "تم عكس قيد اليومية بالفعل.",
+    "JOURNAL_ENTRY_NOT_POSTED": "لا يمكن عكس إلا قيد يومية مرحّل.",
+    "JOURNAL_ENTRY_CANNOT_REVERSE_REVERSAL": "لا يمكن عكس قيد عكسي.",
+    "JOURNAL_ENTRY_DUPLICATE_SOURCE": "تم ترحيل قيد لهذا المستند بالفعل.",
+    "JOURNAL_ENTRY_PERIOD_CLOSED": "الفترة المحاسبية لهذا التاريخ مغلقة.",
+    "ACCOUNTING_INVALID_AMOUNT": "المبلغ غير صالح.",
+    "ACCOUNTING_CURRENCY_MISMATCH": "العملة لا تطابق عملة المحاسبة للمنشأة.",
+    "ACCOUNTING_OPENING_BALANCE_INVALID": "الرصيد الافتتاحي غير صالح.",
+    "ACCOUNTING_INVALID_DATE_RANGE": "نطاق التاريخ غير صالح.",
+    "ACCOUNTING_PERIOD_NOT_FOUND": "الفترة المحاسبية غير موجودة.",
+    "ACCOUNTING_PERIOD_OVERLAP": "الفترة تتداخل مع فترة محاسبية قائمة.",
+    "ACCOUNTING_PERIOD_ALREADY_CLOSED": "الفترة المحاسبية مغلقة بالفعل."
+  }
+}

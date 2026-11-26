@@ -1,0 +1,8 @@
+{
+  "errors": {
+    "COUNTRY_NOT_FOUND": "الدولة غير موجودة.",
+    "STATE_NOT_FOUND": "المحافظة أو الولاية غير موجودة.",
+    "CURRENCY_NOT_FOUND": "العملة غير موجودة.",
+    "TIMEZONE_NOT_FOUND": "المنطقة الزمنية غير موجودة."
+  }
+}

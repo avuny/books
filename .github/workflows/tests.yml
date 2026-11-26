@@ -1,0 +1,78 @@
+name: Tests
+
+on:
+  pull_request:
+  push:
+    branches: [main, dev]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  TURBO_TELEMETRY_DISABLED: "1"
+  # Postgres + Neon HTTP proxy from apps/server/docker-compose.test.yml (same driver as production).
+  TEST_DATABASE_URL: postgres://postgres:postgres@db.localtest.me:5432/avuny_test
+
+jobs:
+  integration:
+    name: API integration tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+
+      - name: Start the test database
+        run: docker compose -f apps/server/docker-compose.test.yml up -d --wait
+
+      # The server imports the built workspace packages (contracts, db, utils, ...).
+      - run: pnpm --filter "@avuny/books-server^..." build
+      - run: pnpm --filter @avuny/books-server test:int
+
+      - name: Database logs
+        if: failure()
+        run: docker compose -f apps/server/docker-compose.test.yml logs
+
+  e2e:
+    name: Web e2e tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+
+      - name: Start the test database
+        run: docker compose -f apps/server/docker-compose.test.yml up -d --wait
+
+      # The server build imports the built workspace packages (contracts, db, utils, ...).
+      - run: pnpm --filter "@avuny/books-server^..." build
+
+      # The web app needs the generated API client, which needs the server's OpenAPI document.
+      - run: pnpm --filter @avuny/books-server build
+      - run: pnpm --filter @avuny/books-web api:generate
+
+      - run: pnpm --filter @avuny/books-web exec playwright install --with-deps chromium
+      - run: pnpm --filter @avuny/books-web e2e
+
+      - name: Upload Playwright report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: apps/web/playwright-report/
+          retention-days: 7

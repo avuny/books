@@ -1,0 +1,156 @@
+{
+  "errors": {
+    "INVENTORY_ADJUSTMENT_NOT_FOUND": "Inventory adjustment not found",
+    "INVENTORY_ADJUSTMENT_NOT_EDITABLE": "Only draft adjustments can be edited",
+    "INVENTORY_ADJUSTMENT_NOT_DELETABLE": "Only draft adjustments can be deleted",
+    "INVENTORY_ADJUSTMENT_ALREADY_CONFIRMED": "The adjustment is already confirmed",
+    "INVENTORY_ADJUSTMENT_ALREADY_CANCELLED": "The adjustment is already cancelled",
+    "INVENTORY_ADJUSTMENT_CANNOT_CANCEL_CONFIRMED": "Confirmed adjustments cannot be cancelled",
+    "INVENTORY_ADJUSTMENT_WAREHOUSE_NOT_FOUND": "The selected warehouse does not exist",
+    "INVENTORY_ADJUSTMENT_WAREHOUSE_NOT_PHYSICAL": "Only physical warehouses can be selected for inventory adjustments",
+    "INVENTORY_ADJUSTMENT_REASON_NOT_FOUND": "The selected adjustment reason does not exist",
+    "INVENTORY_ADJUSTMENT_REASON_INACTIVE": "The selected adjustment reason is inactive",
+    "INVENTORY_ADJUSTMENT_NO_LINES": "At least one adjustment line is required",
+    "INVENTORY_ADJUSTMENT_TOO_MANY_LINES": "The adjustment exceeds the maximum allowed lines",
+    "INVENTORY_ADJUSTMENT_DUPLICATE_LINES": "Duplicate lines found for the same item, location, and batch",
+    "INVENTORY_ADJUSTMENT_NO_DIFFERENCE": "The adjustment has no quantity differences to post",
+    "INVENTORY_ADJUSTMENT_DIRECTION_MISMATCH": "Quantity differences do not match the selected reason direction",
+    "INVENTORY_ADJUSTMENT_LOCATION_NOT_FOUND": "The specified warehouse location does not exist",
+    "INVENTORY_ADJUSTMENT_LOCATION_NOT_IN_WAREHOUSE": "The location does not belong to the selected warehouse",
+    "INVENTORY_ADJUSTMENT_LOCATION_NOT_STOCKABLE": "The location is not stockable",
+    "INVENTORY_ADJUSTMENT_LOCATION_BLOCKED": "The location is blocked for stock adjustments",
+    "INVENTORY_ADJUSTMENT_ITEM_NOT_FOUND": "The specified item does not exist",
+    "INVENTORY_ADJUSTMENT_ITEM_INACTIVE": "Cannot adjust inactive items",
+    "INVENTORY_ADJUSTMENT_ITEM_NOT_STOCKED": "Cannot adjust non-stocked items",
+    "INVENTORY_ADJUSTMENT_UNIT_NOT_IN_COLLECTION": "The selected unit is not configured for this item",
+    "INVENTORY_ADJUSTMENT_BATCH_REQUIRED": "Batch selection is required for batch-tracked items",
+    "INVENTORY_ADJUSTMENT_BATCH_NOT_TRACKED": "Batch selection is not allowed for non-batch-tracked items",
+    "INVENTORY_ADJUSTMENT_BATCH_NOT_FOUND": "The specified batch was not found",
+    "INVENTORY_ADJUSTMENT_STALE_COUNT": "System stock has changed since this count was taken. Please refresh and review.",
+    "INVENTORY_ADJUSTMENT_INSUFFICIENT_STOCK": "Insufficient stock to perform this decrease adjustment",
+    "INVENTORY_ADJUSTMENT_RESERVATION_VIOLATION": "Adjustment would violate existing active stock reservations",
+    "INVENTORY_ADJUSTMENT_NUMBER_TAKEN": "An inventory adjustment with this number already exists",
+    "INVENTORY_ADJUSTMENT_COST_NOT_DETERMINABLE": "Could not determine valuation cost for positive adjustment"
+  },
+  "labels": {
+    "status": {
+      "DRAFT": "Draft",
+      "CONFIRMED": "Confirmed",
+      "CANCELLED": "Cancelled"
+    },
+    "direction": {
+      "INCREASE": "Increase (Surplus)",
+      "DECREASE": "Decrease (Shortage)",
+      "BOTH": "Both (Mixed)"
+    },
+    "reasons": {
+      "COUNT_SHORTAGE": "Count shortage",
+      "COUNT_SURPLUS": "Count surplus",
+      "DAMAGE": "Damaged stock",
+      "THEFT": "Theft / shrinkage",
+      "EXPIRED": "Expired items",
+      "FOUND_STOCK": "Found stock",
+      "OTHER": "Other adjustment"
+    }
+  },
+  "msgs": {
+    "INVENTORY_ADJUSTMENT_CREATED": "Inventory adjustment created successfully",
+    "INVENTORY_ADJUSTMENT_UPDATED": "Inventory adjustment updated successfully",
+    "INVENTORY_ADJUSTMENT_DELETED": "Inventory adjustment deleted successfully",
+    "INVENTORY_ADJUSTMENT_CONFIRMED": "Inventory adjustment confirmed and stock posted successfully",
+    "INVENTORY_ADJUSTMENT_CANCELLED": "Inventory adjustment cancelled successfully"
+  },
+  "list": {
+    "title": "Inventory adjustments",
+    "description": "Reconcile recorded inventory balances with physical stock counts.",
+    "newButton": "New adjustment"
+  },
+  "create": {
+    "title": "New inventory adjustment",
+    "description": "Enter physical stock count and post quantity differences.",
+    "saveDraft": "Save as draft",
+    "confirm": "Confirm & post"
+  },
+  "update": {
+    "title": "Edit inventory adjustment",
+    "description": "Update draft stock counts."
+  },
+  "fields": {
+    "number": "Adjustment number",
+    "referenceNumber": "Reference number",
+    "date": "Adjustment date",
+    "warehouse": "Warehouse",
+    "direction": "Adjustment type",
+    "reason": "Adjustment reason",
+    "description": "Description",
+    "status": "Status",
+    "item": "Item",
+    "location": "Location",
+    "unit": "Unit",
+    "batch": "Batch",
+    "systemQuantity": "System quantity",
+    "countedQuantity": "Counted quantity",
+    "difference": "Difference",
+    "baseQuantity": "Base quantity",
+    "notes": "Notes"
+  },
+  "actions": {
+    "view": "View details",
+    "edit": "Edit draft",
+    "delete": "Delete draft",
+    "confirm": "Confirm",
+    "confirmTitle": "Confirm inventory adjustment",
+    "confirmDescription": "Confirming this adjustment will post a stock movement and general ledger journal entry. Confirmed adjustments cannot be edited or undone.",
+    "cancelDialog": "Cancel",
+    "cancel": "Cancel adjustment",
+    "cancelTitle": "Cancel inventory adjustment",
+    "cancelDescription": "Are you sure you want to cancel this draft adjustment? No stock will be affected.",
+    "back": "Back",
+    "backToList": "Back to adjustments",
+    "addLine": "Add line",
+    "removeLine": "Remove line"
+  },
+  "type": {
+    "adjustment": "Inventory adjustment"
+  },
+  "table": {
+    "number": "Number",
+    "date": "Date",
+    "warehouse": "Warehouse",
+    "reason": "Reason",
+    "items": "Lines",
+    "status": "Status",
+    "createdAt": "Created at"
+  },
+  "empty": {
+    "title": "No inventory adjustments",
+    "description": "Create an adjustment to record count differences, damage, or stock corrections."
+  },
+  "delete": {
+    "title": "Delete adjustment",
+    "message": "Are you sure you want to delete this draft adjustment? This action cannot be undone."
+  },
+  "details": {
+    "title": "Adjustment details",
+    "overview": "Overview",
+    "documentInfo": "Document details",
+    "auditInfo": "Audit & Postings",
+    "stockMovement": "Stock movement",
+    "journalEntry": "Journal entry",
+    "confirmedBy": "Confirmed by",
+    "confirmedAt": "Confirmed at",
+    "createdBy": "Created by",
+    "createdAt": "Created at",
+    "linesSummary": "Adjusted items",
+    "totalLines": "Total items",
+    "increases": "Increases",
+    "decreases": "Decreases",
+    "noChange": "No change",
+    "netDifference": "Net difference",
+    "pendingPosting": "Pending confirmation",
+    "noItems": "No items recorded in this adjustment."
+  },
+  "pagination": {
+    "showing": "Showing {from} to {to} of {total} adjustments"
+  }
+}

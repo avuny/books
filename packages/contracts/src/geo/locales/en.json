@@ -1,0 +1,21 @@
+{
+  "errors": {
+    "COUNTRY_NOT_FOUND": "Country not found.",
+    "STATE_NOT_FOUND": "State or province not found.",
+    "CURRENCY_NOT_FOUND": "Currency not found.",
+    "TIMEZONE_NOT_FOUND": "Timezone not found."
+  },
+  "labels": {
+    "country": "Country",
+    "state": "State / Province",
+    "currency": "Currency",
+    "timezone": "Timezone"
+  },
+  "msgs": {
+    "countriesRetrieved": "Countries retrieved successfully",
+    "countryRetrieved": "Country retrieved successfully",
+    "statesRetrieved": "States retrieved successfully",
+    "currenciesRetrieved": "Currencies retrieved successfully",
+    "timezonesRetrieved": "Timezones retrieved successfully"
+  }
+}

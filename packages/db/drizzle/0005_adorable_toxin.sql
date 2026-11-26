@@ -1,0 +1,1 @@
+ALTER TYPE "public"."sidebar_option_name" ADD VALUE 'organizationInvitation';

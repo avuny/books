@@ -1,0 +1,20 @@
+{
+  "errors": {
+    "ORGANIZATION_INVITATION_NOT_FOUND": "Invitation not found.",
+    "ORGANIZATION_INVITATION_FORBIDDEN": "You are not allowed to manage invitations for this organization.",
+    "ORGANIZATION_INVITATION_ORGANIZATION_UNAVAILABLE": "This organization is not accepting new members right now.",
+    "ORGANIZATION_INVITATION_ALREADY_MEMBER": "This person is already a member of the organization.",
+    "ORGANIZATION_INVITATION_ALREADY_PENDING": "There is already a pending invitation for this person.",
+    "ORGANIZATION_INVITATION_LIMIT_REACHED": "Your plan's user limit for this member type has been reached.",
+    "ORGANIZATION_INVITATION_CHANNEL_NOT_ALLOWED": "This invitation channel is not available on your plan.",
+    "ORGANIZATION_INVITATION_TARGET_UNAVAILABLE": "We could not find a usable contact for this invitee.",
+    "ORGANIZATION_INVITATION_NOT_PENDING": "This invitation is no longer pending.",
+    "ORGANIZATION_INVITATION_EXPIRED": "This invitation has expired.",
+    "ORGANIZATION_INVITATION_RESEND_TOO_SOON": "Please wait a moment before resending this invitation.",
+    "ORGANIZATION_INVITATION_RESEND_LIMIT_REACHED": "This invitation was resent too many times. Create a new one.",
+    "ORGANIZATION_INVITATION_USERNAME_REQUIRED": "Choose a username to join this organization.",
+    "ORGANIZATION_INVITATION_USERNAME_TAKEN": "This username is already used in the organization.",
+    "ORGANIZATION_INVITATION_IDENTITY_MISMATCH": "This invitation was sent to a different verified email or phone number.",
+    "ORGANIZATION_INVITATION_MEMBER_TYPE_CONFLICT": "You already have a different membership type in this organization."
+  }
+}

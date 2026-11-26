@@ -1,0 +1,206 @@
+{
+  "errors": {
+    "SERVER_ERROR": "حطأ في النظام. برجاء المحاولة لاحقا.",
+    "AUTH_LOGIN_INCORRECT_CREDENTIALS": "البريد الإلكتروني أو كلمة المرور غير صحيحة.",
+    "AUTH_LOGIN_USER_PASSWORD_NOT_SET": "لم يتم تعيين كلمة مرور لهذا الحساب.",
+    "AUTH_USED_EMAIL": "هذا البريد الإلكتروني مسجل بالفعل.",
+    "AUTH_USED_IDENTIFIER": "هذا البريد الإلكتروني مستخدم بالفعل.",
+    "AUTH_SIGN_UP_USER_EXIST": "هذا البريد الإلكتروني مستخدم بالفعل.",
+    "AUTH_UNVERIFIED_EMAIL": "لم يتم التحقق من بريدك الإلكتروني.",
+    "INCORRECT_CREDENTIALS": "البريد الإلكتروني أو كلمة المرور غير صحيحة.",
+    "USER_NOT_LOCAL": "هذا المستخدم مسجل عبر مزود خارجي.",
+    "REFRESH_TOKEN_INVALID": "رمز التحديث غير صالح.",
+    "MISSING_OR_MALFORMED_AUTHORIZATION_HEADER": "الترويسة الخاصة بالتفويض مفقودة أو غير صحيحة.",
+    "INVALID_ACCESS_TOKEN": "رمز الوصول غير صالح.",
+    "EXPIRED_ACCESS_TOKEN": "انتهت صلاحية رمز الوصول.",
+    "MISSING_ACCESS_TOKEN": "رمز الوصول مفقود.",
+    "MISSING_REFRESH_TOKEN": "رمز التحديث مفقود.",
+    "USER_IS_NOT_EXIST": "هذا البريد الإلكتروني غير موجود.",
+    "OTP_INVALID": "رمز التحقق (OTP) غير صالح.",
+    "OTP_EXPIRED": "انتهت صلاحية رمز التحقق (OTP).",
+    "TOKEN_EXPIRED": "انتهت صلاحية الرمز.",
+    "FINDING_USER_FAILED": "حدث خطأ غير متوقع أثناء البحث عن المستخدم.",
+    "AUTH_USER_CREATION_FAILED": "فشل إنشاء المستخدم.",
+    "ISSUE_TOKEN_FAILED": "فشل إصدار الرمز.",
+    "PASSWORD_RESET_FAILED": "فشل في إعادة تعيين كلمة المرور.",
+    "REFRESHTOKEN_REVOKE_FAILED": "فشل في إلغاء رمز التحديث.",
+    "REFRESHTOKEN_CREATE_FAILED": "فشل في إنشاء رمز التحديث.",
+    "REFRESHTOKEN_VERIFY_FAILED": "فشل في التحقق من رمز التحديث.",
+    "LOGIN_FAILED": "فشل تسجيل الدخول.",
+    "OTP_CREATION_FAILED": "فشل في إنشاء رمز التحقق (OTP).",
+    "OTP_VERIFICATION_FAILED": "فشل في التحقق من رمز التحقق (OTP).",
+    "OTP_TOKEN_INVALID": "يرجى طلب رمز تحقق جديد (OTP)."
+  },
+  "labels": {
+    "identifier": "البريد الإلكتروني",
+    "name": "الاسم",
+    "password": "كلمة المرور",
+    "confirmPassword": "تأكيد كلمة المرور"
+  },
+  "headers": {
+    "signIn": "تسجيل الدخول",
+    "signUp": "إنشاء حساب",
+    "forgotPassword": "نسيت كلمة المرور",
+    "resetPassword": "إعادة تعيين كلمة المرور"
+  },
+  "msgs": {
+    "welcome": "مرحباً بك، {thing}!",
+    "orAlreadyHaveAnAccountSignIn": "أو لديك حساب بالفعل؟  ",
+    "orHaveNotAnAccountSignUp": "أو ليس لديك حساب؟  "
+  },
+  "auth": {
+    "signIn": {
+      "title": "مرحباً بعودتك",
+      "description": "سجّل دخولك بالبريد الإلكتروني.",
+      "identifier": {
+        "label": "البريد الإلكتروني",
+        "placeholder": "name@example.com"
+      },
+      "password": {
+        "label": "كلمة المرور",
+        "placeholder": "كلمة المرور الخاصة بك"
+      },
+      "submitLabel": "تسجيل الدخول",
+      "submittingLabel": "جارٍ تسجيل الدخول…",
+      "signUpPrompt": "ليس لديك حساب؟",
+      "signUpLabel": "إنشاء حساب",
+      "forgotPasswordLabel": "نسيت كلمة المرور؟"
+    },
+    "signUp": {
+      "stepLabel": "الخطوة {current} من {total}",
+      "proofExpired": "انتهت صلاحية الجلسة. يرجى البدء من جديد.",
+      "sendOtp": {
+        "title": "إنشاء حساب جديد",
+        "description": "أدخل بريدك الإلكتروني وسنرسل لك رمز التحقق.",
+        "identifier": {
+          "label": "البريد الإلكتروني",
+          "placeholder": "name@example.com"
+        },
+        "submitLabel": "إرسال الرمز",
+        "submittingLabel": "جارٍ الإرسال…",
+        "signInPrompt": "لديك حساب بالفعل؟",
+        "signInLabel": "تسجيل الدخول"
+      },
+      "verifyOtp": {
+        "title": "تحقق من هويتك",
+        "description": "أدخل الرمز الذي أرسلناه إلى {identifier}.",
+        "codeLabel": "رمز التحقق",
+        "submitLabel": "تحقق",
+        "submittingLabel": "جارٍ التحقق…",
+        "resendPrompt": "لم يصلك الرمز؟",
+        "resendLabel": "إعادة إرسال الرمز",
+        "resendIn": "إعادة الإرسال خلال {seconds} ث",
+        "resendLimitReached": "لقد وصلت إلى الحد الأقصى لإعادة الإرسال.",
+        "changeIdentifierLabel": "استخدام بريد إلكتروني مختلف"
+      },
+      "completeSignUp": {
+        "title": "إتمام إعداد الحساب",
+        "description": "أخبرنا باسمك واختر كلمة مرور.",
+        "name": {
+          "label": "الاسم الكامل",
+          "placeholder": "محمد أحمد"
+        },
+        "password": {
+          "label": "كلمة المرور",
+          "placeholder": "٨ أحرف على الأقل"
+        },
+        "confirmPassword": {
+          "label": "تأكيد كلمة المرور",
+          "placeholder": "أعد كتابة كلمة المرور"
+        },
+        "passwordMismatch": "كلمتا المرور غير متطابقتين.",
+        "submitLabel": "إنشاء الحساب",
+        "submittingLabel": "جارٍ إنشاء الحساب…"
+      }
+    },
+    "forgotPassword": {
+      "stepLabel": "الخطوة {current} من {total}",
+      "proofExpired": "انتهت صلاحية الجلسة. يرجى البدء من جديد.",
+      "sendOtp": {
+        "title": "نسيت كلمة المرور؟",
+        "description": "أدخل بريدك الإلكتروني وسنرسل لك رمز التحقق.",
+        "identifier": {
+          "label": "البريد الإلكتروني",
+          "placeholder": "name@example.com"
+        },
+        "submitLabel": "إرسال الرمز",
+        "submittingLabel": "جارٍ الإرسال…"
+      },
+      "verifyOtp": {
+        "title": "أدخل رمز التحقق",
+        "description": "إذا كان {identifier} مرتبطاً بحساب، فقد أرسلنا إليه رمز التحقق. أدخله أدناه.",
+        "codeLabel": "رمز التحقق",
+        "submitLabel": "تحقق",
+        "submittingLabel": "جارٍ التحقق…",
+        "resendPrompt": "لم يصلك الرمز؟",
+        "resendLabel": "إعادة إرسال الرمز",
+        "resendIn": "إعادة الإرسال خلال {seconds} ث",
+        "resendLimitReached": "لقد وصلت إلى الحد الأقصى لإعادة الإرسال. يرجى المحاولة لاحقاً.",
+        "changeIdentifierLabel": "استخدام بريد إلكتروني مختلف"
+      },
+      "resetPassword": {
+        "title": "اختر كلمة مرور جديدة",
+        "description": "أدخل كلمة مرور جديدة لحسابك.",
+        "newPassword": {
+          "label": "كلمة المرور الجديدة",
+          "placeholder": "كلمة المرور الجديدة"
+        },
+        "confirmPassword": {
+          "label": "تأكيد كلمة المرور الجديدة",
+          "placeholder": "أعد كتابة كلمة المرور الجديدة"
+        },
+        "passwordMismatch": "كلمتا المرور غير متطابقتين.",
+        "submitLabel": "إعادة تعيين كلمة المرور",
+        "submittingLabel": "جارٍ إعادة التعيين…"
+      }
+    },
+    "errors": {
+      "fallback": "حدث خطأ ما. يرجى المحاولة مرة أخرى.",
+      "INVALID_CREDENTIALS": "المعرّف أو كلمة المرور غير صحيحة.",
+      "OTP_INVALID": "الرمز أو المعرّف غير صالح.",
+      "OTP_EXPIRED": "انتهت صلاحية هذا الرمز. اطلب رمزاً جديداً.",
+      "OTP_ATTEMPTS_EXCEEDED": "عدد كبير من المحاولات الخاطئة. اطلب رمزاً جديداً.",
+      "OTP_RATE_LIMITED": "طلبات كثيرة جداً. يرجى الانتظار ثم المحاولة مجدداً.",
+      "OTP_RESEND_TOO_SOON": "يرجى الانتظار لحظة قبل طلب رمز آخر.",
+      "VERIFICATION_TOKEN_INVALID": "فشل التحقق. يرجى البدء من جديد.",
+      "WEAK_PASSWORD": "كلمة المرور ضعيفة جداً. اختر كلمة مرور أقوى.",
+      "INVALID_IDENTIFIER_TYPE": "استخدم بريداً إلكترونياً صالحاً.",
+      "proofExpired": "انتهت صلاحية الجلسة. يرجى البدء من جديد."
+    }
+  },
+  "menu": {
+    "account": "الحساب",
+    "settings": "الإعدادات",
+    "notifications": "الإشعارات",
+    "logout": "تسجيل الخروج",
+    "invitations": "الدعوات"
+  },
+  "settings": {
+    "header": "الإعدادات",
+    "sidebarLabel": "قائمة الإعدادات",
+    "sections": {
+      "settings": "الإعدادات"
+    },
+    "nav": {
+      "personalInfo": "المعلومات الشخصية"
+    },
+    "personalInfo": {
+      "title": "المعلومات الشخصية",
+      "description": "حدّث بيانات ملفك الشخصي ومعلوماتك الشخصية.",
+      "name": {
+        "label": "الاسم الكامل",
+        "placeholder": "أدخل اسمك"
+      },
+      "identifier": {
+        "label": "البريد الإلكتروني"
+      },
+      "submitLabel": "حفظ التغييرات",
+      "submittingLabel": "جارٍ الحفظ…",
+      "successMessage": "تم تحديث ملفك الشخصي بنجاح.",
+      "errors": {
+        "fallback": "فشل تحديث الملف الشخصي. يرجى المحاولة مرة أخرى.",
+        "IDENTIFIER_NOT_FOUND": "المستخدم غير موجود."
+      }
+    }
+  }
+}

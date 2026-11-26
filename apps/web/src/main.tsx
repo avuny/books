@@ -2,17 +2,12 @@ import { StrictMode } from "react"
 import { createRoot } from "react-dom/client"
 
 import "@workspace/ui/globals.css"
-import { App } from "./App.tsx"
-import "./i18n" // Keep this so i18n initializes before the app renders
-import { LanguageProvider } from "@/providers/langauge-provider"
-import { ThemeProvider } from "@workspace/ui/providers/theme-provider"
+import "./i18n/i18n"
+
+import { AppProviders } from "@/providers"
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <LanguageProvider>
-      <ThemeProvider>
-        <App />
-      </ThemeProvider>
-    </LanguageProvider>
+    <AppProviders />
   </StrictMode>
 )

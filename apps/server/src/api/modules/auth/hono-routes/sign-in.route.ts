@@ -1,10 +1,16 @@
 import { createRoute } from "@hono/zod-openapi"
-import { createOpenAPIRouter, handleResult, getRequestLocale } from "@avuny/hono"
+import {
+  createOpenAPIRouter,
+  handleResult,
+  getRequestLocale,
+  validationErrorResponse,
+} from "@avuny/hono"
 import {
   SignInBodySchema,
   AuthResponseSchema,
   AuthErrorCode,
-} from "@avuny/contracts"
+} from "@avuny/contracts/user"
+
 import {
   createResponseSchema,
   createDomainErrorResponseSchema,
@@ -82,11 +88,13 @@ export const signInRoute = createRoute({
       },
     },
     ...globalErrorResponses,
+    ...validationErrorResponse,
   },
 })
 
 router.openapi(signInRoute, async (c) => {
   const lang = getRequestLocale()
+  console.log("lang", lang)
   const errorTrans = trans({ lang })
   const body = c.req.valid("json")
   const platform = getClientPlatform(c)
@@ -109,11 +117,11 @@ router.openapi(signInRoute, async (c) => {
 
   const publicResult = result.success
     ? {
-        success: true as const,
-        data: result.data.authResponse,
-        msg: result.msg,
-        meta: result.meta,
-      }
+      success: true as const,
+      data: result.data.authResponse,
+      msg: result.msg,
+      meta: result.meta,
+    }
     : result
 
   return handleResult({

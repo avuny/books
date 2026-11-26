@@ -1,55 +1,75 @@
-import "i18next"
+import type accountingEn from "./locales/accounting/en.json"
+import type adminEn from "./locales/admin/en.json"
+import type authEn from "./locales/auth/en.json"
+import type batchEn from "./locales/batch/en.json"
+import type geoEn from "./locales/geo/en.json"
+import type inventoryAdjustmentEn from "./locales/inventory-adjustment/en.json"
+import type itemEn from "./locales/item/en.json"
+import type itemCategoryEn from "./locales/item-category/en.json"
+import type organizationEn from "./locales/organization/en.json"
+import type organizationInvitationEn from "./locales/organization-invitation/en.json"
+import type organizationUserEn from "./locales/organization-user/en.json"
+import type otpEn from "./locales/otp/en.json"
+import type partyEn from "./locales/party/en.json"
+import type roleEn from "./locales/role/en.json"
+import type sidebarEn from "./locales/sidebar/en.json"
+import type unitEn from "./locales/unit/en.json"
+import type unitCollectionEn from "./locales/unit-collection/en.json"
+import type usersEn from "./locales/users/en.json"
+import type warehouseEn from "./locales/warehouse/en.json"
+import type warehouseLocationEn from "./locales/warehouse-location/en.json"
+
+type AccountingMessages = typeof accountingEn
+type AdminMessages = typeof adminEn
+type AuthMessages = typeof authEn
+type BatchMessages = typeof batchEn
+type GeoMessages = typeof geoEn
+type InventoryAdjustmentMessages = typeof inventoryAdjustmentEn
+type ItemMessages = typeof itemEn
+type ItemCategoryMessages = typeof itemCategoryEn
+type OrganizationMessages = typeof organizationEn
+type OrganizationInvitationMessages = typeof organizationInvitationEn
+type OrganizationUserMessages = typeof organizationUserEn
+type OtpMessages = typeof otpEn
+type PartyMessages = typeof partyEn
+type RoleMessages = typeof roleEn
+type SidebarMessages = typeof sidebarEn
+type UnitMessages = typeof unitEn
+type UnitCollectionMessages = typeof unitCollectionEn
+type UsersMessages = typeof usersEn
+type WarehouseMessages = typeof warehouseEn
+type WarehouseLocationMessages = typeof warehouseLocationEn
 
 declare module "i18next" {
   interface CustomTypeOptions {
     defaultNS: "otp"
-    ns: "otp" | "auth" | "users" | "admin"
     resources: {
-      otp: {
-        errors: {
-          OTP_INVALID: string
-          OTP_EXPIRED: string
-          OTP_ATTEMPTS_EXCEEDED: string
-          OTP_RESEND_TOO_SOON: string
-          OTP_RATE_LIMITED: string
-          OTP_DELIVERY_FAILED: string
-          VERIFICATION_TOKEN_INVALID: string
-        }
-      }
-      auth: {
-        errors: {
-          INVALID_CREDENTIALS: string
-          ACCOUNT_SUSPENDED: string
-          TOO_MANY_ATTEMPTS: string
-          REFRESH_TOKEN_INVALID: string
-          REFRESH_TOKEN_REUSED: string
-          SESSION_NOT_FOUND: string
-          WEAK_PASSWORD: string
-          INVALID_CURRENT_PASSWORD: string
-          INVALID_IDENTIFIER_TYPE: string
-        }
-      }
-      users: {
-        errors: {
-          IDENTIFIER_ALREADY_EXISTS: string
-          IDENTIFIER_LIMIT_REACHED: string
-          IDENTIFIER_NOT_FOUND: string
-          IDENTIFIER_TYPE_MISMATCH: string
-          CANNOT_DELETE_PRIMARY_IDENTIFIER: string
-          CANNOT_DELETE_LAST_RECOVERY_IDENTIFIER: string
-          AVATAR_TOO_LARGE: string
-          AVATAR_INVALID_TYPE: string
-        }
-      }
-      admin: {
-        errors: {
-          CANNOT_SUSPEND_SELF: string
-          CANNOT_SUSPEND_ADMIN: string
-          USER_ALREADY_SUSPENDED: string
-          USER_NOT_SUSPENDED: string
-          USER_NOT_FOUND: string
-        }
-      }
+      accounting: AccountingMessages
+      admin: AdminMessages
+      auth: AuthMessages
+      batch: BatchMessages
+      geo: GeoMessages
+      "inventory-adjustment": InventoryAdjustmentMessages
+      inventoryAdjustment: InventoryAdjustmentMessages
+      item: ItemMessages
+      "item-category": ItemCategoryMessages
+      itemCategory: ItemCategoryMessages
+      organization: OrganizationMessages
+      "organization-invitation": OrganizationInvitationMessages
+      organizationInvitation: OrganizationInvitationMessages
+      "organization-user": OrganizationUserMessages
+      organizationUser: OrganizationUserMessages
+      otp: OtpMessages
+      party: PartyMessages
+      role: RoleMessages
+      sidebar: SidebarMessages
+      unit: UnitMessages
+      "unit-collection": UnitCollectionMessages
+      unitCollection: UnitCollectionMessages
+      users: UsersMessages
+      warehouse: WarehouseMessages
+      "warehouse-location": WarehouseLocationMessages
+      warehouseLocation: WarehouseLocationMessages
     }
   }
 }

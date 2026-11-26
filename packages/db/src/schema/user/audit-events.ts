@@ -9,7 +9,7 @@ import {
   text,
   uuid,
 } from "drizzle-orm/pg-core"
-import { pk, timestamptz } from "./_helpers.js"
+import { pk, timestamptz } from "../_helpers.js"
 
 export const auditOutcomeEnum = pgEnum("audit_outcome", ["success", "failure"])
 export type AuditOutcome = (typeof auditOutcomeEnum.enumValues)[number]

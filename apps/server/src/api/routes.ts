@@ -10,11 +10,31 @@ import { requestId } from "hono/request-id"
 
 import healthRoute from "./health.route.js"
 import { installRequestLanguage } from "./intl/i18next.js"
-import { otpRoutes } from "./modules/otp/index.js"
-import { authRoutes } from "./modules/auth/index.js"
-import { usersRoutes } from "./modules/users/index.js"
+import { cors } from "hono/cors"
+// [codegen:imports:start]
+import { accountingRoutes } from "./modules/accounting/index.js"
 import { adminRoutes } from "./modules/admin/index.js"
-
+import { authRoutes } from "./modules/auth/index.js"
+import { batchRoutes } from "./modules/batch/index.js"
+import { geoRoutes } from "./modules/geo/index.js"
+import { inventoryAdjustmentRoutes } from "./modules/inventory-adjustment/index.js"
+import { itemRoutes } from "./modules/item/index.js"
+import { itemCategoryRoutes } from "./modules/item-category/index.js"
+import { organizationRoutes } from "./modules/organization/index.js"
+import { organizationInvitationRoutes } from "./modules/organization-invitation/index.js"
+import { organizationUserRoutes } from "./modules/organization-user/index.js"
+import { otpRoutes } from "./modules/otp/index.js"
+import { partyRoutes } from "./modules/party/index.js"
+import { roleRoutes } from "./modules/role/index.js"
+import { sidebarRoutes } from "./modules/sidebar/index.js"
+import { stockMovementRoutes } from "./modules/stock-movement/index.js"
+import { unitRoutes } from "./modules/unit/index.js"
+import { unitCollectionRoutes } from "./modules/unit-collection/index.js"
+import { usersRoutes } from "./modules/users/index.js"
+import { warehouseRoutes } from "./modules/warehouse/index.js"
+import { warehouseLocationRoutes } from "./modules/warehouse-location/index.js"
+// [codegen:imports:end]
+import { config } from "./index.js"
 
 const APP_NAME = "hono-worker-api"
 const APP_VERSION = "1.0.0"
@@ -28,16 +48,72 @@ installRequestLanguage()
 export const app = createOpenAPIRouter().basePath(API_BASE_PATH)
 
 // ── Middleware ────────────────────────────────────────────────────────────────
+app.use(
+  "*",
+  cors({
+    origin: (origin) => {
+      // Allow any port on localhost during development only.
+      if (config.NODE_ENV === "development") {
+        try {
+          const url = new URL(origin)
+
+          if (
+            url.protocol === "http:" &&
+            ["localhost", "127.0.0.1", "[::1]"].includes(url.hostname)
+          ) {
+            return origin
+          }
+        } catch {
+          // Invalid origin: continue to the configured allowlist.
+        }
+      }
+
+      // Production: require an exact match.
+      return config.CORS_ORIGINS.includes(origin) ? origin : ""
+    },
+    credentials: true,
+    allowMethods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowHeaders: [
+      "Content-Type",
+      "Authorization",
+      "X-Organization-Id",
+      "X-Requested-With",
+      "X-Lang",
+      "accept-language"
+    ],
+    maxAge: 600,
+  })
+)
+
 app.use(resolveRequestLanguageMiddleware)
 app.use(requestId())
 app.use(requestLogger())
 
 // ── Routes ────────────────────────────────────────────────────────────────────
 app.route("/", healthRoute)
-app.route("/otp", otpRoutes)
-app.route("/auth", authRoutes)
-app.route("/users", usersRoutes)
+// [codegen:routes:start]
+app.route("/accounting", accountingRoutes)
 app.route("/admin", adminRoutes)
+app.route("/auth", authRoutes)
+app.route("/batch", batchRoutes)
+app.route("/geo", geoRoutes)
+app.route("/inventoryAdjustment", inventoryAdjustmentRoutes)
+app.route("/item", itemRoutes)
+app.route("/itemCategory", itemCategoryRoutes)
+app.route("/organizations", organizationRoutes)
+app.route("/organization-invitations", organizationInvitationRoutes)
+app.route("/organization-users", organizationUserRoutes)
+app.route("/otp", otpRoutes)
+app.route("/party", partyRoutes)
+app.route("/roles", roleRoutes)
+app.route("/sidebar", sidebarRoutes)
+app.route("/stockMovement", stockMovementRoutes)
+app.route("/unit", unitRoutes)
+app.route("/unitCollection", unitCollectionRoutes)
+app.route("/users", usersRoutes)
+app.route("/warehouse", warehouseRoutes)
+app.route("/warehouseLocation", warehouseLocationRoutes)
+// [codegen:routes:end]
 
 app.notFound((c) =>
   c.json(

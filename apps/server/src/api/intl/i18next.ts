@@ -1,12 +1,106 @@
 import i18next from "i18next"
-import otpEn from "./locales/otp/en.json" with { type: "json" }
-import otpAr from "./locales/otp/ar.json" with { type: "json" }
-import authEn from "./locales/auth/en.json" with { type: "json" }
-import authAr from "./locales/auth/ar.json" with { type: "json" }
-import usersEn from "./locales/users/en.json" with { type: "json" }
-import usersAr from "./locales/users/ar.json" with { type: "json" }
+import accountingEn from "./locales/accounting/en.json" with { type: "json" }
+import accountingAr from "./locales/accounting/ar.json" with { type: "json" }
 import adminEn from "./locales/admin/en.json" with { type: "json" }
 import adminAr from "./locales/admin/ar.json" with { type: "json" }
+import authEn from "./locales/auth/en.json" with { type: "json" }
+import authAr from "./locales/auth/ar.json" with { type: "json" }
+import batchEn from "./locales/batch/en.json" with { type: "json" }
+import batchAr from "./locales/batch/ar.json" with { type: "json" }
+import geoEn from "./locales/geo/en.json" with { type: "json" }
+import geoAr from "./locales/geo/ar.json" with { type: "json" }
+import inventoryAdjustmentEn from "./locales/inventory-adjustment/en.json" with { type: "json" }
+import inventoryAdjustmentAr from "./locales/inventory-adjustment/ar.json" with { type: "json" }
+import itemEn from "./locales/item/en.json" with { type: "json" }
+import itemAr from "./locales/item/ar.json" with { type: "json" }
+import itemCategoryEn from "./locales/item-category/en.json" with { type: "json" }
+import itemCategoryAr from "./locales/item-category/ar.json" with { type: "json" }
+import organizationEn from "./locales/organization/en.json" with { type: "json" }
+import organizationAr from "./locales/organization/ar.json" with { type: "json" }
+import organizationInvitationEn from "./locales/organization-invitation/en.json" with { type: "json" }
+import organizationInvitationAr from "./locales/organization-invitation/ar.json" with { type: "json" }
+import organizationUserEn from "./locales/organization-user/en.json" with { type: "json" }
+import organizationUserAr from "./locales/organization-user/ar.json" with { type: "json" }
+import otpEn from "./locales/otp/en.json" with { type: "json" }
+import otpAr from "./locales/otp/ar.json" with { type: "json" }
+import partyEn from "./locales/party/en.json" with { type: "json" }
+import partyAr from "./locales/party/ar.json" with { type: "json" }
+import roleEn from "./locales/role/en.json" with { type: "json" }
+import roleAr from "./locales/role/ar.json" with { type: "json" }
+import sidebarEn from "./locales/sidebar/en.json" with { type: "json" }
+import sidebarAr from "./locales/sidebar/ar.json" with { type: "json" }
+import unitEn from "./locales/unit/en.json" with { type: "json" }
+import unitAr from "./locales/unit/ar.json" with { type: "json" }
+import unitCollectionEn from "./locales/unit-collection/en.json" with { type: "json" }
+import unitCollectionAr from "./locales/unit-collection/ar.json" with { type: "json" }
+import usersEn from "./locales/users/en.json" with { type: "json" }
+import usersAr from "./locales/users/ar.json" with { type: "json" }
+import warehouseEn from "./locales/warehouse/en.json" with { type: "json" }
+import warehouseAr from "./locales/warehouse/ar.json" with { type: "json" }
+import warehouseLocationEn from "./locales/warehouse-location/en.json" with { type: "json" }
+import warehouseLocationAr from "./locales/warehouse-location/ar.json" with { type: "json" }
+import { Locale } from "@avuny/i18n"
+
+export const resources = {
+  en: {
+        accounting: accountingEn,
+        admin: adminEn,
+        auth: authEn,
+        batch: batchEn,
+        geo: geoEn,
+        "inventory-adjustment": inventoryAdjustmentEn,
+        inventoryAdjustment: inventoryAdjustmentEn,
+        item: itemEn,
+        "item-category": itemCategoryEn,
+        itemCategory: itemCategoryEn,
+        organization: organizationEn,
+        "organization-invitation": organizationInvitationEn,
+        organizationInvitation: organizationInvitationEn,
+        "organization-user": organizationUserEn,
+        organizationUser: organizationUserEn,
+        otp: otpEn,
+        party: partyEn,
+        role: roleEn,
+        sidebar: sidebarEn,
+        unit: unitEn,
+        "unit-collection": unitCollectionEn,
+        unitCollection: unitCollectionEn,
+        users: usersEn,
+        warehouse: warehouseEn,
+        "warehouse-location": warehouseLocationEn,
+        warehouseLocation: warehouseLocationEn,
+  },
+  ar: {
+        accounting: accountingAr,
+        admin: adminAr,
+        auth: authAr,
+        batch: batchAr,
+        geo: geoAr,
+        "inventory-adjustment": inventoryAdjustmentAr,
+        inventoryAdjustment: inventoryAdjustmentAr,
+        item: itemAr,
+        "item-category": itemCategoryAr,
+        itemCategory: itemCategoryAr,
+        organization: organizationAr,
+        "organization-invitation": organizationInvitationAr,
+        organizationInvitation: organizationInvitationAr,
+        "organization-user": organizationUserAr,
+        organizationUser: organizationUserAr,
+        otp: otpAr,
+        party: partyAr,
+        role: roleAr,
+        sidebar: sidebarAr,
+        unit: unitAr,
+        "unit-collection": unitCollectionAr,
+        unitCollection: unitCollectionAr,
+        users: usersAr,
+        warehouse: warehouseAr,
+        "warehouse-location": warehouseLocationAr,
+        warehouseLocation: warehouseLocationAr,
+  },
+} as const
+
+export type Resources = (typeof resources)["en"]
 
 /**
  * Call once at startup. Never call i18n.changeLanguage() on the server: it is global and races
@@ -16,22 +110,9 @@ export function installRequestLanguage(): void {
   i18next.init({
     lng: "en",
     fallbackLng: "en",
-    ns: ["otp", "auth", "users", "admin"],
+    ns: ["accounting", "admin", "auth", "batch", "geo", "inventory-adjustment", "inventoryAdjustment", "item", "item-category", "itemCategory", "organization", "organization-invitation", "organizationInvitation", "organization-user", "organizationUser", "otp", "party", "role", "sidebar", "unit", "unit-collection", "unitCollection", "users", "warehouse", "warehouse-location", "warehouseLocation"],
     defaultNS: "otp",
-    resources: {
-      en: {
-        otp: otpEn,
-        auth: authEn,
-        users: usersEn,
-        admin: adminEn,
-      },
-      ar: {
-        otp: otpAr,
-        auth: authAr,
-        users: usersAr,
-        admin: adminAr,
-      },
-    },
+    resources,
     interpolation: { escapeValue: false },
   })
 }
@@ -44,6 +125,6 @@ export function installRequestLanguage(): void {
  *   const errorTrans = trans({ lang })
  *   // then pass errorTrans to handleResult
  */
-export function trans({ lang }: { lang: string }) {
-  return (key: string): string => i18next.t(key, { lng: lang })
+export function trans({ lang }: { lang: Locale }) {
+  return (key: string): string => i18next.t(key as any, { lng: lang })
 }

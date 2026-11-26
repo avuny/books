@@ -23,17 +23,25 @@
     "db:migrate": "drizzle-kit migrate",
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio",
-    "dev": "tsc -p tsconfig.build.json --watch --preserveWatchOutput"
+    "db:seed:geo": "tsx seed/geo-seed.ts",
+    "seed:geo": "tsx seed/geo-seed.ts",
+    "dev": "tsc -p tsconfig.build.json --watch --preserveWatchOutput",
+    "schema:generate": "tsx ./scripts/generate-schema-barrel.ts",
+    "schema:watch": "tsx ./scripts/generate-schema-barrel.ts --watch",
+    "seed:permissions": "tsx ./seed/permissions.seed.ts"
   },
   "dependencies": {
+    "@avuny/contracts": "workspace:*",
+    "@neondatabase/serverless": "^0.10.4",
     "drizzle-orm": "^0.38.0",
     "postgres": "^3.4.5"
   },
   "devDependencies": {
-    "@types/node": "^26.6.3",
     "@avuny/typescript-config": "workspace:*",
+    "@types/node": "^26.6.3",
     "dotenv": "^17.4.2",
-    "drizzle-kit": "^0.30.0",
+    "drizzle-kit": "^0.30.6",
+    "tsx": "^4.23.15",
     "typescript": "^5.7.0"
   }
 }

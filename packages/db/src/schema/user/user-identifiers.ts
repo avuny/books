@@ -9,7 +9,7 @@ import {
   uniqueIndex,
   uuid,
 } from "drizzle-orm/pg-core"
-import { isNormalized, pk, timestamps, timestamptz } from "./_helpers.js"
+import { isNormalized, pk, timestamps, timestamptz } from "../_helpers.js"
 import { E164_RE, EMAIL_RE } from "./identifier-patterns.js"
 import { users } from "./users.js"
 

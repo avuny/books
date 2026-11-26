@@ -100,9 +100,9 @@ router.openapi(refreshRoute, async (c) => {
       )
     }
 
-    presentedToken = getRefreshTokenFromCookie(c)
+    presentedToken = getRefreshTokenFromCookie(c) ?? body?.refreshToken
   } else {
-    presentedToken = body?.refreshToken
+    presentedToken = body?.refreshToken ?? getRefreshTokenFromCookie(c)
   }
 
   if (!presentedToken) {
@@ -131,11 +131,11 @@ router.openapi(refreshRoute, async (c) => {
 
   const publicResult = result.success
     ? {
-        success: true as const,
-        data: result.data.refreshResponse,
-        msg: result.msg,
-        meta: result.meta,
-      }
+      success: true as const,
+      data: result.data.refreshResponse,
+      msg: result.msg,
+      meta: result.meta,
+    }
     : result
 
   return handleResult({

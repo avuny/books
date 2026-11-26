@@ -1,0 +1,136 @@
+{
+  "errors": {
+    "ORGANIZATION_INVITATION_NOT_FOUND": "الدعوة غير موجودة.",
+    "ORGANIZATION_INVITATION_FORBIDDEN": "غير مسموح لك بإدارة الدعوات في هذه المؤسسة.",
+    "ORGANIZATION_INVITATION_ORGANIZATION_UNAVAILABLE": "هذه المؤسسة لا تقبل أعضاء جددًا حاليًا.",
+    "ORGANIZATION_INVITATION_ALREADY_MEMBER": "هذا الشخص عضو بالفعل في المؤسسة.",
+    "ORGANIZATION_INVITATION_ALREADY_PENDING": "توجد دعوة معلّقة لهذا الشخص بالفعل.",
+    "ORGANIZATION_INVITATION_LIMIT_REACHED": "تم الوصول إلى الحد الأقصى للمستخدمين في باقتك.",
+    "ORGANIZATION_INVITATION_TARGET_UNAVAILABLE": "تعذر العثور على وسيلة تواصل صالحة لهذا المدعو.",
+    "ORGANIZATION_INVITATION_NOT_PENDING": "هذه الدعوة لم تعد معلّقة.",
+    "ORGANIZATION_INVITATION_EXPIRED": "انتهت صلاحية هذه الدعوة.",
+    "ORGANIZATION_INVITATION_RESEND_TOO_SOON": "يرجى الانتظار قليلًا قبل إعادة إرسال الدعوة.",
+    "ORGANIZATION_INVITATION_RESEND_LIMIT_REACHED": "تمت إعادة إرسال هذه الدعوة مرات كثيرة. أنشئ دعوة جديدة.",
+    "ORGANIZATION_INVITATION_USERNAME_REQUIRED": "اختر اسم مستخدم للانضمام إلى هذه المؤسسة.",
+    "ORGANIZATION_INVITATION_USERNAME_TAKEN": "اسم المستخدم مستخدم بالفعل في المؤسسة.",
+    "ORGANIZATION_INVITATION_IDENTITY_MISMATCH": "أُرسلت هذه الدعوة إلى بريد إلكتروني موثّق مختلف.",
+    "ORGANIZATION_INVITATION_ROLE_NOT_FOUND": "الدور المحدد غير موجود."
+  },
+  "labels": {
+    "pending": "معلّقة",
+    "accepted": "مقبولة",
+    "declined": "مرفوضة",
+    "revoked": "ملغاة",
+    "expired": "منتهية"
+  },
+  "msgs": {
+    "INVITATION_CREATED": "تم إرسال الدعوة.",
+    "INVITATION_CREATED_DELIVERY_FAILED": "تم إنشاء الدعوة لكن فشل إرسالها. يمكنك إعادة الإرسال.",
+    "INVITATIONS_LISTED": "تم جلب الدعوات بنجاح.",
+    "INVITATION_REVOKED": "تم إلغاء الدعوة.",
+    "INVITATION_RESENT": "تمت إعادة إرسال الدعوة.",
+    "INVITATION_RESENT_DELIVERY_FAILED": "فشل الإرسال. حاول مرة أخرى بعد قليل.",
+    "INVITATION_ACCEPTED": "لقد انضممت إلى المؤسسة.",
+    "INVITATION_DECLINED": "تم رفض الدعوة.",
+    "INVITATION_PREVIEWED": "تم جلب الدعوة بنجاح."
+  },
+  "actions": {
+    "create": "دعوة",
+    "resend": "إعادة الإرسال",
+    "revoke": "إلغاء الدعوة",
+    "cancel": "تراجع",
+    "accept": "قبول",
+    "decline": "رفض"
+  },
+  "list": {
+    "title": "الدعوات",
+    "description": "ادعُ أشخاصًا إلى هذه المؤسسة وتابع حالة كل دعوة.",
+    "tabs": {
+      "aria": "تصفية الدعوات حسب الحالة",
+      "all": "الكل"
+    }
+  },
+  "table": {
+    "invitee": "المدعو",
+    "role": "الدور",
+    "status": "الحالة",
+    "sent": "آخر إرسال",
+    "expires": "تنتهي في",
+    "actions": "الإجراءات",
+    "actionsFor": "إجراءات {name}",
+    "existingUser": "مستخدم موجود"
+  },
+  "empty": {
+    "title": "لا توجد دعوات",
+    "description": "ستظهر هنا الدعوات التي ترسلها."
+  },
+  "pagination": {
+    "nav": "التنقل بين الصفحات",
+    "previous": "السابق",
+    "next": "التالي",
+    "rowsPerPage": "عدد الصفوف في الصفحة",
+    "summary": "{from}–{to} من {total}",
+    "pageOf": "الصفحة {page} من {pageCount}",
+    "goTo": "اذهب إلى الصفحة {page}"
+  },
+  "create": {
+    "title": "دعوة شخص",
+    "description": "أرسل دعوة عبر البريد الإلكتروني.",
+    "submitLabel": "إرسال الدعوة",
+    "submittingLabel": "جارٍ الإرسال…"
+  },
+  "fields": {
+    "identifier": {
+      "label": "البريد الإلكتروني",
+      "placeholder": "name@example.com"
+    },
+    "role": {
+      "label": "الدور",
+      "placeholder": "اختر دورًا"
+    },
+    "acceptUsername": {
+      "label": "اسم المستخدم",
+      "placeholder": "اختر اسم المستخدم الخاص بك في هذه المؤسسة"
+    }
+  },
+  "revoke": {
+    "title": "إلغاء الدعوة؟",
+    "description": "لن يتمكن {name} من استخدام هذه الدعوة بعد الآن."
+  },
+  "resend": {
+    "title": "إعادة إرسال الدعوة؟",
+    "description": "سيصل {name} رابط جديد وسيتم تمديد تاريخ الانتهاء. يتوقف الرابط السابق عن العمل."
+  },
+  "inbox": {
+    "title": "دعواتي",
+    "description": "المؤسسات التي دعتك للانضمام إليها.",
+    "empty": {
+      "title": "لا توجد دعوات مفتوحة",
+      "description": "عندما تدعوك مؤسسة، ستظهر دعوتها هنا."
+    },
+    "expires": "تنتهي في {date}"
+  },
+  "accept": {
+    "title": "الانضمام إلى {name}",
+    "description": "اقبل الدعوة لتصبح عضوًا في هذه المؤسسة.",
+    "descriptionWithRole": "اقبل الدعوة للانضمام إلى هذه المؤسسة بصفتك {role}.",
+    "role": "الدور",
+    "submitLabel": "قبول الدعوة",
+    "submittingLabel": "جارٍ الانضمام…"
+  },
+  "decline": {
+    "title": "رفض الدعوة؟",
+    "description": "لن تنضم إلى {name}. يمكنك أن تطلب منهم دعوتك مجددًا لاحقًا."
+  },
+  "join": {
+    "title": "الانضمام إلى {name}",
+    "description": "تمت دعوتك للانضمام إلى هذه المؤسسة.",
+    "organization": "المؤسسة",
+    "role": "الدور",
+    "sentTo": "أُرسلت إلى",
+    "expires": "تنتهي في",
+    "signInPrompt": "سجّل الدخول، أو أنشئ حسابًا، بالبريد الإلكتروني المدعو لقبول هذه الدعوة.",
+    "signIn": "سجّل الدخول للمتابعة",
+    "missingToken": "رابط الدعوة هذا غير مكتمل. اطلب دعوة جديدة."
+  }
+}

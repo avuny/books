@@ -4,20 +4,16 @@ import Loading from "@workspace/ui/blocks/loading/loading"
 import { Button } from "@workspace/ui/components/button"
 import { BriefcaseBusinessIcon } from "lucide-react"
 
-type DashboardButtonProps = {
-  user: unknown | undefined
-  isLoading: boolean
-  router: {
-    replace: (href: string) => void
-  }
-  href: string
+export type DashboardButtonProps = {
+  user?: unknown | undefined
+  isLoading?: boolean
+  onClick?: () => void
 }
 
 export default function DashboardButton({
-  isLoading,
+  isLoading = false,
   user,
-  router,
-  href,
+  onClick,
 }: DashboardButtonProps) {
   if (isLoading) {
     return (
@@ -33,7 +29,7 @@ export default function DashboardButton({
 
   return (
     <Button
-      onClick={() => router.replace(href)}
+      onClick={onClick}
       variant="outline"
       size="icon"
       className="cursor-pointer"

@@ -8,12 +8,19 @@ import {
 import {
   createDomainErrorResponseSchema,
   globalErrorResponses,
+  resultToErrorResponse,
 } from "@avuny/utils"
 import { trans } from "../../../intl/i18next.js"
 import { db } from "../../../db.js"
 import { otpErrorsHttpMap } from "../../otp/index.js"
 import { authErrorsHttpMap } from "../core/errors/index.js"
-import { resetPassword } from "../shell/auth.service.js"
+import { resetPassword, type ResetPasswordErrorCode } from "../shell/auth.service.js"
+import type { ErrorMeta } from "@avuny/utils"
+
+const resetPasswordErrorsHttpMap = {
+  VERIFICATION_TOKEN_INVALID: otpErrorsHttpMap.VERIFICATION_TOKEN_INVALID,
+  WEAK_PASSWORD: authErrorsHttpMap.WEAK_PASSWORD,
+} as const satisfies Record<ResetPasswordErrorCode, ErrorMeta>
 
 const router = createOpenAPIRouter()
 
@@ -79,35 +86,13 @@ router.openapi(forgotPasswordResetRoute, async (c) => {
   })
 
   if (!result.success) {
-    if (result.error === OtpErrorCode.VERIFICATION_TOKEN_INVALID) {
-      const errMsg =
-        errorTrans?.(`otp:errors.${result.error}`) ||
-        otpErrorsHttpMap.VERIFICATION_TOKEN_INVALID.responseMessage
-
-      return c.json(
-        {
-          success: false as const,
-          code: result.error,
-          message: errMsg,
-          type: "domain" as const,
-        },
-        400
-      )
-    }
-
-    const errMsg =
-      errorTrans?.(`auth:errors.${result.error}`) ||
-      authErrorsHttpMap.WEAK_PASSWORD.responseMessage
-
-    return c.json(
-      {
-        success: false as const,
-        code: result.error,
-        message: errMsg,
-        type: "domain" as const,
-      },
-      422
-    )
+    return c.json({
+      success: false as const,
+      code: result.error,
+      message: errorTrans?.(`otp:errors.${result.error}`) ||
+        resetPasswordErrorsHttpMap[result.error].responseMessage,
+      type: "domain" as const,
+    }, resultToErrorResponse(result.error, resetPasswordErrorsHttpMap).status)
   }
 
   return c.body(null, 204)

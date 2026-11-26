@@ -1,0 +1,13 @@
+{
+  "errors": {
+    "ITEM_NOT_FOUND": "Item not found.",
+    "ITEM_FORBIDDEN": "You do not have access to this item.",
+    "ITEM_NAME_TAKEN": "An item with this name already exists.",
+    "ITEM_CATEGORY_INVALID": "Choose an active category from this organization.",
+    "ITEM_UNIT_INVALID": "Choose an active base unit.",
+    "ITEM_UNIT_COLLECTION_INVALID": "The selected unit collection does not exist.",
+    "ITEM_BATCH_REQUIRES_TRACKING": "Batch tracking requires inventory tracking.",
+    "ITEM_LOCKED_FIELD": "These settings cannot change after the item has stock movements.",
+    "ITEM_HAS_HISTORY": "This item has stock history. Deactivate it instead of deleting it."
+  }
+}
