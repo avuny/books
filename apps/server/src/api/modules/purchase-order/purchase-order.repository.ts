@@ -206,6 +206,13 @@ export function createPurchaseOrderRepository({ db }: { db: DB }): PurchaseOrder
         .where(and(eq(purchaseOrderLines.orgId, orgId), eq(purchaseOrderLines.id, lineId)))
     },
 
+    async setLineShipped(orgId, lineId, shippedBaseQty, tx) {
+      await ex(tx)
+        .update(purchaseOrderLines)
+        .set({ shippedBaseQty })
+        .where(and(eq(purchaseOrderLines.orgId, orgId), eq(purchaseOrderLines.id, lineId)))
+    },
+
     async deleteById(orgId, id, tx) {
       await ex(tx)
         .delete(purchaseOrders)

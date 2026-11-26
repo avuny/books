@@ -66,6 +66,7 @@ export interface PurchaseOrderRepository {
   ): Promise<PurchaseOrder | null>
   replaceLines(orgId: string, id: string, lines: readonly NewLine[], tx?: Tx): Promise<PurchaseOrderLine[]>
   setLineCancelled(orgId: string, lineId: string, cancelledBaseQty: string, tx?: Tx): Promise<void>
+  setLineShipped(orgId: string, lineId: string, shippedBaseQty: string, tx?: Tx): Promise<void>
   deleteById(orgId: string, id: string, tx?: Tx): Promise<void>
   /** True when any non-voided shipment (draft or posted) references the order. */
   hasShipments(orgId: string, id: string, tx?: Tx): Promise<boolean>
