@@ -1,6 +1,6 @@
 # Audit progress: 2026-11-26 app audit
 
-Tracks work against [2026-11-26-app-audit.md](./2026-11-26-app-audit.md). Updated by Instinct on behalf of Khalid. Last updated: 2026-11-26 15:55 (Cairo).
+Tracks work against [2026-11-26-app-audit.md](./2026-11-26-app-audit.md). Updated by Instinct on behalf of Khalid. Last updated: 2026-11-26 17:50 (Cairo).
 
 Rule used: nothing goes to `main` directly any more. Each fix is a PR with a regression test where the code allows one.
 
@@ -12,15 +12,15 @@ Rule used: nothing goes to `main` directly any more. Each fix is a PR with a reg
 | B1 | S1 | Owner username is validated against the DB rule before any row is written, and the create-organization form derives a valid default handle. Test added. | commit 2cbbec3, pushed to `main` by request |
 | B11 (title) | S3 | Page title is now "Avuny Books". | commit 2cbbec3 |
 | B6 | S2 | `WEB_APP_URL` is set in `wrangler.jsonc`, so invitation links point at the web app. Not re-tested with a live invitation. | commit 1c9ef3c |
-| B3 | S1 | New items default to batch tracking off (contract and form). | PR #4 (open, needs review) |
-| B12 | S3 | Permission picker group labels: en and ar labels for every catalog resource, plus a test. Arabic needs a native check. | PR #7 (open, needs review) |
-| B13 | S3 | aria-labels on the header icon buttons. English defaults, not yet translated. | PR #7 (open, needs review) |
-| B5 | S2 | Sidebar Accounting link hidden until its page exists (explicit list in the sidebar service, registry untouched). | PR #9 (open, needs review) |
-| B11 | S3 | OTP email wording ("sign-up" instead of SIGN_UP), quantities without padding zeros on item list and inventory tab, removed a debug console.log. Page title was already shipped. | PR #8 (open, needs review) |
-| B7 | S2 | Role list counts: the SQL compared against a bare `"id"` so every count was 0. Fixed, test on the generated SQL. | PR #5 (open, needs review) |
-| B8 | S2 | Required marker after labels on the item form; item name and category marked required; category error now "Choose a category". | PR #10 (open, needs review) |
-| B10 | S2 | Create-organization form prefills currency and timezone from the chosen country (create form only). | PR #11 (open, needs review) |
-| B15 | S3 | Sidebar links for Item categories and Stock movements. | PR #12 (open, needs seed:sidebar after deploy) |
+| B3 | S1 | New items default to batch tracking off (contract and form). | PR #4 (merged) |
+| B12 | S3 | Permission picker group labels: en and ar labels for every catalog resource, plus a test. Arabic needs a native check. | PR #7 (merged) |
+| B13 | S3 | aria-labels on the header icon buttons. English defaults, not yet translated. | PR #7 (merged) |
+| B5 | S2 | Sidebar Accounting link hidden until its page exists (explicit list in the sidebar service, registry untouched). | PR #9 (merged) |
+| B11 | S3 | OTP email wording ("sign-up" instead of SIGN_UP), quantities without padding zeros on item list and inventory tab, removed a debug console.log. Page title was already shipped. | PR #8 (merged) |
+| B7 | S2 | Role list counts: the SQL compared against a bare `"id"` so every count was 0. Fixed, test on the generated SQL. | PR #5 (merged) |
+| B8 | S2 | Required marker after labels on the item form; item name and category marked required; category error now "Choose a category". | PR #10 (merged) |
+| B10 | S2 | Create-organization form prefills currency and timezone from the chosen country (create form only). | PR #11 (merged) |
+| B15 | S3 | Sidebar links for Item categories and Stock movements. | PR #12 (merged; run seed:sidebar on production) |
 
 ## Not done, and why
 
@@ -43,3 +43,12 @@ Contracts tests pass. In the sandbox the server unit suite has 12 failing tests 
 ## Incident, 2026-11-26
 
 Push to `main` at 13:29 (Cairo) deployed the Worker. The deploy replaced the dashboard-set variables with the `wrangler.jsonc` block, so five required values were undefined and the API returned HTTP 500 until about 14:38. Before the next deploy, keep these five as real Cloudflare secrets (`wrangler secret put NAME`) and keep non-secret values in `wrangler.jsonc`. Add the post-deploy smoke test from the audit (B0) so a broken deploy is caught in minutes.
+
+## Commerce plan (docs/modules/COMMERCE-IMPLEMENTATION-PLAN.md), Stage 0
+
+| ID | Status |
+|---|---|
+| C0-01 | Audit B0 to B7, B8 to B13, B15 merged. B2 and B4 depend on C0-02. B14 and B9 open (see above). |
+| C0-02 | PR #13: real transactions through a Neon WebSocket pool. Not verified against real Postgres yet. |
+| C0-03 to C0-06 | Not started. Next: C0-05 (smoke test and wrangler vars check in deploy.yml). |
+| Stage 1 to 3 | Not started. |
