@@ -1,4 +1,5 @@
 import { useEffect } from "react"
+import { pickCurrency, pickTimezone } from "./country-defaults"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import {
@@ -41,6 +42,8 @@ type CreateOrganizationFormProps = {
   currencyOptions: SelectOption[]
   timezoneOptions: SelectOption[]
   selectedCountryCode: string | undefined
+  /** Currency code per country code, used to prefill the currency when a country is picked. */
+  countryCurrencyByCode?: Record<string, string | null>
   onCountryChange: (countryCode: string) => void
   onSubmit: (values: CreateOrganizationFormValues) => void
   onClickOnCancelButton?: () => void
@@ -56,6 +59,7 @@ export function CreateOrganizationForm({
   currencyOptions,
   timezoneOptions,
   selectedCountryCode,
+  countryCurrencyByCode,
   onCountryChange,
   onSubmit,
   onClickOnCancelButton,
@@ -91,6 +95,25 @@ export function CreateOrganizationForm({
       form.setValue("stateId", null)
     }
   }, [watchedCountry, selectedCountryCode, onCountryChange, form])
+
+  // Picking a country prefills its currency and timezone (the user can still change them).
+  useEffect(() => {
+    if (!watchedCountry) return
+    const current = form.getValues("defaultCurrency")
+    const next = pickCurrency(
+      countryCurrencyByCode?.[watchedCountry],
+      currencyOptions,
+      current
+    )
+    if (next !== current) form.setValue("defaultCurrency", next)
+  }, [watchedCountry, countryCurrencyByCode, currencyOptions, form])
+
+  useEffect(() => {
+    if (!watchedCountry || selectedCountryCode !== watchedCountry) return
+    const current = form.getValues("timezone") ?? "UTC"
+    const next = pickTimezone(timezoneOptions, current)
+    if (next !== current) form.setValue("timezone", next)
+  }, [watchedCountry, selectedCountryCode, timezoneOptions, form])
 
   // Automatically generate code slug from name if code is empty
   const watchedName = form.watch("name")

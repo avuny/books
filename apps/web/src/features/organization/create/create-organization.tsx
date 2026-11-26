@@ -96,6 +96,14 @@ export function CreateOrganization({
     }))
   }, [countriesQuery.data?.data])
 
+  const countryCurrencyByCode = useMemo(
+    () =>
+      Object.fromEntries(
+        (countriesQuery.data?.data ?? []).map((c) => [c.code, c.currencyCode])
+      ),
+    [countriesQuery.data?.data]
+  )
+
   const stateOptions = useMemo(() => {
     const items = statesQuery.data?.data ?? []
     return items.map((s) => ({
@@ -152,6 +160,7 @@ export function CreateOrganization({
         isPending={createMutation.isPending}
         errorMessage={serverError}
         defaultOwnerUsername={defaultOwnerUsername}
+        countryCurrencyByCode={countryCurrencyByCode}
       />
     </div>
   )
