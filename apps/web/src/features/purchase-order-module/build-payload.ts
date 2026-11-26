@@ -1,5 +1,5 @@
 import { CreatePurchaseOrderSchema, type CreatePurchaseOrderInput } from "@avuny/contracts"
-import { toMinorUnits } from "./lib/money-input"
+import { percentToBps, toMinorUnits } from "./lib/money-input"
 
 export type PurchaseOrderFormLine = {
   itemId: string
@@ -9,6 +9,10 @@ export type PurchaseOrderFormLine = {
   /** Decimal in major units as typed, e.g. "125.50". */
   unitPrice: string
   discountAmount: string
+  /** Percent as typed, e.g. "10". Use this or discountAmount, not both. */
+  discountRate: string
+  /** Percent as typed, e.g. "14". */
+  taxRate: string
   expectedDeliveryDate: string
   notes: string
 }
@@ -26,7 +30,7 @@ export type PurchaseOrderFormValues = {
 
 export type BuildResult =
   | { ok: true; data: CreatePurchaseOrderInput }
-  | { ok: false; message: string }
+  | { ok: false; message: "invalid-money" | "invalid-rate" | "rate-conflict" | string }
 
 /** Turn form values into the API payload: drop blank lines, convert money, validate with the contract schema. */
 export function buildPurchaseOrderPayload(
@@ -41,6 +45,14 @@ export function buildPurchaseOrderPayload(
     if (unitPrice === null || discountAmount === null) {
       return { ok: false, message: "invalid-money" }
     }
+    const discountRateBps = percentToBps(l.discountRate)
+    const taxRateBps = percentToBps(l.taxRate)
+    if (discountRateBps === null || taxRateBps === null) {
+      return { ok: false, message: "invalid-rate" }
+    }
+    if (discountRateBps > 0 && BigInt(discountAmount) > 0n) {
+      return { ok: false, message: "rate-conflict" }
+    }
     converted.push({
       itemId: l.itemId,
       locationId: l.locationId,
@@ -48,6 +60,8 @@ export function buildPurchaseOrderPayload(
       orderedQty: l.orderedQty.trim(),
       unitPrice,
       discountAmount,
+      discountRateBps,
+      taxRateBps,
       expectedDeliveryDate: l.expectedDeliveryDate || null,
       notes: l.notes.trim() || null,
     })

@@ -40,6 +40,8 @@ const blankLine = (locationId = ""): PurchaseOrderFormLine => ({
   orderedQty: "1",
   unitPrice: "0",
   discountAmount: "0",
+  discountRate: "0",
+  taxRate: "0",
   expectedDeliveryDate: "",
   notes: "",
 })
@@ -97,7 +99,15 @@ export function CreatePurchaseOrder({ orgId, onCreated, onCancel }: Props) {
       }
       const built = buildPurchaseOrderPayload(filled, digits)
       if (!built.ok) {
-        setServerError(built.message === "invalid-money" ? t("form.invalidMoney") : built.message)
+        setServerError(
+          built.message === "invalid-money"
+            ? t("form.invalidMoney")
+            : built.message === "invalid-rate"
+              ? t("form.invalidRate")
+              : built.message === "rate-conflict"
+                ? t("form.rateConflict")
+                : built.message
+        )
         return
       }
       try {
@@ -246,6 +256,24 @@ export function CreatePurchaseOrder({ orgId, onCreated, onCancel }: Props) {
                     control={form.control}
                     name={`lines.${index}.discountAmount` as const}
                     copy={{ label: t("form.discount") }}
+                    type="text"
+                    disabled={disabled}
+                  />
+                </div>
+                <div className="sm:col-span-3">
+                  <InputField
+                    control={form.control}
+                    name={`lines.${index}.discountRate` as const}
+                    copy={{ label: t("form.discountRate") }}
+                    type="text"
+                    disabled={disabled}
+                  />
+                </div>
+                <div className="sm:col-span-3">
+                  <InputField
+                    control={form.control}
+                    name={`lines.${index}.taxRate` as const}
+                    copy={{ label: t("form.taxRate") }}
                     type="text"
                     disabled={disabled}
                   />

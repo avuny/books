@@ -55,7 +55,7 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done · `[!]` blocked · `[-]` 
 |---|---|---|---|
 | D1 | Transaction-capable DB driver is available before posting use cases are built | open | see `../SAAS-SPEC-FIXES-PLAN.md` D1. Built best-effort; see `docs/proposals/real-transactions.md` |
 | D2 | Money is integer minor units: bigint in DB (number mode), strings in contracts, org default currency | decided (agent default, please confirm) | 2026-11-26 |
-| D3 | v1 has per-line `discountAmount` only; no tax and no discount rate | decided (agent default, please confirm) | 2026-11-26 |
+| D3 | Tax and discount rates are in v1 (user, 2026-11-26). SPEC defers tax to a tax module that does not exist, so rates are per-line basis points (`discountRateBps`, `taxRateBps`). Rate and fixed discount amount together returns 422 `PURCHASE_ORDER_DISCOUNT_CONFLICT`. Tax = rate of net, rounded half up per line; header totals sum lines. | decided (user scope, model is agent choice) | 2026-11-26 |
 | D4 | PO number is max-suffix + 1 with insert retry on `number_taken` | decided, see `docs/proposals/document-sequences.md` | 2026-11-26 |
 | D5 | System payment terms seed lazily per org; 20-term cap by count, insert, re-count, compensating delete; custom codes `CUSTOM_<SLUG>`; default term "Due on receipt"; term snapshotted on the PO at save and at confirm | decided | 2026-11-26 |
 | D6 | Confirm adds ordered base qty to `onOrder`. Close sets `cancelledBaseQty` to the unshipped qty and releases onOrder. Cancel of a confirmed PO needs no shipment activity, else `HAS_FULFILLMENT`. Delete is draft only | decided | 2026-11-26 |
@@ -66,7 +66,7 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done · `[!]` blocked · `[-]` 
 
 - Posting is not atomic (D1). Confirm, shipment post and reverse write several rows in sequence. A failure midway can leave the projection out of step with the document.
 - Integration tests were written but not run (no docker or Postgres in the build sandbox). The full draft to receipt journey is not yet covered by an integration test.
-- SPEC tax and discount-rate fields are not implemented (D3).
+- Deviation from SPEC (D3): no `taxCodeId` or tax module, rates are inline basis points; no header-level discount.
 
 ## Verification log
 

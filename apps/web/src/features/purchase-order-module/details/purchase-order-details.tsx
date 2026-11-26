@@ -15,7 +15,7 @@ import {
 } from "@workspace/ui/components/dialog"
 
 import { PurchaseOrderStatusBadge } from "../components"
-import { formatMinorAmount, usePurchaseOrderLabels } from "../lib"
+import { bpsToPercent, formatMinorAmount, usePurchaseOrderLabels } from "../lib"
 import {
   useCancelPurchaseOrderMutation,
   useClosePurchaseOrderMutation,
@@ -130,7 +130,10 @@ export function PurchaseOrderDetails({ orgId, orderId, onBack }: Props) {
                   t("lineFields.received"),
                   t("lineFields.unshipped"),
                   t("lineFields.unitPrice"),
+                  t("details.discountRate"),
                   t("lineFields.net"),
+                  t("details.taxRate"),
+                  t("details.lineTotal"),
                 ].map((label) => (
                   <th key={label} className="px-3 py-2 text-start font-medium">
                     {label}
@@ -148,7 +151,10 @@ export function PurchaseOrderDetails({ orgId, orderId, onBack }: Props) {
                   <td className="px-3 py-2 tabular-nums">{l.receivedBaseQty}</td>
                   <td className="px-3 py-2 tabular-nums">{l.unshippedBaseQty}</td>
                   <td className="px-3 py-2 tabular-nums">{money(l.unitPrice)}</td>
+                  <td className="px-3 py-2 tabular-nums">{bpsToPercent(l.discountRateBps)}%</td>
                   <td className="px-3 py-2 tabular-nums">{money(l.lineNetAmount)}</td>
+                  <td className="px-3 py-2 tabular-nums">{bpsToPercent(l.taxRateBps)}%</td>
+                  <td className="px-3 py-2 tabular-nums">{money(l.lineTotalAmount)}</td>
                 </tr>
               ))}
             </tbody>
@@ -159,6 +165,8 @@ export function PurchaseOrderDetails({ orgId, orderId, onBack }: Props) {
           <dd className="text-end tabular-nums">{money(order.subtotalAmount)}</dd>
           <dt className="text-muted-foreground">{t("details.discount")}</dt>
           <dd className="text-end tabular-nums">{money(order.discountAmount)}</dd>
+          <dt className="text-muted-foreground">{t("details.tax")}</dt>
+          <dd className="text-end tabular-nums">{money(order.taxAmount)}</dd>
           <dt className="font-medium">{t("details.total")}</dt>
           <dd className="text-end font-medium tabular-nums">{money(order.totalAmount)}</dd>
         </dl>

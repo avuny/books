@@ -19,10 +19,12 @@ const base = (): PurchaseOrderFormValues => ({
       orderedQty: "10",
       unitPrice: "12.50",
       discountAmount: "",
+      discountRate: "",
+      taxRate: "",
       expectedDeliveryDate: "",
       notes: "",
     },
-    { itemId: "", locationId: "", unitId: "", orderedQty: "", unitPrice: "", discountAmount: "", expectedDeliveryDate: "", notes: "" },
+    { itemId: "", locationId: "", unitId: "", orderedQty: "", unitPrice: "", discountAmount: "", discountRate: "", taxRate: "", expectedDeliveryDate: "", notes: "" },
   ],
 })
 
@@ -45,5 +47,23 @@ describe("buildPurchaseOrderPayload", () => {
     const v = base()
     v.lines = [v.lines[1]!]
     expect(buildPurchaseOrderPayload(v, 2).ok).toBe(false)
+  })
+  it("converts percent rates to basis points", () => {
+    const v = base()
+    v.lines[0]!.discountRate = "10"
+    v.lines[0]!.taxRate = "14.5"
+    const r = buildPurchaseOrderPayload(v, 2)
+    expect(r.ok).toBe(true)
+    if (!r.ok) return
+    expect(r.data.lines[0]).toMatchObject({ discountRateBps: 1000, taxRateBps: 1450, discountAmount: "0" })
+  })
+  it("rejects bad rates and a rate plus an amount", () => {
+    const v = base()
+    v.lines[0]!.taxRate = "101"
+    expect(buildPurchaseOrderPayload(v, 2)).toEqual({ ok: false, message: "invalid-rate" })
+    const w = base()
+    w.lines[0]!.discountRate = "10"
+    w.lines[0]!.discountAmount = "5"
+    expect(buildPurchaseOrderPayload(w, 2)).toEqual({ ok: false, message: "rate-conflict" })
   })
 })

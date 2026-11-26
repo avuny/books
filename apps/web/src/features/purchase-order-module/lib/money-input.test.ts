@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { currencyDigits, toMinorUnits } from "./money-input"
+import { bpsToPercent, currencyDigits, percentToBps, toMinorUnits } from "./money-input"
 
 describe("toMinorUnits", () => {
   it("converts decimals without float math", () => {
@@ -23,5 +23,26 @@ describe("toMinorUnits", () => {
     expect(currencyDigits("USD")).toBe(2)
     expect(currencyDigits("JPY")).toBe(0)
     expect(currencyDigits("KWD")).toBe(3)
+  })
+
+  it("converts percentages to basis points", () => {
+    expect(percentToBps("14")).toBe(1400)
+    expect(percentToBps("7.5")).toBe(750)
+    expect(percentToBps("12.34")).toBe(1234)
+    expect(percentToBps("100")).toBe(10000)
+    expect(percentToBps("")).toBe(0)
+  })
+  it("rejects bad percentages", () => {
+    expect(percentToBps("100.01")).toBeNull()
+    expect(percentToBps("101")).toBeNull()
+    expect(percentToBps("1.234")).toBeNull()
+    expect(percentToBps("-5")).toBeNull()
+    expect(percentToBps("abc")).toBeNull()
+  })
+  it("formats basis points as a percentage", () => {
+    expect(bpsToPercent(1400)).toBe("14")
+    expect(bpsToPercent(750)).toBe("7.5")
+    expect(bpsToPercent(1234)).toBe("12.34")
+    expect(bpsToPercent(0)).toBe("0")
   })
 })
