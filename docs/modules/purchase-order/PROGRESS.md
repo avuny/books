@@ -24,7 +24,7 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done · `[!]` blocked · `[-]` 
 | ID | Status | Evidence |
 |---|---|---|
 | P0-01 | [x] | Decision log below; party `assertActiveRole` reused, no SKU on items, money is bigint minor units |
-| P0-02 | [!] | D1 still open. Posting is sequential and best-effort, see Deviations |
+| P0-02 | [~] | main now has real transactions (audit #13); PO repositories call `db.transaction`, so posting becomes atomic once the integration run confirms it |
 | P0-03 | [~] | TEST-PLAN rows added; some layers not yet written |
 | P0-04 | [x] | `purchase_order`, `purchase_shipment` in contracts registry; sidebar permission map has `purchaseOrder`; route tests assert 403 mapping |
 | P1-01 | [x] | `assertActiveRole(orgId, partyId, "VENDOR")` in purchase-order service; service spec |
@@ -53,7 +53,7 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done · `[!]` blocked · `[-]` 
 
 | ID | Decision | Status | Owner response · date |
 |---|---|---|---|
-| D1 | Transaction-capable DB driver is available before posting use cases are built | open | see `../SAAS-SPEC-FIXES-PLAN.md` D1. Built best-effort; see `docs/proposals/real-transactions.md` |
+| D1 | Transaction-capable DB driver is available before posting use cases are built | resolved on main by audit #13 (Neon WebSocket pool); PO code already uses `db.transaction` | see `../SAAS-SPEC-FIXES-PLAN.md` D1. Built best-effort; see `docs/proposals/real-transactions.md` |
 | D2 | Money is integer minor units: bigint in DB (number mode), strings in contracts, org default currency | decided (agent default, please confirm) | 2026-11-26 |
 | D3 | Tax and discount rates are in v1 (user, 2026-11-26). SPEC defers tax to a tax module that does not exist, so rates are per-line basis points (`discountRateBps`, `taxRateBps`). Rate and fixed discount amount together returns 422 `PURCHASE_ORDER_DISCOUNT_CONFLICT`. Tax = rate of net, rounded half up per line; header totals sum lines. | decided (user scope, model is agent choice) | 2026-11-26 |
 | D4 | PO number is max-suffix + 1 with insert retry on `number_taken` | decided, see `docs/proposals/document-sequences.md` | 2026-11-26 |
