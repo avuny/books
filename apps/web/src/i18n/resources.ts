@@ -44,6 +44,10 @@ import {
   purchaseOrderTranslationsEn,
 } from "@avuny/contracts/purchase-order"
 import {
+  purchaseReceiptTranslationsAr,
+  purchaseReceiptTranslationsEn,
+} from "@avuny/contracts/purchase-receipt"
+import {
   purchaseShipmentTranslationsAr,
   purchaseShipmentTranslationsEn,
 } from "@avuny/contracts/purchase-shipment"
@@ -81,6 +85,7 @@ export const resources = {
     party: partyTranslationsEn,
     "payment-term": paymentTermTranslationsEn,
     "purchase-order": purchaseOrderTranslationsEn,
+    "purchase-receipt": purchaseReceiptTranslationsEn,
     "purchase-shipment": purchaseShipmentTranslationsEn,
     role: roleTranslationsEn,
     "stock-movement": stockMovementTranslationsEn,
@@ -103,6 +108,7 @@ export const resources = {
     party: partyTranslationsAr,
     "payment-term": paymentTermTranslationsAr,
     "purchase-order": purchaseOrderTranslationsAr,
+    "purchase-receipt": purchaseReceiptTranslationsAr,
     "purchase-shipment": purchaseShipmentTranslationsAr,
     role: roleTranslationsAr,
     "stock-movement": stockMovementTranslationsAr,

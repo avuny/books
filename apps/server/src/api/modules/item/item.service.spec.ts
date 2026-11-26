@@ -19,6 +19,8 @@ const item = (o: Partial<Item> = {}): Item => ({
   isBatchTracked: false,
   isExpiryTracked: false,
   inventoryValuationMethod: "fifo",
+  costPrice: null,
+  sellingPrice: null,
   isActive: true,
   createdAt: NOW,
   updatedAt: NOW,
@@ -159,6 +161,14 @@ describe("itemService", () => {
       const res = await t.service.create("u1", "org-1", createInput)
       expect(res).toMatchObject({ success: false, error: "ITEM_NAME_TAKEN" })
       expect(t.unitRepository.insertCollection).not.toHaveBeenCalled()
+    })
+
+    it("stores default prices on create (null when omitted)", async () => {
+      await t.service.create("u1", "org-1", { ...createInput, costPrice: "12.5" })
+      expect(t.repository.insertItem).toHaveBeenCalledWith(
+        expect.objectContaining({ costPrice: "12.5", sellingPrice: null }),
+        expect.anything()
+      )
     })
 
     it("from a base unit: creates the collection (base unit at factor 1), the item and its settings", async () => {
@@ -341,6 +351,16 @@ describe("itemService", () => {
         "org-1",
         "item-1",
         { baseUnitId: "u-g", unitCollectionId: "c-2" },
+        expect.anything()
+      )
+    })
+
+    it("default prices go to the item row", async () => {
+      await t.service.update("u1", "org-1", "item-1", { costPrice: "12.5", sellingPrice: null })
+      expect(t.repository.updateItem).toHaveBeenCalledWith(
+        "org-1",
+        "item-1",
+        { costPrice: "12.5", sellingPrice: null },
         expect.anything()
       )
     })

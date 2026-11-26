@@ -9,6 +9,8 @@ export type PurchaseOrderFormLine = {
   /** Decimal in major units as typed, e.g. "125.50". */
   unitPrice: string
   discountAmount: string
+  /** Which discount input the user picked. Only that one is sent. Defaults to percent. */
+  discountMode?: "percent" | "amount"
   /** Percent as typed, e.g. "10". Use this or discountAmount, not both. */
   discountRate: string
   /** Percent as typed, e.g. "14". */

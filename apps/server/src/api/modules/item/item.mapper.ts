@@ -40,6 +40,8 @@ export function toItemDto(row: ItemRow): ItemDto {
     isActive: item.isActive,
     allowNegativeStock: settings?.allowNegativeStock ?? false,
     reorderPoint: settings?.reorderPoint ?? null,
+    costPrice: item.costPrice ?? null,
+    sellingPrice: item.sellingPrice ?? null,
     createdAt: item.createdAt.toISOString(),
     updatedAt: item.updatedAt.toISOString(),
   }

@@ -65,6 +65,40 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
+      # Schema first, so the new API never runs against old tables. Fails closed: without the
+      # PRODUCTION_DATABASE_URL secret (production environment) the deploy stops here instead of shipping
+      # code that needs tables that do not exist. The seed is a deploy-time sync of system data only:
+      # system roles and permissions, sidebar, units, and default accounting for orgs that lack it
+      # (existing org accounts are never changed). Both steps are idempotent.
+      - name: Migrate database and sync seed data
+        env:
+          DATABASE_URL: ${{ secrets.PRODUCTION_DATABASE_URL }}
+          # The seed loads the API config, which validates these; they are not used by the seed itself.
+          ACCESS_TOKEN_SECRET: ci-seed-placeholder-secret-0000000000
+          VERIFICATION_TOKEN_SECRET: ci-seed-placeholder-secret-0000000000
+          OTP_SECRET: ci-seed-placeholder-secret-0000000000
+          AUDIT_HMAC_SECRET: ci-seed-placeholder-secret-0000000000
+          RESEND_API_KEY: ci-seed-placeholder
+          EMAIL_FROM: ci@example.com
+        run: |
+          if [ -z "$DATABASE_URL" ]; then
+            echo "::error::PRODUCTION_DATABASE_URL is not set in the production environment. Add it, or apply migrations and run the seed by hand and re-run this job."
+            exit 1
+          fi
+          pnpm --filter @avuny/contracts build
+          pnpm --filter @avuny/db build
+          pnpm --filter @avuny/db db:migrate
+          # Verify: the newest migration in the journal must be recorded as applied before we deploy.
+          # drizzle stores each applied migration's journal timestamp (created_at).
+          expected=$(node -e 'const e=require("./packages/db/drizzle/meta/_journal.json").entries;console.log(e[e.length-1].when)')
+          applied=$(psql "$DATABASE_URL" -tA -c 'select coalesce(max(created_at), 0) from drizzle.__drizzle_migrations')
+          echo "newest migration in journal: $expected, newest applied: $applied"
+          if [ "$applied" -lt "$expected" ]; then
+            echo "::error::The newest migration is not applied. Not deploying."
+            exit 1
+          fi
+          pnpm seed
+
       # API first, so the web app never goes live pointing at an API that isn't there.
       - name: Deploy API (Worker)
         run: pnpm turbo run deploy --filter="${{ env.API_PACKAGE }}"

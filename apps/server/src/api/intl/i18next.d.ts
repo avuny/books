@@ -13,6 +13,7 @@ import type otpEn from "./locales/otp/en.json"
 import type partyEn from "./locales/party/en.json"
 import type paymentTermEn from "./locales/payment-term/en.json"
 import type purchaseOrderEn from "./locales/purchase-order/en.json"
+import type purchaseReceiptEn from "./locales/purchase-receipt/en.json"
 import type purchaseShipmentEn from "./locales/purchase-shipment/en.json"
 import type roleEn from "./locales/role/en.json"
 import type sidebarEn from "./locales/sidebar/en.json"
@@ -37,6 +38,7 @@ type OtpMessages = typeof otpEn
 type PartyMessages = typeof partyEn
 type PaymentTermMessages = typeof paymentTermEn
 type PurchaseOrderMessages = typeof purchaseOrderEn
+type PurchaseReceiptMessages = typeof purchaseReceiptEn
 type PurchaseShipmentMessages = typeof purchaseShipmentEn
 type RoleMessages = typeof roleEn
 type SidebarMessages = typeof sidebarEn
@@ -71,6 +73,8 @@ declare module "i18next" {
       paymentTerm: PaymentTermMessages
       "purchase-order": PurchaseOrderMessages
       purchaseOrder: PurchaseOrderMessages
+      "purchase-receipt": PurchaseReceiptMessages
+      purchaseReceipt: PurchaseReceiptMessages
       "purchase-shipment": PurchaseShipmentMessages
       purchaseShipment: PurchaseShipmentMessages
       role: RoleMessages

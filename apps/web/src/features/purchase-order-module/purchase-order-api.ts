@@ -106,6 +106,9 @@ export function usePurchaseOrderAbilities(orgId: string) {
         canCreateShipment: false,
         canPostShipment: false,
         canReverseShipment: false,
+        canCreateReceipt: false,
+        canPostReceipt: false,
+        canReverseReceipt: false,
         canManagePaymentTerms: false,
       }
     }
@@ -124,6 +127,9 @@ export function usePurchaseOrderAbilities(orgId: string) {
       canCreateShipment: hasPermission(s, "create:purchase-shipment"),
       canPostShipment: hasPermission(s, "post:purchase-shipment"),
       canReverseShipment: hasPermission(s, "reverse:purchase-shipment"),
+      canCreateReceipt: hasPermission(s, "create:purchase-receipt"),
+      canPostReceipt: hasPermission(s, "post:purchase-receipt"),
+      canReverseReceipt: hasPermission(s, "reverse:purchase-receipt"),
       canManagePaymentTerms:
         hasPermission(s, "create:payment-term") && hasPermission(s, "update:payment-term"),
     }
@@ -170,18 +176,25 @@ import {
   getListItemOptionsQueryKey,
   getUnitCollection,
   listItemOptions,
+  getListPurchaseReceiptsQueryKey,
   getListPurchaseShipmentsQueryKey,
   getListPaymentTermsQueryKey,
   useCreatePaymentTerm,
   useCreatePurchaseOrder,
+  useCreatePurchaseReceipt,
   useCreatePurchaseShipment,
   useListPaymentTerms,
+  useListPurchaseReceipts,
   useListPurchaseShipments,
+  usePostPurchaseReceipt,
   usePostPurchaseShipment,
+  useReversePurchaseReceipt,
   useReversePurchaseShipment,
   useUpdatePaymentTerm,
   useUpdatePurchaseOrder,
   useListWarehouseLocationOptions,
+  listWarehouseLocationOptions,
+  getListWarehouseLocationOptionsQueryKey,
   useListWarehouseOptions,
   usePreviewPurchaseOrderNumber,
 } from "@/api"
@@ -238,6 +251,22 @@ export function useStockLocationOptions(orgId: string, warehouseId?: string) {
   )
 }
 
+/** Async picker source for stockable locations of one warehouse (search and paging like the item picker). */
+export function useLocationSource(orgId: string, warehouseId?: string) {
+  return useCursorOptions({
+    queryKey: getListWarehouseLocationOptionsQueryKey(orgId, { warehouseId: warehouseId || undefined }),
+    fetchPage: async ({ cursor, search, limit, signal }) =>
+      (
+        await listWarehouseLocationOptions(
+          orgId,
+          { warehouseId: warehouseId || undefined, stockableOnly: "true" as never, cursor, search, limit },
+          { signal }
+        )
+      ).data,
+    enabled: Boolean(orgId && warehouseId),
+  })
+}
+
 export function useItemSource(orgId: string) {
   return useCursorOptions({
     queryKey: getListItemOptionsQueryKey(orgId),
@@ -247,18 +276,24 @@ export function useItemSource(orgId: string) {
   })
 }
 
+/** "12.500000" -> "12.5", "12.000000" -> "12". */
+function trimDecimal(v: string): string {
+  return v.includes(".") ? v.replace(/0+$/, "").replace(/\.$/, "") : v
+}
+
 /** Units an item can be ordered in: its unit collection, plus the base unit. */
 export async function fetchItemUnits(
   orgId: string,
   itemId: string
-): Promise<{ baseUnitId: string; units: { value: string; label: string }[] }> {
+): Promise<{ baseUnitId: string; units: { value: string; label: string }[]; costPrice: string | null }> {
   try {
     const item = (await getItem(orgId, itemId)).data
     const base = {
       value: item.baseUnit.id,
       label: `${item.baseUnit.name} (${item.baseUnit.symbol})`,
     }
-    if (!item.unitCollectionId) return { baseUnitId: item.baseUnit.id, units: [base] }
+    const costPrice = item.costPrice ? trimDecimal(item.costPrice) : null
+    if (!item.unitCollectionId) return { baseUnitId: item.baseUnit.id, units: [base], costPrice }
     const collection = (await getUnitCollection(orgId, item.unitCollectionId)).data
     const units = (collection.units ?? []).map((u: { id: string; name: string; symbol: string }) => ({
       value: u.id,
@@ -266,10 +301,11 @@ export async function fetchItemUnits(
     }))
     return {
       baseUnitId: item.baseUnit.id,
+      costPrice,
       units: units.some((u: { value: string }) => u.value === item.baseUnit.id) ? units : [base, ...units],
     }
   } catch {
-    return { baseUnitId: "", units: [] }
+    return { baseUnitId: "", units: [], costPrice: null }
   }
 }
 
@@ -314,6 +350,44 @@ export function usePostShipmentMutation(orgId: string, orderId: string) {
 export function useReverseShipmentMutation(orgId: string, orderId: string) {
   const invalidate = useInvalidateShipments(orgId, orderId)
   return useReversePurchaseShipment({ mutation: { onSuccess: () => invalidate() } })
+}
+
+/* -------------------------------- receipts -------------------------------- */
+
+export type ReceiptDto = import("@avuny/contracts").PurchaseReceiptDto
+
+export function usePurchaseReceipts(orgId: string, orderId: string) {
+  const query = useListPurchaseReceipts(orgId, orderId)
+  const receipts = useMemo(
+    () => ((query.data?.data as { items?: ReceiptDto[] } | undefined)?.items ?? []) as ReceiptDto[],
+    [query.data]
+  )
+  return { receipts, isLoading: query.isLoading }
+}
+
+function useInvalidateReceipts(orgId: string, orderId: string) {
+  const queryClient = useQueryClient()
+  const invalidateOrders = useInvalidatePurchaseOrders(orgId)
+  return () =>
+    Promise.all([
+      queryClient.invalidateQueries({ queryKey: getListPurchaseReceiptsQueryKey(orgId, orderId) }),
+      invalidateOrders(orderId),
+    ])
+}
+
+export function useCreateReceiptMutation(orgId: string, orderId: string) {
+  const invalidate = useInvalidateReceipts(orgId, orderId)
+  return useCreatePurchaseReceipt({ mutation: { onSuccess: () => invalidate() } })
+}
+
+export function usePostReceiptMutation(orgId: string, orderId: string) {
+  const invalidate = useInvalidateReceipts(orgId, orderId)
+  return usePostPurchaseReceipt({ mutation: { onSuccess: () => invalidate() } })
+}
+
+export function useReverseReceiptMutation(orgId: string, orderId: string) {
+  const invalidate = useInvalidateReceipts(orgId, orderId)
+  return useReversePurchaseReceipt({ mutation: { onSuccess: () => invalidate() } })
 }
 
 /* ------------------------------ payment terms ----------------------------- */

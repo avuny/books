@@ -654,12 +654,12 @@ export function createStockMovementRepository({ db }: { db: DB }) {
           locationCode: warehouseLocations.fullCode,
           locationType: warehouseLocations.type,
           itemId: inventoryItemBatches.itemId,
-          batchId: sql<string | null>`${inventoryItemBatches.batchId}`,
-          quantity: sql<string>`${inventoryItemBatches.onHandQty}::text`,
-          onHandQty: sql<string>`${inventoryItemBatches.onHandQty}::text`,
-          reservedQty: sql<string>`${inventoryItemBatches.reservedQty}::text`,
-          onOrderQty: sql<string>`${inventoryItemBatches.onOrderQty}::text`,
-          availableQty: sql<string>`(${inventoryItemBatches.onHandQty} - ${inventoryItemBatches.reservedQty})::text`,
+          batchId: sql<string | null>`${inventoryItemBatches.batchId}`.as("batchId"),
+          quantity: sql<string>`${inventoryItemBatches.onHandQty}::text`.as("quantity"),
+          onHandQty: sql<string>`${inventoryItemBatches.onHandQty}::text`.as("onHandQty"),
+          reservedQty: sql<string>`${inventoryItemBatches.reservedQty}::text`.as("reservedQty"),
+          onOrderQty: sql<string>`${inventoryItemBatches.onOrderQty}::text`.as("onOrderQty"),
+          availableQty: sql<string>`(${inventoryItemBatches.onHandQty} - ${inventoryItemBatches.reservedQty})::text`.as("availableQty"),
           updatedAt: inventoryItemBatches.updatedAt,
         })
         .from(inventoryItemBatches)
@@ -686,12 +686,12 @@ export function createStockMovementRepository({ db }: { db: DB }) {
           locationCode: warehouseLocations.fullCode,
           locationType: warehouseLocations.type,
           itemId: inventoryItems.itemId,
-          batchId: sql<string | null>`null`,
-          quantity: sql<string>`${inventoryItems.onHandQty}::text`,
-          onHandQty: sql<string>`${inventoryItems.onHandQty}::text`,
-          reservedQty: sql<string>`${inventoryItems.reservedQty}::text`,
-          onOrderQty: sql<string>`${inventoryItems.onOrderQty}::text`,
-          availableQty: sql<string>`(${inventoryItems.onHandQty} - ${inventoryItems.reservedQty})::text`,
+          batchId: sql<string | null>`null`.as("batchId"),
+          quantity: sql<string>`${inventoryItems.onHandQty}::text`.as("quantity"),
+          onHandQty: sql<string>`${inventoryItems.onHandQty}::text`.as("onHandQty"),
+          reservedQty: sql<string>`${inventoryItems.reservedQty}::text`.as("reservedQty"),
+          onOrderQty: sql<string>`${inventoryItems.onOrderQty}::text`.as("onOrderQty"),
+          availableQty: sql<string>`(${inventoryItems.onHandQty} - ${inventoryItems.reservedQty})::text`.as("availableQty"),
           updatedAt: inventoryItems.updatedAt,
         })
         .from(inventoryItems)
@@ -803,6 +803,15 @@ export function createStockMovementRepository({ db }: { db: DB }) {
         .where(and(eq(inventoryItems.orgId, orgId), eq(inventoryItems.itemId, itemId)))
         .groupBy(inventoryItems.warehouseId, warehouses.name, warehouses.code, warehouses.type, warehouses.isSystem)
         .having(sql`sum(${inventoryItems.onHandQty}) <> 0 or sum(${inventoryItems.onOrderQty}) <> 0`)
+    },
+
+    /** Quantity shipped by suppliers and not yet received (projection inTransitQty), summed over all warehouses. */
+    async sumInTransitQty(orgId: string, itemId: string): Promise<string> {
+      const [row] = await db
+        .select({ quantity: sql<string>`coalesce(sum(${inventoryItems.inTransitQty}), 0)::text` })
+        .from(inventoryItems)
+        .where(and(eq(inventoryItems.orgId, orgId), eq(inventoryItems.itemId, itemId)))
+      return row?.quantity ?? "0"
     },
 
     /** On hand per batch of one item in real warehouses, non-zero only (batchless stock is not a batch). */

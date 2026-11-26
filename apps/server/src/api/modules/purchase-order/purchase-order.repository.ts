@@ -213,6 +213,13 @@ export function createPurchaseOrderRepository({ db }: { db: DB }): PurchaseOrder
         .where(and(eq(purchaseOrderLines.orgId, orgId), eq(purchaseOrderLines.id, lineId)))
     },
 
+    async setLineShippedReceived(orgId, lineId, counters, tx) {
+      await ex(tx)
+        .update(purchaseOrderLines)
+        .set(counters)
+        .where(and(eq(purchaseOrderLines.orgId, orgId), eq(purchaseOrderLines.id, lineId)))
+    },
+
     async deleteById(orgId, id, tx) {
       await ex(tx)
         .delete(purchaseOrders)

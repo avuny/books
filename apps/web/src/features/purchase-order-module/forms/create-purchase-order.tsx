@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react"
-import { useForm, useWatch } from "react-hook-form"
+import { Controller, useForm, useWatch } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { parseApiError } from "@workspace/ui/lib/api-error"
 import {
@@ -31,6 +31,7 @@ import {
   useItemSource,
   usePaymentTermOptions,
   usePurchaseOrderDefaults,
+  useLocationSource,
   useStockLocationOptions,
   useWarehouseOptions,
 } from "../purchase-order-api"
@@ -41,6 +42,7 @@ const blankLine = (locationId = ""): PurchaseOrderFormLine => ({
   unitId: "",
   orderedQty: "1",
   unitPrice: "0",
+  discountMode: "percent",
   discountAmount: "0",
   discountRate: "0",
   taxRate: "0",
@@ -72,6 +74,7 @@ function orderToFormValues(order: PurchaseOrderDto): PurchaseOrderFormValues {
       unitId: l.unitId,
       orderedQty: l.orderedQty,
       unitPrice: fromMinorUnits(l.unitPrice, digits),
+      discountMode: l.discountRateBps === 0 && BigInt(l.discountAmount) > 0n ? "amount" : "percent",
       discountAmount: fromMinorUnits(l.discountAmount, digits),
       discountRate: bpsToPercent(l.discountRateBps),
       taxRate: bpsToPercent(l.taxRateBps),
@@ -113,6 +116,7 @@ export function CreatePurchaseOrder({ orgId, order, onCreated, onCancel }: Props
   const warehouseId = useWatch({ control: form.control, name: "warehouseId" })
   const effectiveWarehouse = warehouseId || warehouseOptions[0]?.value || ""
   const locationOptions = useStockLocationOptions(orgId, effectiveWarehouse)
+  const locationSource = useLocationSource(orgId, effectiveWarehouse)
   const digits = useMemo(
     () => currencyDigits(order?.currency ?? defaults.currency ?? "USD"),
     [order?.currency, defaults.currency]
@@ -174,6 +178,11 @@ export function CreatePurchaseOrder({ orgId, order, onCreated, onCancel }: Props
     if (!itemId) return
     const details = await fetchItemUnits(orgId, itemId)
     setUnitMap((m) => ({ ...m, [itemId]: details.units }))
+    // Default the unit price from the item's cost price, unless the user already typed one.
+    const typed = form.getValues(`lines.${index}.unitPrice`)
+    if (details.costPrice && (!typed || Number(typed) === 0)) {
+      form.setValue(`lines.${index}.unitPrice`, details.costPrice)
+    }
     if (!form.getValues(`lines.${index}.unitId`)) {
       form.setValue(`lines.${index}.unitId`, details.baseUnitId || details.units[0]?.value || "")
     }
@@ -264,11 +273,12 @@ export function CreatePurchaseOrder({ orgId, order, onCreated, onCancel }: Props
             return (
               <>
                 <div className="sm:col-span-5">
-                  <SelectField
+                  <AsyncComboboxField
                     control={form.control}
                     name={`lines.${index}.locationId` as const}
-                    copy={{ label: t("lineFields.location") }}
-                    options={locationOptions}
+                    copy={{ label: t("lineFields.location"), placeholder: t("form.locationPlaceholder") }}
+                    comboboxCopy={comboboxCopy}
+                    source={locationSource}
                     disabled={disabled}
                   />
                 </div>
@@ -299,23 +309,54 @@ export function CreatePurchaseOrder({ orgId, order, onCreated, onCancel }: Props
                     disabled={disabled}
                   />
                 </div>
-                <div className="sm:col-span-3">
-                  <InputField
-                    control={form.control}
-                    name={`lines.${index}.discountAmount` as const}
-                    copy={{ label: t("form.discount") }}
-                    type="text"
-                    disabled={disabled}
-                  />
-                </div>
-                <div className="sm:col-span-3">
-                  <InputField
-                    control={form.control}
-                    name={`lines.${index}.discountRate` as const}
-                    copy={{ label: t("form.discountRate") }}
-                    type="text"
-                    disabled={disabled}
-                  />
+                <div className="sm:col-span-6">
+                  <fieldset className="grid gap-2" disabled={disabled}>
+                    <legend className="mb-1 text-sm font-medium text-foreground">{t("form.discountMode")}</legend>
+                    <Controller
+                      control={form.control}
+                      name={`lines.${index}.discountMode` as const}
+                      render={({ field }) => (
+                        <div className="flex flex-wrap items-center gap-4">
+                          {(["percent", "amount"] as const).map((mode) => (
+                            <label key={mode} className="flex items-center gap-2 text-sm">
+                              <input
+                                type="radio"
+                                className="accent-primary"
+                                name={`discount-mode-${index}`}
+                                checked={(field.value ?? "percent") === mode}
+                                onChange={() => {
+                                  field.onChange(mode)
+                                  // Only one discount applies: clear the other so it is never sent.
+                                  form.setValue(
+                                    mode === "percent" ? `lines.${index}.discountAmount` : `lines.${index}.discountRate`,
+                                    "0"
+                                  )
+                                }}
+                              />
+                              {mode === "percent" ? t("form.discountModePercent") : t("form.discountModeAmount")}
+                            </label>
+                          ))}
+                        </div>
+                      )}
+                    />
+                    {(line as PurchaseOrderFormLine | undefined)?.discountMode === "amount" ? (
+                      <InputField
+                        control={form.control}
+                        name={`lines.${index}.discountAmount` as const}
+                        copy={{ label: t("form.discount") }}
+                        type="text"
+                        disabled={disabled}
+                      />
+                    ) : (
+                      <InputField
+                        control={form.control}
+                        name={`lines.${index}.discountRate` as const}
+                        copy={{ label: t("form.discountRate") }}
+                        type="text"
+                        disabled={disabled}
+                      />
+                    )}
+                  </fieldset>
                 </div>
                 <div className="sm:col-span-3">
                   <InputField
