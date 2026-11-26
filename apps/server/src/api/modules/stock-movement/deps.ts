@@ -24,6 +24,8 @@ export function getStockMovementService(): StockMovementService {
     },
     batches: {
       findForPosting: (orgId, batchIds, tx) => getBatchService().findForPosting(orgId, batchIds, tx),
+      listAllocatable: (orgId, itemId, locationId, tx) =>
+        getBatchService().listAllocatable(orgId, itemId, locationId, tx),
     },
     // See ITEM_CHANGES.md: findStockPolicies is a small query to add to the item repository.
     items: {

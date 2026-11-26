@@ -2,6 +2,7 @@ import {
   StockMovementErrorCode as Err,
   STOCK_MOVEMENT_MAX_LINES,
   addDecimal,
+  allocateBatches,
   balanceKey,
   batchAllowsIntent,
   compareDecimal,
@@ -79,10 +80,11 @@ export function createStockMovementService(deps: StockMovementServiceDeps) {
     orgId: string,
     actorId: string | null,
     header: Header,
-    lines: ResolvedLine[],
+    inputLines: ResolvedLine[],
     system: SystemLocationIds,
     forwardChecks: boolean
   ): Promise<Failure | StockMovementDto> => {
+    let lines = inputLines
     // 1. items exist, are active and keep stock
     const itemIds = [...new Set(lines.map((l) => l.itemId))]
     const policies = await items.findPolicies(orgId, itemIds, tx)
@@ -95,6 +97,37 @@ export function createStockMovementService(deps: StockMovementServiceDeps) {
       if (forwardChecks && !policy.tracksStock) {
         return failure(Err.STOCK_MOVEMENT_ITEM_NOT_STOCKED, message(Err.STOCK_MOVEMENT_ITEM_NOT_STOCKED))
       }
+    }
+
+    // 1b. outbound lines of a batch-tracked item that name no batch are split across batches:
+    // FEFO for expiry-tracked items, FIFO otherwise. A shortfall fails (no negative batch stock).
+    if (forwardChecks) {
+      const expanded: ResolvedLine[] = []
+      for (const line of lines) {
+        const policy = policies.get(line.itemId)
+        if (!line.fromIntent || line.batchId || !policy?.isBatchTracked) {
+          expanded.push(line)
+          continue
+        }
+        const pool = await batches.listAllocatable(orgId, line.itemId, line.fromLocationId, tx)
+        // earlier lines of this posting already claimed part of the pool
+        const claimed = new Map<string, string>()
+        for (const e of expanded) {
+          if (e.itemId === line.itemId && e.fromLocationId === line.fromLocationId && e.batchId && e.fromIntent) {
+            claimed.set(e.batchId, addDecimal(claimed.get(e.batchId) ?? "0", e.quantity))
+          }
+        }
+        const left = pool.map((b) => ({ ...b, available: addDecimal(b.available, negateDecimal(claimed.get(b.batchId) ?? "0")) }))
+        const res = allocateBatches(line.quantity, left, policy.isExpiryTracked ? "fefo" : "fifo")
+        if (!res.ok) {
+          return failure(
+            Err.STOCK_MOVEMENT_INSUFFICIENT_STOCK,
+            `${message(Err.STOCK_MOVEMENT_INSUFFICIENT_STOCK)} (item ${line.itemId}, location ${line.fromLocationId}: short by ${res.short})`
+          )
+        }
+        for (const part of res.lines) expanded.push({ ...line, batchId: part.batchId, quantity: part.quantity })
+      }
+      lines = expanded
     }
 
     // 2. batches: present exactly for batch-tracked items, of the same item, in a status that allows this

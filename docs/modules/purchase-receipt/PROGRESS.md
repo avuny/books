@@ -46,10 +46,13 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done · `[!]` blocked · `[-]` 
 - Rejected goods have no stock effect in v1: only the accepted quantity moves stock and creates cost layers. No quarantine movement. `received` counts accepted plus rejected.
 - `accounting.reverseJournalEntry` takes an optional outer `tx` so reversal runs in the receipt transaction.
 - PO repository gained `setLineShippedReceived` for counter updates inside the receipt transaction.
-- The deploy workflow now runs migrate and seed before the API deploy (needs `PRODUCTION_DATABASE_URL` in the production environment, else skipped with a warning).
+- The deploy workflow now runs migrate and seed before the API deploy (needs the `PRODUCTION_DATABASE_URL` environment secret in `production`; without it the deploy fails closed, see AGENTS.md).
+- Batch-tracked items get a new batch per accepted receipt line (`<receipt number>-<lineNo>`). Expiry-tracked items take the expiry date typed on the line (`purchase_receipt_lines.expires_on`, migration 0026), else the item default shelf life.
+- Prod verified 2026-11-26 (v0.3.0): receive 3 lines, onHand/onOrder, 3 FIFO layers, Dr 1140 Inventory / Cr 2140 GRNI, reverse all checked.
 
 ## Verification log
 
 | Date | Task | Command | Result |
 |---|---|---|---|
 | 2026-11-26 | Server, contracts, web | `tsc`, receipt/PO/shipment specs, contracts tests (253), web tests, eslint, `sync:i18n:check` | pass |
+| 2026-11-26 | Production smoke (softhyper) | receive, reverse, stock-balances, in-transit | pass after stock-balances alias fix |

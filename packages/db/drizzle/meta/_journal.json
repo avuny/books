@@ -183,6 +183,13 @@
       "when": 1795718825898,
       "tag": "0025_item_default_prices",
       "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "7",
+      "when": 1795722917030,
+      "tag": "0026_receipt_line_expiry",
+      "breakpoints": true
     }
   ]
 }

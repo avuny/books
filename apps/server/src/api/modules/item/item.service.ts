@@ -196,7 +196,7 @@ export function createItemService(deps: ItemServiceDeps) {
               canAssembled: input.canAssembled,
               isReturnable: input.isReturnable,
               isInventoryTracked: input.isInventoryTracked,
-              isBatchTracked: input.isBatchTracked ?? (input.isInventoryTracked ? true : false),
+              isBatchTracked: input.isInventoryTracked === true,
               isExpiryTracked: input.isExpiryTracked,
               inventoryValuationMethod: input.inventoryValuationMethod,
               costPrice: input.costPrice ?? null,
@@ -230,7 +230,7 @@ export function createItemService(deps: ItemServiceDeps) {
               orgId,
               itemId: res.row.id,
               itemName: res.row.name,
-              isBatchTracked: input.isBatchTracked ?? (input.isInventoryTracked ? true : false),
+              isBatchTracked: input.isInventoryTracked === true,
               opening: input.openingStock,
             })
             if (!posted.ok) {
@@ -337,7 +337,7 @@ export function createItemService(deps: ItemServiceDeps) {
               ...(input.isInventoryTracked !== undefined && {
                 isInventoryTracked: input.isInventoryTracked,
               }),
-              ...(input.isBatchTracked !== undefined && { isBatchTracked: input.isBatchTracked }),
+              ...(input.isInventoryTracked !== undefined && { isBatchTracked: input.isInventoryTracked }),
               ...(input.isExpiryTracked !== undefined && { isExpiryTracked: input.isExpiryTracked }),
               ...(input.inventoryValuationMethod !== undefined && {
                 inventoryValuationMethod: input.inventoryValuationMethod,

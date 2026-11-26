@@ -110,7 +110,13 @@ export const receiptBatchAdapter: ReceiptBatchPort = {
     const ensured = await batchService.ensureBatches(
       orgId,
       input.itemId,
-      [{ number: input.number, manufacturedOn: row.expiry ? input.manufacturedOn : null }],
+      [
+        {
+          number: input.number,
+          manufacturedOn: row.expiry ? input.manufacturedOn : null,
+          expiresOn: row.expiry ? (input.expiresOn ?? null) : null,
+        },
+      ],
       tx
     )
     if (!ensured.success) throw new Error("Could not create the receipt batch")

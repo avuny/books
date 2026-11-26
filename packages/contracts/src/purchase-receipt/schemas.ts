@@ -34,6 +34,7 @@ export const PurchaseReceiptLineInputSchema = z
     rejectedQty: z.string().trim().regex(/^\d{1,12}(\.\d{1,6})?$/, "Invalid quantity").default("0"),
     isDirect: z.boolean().default(false),
     batchId: id.nullish(),
+    expiresOn: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date").nullish(),
     rejectionReason: text(PURCHASE_RECEIPT_REJECTION_REASON_MAX_LENGTH).nullish(),
     notes: text(PURCHASE_RECEIPT_LINE_NOTES_MAX_LENGTH).nullish(),
   })
@@ -74,6 +75,7 @@ export const PurchaseReceiptLineDtoSchema = z.object({
   rejectedBaseQty: z.string(),
   isDirect: z.boolean(),
   batchId: id.nullable(),
+  expiresOn: z.string().nullable(),
   /** PO net price per base unit, in minor units (informational snapshot). */
   unitCostSnapshot: z.string(),
   /** Value of the accepted quantity in minor units: what the cost layer and the journal carry. */
