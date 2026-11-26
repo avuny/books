@@ -55,6 +55,11 @@
       "import": "./dist/inventory-reservation/index.js",
       "default": "./dist/inventory-reservation/index.js"
     },
+    "./inventory-transfer": {
+      "types": "./dist/inventory-transfer/index.d.ts",
+      "import": "./dist/inventory-transfer/index.js",
+      "default": "./dist/inventory-transfer/index.js"
+    },
     "./item": {
       "types": "./dist/item/index.d.ts",
       "import": "./dist/item/index.js",

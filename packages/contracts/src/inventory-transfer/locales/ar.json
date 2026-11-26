@@ -1,0 +1,67 @@
+{
+  "errors": {
+    "INVENTORY_TRANSFER_NOT_FOUND": "تحويل المخزون غير موجود",
+    "INVENTORY_TRANSFER_NOT_EDITABLE": "يمكن تعديل التحويلات المسودة فقط",
+    "INVENTORY_TRANSFER_NOT_DELETABLE": "يمكن حذف التحويلات المسودة فقط",
+    "INVENTORY_TRANSFER_NOT_DRAFT": "يمكن إلغاء التحويلات المسودة فقط",
+    "INVENTORY_TRANSFER_ALREADY_DISPATCHED": "تم شحن التحويل بالفعل",
+    "INVENTORY_TRANSFER_NOT_DISPATCHABLE": "يمكن شحن التحويلات المسودة فقط",
+    "INVENTORY_TRANSFER_NOT_IN_TRANSIT": "لا توجد بضاعة قيد النقل في هذا التحويل",
+    "INVENTORY_TRANSFER_ALREADY_CANCELLED": "التحويل ملغى بالفعل",
+    "INVENTORY_TRANSFER_NO_LINES": "مطلوب بند واحد على الأقل في التحويل",
+    "INVENTORY_TRANSFER_TOO_MANY_LINES": "التحويل يتجاوز الحد الأقصى للبنود",
+    "INVENTORY_TRANSFER_DUPLICATE_LINES": "توجد بنود مكررة لنفس الصنف والمواقع",
+    "INVENTORY_TRANSFER_SAME_LOCATION": "يجب أن يختلف موقع المصدر عن موقع الوجهة",
+    "INVENTORY_TRANSFER_WAREHOUSE_NOT_FOUND": "المستودع المحدد غير موجود",
+    "INVENTORY_TRANSFER_WAREHOUSE_NOT_PHYSICAL": "يمكن اختيار المستودعات الفعلية فقط للتحويلات",
+    "INVENTORY_TRANSFER_LOCATION_NOT_FOUND": "موقع المستودع المحدد غير موجود",
+    "INVENTORY_TRANSFER_LOCATION_NOT_IN_WAREHOUSE": "الموقع لا يتبع المستودع المحدد",
+    "INVENTORY_TRANSFER_LOCATION_NOT_STOCKABLE": "الموقع لا يقبل تخزين المخزون",
+    "INVENTORY_TRANSFER_LOCATION_BLOCKED": "الموقع محظور",
+    "INVENTORY_TRANSFER_LOCATION_NOT_RECEIVABLE": "موقع الوجهة لا يستقبل البضاعة",
+    "INVENTORY_TRANSFER_LOCATION_NOT_PICKABLE": "موقع المصدر لا يصرف البضاعة",
+    "INVENTORY_TRANSFER_ITEM_NOT_FOUND": "الصنف المحدد غير موجود",
+    "INVENTORY_TRANSFER_ITEM_INACTIVE": "لا يمكن تحويل أصناف غير نشطة",
+    "INVENTORY_TRANSFER_ITEM_NOT_STOCKED": "لا يمكن تحويل أصناف غير مخزنة",
+    "INVENTORY_TRANSFER_UNIT_NOT_IN_COLLECTION": "الوحدة المحددة غير مهيأة لهذا الصنف",
+    "INVENTORY_TRANSFER_BATCH_NOT_FOUND": "الدفعة المحددة غير موجودة",
+    "INVENTORY_TRANSFER_BATCH_NOT_AVAILABLE": "لا يمكن نقل الدفعة بحالتها الحالية",
+    "INVENTORY_TRANSFER_INSUFFICIENT_STOCK": "المخزون المتاح في موقع المصدر غير كاف",
+    "INVENTORY_TRANSFER_LINE_NOT_FOUND": "بند التحويل غير موجود",
+    "INVENTORY_TRANSFER_ALLOCATION_NOT_FOUND": "تخصيص التحويل غير موجود",
+    "INVENTORY_TRANSFER_INVALID_QUANTITY": "الكمية غير صالحة",
+    "INVENTORY_TRANSFER_EXCEEDS_REQUESTED": "كمية الشحن أكبر من المطلوبة",
+    "INVENTORY_TRANSFER_EXCEEDS_PENDING": "الكمية أكبر من المتبقي قيد النقل",
+    "INVENTORY_TRANSFER_NOTHING_PENDING": "لا يوجد شيء متبقٍ قيد النقل",
+    "INVENTORY_TRANSFER_EVENT_NOT_FOUND": "حدث التحويل غير موجود",
+    "INVENTORY_TRANSFER_CANNOT_REVERSE": "لا يمكن عكس هذه الخطوة من التحويل",
+    "INVENTORY_TRANSFER_HAS_EVENTS": "للتحويل استلامات أو مرتجعات أو شطب بالفعل",
+    "INVENTORY_TRANSFER_POSTING_FAILED": "تعذر ترحيل المخزون لهذا التحويل",
+    "INVENTORY_TRANSFER_NUMBER_TAKEN": "يوجد تحويل مخزون بهذا الرقم بالفعل"
+  },
+  "labels": {
+    "status": {
+      "DRAFT": "مسودة",
+      "IN_TRANSIT": "قيد النقل",
+      "PARTIALLY_RECEIVED": "مستلم جزئيا",
+      "RECEIVED": "مستلم",
+      "CANCELLED": "ملغى"
+    },
+    "eventKind": {
+      "RECEIPT": "استلام",
+      "RETURN": "إرجاع إلى المصدر",
+      "LOSS": "شطب"
+    }
+  },
+  "msgs": {
+    "INVENTORY_TRANSFER_CREATED": "تم إنشاء تحويل المخزون بنجاح",
+    "INVENTORY_TRANSFER_UPDATED": "تم تحديث تحويل المخزون بنجاح",
+    "INVENTORY_TRANSFER_DELETED": "تم حذف تحويل المخزون بنجاح",
+    "INVENTORY_TRANSFER_DISPATCHED": "تم شحن التحويل والمخزون قيد النقل",
+    "INVENTORY_TRANSFER_RECEIVED": "تم استلام البضاعة بنجاح",
+    "INVENTORY_TRANSFER_RETURNED": "تمت إعادة البضاعة إلى المصدر",
+    "INVENTORY_TRANSFER_CLOSED_SHORT": "تم شطب البضاعة المتبقية",
+    "INVENTORY_TRANSFER_CANCELLED": "تم إلغاء تحويل المخزون بنجاح",
+    "INVENTORY_TRANSFER_REVERSED": "تم عكس خطوة التحويل بنجاح"
+  }
+}
