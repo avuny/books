@@ -383,6 +383,7 @@ export function createVendorBillService(deps: VendorBillServiceDeps) {
           const current = await repo.findAggregate(orgId, id, tx)
           if (!current) throw new PostingAbort(Err.VENDOR_BILL_NOT_FOUND)
           if (current.row.status !== "POSTED") throw new PostingAbort(Err.VENDOR_BILL_NOT_POSTED)
+          if (await repo.hasPostedPayments(orgId, id, tx)) throw new PostingAbort(Err.VENDOR_BILL_HAS_PAYMENTS)
           if (current.row.journalEntryId) {
             const journal = await deps.accounting.reverseJournalEntry(
               actorId,

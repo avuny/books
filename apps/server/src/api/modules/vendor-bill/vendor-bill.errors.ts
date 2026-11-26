@@ -24,6 +24,7 @@ export const vendorBillErrorsHttpMap = {
   VENDOR_BILL_DUPLICATE_SUPPLIER_INVOICE: { statusCode: 409, responseMessage: "This supplier invoice number is already entered for this supplier" },
   VENDOR_BILL_PAYMENT_TERM_NOT_FOUND: { statusCode: 422, responseMessage: "The payment term does not exist" },
   VENDOR_BILL_DUE_DATE_BEFORE_INVOICE: { statusCode: 422, responseMessage: "The due date cannot be before the invoice date" },
+  VENDOR_BILL_HAS_PAYMENTS: { statusCode: 409, responseMessage: "The bill has posted payments. Reverse them first" },
   VENDOR_BILL_POSTING_FAILED: { statusCode: 409, responseMessage: "Posting the bill failed. Nothing was changed. Please try again" },
   VENDOR_BILL_NUMBER_TAKEN: { statusCode: 409, responseMessage: "Could not allocate a bill number. Please try again" },
 } as const satisfies Record<VendorBillErrorCode, ErrorMeta>

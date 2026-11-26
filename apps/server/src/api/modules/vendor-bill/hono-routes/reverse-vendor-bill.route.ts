@@ -20,6 +20,7 @@ const rawErrorMap = {
   ROLE_PERMISSION_DENIED: roleErrorsHttpMap.ROLE_PERMISSION_DENIED,
   VENDOR_BILL_NOT_FOUND: errors.VENDOR_BILL_NOT_FOUND,
   VENDOR_BILL_NOT_POSTED: errors.VENDOR_BILL_NOT_POSTED,
+  VENDOR_BILL_HAS_PAYMENTS: errors.VENDOR_BILL_HAS_PAYMENTS,
   VENDOR_BILL_POSTING_FAILED: errors.VENDOR_BILL_POSTING_FAILED,
 } as const
 
@@ -51,6 +52,7 @@ export const reverseVendorBillRoute = ({
       ]),
       409: jsonError("Conflict", [
         Code.VENDOR_BILL_NOT_POSTED,
+        Code.VENDOR_BILL_HAS_PAYMENTS,
         Code.VENDOR_BILL_POSTING_FAILED,
       ]),
       ...globalErrorResponses,
