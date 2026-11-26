@@ -20,6 +20,16 @@
       "inventory_adjustment": "تسويات المخزون",
       "customer": "العملاء",
       "vendor": "الموردون",
+      "activity_log": "سجل النشاط",
+      "item": "الأصناف",
+      "item_category": "فئات الأصناف",
+      "unit": "الوحدات",
+      "unit_collection": "مجموعات الوحدات",
+      "warehouse": "المستودعات",
+      "warehouse_location": "مواقع المستودع",
+      "batch": "الدفعات",
+      "stock_movement": "حركات المخزون",
+      "accounting": "المحاسبة",
       "*": "كل شيء"
     },
     "actions": {

@@ -55,8 +55,9 @@ export function CustomDropdownMenu<DeleteArg, EditArg>({
               variant="outline"
               size="icon"
               className="transition hover:bg-muted"
+              aria-label="More actions"
             >
-              <MoreVerticalIcon className="h-4 w-4" />
+              <MoreVerticalIcon className="h-4 w-4" aria-hidden />
             </Button>
           }
         ></DropdownMenuTrigger>
