@@ -85,8 +85,8 @@ jobs:
             echo "::error::PRODUCTION_DATABASE_URL is not set in the production environment. Add it, or apply migrations and run the seed by hand and re-run this job."
             exit 1
           fi
-          pnpm --filter @avuny/contracts build
-          pnpm --filter @avuny/db build
+          # Build every workspace package the server imports (utils, contracts, db, ...): the seed runs the API code.
+          pnpm turbo run build --filter="${{ env.API_PACKAGE }}^..."
           pnpm --filter @avuny/db db:migrate
           # Verify: the newest migration in the journal must be recorded as applied before we deploy.
           # drizzle stores each applied migration's journal timestamp (created_at).
