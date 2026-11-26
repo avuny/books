@@ -1,6 +1,6 @@
 # Audit progress: 2026-11-26 app audit
 
-Tracks work against [2026-11-26-app-audit.md](./2026-11-26-app-audit.md). Updated by Instinct on behalf of Khalid. Last updated: 2026-11-26 15:50 (Cairo).
+Tracks work against [2026-11-26-app-audit.md](./2026-11-26-app-audit.md). Updated by Instinct on behalf of Khalid. Last updated: 2026-11-26 15:55 (Cairo).
 
 Rule used: nothing goes to `main` directly any more. Each fix is a PR with a regression test where the code allows one.
 
@@ -18,6 +18,9 @@ Rule used: nothing goes to `main` directly any more. Each fix is a PR with a reg
 | B5 | S2 | Sidebar Accounting link hidden until its page exists (explicit list in the sidebar service, registry untouched). | PR #9 (open, needs review) |
 | B11 | S3 | OTP email wording ("sign-up" instead of SIGN_UP), quantities without padding zeros on item list and inventory tab, removed a debug console.log. Page title was already shipped. | PR #8 (open, needs review) |
 | B7 | S2 | Role list counts: the SQL compared against a bare `"id"` so every count was 0. Fixed, test on the generated SQL. | PR #5 (open, needs review) |
+| B8 | S2 | Required marker after labels on the item form; item name and category marked required; category error now "Choose a category". | PR #10 (open, needs review) |
+| B10 | S2 | Create-organization form prefills currency and timezone from the chosen country (create form only). | PR #11 (open, needs review) |
+| B15 | S3 | Sidebar links for Item categories and Stock movements. | PR #12 (open, needs seed:sidebar after deploy) |
 
 ## Not done, and why
 
@@ -25,10 +28,10 @@ Rule used: nothing goes to `main` directly any more. Each fix is a PR with a reg
 |---|---|
 | B2 (S1) | Item with opening stock is not atomic. The Neon HTTP driver has no transactions (docs/TESTING.md known gap). The real fix is a transaction-capable driver (Neon WebSocket pool or Hyperdrive). That changes the production DB connection and may need a pooled DATABASE_URL, so it waits for Khalid's OK. |
 | B4 (S2) | Per-location inventory table is empty. Investigated, no code fix made. The read side checks out: the stock-balances query and the item stock summary both generate correctly qualified SQL (printed and checked), and the web tab passes the right filters. The most likely cause is B2: the item was created with opening stock, the "transaction" failed half way on the Neon HTTP driver, and the stock movement was written without the per-location projection rows. If that is right, B4 goes away once B2 is fixed (and the broken test item is cleaned up). Not confirmed against live data, I have no database access. Needs a repro on a fresh item after B3 and B2. |
-| B8, B10 (S2) | Item form required marker and "Invalid UUID" text; country not driving default currency and timezone. Not started. |
+| B8, B10 (S2) | Done as PRs, see the Done table below. Arabic strings need a native check. |
 | B9 (S2) | Virtual TRANSIT location in the opening-stock dropdown. The code on main already asks only for stockable, usable locations (`stockableOnly`, default true in the location options endpoint). Whether the TRANSIT location is flagged stockable in the data is not verifiable without database access. Needs a live check on a fresh item; if TRANSIT still shows, the fix is in its seed data. |
 | B14 (S3) | Item row says "Delete", party rows say "Deactivate". Not a copy fix: items have a real delete (blocked by stock history, see ITEM_HAS_HISTORY) and parties only deactivate. Needs a product decision (give items a Deactivate action, or rename). Not started. |
-| B15 (S3) | No sidebar entries for item categories and stock movements, customer names not links. Not started. |
+| B15 (S3) | Sidebar links done in PR #12. After merge and deploy, run `pnpm --filter @avuny/books-server seed:sidebar` against production or the links will not show. Customer names as links not done. |
 | B11 (rest) | Owner "Last active: Never" needs a behavior decision. |
 | Sections 3 and 4 | Enhancements and new modules (purchasing, sales, accounting UI, reports, SaaS layer, and so on). Large product work, each needs its own spec and plan. Not started. |
 | Live verification | B1, B3 and B7 are covered by unit tests only. None was exercised against the live database. |
