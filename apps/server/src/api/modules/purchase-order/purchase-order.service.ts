@@ -6,7 +6,6 @@ import {
   PurchaseOrderErrorCode as Err,
   RoleErrorCode,
   addQty,
-  cmpQty,
   computeLineAmounts,
   isPositiveQty,
   mulQty,
@@ -398,23 +397,23 @@ export function createPurchaseOrderService(deps: PurchaseOrderServiceDeps) {
         if (active || (await repo.hasShipments(orgId, id))) return failWith(Err.PURCHASE_ORDER_HAS_FULFILLMENT)
       }
 
-      await repo.transaction(async (tx) => {
-        if (status !== "DRAFT") {
-          for (const l of current.lines) {
-            await repo.setLineCancelled(orgId, l.id, l.orderedBaseQty, tx)
-          }
-          await deps.projection.applyInboundDeltas(
-            orgId,
-            current.lines
-              .filter((l) => cmpQty(subQty(l.orderedBaseQty, l.cancelledBaseQty), "0") > 0)
+      // Computed before any write so the release always uses the counters this request read.
+      const releases: InboundDelta[] =
+        status === "DRAFT"
+          ? []
+          : current.lines
+              .filter((l) => isPositiveQty(subQty(l.orderedBaseQty, l.cancelledBaseQty)))
               .map((l) => ({
                 itemId: l.itemId,
                 warehouseId: l.warehouseId,
                 locationId: l.locationId,
                 onOrderDelta: subQty("0", subQty(l.orderedBaseQty, l.cancelledBaseQty)),
-              })),
-            tx
-          )
+              }))
+
+      await repo.transaction(async (tx) => {
+        if (status !== "DRAFT") {
+          for (const l of current.lines) await repo.setLineCancelled(orgId, l.id, l.orderedBaseQty, tx)
+          await deps.projection.applyInboundDeltas(orgId, releases, tx)
         }
         await repo.updateHeader(
           orgId,
