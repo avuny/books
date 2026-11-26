@@ -107,6 +107,15 @@ export class InMemoryPurchaseOrderRepository implements PurchaseOrderRepository 
     if (l) l.shippedBaseQty = shippedBaseQty
   }
 
+  async setLineShippedReceived(
+    _orgId: string,
+    lineId: string,
+    counters: { shippedBaseQty: string; receivedBaseQty: string; acceptedBaseQty: string; rejectedBaseQty: string }
+  ) {
+    const l = this.lines.find((x) => x.id === lineId)
+    if (l) Object.assign(l, counters)
+  }
+
   async deleteById(_orgId: string, id: string) {
     this.orders = this.orders.filter((o) => o.id !== id)
     this.lines = this.lines.filter((l) => l.purchaseOrderId !== id)
