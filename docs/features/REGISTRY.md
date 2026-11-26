@@ -19,6 +19,6 @@ One row per module. Update in the same commit that changes status. Statuses: pro
 | purchase-order | in-progress | [SPEC](../modules/purchase-order/SPEC.md) | [PROGRESS](../modules/purchase-order/PROGRESS.md) | [TEST-PLAN](../modules/purchase-order/TEST-PLAN.md) | server, contracts, list, details, create form done; edit, shipments UI, int run, e2e open; D1 |
 | purchase-receipt | planned | [SPEC](../modules/purchase-receipt/SPEC.md) | [PROGRESS](../modules/purchase-receipt/PROGRESS.md) | [TEST-PLAN](../modules/purchase-receipt/TEST-PLAN.md) | stage 1 |
 | vendor-bill-payment | in-progress | [SPEC](../modules/vendor-bill-payment/SPEC.md) | [PROGRESS](../modules/vendor-bill-payment/PROGRESS.md) | [TEST-PLAN](../modules/vendor-bill-payment/TEST-PLAN.md) | stage 1 |
-| sales-order | planned | [SPEC](../modules/sales-order/SPEC.md) | [PROGRESS](../modules/sales-order/PROGRESS.md) | [TEST-PLAN](../modules/sales-order/TEST-PLAN.md) | stage 2 |
+| sales-order | server done (web pending) | [SPEC](../modules/sales-order/SPEC.md) | [PROGRESS](../modules/sales-order/PROGRESS.md) | [TEST-PLAN](../modules/sales-order/TEST-PLAN.md) | stage 2 |
 | sales-delivery | planned | [SPEC](../modules/sales-delivery/SPEC.md) | [PROGRESS](../modules/sales-delivery/PROGRESS.md) | [TEST-PLAN](../modules/sales-delivery/TEST-PLAN.md) | stage 2 |
 | sales-invoice-payment | planned | [SPEC](../modules/sales-invoice-payment/SPEC.md) | [PROGRESS](../modules/sales-invoice-payment/PROGRESS.md) | [TEST-PLAN](../modules/sales-invoice-payment/TEST-PLAN.md) | stage 2 |
