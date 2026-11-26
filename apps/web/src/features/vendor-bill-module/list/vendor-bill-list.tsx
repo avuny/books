@@ -6,11 +6,11 @@ import { formatMinorAmount } from "../../purchase-order-module/lib/format-money"
 import { useVendorBills } from "../vendor-bill-api"
 import type { BillScope } from "../types"
 
-type Props = { orgId: string; onViewBill: (id: string) => void }
+type Props = { orgId: string; onViewBill: (id: string) => void; headerAction?: React.ReactNode }
 
 const SCOPES: BillScope[] = ["all", "DRAFT", "POSTED", "REVERSED"]
 
-export function VendorBillList({ orgId, onViewBill }: Props) {
+export function VendorBillList({ orgId, onViewBill, headerAction }: Props) {
   const { t, i18n } = useTranslation("vendor-bill")
   const { t: tp } = useTranslation("vendor-payment")
   const { bills, isLoading } = useVendorBills(orgId)
@@ -19,9 +19,12 @@ export function VendorBillList({ orgId, onViewBill }: Props) {
 
   return (
     <div className="flex flex-col gap-4 p-6">
-      <div>
-        <h1 className="text-xl font-semibold">{t("ui.title")}</h1>
-        <p className="text-sm text-muted-foreground">{t("ui.description")}</p>
+      <div className="flex items-start justify-between gap-2">
+        <div>
+          <h1 className="text-xl font-semibold">{t("ui.title")}</h1>
+          <p className="text-sm text-muted-foreground">{t("ui.description")}</p>
+        </div>
+        {headerAction}
       </div>
       <div className="flex gap-2" role="tablist">
         {SCOPES.map((s) => (

@@ -19,7 +19,10 @@ import {
   useCreateVendorPayment,
   useDeleteVendorBill,
   useDeleteVendorPayment,
+  useGetApAging,
+  useGetApReconciliation,
   useGetMyPermissions,
+  useGetSupplierStatement,
   useGetVendorBill,
   useListVendorBills,
   useListVendorPayments,
@@ -29,7 +32,13 @@ import {
   useReverseVendorPayment,
 } from "@/api"
 
-import type { VendorBillDto, VendorPaymentDto } from "./types"
+import type {
+  ApAgingResponse,
+  ApReconciliationResponse,
+  SupplierStatementResponse,
+  VendorBillDto,
+  VendorPaymentDto,
+} from "./types"
 
 const NO_BILLS: VendorBillDto[] = []
 const NO_PAYMENTS: VendorPaymentDto[] = []
@@ -153,4 +162,29 @@ export function useReversePaymentMutation(orgId: string) {
 export function useDeletePaymentMutation(orgId: string) {
   const invalidate = useInvalidate(orgId)
   return useDeleteVendorPayment({ mutation: { onSuccess: () => invalidate() } })
+}
+
+export function useApAging(orgId: string) {
+  const query = useGetApAging(orgId)
+  const aging = (query.data?.data ?? null) as ApAgingResponse | null
+  return { aging, isLoading: query.isLoading, error: query.error }
+}
+
+export function useApReconciliation(orgId: string) {
+  const query = useGetApReconciliation(orgId)
+  const reconciliation = (query.data?.data ?? null) as ApReconciliationResponse | null
+  return { reconciliation, isLoading: query.isLoading, error: query.error }
+}
+
+export function useSupplierStatement(
+  orgId: string,
+  params: { partyId: string; from?: string; to?: string } | null
+) {
+  const query = useGetSupplierStatement(
+    orgId,
+    { partyId: params?.partyId ?? "", from: params?.from || undefined, to: params?.to || undefined },
+    { query: { enabled: Boolean(params) } }
+  )
+  const statement = (query.data?.data ?? null) as SupplierStatementResponse | null
+  return { statement, isLoading: query.isLoading && Boolean(params), error: query.error }
 }

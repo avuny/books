@@ -149,6 +149,49 @@
       "reverseTitle": "Reverse payment",
       "reverseDescription": "Reverses the journal entry and reopens the bills it paid.",
       "delete": "Delete"
+    },
+    "reports": {
+      "title": "AP reports",
+      "description": "What you owe suppliers, and whether the books agree.",
+      "open": "AP reports",
+      "aging": "AP aging",
+      "agingNote": "Outstanding on posted bills today, by days past the due date.",
+      "agingNone": "Nothing outstanding.",
+      "supplier": "Supplier",
+      "currency": "Currency",
+      "total": "Total",
+      "statement": "Statement",
+      "buckets": {
+        "CURRENT": "Current",
+        "DAYS_1_30": "1-30",
+        "DAYS_31_60": "31-60",
+        "DAYS_61_90": "61-90",
+        "OVER_90": "Over 90"
+      },
+      "reconciliation": "Reconciliation",
+      "ledger": "Ledger",
+      "subledger": "Subledger",
+      "difference": "Difference",
+      "ok": "Balanced",
+      "off": "Does not match",
+      "ap": "Accounts payable vs open bills",
+      "grni": "GRNI vs received not billed",
+      "stmt": {
+        "title": "Statement: {name}",
+        "from": "From",
+        "to": "To",
+        "opening": "Opening balance",
+        "closing": "Closing balance",
+        "date": "Date",
+        "document": "Document",
+        "reference": "Reference",
+        "charge": "Billed",
+        "payment": "Paid",
+        "balance": "Balance",
+        "none": "No activity in this period.",
+        "bill": "Bill",
+        "paymentKind": "Payment"
+      }
     }
   }
 }
