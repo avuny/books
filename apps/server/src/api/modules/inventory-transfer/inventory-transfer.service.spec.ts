@@ -1,0 +1,193 @@
+import { beforeEach, describe, expect, it } from "vitest"
+import { InventoryTransferErrorCode as Err, RoleErrorCode } from "@avuny/contracts"
+import { createInventoryTransferService } from "./inventory-transfer.service.js"
+import type {
+  InventoryTransferDetail,
+  InventoryTransferRepository,
+  LocationFailure,
+  NewLine,
+} from "./inventory-transfer.types.js"
+
+const orgId = "11111111-1111-4111-a111-111111111111"
+const actorId = "22222222-2222-4222-a222-222222222222"
+const srcWh = "33333333-3333-4333-a333-333333333333"
+const dstWh = "44444444-4444-4444-a444-444444444444"
+const itemId = "55555555-5555-4555-a555-555555555555"
+const srcLoc = "66666666-6666-4666-a666-666666666666"
+const dstLoc = "77777777-7777-4777-a777-777777777777"
+const unitId = "88888888-8888-4888-a888-888888888888"
+
+type Header = InventoryTransferDetail["row"]
+type Line = InventoryTransferDetail["lines"][number]
+
+class FakeRepo implements InventoryTransferRepository {
+  headers = new Map<string, Header>()
+  lines = new Map<string, Line[]>()
+  seq = 0
+  async transaction<T>(fn: (tx: any) => Promise<T>) {
+    return fn({})
+  }
+  async nextDocumentNumber() {
+    return `TRF-${String(++this.seq).padStart(6, "0")}`
+  }
+  private toLines(transferId: string, lines: readonly NewLine[]): Line[] {
+    return lines.map((l, i) => ({
+      id: `line-${transferId}-${i}`,
+      orgId,
+      transferId,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      ...l,
+    })) as Line[]
+  }
+  async insertAggregate(_o: string, values: any, lines: readonly NewLine[]) {
+    const row = { id: `t-${this.seq}`, orgId, createdAt: new Date(), updatedAt: new Date(), ...values } as Header
+    this.headers.set(row.id, row)
+    const ls = this.toLines(row.id, lines)
+    this.lines.set(row.id, ls)
+    return { ok: true as const, row, lines: ls }
+  }
+  async findAggregate(_o: string, id: string) {
+    const row = this.headers.get(id)
+    return row ? { row, lines: this.lines.get(id) ?? [] } : null
+  }
+  async findDetail(_o: string, id: string) {
+    const row = this.headers.get(id)
+    return row ? { row, lines: this.lines.get(id) ?? [], allocations: [], events: [] } : null
+  }
+  async updateAggregate(_o: string, id: string, patch: any) {
+    const row = this.headers.get(id)
+    if (!row) return null
+    Object.assign(row, patch)
+    return row
+  }
+  async replaceLines(_o: string, id: string, lines: readonly NewLine[]) {
+    const ls = this.toLines(id, lines)
+    this.lines.set(id, ls)
+    return ls
+  }
+  async delete(_o: string, id: string) {
+    return this.headers.delete(id) ? { ok: true } : { ok: false, reason: "not_found" as const }
+  }
+  async list() {
+    return { rows: [...this.headers.values()].map((transfer) => ({ transfer, lineCount: 1 })), total: this.headers.size }
+  }
+  async listOptions() {
+    return [...this.headers.values()].map((h) => ({ id: h.id, number: h.number, status: h.status }))
+  }
+}
+
+describe("InventoryTransferService drafts", () => {
+  let repo: FakeRepo
+  let allowed = true
+  let locationFailure: LocationFailure | null = null
+  let itemFailure: "item_not_found" | "item_inactive" | "item_not_stocked" | "unit_not_in_collection" | null = null
+  let factor = "1"
+  let audits: string[] = []
+  let service: ReturnType<typeof createInventoryTransferService>
+
+  const line = { itemId, sourceLocationId: srcLoc, destinationLocationId: dstLoc, unitId, quantity: "5" }
+  const input = { date: "2026-11-26", sourceWarehouseId: srcWh, destinationWarehouseId: dstWh, lines: [line] }
+
+  beforeEach(() => {
+    repo = new FakeRepo()
+    allowed = true
+    locationFailure = null
+    itemFailure = null
+    factor = "1"
+    audits = []
+    service = createInventoryTransferService({
+      repository: repo,
+      items: {
+        async resolveUnitConversion() {
+          return itemFailure ? { ok: false, reason: itemFailure } : { ok: true, baseUnitId: unitId, factor }
+        },
+      },
+      locations: {
+        async validateLocation() {
+          return locationFailure ? { ok: false, reason: locationFailure } : { ok: true }
+        },
+      },
+      permissions: { check: async () => allowed },
+      activityLog: { record: async (e) => void audits.push(e.action) },
+    })
+  })
+
+  it("creates a numbered draft with base quantities", async () => {
+    factor = "12"
+    const res = await service.create(actorId, orgId, input)
+    expect(res.success).toBe(true)
+    if (!res.success) return
+    expect(res.data.number).toBe("TRF-000001")
+    expect(res.data.status).toBe("DRAFT")
+    expect(res.data.lines[0]?.requestedBaseQty).toBe("60")
+    expect(audits).toEqual(["inventory_transfer.created"])
+  })
+
+  it("denies without permission", async () => {
+    allowed = false
+    const res = await service.create(actorId, orgId, input)
+    expect(!res.success && res.error).toBe(RoleErrorCode.ROLE_PERMISSION_DENIED)
+  })
+
+  it("rejects no lines, duplicate lines and same location", async () => {
+    const none = await service.create(actorId, orgId, { ...input, lines: [] })
+    expect(!none.success && none.error).toBe(Err.INVENTORY_TRANSFER_NO_LINES)
+    const dup = await service.create(actorId, orgId, { ...input, lines: [line, line] })
+    expect(!dup.success && dup.error).toBe(Err.INVENTORY_TRANSFER_DUPLICATE_LINES)
+    const same = await service.create(actorId, orgId, { ...input, lines: [{ ...line, destinationLocationId: srcLoc }] })
+    expect(!same.success && same.error).toBe(Err.INVENTORY_TRANSFER_SAME_LOCATION)
+  })
+
+  it("maps location and item failures", async () => {
+    locationFailure = "location_blocked"
+    const a = await service.create(actorId, orgId, input)
+    expect(!a.success && a.error).toBe(Err.INVENTORY_TRANSFER_LOCATION_BLOCKED)
+    locationFailure = null
+    itemFailure = "unit_not_in_collection"
+    const b = await service.create(actorId, orgId, input)
+    expect(!b.success && b.error).toBe(Err.INVENTORY_TRANSFER_UNIT_NOT_IN_COLLECTION)
+  })
+
+  it("rejects quantities that need more than 6 decimals in the base unit", async () => {
+    factor = "0.0000001"
+    const res = await service.create(actorId, orgId, input)
+    expect(!res.success && res.error).toBe(Err.INVENTORY_TRANSFER_INVALID_QUANTITY)
+  })
+
+  it("updates a draft and revalidates lines on a warehouse change", async () => {
+    const created = await service.create(actorId, orgId, input)
+    if (!created.success) throw new Error("create failed")
+    const id = created.data.id
+    const ok = await service.update(actorId, orgId, id, { description: "moved" })
+    expect(ok.success && ok.data.description).toBe("moved")
+    locationFailure = "location_not_in_warehouse"
+    const bad = await service.update(actorId, orgId, id, { destinationWarehouseId: srcWh })
+    expect(!bad.success && bad.error).toBe(Err.INVENTORY_TRANSFER_LOCATION_NOT_IN_WAREHOUSE)
+  })
+
+  it("blocks edit and delete once the transfer is not a draft", async () => {
+    const created = await service.create(actorId, orgId, input)
+    if (!created.success) throw new Error("create failed")
+    repo.headers.get(created.data.id)!.status = "IN_TRANSIT"
+    const upd = await service.update(actorId, orgId, created.data.id, { description: "x" })
+    expect(!upd.success && upd.error).toBe(Err.INVENTORY_TRANSFER_NOT_EDITABLE)
+    const del = await service.delete(actorId, orgId, created.data.id)
+    expect(!del.success && del.error).toBe(Err.INVENTORY_TRANSFER_NOT_DELETABLE)
+    const cancel = await service.cancel(actorId, orgId, created.data.id)
+    expect(!cancel.success && cancel.error).toBe(Err.INVENTORY_TRANSFER_NOT_DRAFT)
+  })
+
+  it("deletes and cancels drafts, and reports not found", async () => {
+    const a = await service.create(actorId, orgId, input)
+    const b = await service.create(actorId, orgId, input)
+    if (!a.success || !b.success) throw new Error("create failed")
+    expect((await service.delete(actorId, orgId, a.data.id)).success).toBe(true)
+    const cancelled = await service.cancel(actorId, orgId, b.data.id)
+    expect(cancelled.success && cancelled.data.status).toBe("CANCELLED")
+    const again = await service.cancel(actorId, orgId, b.data.id)
+    expect(!again.success && again.error).toBe(Err.INVENTORY_TRANSFER_ALREADY_CANCELLED)
+    const missing = await service.get(actorId, orgId, a.data.id)
+    expect(!missing.success && missing.error).toBe(Err.INVENTORY_TRANSFER_NOT_FOUND)
+  })
+})
