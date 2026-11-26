@@ -113,6 +113,14 @@ pnpm dlx shadcn@latest add <component-name> -c apps/web
 
 ---
 
+## Specs, plans, tests and tracking (read before starting a module)
+
+- Index: `docs/README.md`. Module status: `docs/features/REGISTRY.md`.
+- Each module lives in `docs/modules/<name>/` with `SPEC.md`, `IMPLEMENTATION-PLAN.md`, `PROGRESS.md`, `TEST-PLAN.md`. Resume at "Next action" in PROGRESS.md; tick tasks only with evidence.
+- Purchasing and sales build order: `docs/modules/COMMERCE-IMPLEMENTATION-PLAN.md`.
+- Tests: `docs/TESTING-PLAN.md` section 4 is the definition of done for every module. Lifecycle and monitoring: `docs/FEATURE-TRACKING.md`. Templates: `docs/templates/`.
+- Non-secret production vars belong in `apps/server/wrangler.jsonc` (a deploy overwrites dashboard-set plain vars). Secrets never go in git.
+
 ## Documentation Reference (`/docs`)
 
 Detailed architectural standards and design patterns are documented in `/docs`. Always consult these documents before implementing features:
