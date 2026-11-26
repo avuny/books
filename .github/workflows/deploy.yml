@@ -43,6 +43,9 @@ jobs:
       - run: pnpm install --frozen-lockfile
 
       # Add lint / test here once they are defined as tasks in turbo.json.
+      - name: Check wrangler vars
+        run: node scripts/check-wrangler-vars.mjs
+
       - run: pnpm turbo run typecheck build
 
   deploy:
@@ -114,3 +117,33 @@ jobs:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           # Baked into the frontend build. Use "/api" if both Workers share one domain.
           VITE_API_URL: ${{ vars.VITE_API_URL }}
+
+  # Post-deploy smoke test (docs/TESTING-PLAN.md section 6, the checks that need no login).
+  # It marks the run red when production is broken after a deploy. It cannot undo the deploy.
+  smoke:
+    name: Post-deploy smoke test
+    needs: deploy
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      API_URL: ${{ vars.SMOKE_API_URL || 'https://hono-worker-api.khaledeveloper.workers.dev' }}
+      WEB_URL: ${{ vars.SMOKE_WEB_URL || 'https://avuny-books-web.khaledeveloper.workers.dev' }}
+    steps:
+      - name: API health, web shell and CORS preflight
+        run: |
+          fail=0
+          for i in 1 2 3 4 5 6; do
+            code=$(curl -s -o /dev/null -w '%{http_code}' "$API_URL/api/health" || true)
+            [ "$code" = 200 ] && break
+            sleep 10
+          done
+          echo "API health: $code"; [ "$code" = 200 ] || { echo "::error::API /api/health is not 200"; fail=1; }
+          web=$(curl -s -o /dev/null -w '%{http_code}' "$WEB_URL/" || true)
+          echo "Web: $web"; [ "$web" = 200 ] || { echo "::error::Web origin is not 200"; fail=1; }
+          hdrs=$(curl -s -i -X OPTIONS "$API_URL/api/auth/sign-in" \
+            -H "Origin: $WEB_URL" -H "Access-Control-Request-Method: POST" \
+            -H "Access-Control-Request-Headers: content-type" | tr -d '\r')
+          echo "$hdrs" | grep -qi "^access-control-allow-origin: $WEB_URL\$" || { echo "::error::CORS preflight does not allow the web origin"; fail=1; }
+          echo "$hdrs" | grep -qi '^access-control-allow-credentials: true' || { echo "::error::CORS preflight does not allow credentials"; fail=1; }
+          exit $fail
