@@ -19,6 +19,9 @@
       "role": "الأدوار",
       "inventory_adjustment": "تسويات المخزون",
       "customer": "العملاء",
+      "purchase_order": "أوامر الشراء",
+      "purchase_shipment": "شحنات الموردين",
+      "payment_term": "شروط الدفع",
       "vendor": "الموردون",
       "*": "كل شيء"
     },
@@ -31,6 +34,9 @@
       "assign": "إسناد للأعضاء",
       "confirm": "تأكيد",
       "cancel": "إلغاء",
+      "close": "إغلاق",
+      "post": "ترحيل",
+      "reverse": "عكس",
       "*": "كل الإجراءات"
     },
     "effects": {

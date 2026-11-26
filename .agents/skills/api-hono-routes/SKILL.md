@@ -59,6 +59,18 @@ responses: {
 **Never put module errors in `rawErrorMap` that this endpoint cannot return!**
 If `responses` does not declare `404`, `rawErrorMap` MUST NOT contain any 404 error codes.
 
+### More traps (found building purchase-order; each costs several tsc rounds)
+
+- **Cast fallback.** `rawErrorMap as Record<Code | RoleErrorCode, ...>` compiles when the map has the keys of the narrow union. If tsc says "Conversion of type ... may be a mistake" (TS2352), use `rawErrorMap as unknown as Record<...>`. Same runtime, same typing result.
+- **`ok` / `fail` take one object.** `ok(dto)` is TS2345. Use `ok({ data: dto, msg })` and `fail({ error: Code.X, msg })`.
+- **Literal status keys.** `responses` keys must be literal numbers (`201`, `404`), and every `statusCode` in `rawErrorMap` must have a matching key. A shared error map reused across routes breaks this; build one `rawErrorMap` per route.
+- **Route order.** Register fixed paths (`/next-number`, `/export`) before `/{id}` routes in `hono-routes/index.ts`, or `{id}` swallows them.
+- **Validation errors are 422.** Body/query/param validation failures return 422 from the shared hook. Tests must expect 422, not 400.
+- **Registry first.** `PermissionKey` and `ActivityLogAction` come from `packages/contracts/src/modules/registry.ts`. Add the module there and rebuild contracts before writing services, or every permission string errors.
+- **Server locales.** Create `apps/server/src/api/intl/locales/<module>/{en,ar}.json` containing only `errors`, then run `pnpm --filter @avuny/books-server intl:generate` (also part of `typecheck`).
+- **Mount names are camelCase** in `routes.ts` (`/paymentTerm`, `/purchaseOrder`); `pnpm --filter @avuny/books-server routes:generate` rewrites that file from the module folders.
+- **Route tests with a mocked service** are unit tests (`pnpm exec vitest run --project unit`), need no database, and catch status-code mapping mistakes cheaply. See `purchase-order/__tests__/purchase-order.routes.test.ts`.
+
 ---
 
 ## Step 1 — `_shared.ts` (copy verbatim into the new module)

@@ -11,6 +11,9 @@ import type organizationInvitationEn from "./locales/organization-invitation/en.
 import type organizationUserEn from "./locales/organization-user/en.json"
 import type otpEn from "./locales/otp/en.json"
 import type partyEn from "./locales/party/en.json"
+import type paymentTermEn from "./locales/payment-term/en.json"
+import type purchaseOrderEn from "./locales/purchase-order/en.json"
+import type purchaseShipmentEn from "./locales/purchase-shipment/en.json"
 import type roleEn from "./locales/role/en.json"
 import type sidebarEn from "./locales/sidebar/en.json"
 import type unitEn from "./locales/unit/en.json"
@@ -32,6 +35,9 @@ type OrganizationInvitationMessages = typeof organizationInvitationEn
 type OrganizationUserMessages = typeof organizationUserEn
 type OtpMessages = typeof otpEn
 type PartyMessages = typeof partyEn
+type PaymentTermMessages = typeof paymentTermEn
+type PurchaseOrderMessages = typeof purchaseOrderEn
+type PurchaseShipmentMessages = typeof purchaseShipmentEn
 type RoleMessages = typeof roleEn
 type SidebarMessages = typeof sidebarEn
 type UnitMessages = typeof unitEn
@@ -61,6 +67,12 @@ declare module "i18next" {
       organizationUser: OrganizationUserMessages
       otp: OtpMessages
       party: PartyMessages
+      "payment-term": PaymentTermMessages
+      paymentTerm: PaymentTermMessages
+      "purchase-order": PurchaseOrderMessages
+      purchaseOrder: PurchaseOrderMessages
+      "purchase-shipment": PurchaseShipmentMessages
+      purchaseShipment: PurchaseShipmentMessages
       role: RoleMessages
       sidebar: SidebarMessages
       unit: UnitMessages

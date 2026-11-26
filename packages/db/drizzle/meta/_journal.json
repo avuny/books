@@ -155,6 +155,20 @@
       "when": 1795531044438,
       "tag": "0021_bouncy_champions",
       "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "7",
+      "when": 1795708873958,
+      "tag": "0022_purchase_orders",
+      "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "7",
+      "when": 1795711326998,
+      "tag": "0023_purchase_order_tax_discount_rates",
+      "breakpoints": true
     }
   ]
 }

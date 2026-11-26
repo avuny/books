@@ -1,0 +1,10 @@
+{
+  "errors": {
+    "PAYMENT_TERM_NOT_FOUND": "Payment term not found",
+    "PAYMENT_TERM_LIMIT_REACHED": "You have reached the maximum number of payment terms",
+    "PAYMENT_TERM_NAME_TAKEN": "A payment term with this name already exists",
+    "PAYMENT_TERM_SYSTEM_READONLY": "System payment terms cannot be changed",
+    "PAYMENT_TERM_DAYS_NOT_ALLOWED": "This calculation method does not use a number of days",
+    "PAYMENT_TERM_DAYS_REQUIRED": "Enter the number of days for this calculation method"
+  }
+}

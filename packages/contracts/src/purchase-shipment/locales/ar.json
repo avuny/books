@@ -1,0 +1,34 @@
+{
+  "errors": {
+    "PURCHASE_SHIPMENT_NOT_FOUND": "شحنة المورد غير موجودة",
+    "PURCHASE_SHIPMENT_NOT_EDITABLE": "يمكن تعديل الشحنات المسودة فقط",
+    "PURCHASE_SHIPMENT_NOT_DELETABLE": "يمكن حذف الشحنات المسودة فقط. اعكس الشحنة المرحّلة بدلًا من حذفها",
+    "PURCHASE_SHIPMENT_ALREADY_POSTED": "الشحنة مرحّلة بالفعل",
+    "PURCHASE_SHIPMENT_NOT_POSTED": "يمكن عكس الشحنات المرحّلة فقط",
+    "PURCHASE_SHIPMENT_PURCHASE_ORDER_NOT_FOUND": "أمر الشراء غير موجود",
+    "PURCHASE_SHIPMENT_PURCHASE_ORDER_NOT_OPEN": "يجب أن يكون أمر الشراء مؤكدًا ومفتوحًا لتسجيل الشحنات",
+    "PURCHASE_SHIPMENT_NO_LINES": "مطلوب سطر واحد على الأقل في الشحنة",
+    "PURCHASE_SHIPMENT_LINE_NOT_ON_ORDER": "أحد أسطر الشحنة لا يتبع أمر الشراء هذا",
+    "PURCHASE_SHIPMENT_DUPLICATE_LINES": "نفس سطر الأمر مكرر",
+    "PURCHASE_SHIPMENT_UNIT_NOT_IN_COLLECTION": "الوحدة المحددة غير مهيأة لهذا الصنف",
+    "PURCHASE_SHIPMENT_QUANTITY_EXCEEDS_UNSHIPPED": "الكمية المشحونة أكبر من الكمية المتبقية للشحن في الأمر",
+    "PURCHASE_SHIPMENT_QUANTITY_NOT_POSITIVE": "يجب أن تكون الكميات المشحونة أكبر من صفر",
+    "PURCHASE_SHIPMENT_ALREADY_RECEIVED": "تم استلام جزء من هذه الشحنة، لذلك لا يمكن عكسها",
+    "PURCHASE_SHIPMENT_PROJECTION_CONFLICT": "تغيرت كميات المخزون أثناء الترحيل. حاول مرة أخرى",
+    "PURCHASE_SHIPMENT_NUMBER_TAKEN": "تعذر تخصيص رقم للشحنة. حاول مرة أخرى"
+  },
+  "labels": {
+    "status": {
+      "DRAFT": "مسودة",
+      "POSTED": "مرحّلة",
+      "VOIDED": "معكوسة"
+    }
+  },
+  "msgs": {
+    "PURCHASE_SHIPMENT_CREATED": "تم إنشاء شحنة المورد بنجاح",
+    "PURCHASE_SHIPMENT_UPDATED": "تم تحديث شحنة المورد بنجاح",
+    "PURCHASE_SHIPMENT_DELETED": "تم حذف شحنة المورد بنجاح",
+    "PURCHASE_SHIPMENT_POSTED": "تم ترحيل الشحنة. الكميات الآن في الطريق",
+    "PURCHASE_SHIPMENT_REVERSED": "تم عكس الشحنة"
+  }
+}

@@ -79,11 +79,11 @@ pnpm dlx shadcn@latest add <component-name> -c apps/web
    - Never import `zod` directly. Always use `import { z } from "@avuny/zod"`.
    - `packages/contracts` and `packages/utils` must remain strictly runtime-agnostic (no Node, DOM, or DB dependencies).
 3. **Domain Error & Result Handling**:
-   - Backend services return `Result<T, E>` (`ok(data)` or `fail(code, message)`) from `@avuny/utils`.
-   - Server endpoints map `Result` objects using `handleResult(c, result)` from `@avuny/hono`.
+   - Backend services return `Result<T, E>` (`ok({ data, msg? })` or `fail({ error: CODE, msg })`; both take ONE object argument) from `@avuny/utils`.
+   - Server endpoints map `Result` objects using `handleResult({ c, result, successStatus, errorMap, errorTrans, moduleName })` from `@avuny/hono`.
 4. **Package-Specific AGENTS.md & Backend Architecture**:
    - Check subpackage `AGENTS.md` files (e.g. in `apps/server/`, `apps/web/`, `packages/contracts/`, `packages/db/`, `packages/hono/`) for localized package constraints.
-   - For backend modules in `apps/server`, agents must strictly follow the canonical module pattern demonstrated in `apps/server/src/api/modules/organization-invitation` and described in `apps/server/AGENTS.md`:
+   - For backend modules in `apps/server`, agents must strictly follow the canonical module pattern demonstrated in `apps/server/src/api/modules/party` (reference for routes, deps, error maps; for a draft/confirm/cancel document with lines see `inventory-adjustment`) and described in `apps/server/AGENTS.md`:
      - Explicit `deps.ts` for singleton DI wiring.
      - Closure factory routes accepting `RouteDeps` (`module-routes.types.ts`).
      - Port interfaces in `<module>.types.ts` (PermissionChecker, ActivityLog, Limits, etc.).
@@ -127,24 +127,22 @@ Detailed architectural standards and design patterns are documented in `/docs`. 
 
 | Document                                                                                  | When to Consult                     | Summary                                                                                                                                                                          |
 | ----------------------------------------------------------------------------------------- | ----------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [docs/FORMS.md](file:///Users/khaled/Dev/projects-2026-october/books/docs/FORMS.md)       | Building or modifying web forms     | Enforces 3-layer architecture: Form (`<name>-form.tsx`) → Container (`<name>.tsx`) → Route (`routes/**`). Use `@workspace/ui/blocks/form` primitives and contract schemas.       |
-| [docs/COPY.md](file:///Users/khaled/Dev/projects-2026-october/books/docs/COPY.md)         | Adding or changing user-facing text | **Zero hardcoded strings**. Text lives in `@avuny/contracts/<module>/locales/{en,ar}.json`. Containers read keys via `t()` and pass a `copy` object down into forms.             |
-| [docs/FRONTEND.md](file:///Users/khaled/Dev/projects-2026-october/books/docs/FRONTEND.md) | Writing UI components or styling    | Small, testable components with dependency injection. Strict use of semantic theme tokens (`bg-background`, `text-foreground`, `border-border`) supporting light and dark modes. |
+| [docs/FORMS.md](docs/FORMS.md)       | Building or modifying web forms     | Enforces 3-layer architecture: Form (`<name>-form.tsx`) → Container (`<name>.tsx`) → Route (`routes/**`). Use `@workspace/ui/blocks/form` primitives and contract schemas.       |
+| [docs/COPY.md](docs/COPY.md)         | Adding or changing user-facing text | **Zero hardcoded strings**. Text lives in `@avuny/contracts/<module>/locales/{en,ar}.json`. Containers read keys via `t()` and pass a `copy` object down into forms.             |
+| [docs/FRONTEND.md](docs/FRONTEND.md) | Writing UI components or styling    | Small, testable components with dependency injection. Strict use of semantic theme tokens (`bg-background`, `text-foreground`, `border-border`) supporting light and dark modes. |
 | [docs/TESTING.md](docs/TESTING.md) | Writing or running tests | Unit vs route-integration vs web-e2e: what each layer is for, the dedicated test database (same Neon HTTP driver as production, dropped and rebuilt per run), per-test isolation by fresh tenants, captured OTPs, CI. |
-| [docs/GIT.md](file:///Users/khaled/Dev/projects-2026-october/books/docs/GIT.md)           | Creating commit messages            | Conventional Commits rules, subject line conventions, and body bullet formatting.                                                                                                |
+| [docs/GIT.md](docs/GIT.md)           | Creating commit messages            | Conventional Commits rules, subject line conventions, and body bullet formatting.                                                                                                |
 # AGENTS.md — how to build modules in this monorepo
 
 Audience: AI coding agents (Claude Code, Codex, Cursor, Copilot, …).
 Read this file fully, then open the **skill** that matches your task. Skills hold copy-paste templates, **rules** are short must/never lists, the **workflow** gives the order of work.
 
-> ⚠ marks a path or command that was *inferred* from import paths, not read from the repo. Verify it once, fix it here, delete the ⚠.
-
 ## 1. Repo map
 
 | Area | Path | What lives there |
 |---|---|---|
-| Contracts (shared) | `packages/contracts/src/<module>/` ⚠ | constants, error codes, Zod schemas/DTOs, `locales/{en,ar}.json`. Imported by API **and** web as `@avuny/contracts` |
-| API modules | `apps/api/src/modules/<module>/` ⚠ | `<module>.service.ts`, `<module>.errors.ts`, `hono-routes/` (one file per endpoint) |
+| Contracts (shared) | `packages/contracts/src/<module>/` | constants, error codes, Zod schemas/DTOs, `locales/{en,ar}.json`. Imported by API **and** web as `@avuny/contracts` |
+| API modules | `apps/server/src/api/modules/<module>/` | `deps.ts`, `<module>.{service,repository,mapper,errors,error-map,permissions,types}.ts`, `hono-routes/` (one file per endpoint), `testing.ts`, `__tests__/` |
 | Web features | `apps/web/src/features/<name>-module/` | all UI for one domain: api hooks, forms, list, details, lib |
 | Web routes | `apps/web/src/routes/` | TanStack Router **file routes**; thin wrappers around features |
 | UI kit | `@workspace/ui` | `components/*` (shadcn-style), `blocks/form`, `blocks/data-table`, `lib/api-error`, `providers/*` |
@@ -192,19 +190,33 @@ Rules (read the ones touching your task, they are short): `.agents/rules/*.md`.
 10. **UI hiding is cosmetic; the server enforces permissions.** Never rely on `hasPermission` in the web alone.
 11. **RTL-safe + semantic tokens**: `ps-/pe-/ms-/me-/start/end`, `rtl:rotate-180` on directional icons; `text-foreground`, `bg-card`, `border-border` — no hard-coded colors, no `left/right`.
 12. **No hard-coded user-facing strings** — not even "coming soon" placeholders (existing `users.tsx` does this; don't copy it).
-13. **Locale interpolation uses single braces `{variable}`**, never double braces `{{variable}}`. All `en.json` and `ar.json` files in this repo must use `{name}`, `{count}`, `{from}`, etc. Double braces are rendered literally and will not be substituted at runtime.
+13. **Locale interpolation uses single braces `{variable}`**, never double braces `{{variable}}`. Contract copy is filled in by the web container (`copy.replace("{name}", value)`), not by i18next `t()` interpolation, so double braces are rendered literally. (`packages/contracts/src/party/locales.test.ts` extracts `{{x}}` placeholders, which finds nothing; its parity check is vacuous for single braces. Copy the test but match `/\{([a-zA-Z0-9_-]+)\}/g`.)
 
-## 5. Commands ⚠ (fill in once)
+## 5. Commands
+
+Run from the repo root. Full list and test layers: "Essential Commands" above and `docs/TESTING.md`.
 
 | Purpose | Command |
 |---|---|
-| Install | `<pnpm install>` |
-| Typecheck all | `<pnpm typecheck>` |
-| Lint | `<pnpm lint>` |
-| Unit tests (Vitest) | `<pnpm test>` / single file: `<pnpm vitest run path>` |
-| Regenerate API client after changing a route | `<pnpm … api:generate>` |
-| Regenerate TanStack route tree | runs with the web dev server, or `<tsr generate>` |
-| DB migrate / seed system roles | `<pnpm db:migrate>` / `<pnpm seed:roles>` (system roles are synced by `seed:roles`) |
+| Install | `pnpm install` |
+| Typecheck all | `pnpm typecheck` (on a box with under 4 GB RAM use the low-memory form below) |
+| Typecheck server only, low memory | `NODE_OPTIONS=--max-old-space-size=1400 pnpm turbo typecheck --filter=@avuny/books-server --concurrency=1` (plain `pnpm typecheck` gets OOM-killed, exit 137) |
+| Lint | `pnpm lint` |
+| Server unit tests | `pnpm --filter @avuny/books-server test` / one file: `pnpm --filter @avuny/books-server exec vitest run --project unit <path>` |
+| Contracts tests | `pnpm --filter @avuny/contracts exec vitest run` |
+| Regenerate server intl typing after adding `apps/server/src/api/intl/locales/<module>/` | `pnpm --filter @avuny/books-server intl:generate` (also runs inside `typecheck`) |
+| Regenerate DB schema barrel after adding `packages/db/src/schema/<dir>/index.ts` | `pnpm --filter @avuny/db schema:generate` |
+| New migration | build db first (`pnpm --filter @avuny/db build`), then in `packages/db`: `DATABASE_URL=postgres://u:p@localhost:5432/x npx drizzle-kit generate --name <name>`. Migrations are append-only |
+| Regenerate API client after changing a route | `pnpm openapi:generate` then `pnpm api:generate` (see the web note below) |
+| Seed system roles | permissions come from the contracts registry; the seed syncs roles |
+
+Gotchas that cost agents time:
+- `pnpm api:generate` (orval) reads `apps/server/openapi/openapi.json`. Run `pnpm openapi:generate` first. If `apps/web/src/mutator/config.ts` fails on `import.meta.env.VITE_API_URL`, export `VITE_API_URL=http://localhost:3000` for the command.
+- Contracts build (`pnpm --filter @avuny/contracts build`) regenerates `src/index.ts` and the `package.json` exports. Commit those changes; never hand-edit them.
+- A new module key in `packages/contracts/src/modules/registry.ts` is what makes `PermissionKey` (`create:purchase-order`) and `ActivityLogAction` (`purchase_order.created`) typecheck. Add it before the server code. A module with a `sidebar` entry also needs a line in `apps/server/src/api/modules/sidebar/sidebar.permission-map.ts`.
+- Server error-message files `apps/server/src/api/intl/locales/<module>/{en,ar}.json` hold only `errors`. Copy them from the contracts locale `errors` block (`jq '{errors}' packages/contracts/src/<module>/locales/en.json`).
+- Request validation failures return 422 (not 400) in this API.
+- The DB client (Neon HTTP) has no real transactions: `db.transaction` runs statements one by one without rollback (open decision D1). Never rely on atomic multi-step writes; order writes so a failure midway is recoverable, and say so in the module SPEC.
 
 ## 6. Definition of done (every PR)
 

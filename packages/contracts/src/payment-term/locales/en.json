@@ -1,0 +1,33 @@
+{
+  "errors": {
+    "PAYMENT_TERM_NOT_FOUND": "Payment term not found",
+    "PAYMENT_TERM_LIMIT_REACHED": "You have reached the maximum number of payment terms",
+    "PAYMENT_TERM_NAME_TAKEN": "A payment term with this name already exists",
+    "PAYMENT_TERM_SYSTEM_READONLY": "System payment terms cannot be changed",
+    "PAYMENT_TERM_DAYS_NOT_ALLOWED": "This calculation method does not use a number of days",
+    "PAYMENT_TERM_DAYS_REQUIRED": "Enter the number of days for this calculation method"
+  },
+  "labels": {
+    "methods": {
+      "DUE_ON_RECEIPT": "Due on receipt",
+      "NET_DAYS": "Net days after invoice date",
+      "END_OF_MONTH": "End of invoice month",
+      "END_OF_NEXT_MONTH": "End of next month",
+      "DAYS_AFTER_END_OF_MONTH": "Days after end of month"
+    },
+    "system": {
+      "DUE_ON_RECEIPT": "Due on receipt",
+      "NET_15": "Net 15",
+      "NET_30": "Net 30",
+      "NET_45": "Net 45",
+      "NET_60": "Net 60",
+      "EOM": "Due end of month",
+      "NEXT_EOM": "Due end of next month"
+    }
+  },
+  "msgs": {
+    "PAYMENT_TERMS_LISTED": "Payment terms retrieved successfully",
+    "PAYMENT_TERM_CREATED": "Payment term created successfully",
+    "PAYMENT_TERM_UPDATED": "Payment term updated successfully"
+  }
+}

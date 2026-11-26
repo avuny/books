@@ -25,6 +25,9 @@ import { organizationInvitationRoutes } from "./modules/organization-invitation/
 import { organizationUserRoutes } from "./modules/organization-user/index.js"
 import { otpRoutes } from "./modules/otp/index.js"
 import { partyRoutes } from "./modules/party/index.js"
+import { paymentTermRoutes } from "./modules/payment-term/index.js"
+import { purchaseOrderRoutes } from "./modules/purchase-order/index.js"
+import { purchaseShipmentRoutes } from "./modules/purchase-shipment/index.js"
 import { roleRoutes } from "./modules/role/index.js"
 import { sidebarRoutes } from "./modules/sidebar/index.js"
 import { stockMovementRoutes } from "./modules/stock-movement/index.js"
@@ -105,6 +108,9 @@ app.route("/organization-invitations", organizationInvitationRoutes)
 app.route("/organization-users", organizationUserRoutes)
 app.route("/otp", otpRoutes)
 app.route("/party", partyRoutes)
+app.route("/paymentTerm", paymentTermRoutes)
+app.route("/purchaseOrder", purchaseOrderRoutes)
+app.route("/purchaseShipment", purchaseShipmentRoutes)
 app.route("/roles", roleRoutes)
 app.route("/sidebar", sidebarRoutes)
 app.route("/stockMovement", stockMovementRoutes)

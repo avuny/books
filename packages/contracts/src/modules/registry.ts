@@ -163,6 +163,30 @@ export const MODULES = {
     },
     scopable: false,
   },
+  purchase_order: {
+    sidebar: {
+      group: "purchases",
+      icon: "clipboard-list",
+      path: "/purchase-orders",
+      label: { en: "Purchase orders", ar: "أوامر الشراء" },
+    },
+    actions: {
+      ...CRUD,
+      confirm: { permission: true, event: "confirmed" },
+      close: { permission: true, event: "closed" },
+      cancel: { permission: true, event: "cancelled" },
+    },
+  },
+  purchase_shipment: {
+    actions: {
+      ...CRUD,
+      post: { permission: true, event: "posted" },
+      reverse: { permission: true, event: "reversed" },
+    },
+  },
+  payment_term: {
+    actions: { ...CRUD },
+  },
   // sales_order: {
   //   sidebar: {
   //     group: "sales",
