@@ -21,6 +21,7 @@
       "inventory_transfer": "تحويلات المخزون",
       "customer": "العملاء",
       "purchase_order": "أوامر الشراء",
+      "sales_order": "أوامر البيع",
       "purchase_shipment": "شحنات الموردين",
       "purchase_receipt": "إيصالات الاستلام",
       "vendor_bill": "فواتير الموردين",

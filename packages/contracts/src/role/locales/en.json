@@ -21,6 +21,7 @@
       "inventory_transfer": "Inventory transfers",
       "customer": "Customers",
       "purchase_order": "Purchase orders",
+      "sales_order": "Sales orders",
       "purchase_shipment": "Supplier shipments",
       "purchase_receipt": "Goods receipts",
       "vendor_bill": "Vendor bills",

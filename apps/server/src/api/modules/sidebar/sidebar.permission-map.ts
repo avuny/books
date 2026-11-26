@@ -24,6 +24,7 @@ export const sidebarOptionResources = {
   customer: "customer",
   vendor: "vendor",
   purchaseOrder: "purchase-order",
+  salesOrder: "sales-order",
   vendorBill: "vendor-bill",
   vendorPayment: "vendor-payment",
   inventoryAdjustment: "inventory-adjustment",

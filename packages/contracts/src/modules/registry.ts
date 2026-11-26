@@ -177,6 +177,20 @@ export const MODULES = {
       cancel: { permission: true, event: "cancelled" },
     },
   },
+  sales_order: {
+    sidebar: {
+      group: "sales",
+      icon: "clipboard-check",
+      path: "/sales-orders",
+      label: { en: "Sales orders", ar: "أوامر البيع" },
+    },
+    actions: {
+      ...CRUD,
+      confirm: { permission: true, event: "confirmed" },
+      close: { permission: true, event: "closed" },
+      cancel: { permission: true, event: "cancelled" },
+    },
+  },
   purchase_shipment: {
     actions: {
       ...CRUD,
