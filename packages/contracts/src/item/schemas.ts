@@ -100,6 +100,9 @@ export const CreateItemSchema = z
     ),
     allowNegativeStock: z.boolean().default(false),
     reorderPoint: quantity.nullish(),
+    /** Default prices per base unit, decimals in major units. */
+    costPrice: quantity.nullish(),
+    sellingPrice: quantity.nullish(),
   })
   .refine((v) => (v.baseUnitId === undefined) !== (v.unitCollectionId === undefined), {
     message: "Provide exactly one of baseUnitId or unitCollectionId",
@@ -133,6 +136,8 @@ export const UpdateItemSchema = z
     isActive: z.boolean().optional(),
     allowNegativeStock: z.boolean().optional(),
     reorderPoint: quantity.nullable().optional(),
+    costPrice: quantity.nullable().optional(),
+    sellingPrice: quantity.nullable().optional(),
   })
   .refine((v) => Object.values(v).some((x) => x !== undefined), {
     message: "Provide at least one field to update",
@@ -164,6 +169,8 @@ export const ItemDtoSchema = z.object({
   isActive: z.boolean(),
   allowNegativeStock: z.boolean(),
   reorderPoint: z.string().nullable(),
+  costPrice: z.string().nullable(),
+  sellingPrice: z.string().nullable(),
   createdAt: timestamp,
   updatedAt: timestamp,
 })

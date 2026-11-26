@@ -27,6 +27,8 @@ export type ItemFormCopy = {
   valuationMethod: FieldCopy
   allowNegativeStock: FieldCopy
   reorderPoint: FieldCopy
+  costPrice: FieldCopy
+  sellingPrice: FieldCopy
   isActive: FieldCopy
   submitLabel: string
   submittingLabel: string

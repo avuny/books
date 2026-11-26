@@ -3,6 +3,7 @@ import {
   inventoryCostLayers,
   inventoryItemBatches,
   inventoryItems,
+  items,
   stockMovementLines,
   type Tx,
 } from "@avuny/db"
@@ -14,9 +15,10 @@ import { createInventoryProjection } from "../inventory-projection/index.js"
 import { itemUnitAdapter, getPurchaseOrderRepository, locationAdapter } from "../purchase-order/deps.js"
 import { permissionChecker } from "../role/index.js"
 import { stockMovementService } from "../stock-movement/index.js"
+import { batchService } from "../batch/index.js"
 import { createPurchaseReceiptRepository } from "./purchase-receipt.repository.js"
 import { createPurchaseReceiptService, type PurchaseReceiptService } from "./purchase-receipt.service.js"
-import type { CostLayerPort, PurchaseReceiptRepository } from "./purchase-receipt.types.js"
+import type { CostLayerPort, PurchaseReceiptRepository, ReceiptBatchPort } from "./purchase-receipt.types.js"
 
 let _repo: PurchaseReceiptRepository | undefined
 let _service: PurchaseReceiptService | undefined
@@ -96,6 +98,26 @@ export const costLayerAdapter: CostLayerPort = {
   },
 }
 
+/** Creates (or reuses) the batch of one receipt line for batch-tracked items. Expiry comes from the item's default shelf life. */
+export const receiptBatchAdapter: ReceiptBatchPort = {
+  async resolve(orgId, input, tx?: Tx) {
+    const [row] = await (tx ?? db)
+      .select({ tracked: items.isBatchTracked, expiry: items.isExpiryTracked })
+      .from(items)
+      .where(and(eq(items.orgId, orgId), eq(items.id, input.itemId)))
+      .limit(1)
+    if (!row?.tracked) return null
+    const ensured = await batchService.ensureBatches(
+      orgId,
+      input.itemId,
+      [{ number: input.number, manufacturedOn: row.expiry ? input.manufacturedOn : null }],
+      tx
+    )
+    if (!ensured.success) throw new Error("Could not create the receipt batch")
+    return ensured.data[0]?.id ?? null
+  },
+}
+
 export function getPurchaseReceiptService(): PurchaseReceiptService {
   return (_service ??= createPurchaseReceiptService({
     repository: getPurchaseReceiptRepository(),
@@ -104,6 +126,7 @@ export function getPurchaseReceiptService(): PurchaseReceiptService {
     locations: locationAdapter,
     stockMovement: stockMovementService,
     costing: costLayerAdapter,
+    batches: receiptBatchAdapter,
     accounting: accountingService as any,
     projection: createInventoryProjection({ db }),
     permissions: permissionChecker,

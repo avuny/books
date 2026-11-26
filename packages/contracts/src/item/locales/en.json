@@ -173,6 +173,16 @@
           "placeholder": "YYYY-MM-DD"
         }
       }
+    },
+    "costPrice": {
+      "label": "Cost price",
+      "placeholder": "e.g. 12.50",
+      "description": "Default purchase price per base unit. Prefilled on purchase orders, editable there. Optional."
+    },
+    "sellingPrice": {
+      "label": "Selling price",
+      "placeholder": "e.g. 15.00",
+      "description": "Default selling price per base unit. Prefilled on sales orders. Optional."
     }
   },
   "actions": {

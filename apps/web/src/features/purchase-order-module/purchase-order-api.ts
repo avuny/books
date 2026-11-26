@@ -193,6 +193,8 @@ import {
   useUpdatePaymentTerm,
   useUpdatePurchaseOrder,
   useListWarehouseLocationOptions,
+  listWarehouseLocationOptions,
+  getListWarehouseLocationOptionsQueryKey,
   useListWarehouseOptions,
   usePreviewPurchaseOrderNumber,
 } from "@/api"
@@ -249,6 +251,22 @@ export function useStockLocationOptions(orgId: string, warehouseId?: string) {
   )
 }
 
+/** Async picker source for stockable locations of one warehouse (search and paging like the item picker). */
+export function useLocationSource(orgId: string, warehouseId?: string) {
+  return useCursorOptions({
+    queryKey: getListWarehouseLocationOptionsQueryKey(orgId, { warehouseId: warehouseId || undefined }),
+    fetchPage: async ({ cursor, search, limit, signal }) =>
+      (
+        await listWarehouseLocationOptions(
+          orgId,
+          { warehouseId: warehouseId || undefined, stockableOnly: "true" as never, cursor, search, limit },
+          { signal }
+        )
+      ).data,
+    enabled: Boolean(orgId && warehouseId),
+  })
+}
+
 export function useItemSource(orgId: string) {
   return useCursorOptions({
     queryKey: getListItemOptionsQueryKey(orgId),
@@ -258,18 +276,24 @@ export function useItemSource(orgId: string) {
   })
 }
 
+/** "12.500000" -> "12.5", "12.000000" -> "12". */
+function trimDecimal(v: string): string {
+  return v.includes(".") ? v.replace(/0+$/, "").replace(/\.$/, "") : v
+}
+
 /** Units an item can be ordered in: its unit collection, plus the base unit. */
 export async function fetchItemUnits(
   orgId: string,
   itemId: string
-): Promise<{ baseUnitId: string; units: { value: string; label: string }[] }> {
+): Promise<{ baseUnitId: string; units: { value: string; label: string }[]; costPrice: string | null }> {
   try {
     const item = (await getItem(orgId, itemId)).data
     const base = {
       value: item.baseUnit.id,
       label: `${item.baseUnit.name} (${item.baseUnit.symbol})`,
     }
-    if (!item.unitCollectionId) return { baseUnitId: item.baseUnit.id, units: [base] }
+    const costPrice = item.costPrice ? trimDecimal(item.costPrice) : null
+    if (!item.unitCollectionId) return { baseUnitId: item.baseUnit.id, units: [base], costPrice }
     const collection = (await getUnitCollection(orgId, item.unitCollectionId)).data
     const units = (collection.units ?? []).map((u: { id: string; name: string; symbol: string }) => ({
       value: u.id,
@@ -277,10 +301,11 @@ export async function fetchItemUnits(
     }))
     return {
       baseUnitId: item.baseUnit.id,
+      costPrice,
       units: units.some((u: { value: string }) => u.value === item.baseUnit.id) ? units : [base, ...units],
     }
   } catch {
-    return { baseUnitId: "", units: [] }
+    return { baseUnitId: "", units: [], costPrice: null }
   }
 }
 

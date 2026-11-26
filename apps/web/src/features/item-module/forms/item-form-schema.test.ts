@@ -45,6 +45,8 @@ const item: ItemDto = {
   inventoryValuationMethod: "fifo",
   isActive: true,
   allowNegativeStock: false,
+  costPrice: null,
+  sellingPrice: null,
   reorderPoint: "20.000000",
   createdAt: "2026-01-01T00:00:00Z",
   updatedAt: "2026-01-01T00:00:00Z",
@@ -94,6 +96,14 @@ describe("CreateItemFormSchema", () => {
     expect(res.success).toBe(false)
   })
 
+  it("expiry tracking only needs inventory tracking (batches are implied)", () => {
+    const base = { ...filled, baseUnitId: uuid(2), isInventoryTracked: true, isBatchTracked: false, isExpiryTracked: true }
+    const res = CreateItemFormSchema.safeParse(base)
+    expect(res.success).toBe(true)
+    if (res.success) expect(toCreateItemInput(res.data).isBatchTracked).toBe(true)
+    expect(CreateItemFormSchema.safeParse({ ...base, isInventoryTracked: false }).success).toBe(false)
+  })
+
   it("reorder point: blank or a numeric(18, 6) string", () => {
     const base = { ...filled, baseUnitId: uuid(2) }
     expect(
@@ -120,6 +130,8 @@ describe("form values -> API input", () => {
       description: null,
       baseUnitId: uuid(2),
       reorderPoint: null,
+      costPrice: null,
+      sellingPrice: null,
     })
     expect(input).not.toHaveProperty("unitCollectionId")
 

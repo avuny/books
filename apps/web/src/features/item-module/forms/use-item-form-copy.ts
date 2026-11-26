@@ -68,6 +68,16 @@ export function useItemFormCopy(mode: "create" | "update"): ItemFormCopy {
       placeholder: t("fields.reorderPoint.placeholder"),
       description: t("fields.reorderPoint.description"),
     },
+    costPrice: {
+      label: t("fields.costPrice.label"),
+      placeholder: t("fields.costPrice.placeholder"),
+      description: t("fields.costPrice.description"),
+    },
+    sellingPrice: {
+      label: t("fields.sellingPrice.label"),
+      placeholder: t("fields.sellingPrice.placeholder"),
+      description: t("fields.sellingPrice.description"),
+    },
     isActive: { label: t("fields.isActive.label") },
     submitLabel: t(`${mode}.submitLabel`),
     submittingLabel: t(`${mode}.submittingLabel`),

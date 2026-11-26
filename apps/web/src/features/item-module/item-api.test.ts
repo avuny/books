@@ -29,6 +29,8 @@ const raw = {
   inventoryValuationMethod: "fifo" as const,
   isActive: true,
   allowNegativeStock: false,
+  costPrice: null,
+  sellingPrice: null,
   createdAt: "2026-01-01T00:00:00Z",
   updatedAt: "2026-01-01T00:00:00Z",
 }

@@ -46,6 +46,14 @@ const ItemFormShape = z.object({
     .string()
     .trim()
     .refine((v) => v === "" || UNIT_QUANTITY_PATTERN.test(v), "Invalid number"),
+  costPrice: z
+    .string()
+    .trim()
+    .refine((v) => v === "" || UNIT_QUANTITY_PATTERN.test(v), "Invalid number"),
+  sellingPrice: z
+    .string()
+    .trim()
+    .refine((v) => v === "" || UNIT_QUANTITY_PATTERN.test(v), "Invalid number"),
   isActive: z.boolean(),
   openingStockPostedAt: z.string().trim().optional(),
   openingStockLines: z
@@ -82,7 +90,7 @@ const expiryNeedsBatchAndTracking = (v: {
   isExpiryTracked: boolean
   isBatchTracked: boolean
   isInventoryTracked: boolean
-}) => !(v.isExpiryTracked && (!v.isBatchTracked || !v.isInventoryTracked))
+}) => !(v.isExpiryTracked && !v.isInventoryTracked)
 
 const shelfLifePairCheck = (v: {
   defaultShelfLifeValue?: number
@@ -100,7 +108,7 @@ export const CreateItemFormSchema = ItemFormShape.refine(batchNeedsTracking, {
 })
   .refine(expiryNeedsBatchAndTracking, {
     message:
-      "Expiry tracking requires both inventory tracking and batch tracking",
+      "Expiry tracking requires inventory tracking",
     path: ["isExpiryTracked"],
   })
   .refine(shelfLifePairCheck, {
@@ -150,7 +158,7 @@ export const UpdateItemFormSchema = ItemFormShape.refine(batchNeedsTracking, {
 })
   .refine(expiryNeedsBatchAndTracking, {
     message:
-      "Expiry tracking requires both inventory tracking and batch tracking",
+      "Expiry tracking requires inventory tracking",
     path: ["isExpiryTracked"],
   })
   .refine(shelfLifePairCheck, {
@@ -190,6 +198,8 @@ export function getCreateItemDefaults(
     inventoryValuationMethod: DEFAULT_INVENTORY_VALUATION_METHOD,
     allowNegativeStock: false,
     reorderPoint: "",
+    costPrice: "",
+    sellingPrice: "",
     isActive: true,
     openingStockPostedAt: "",
     openingStockLines: [],
@@ -215,6 +225,8 @@ export function getUpdateItemDefaults(item: ItemDto): UpdateItemFormInput {
     inventoryValuationMethod: item.inventoryValuationMethod,
     allowNegativeStock: item.allowNegativeStock,
     reorderPoint: item.reorderPoint ? trimQuantity(item.reorderPoint) : "",
+    costPrice: item.costPrice ? trimQuantity(item.costPrice) : "",
+    sellingPrice: item.sellingPrice ? trimQuantity(item.sellingPrice) : "",
     isActive: item.isActive,
   }
 }
@@ -252,7 +264,8 @@ export function toCreateItemInput(
     canAssembled: values.canAssembled,
     isReturnable: values.isReturnable,
     isInventoryTracked: values.isInventoryTracked,
-    isBatchTracked: values.isBatchTracked,
+    // The batch checkbox is gone from the form: inventory-tracked items are always batch tracked.
+    isBatchTracked: values.isInventoryTracked,
     isExpiryTracked: values.isExpiryTracked,
     expirySettings:
       values.isExpiryTracked &&
@@ -266,6 +279,8 @@ export function toCreateItemInput(
     inventoryValuationMethod: values.inventoryValuationMethod,
     allowNegativeStock: values.allowNegativeStock,
     reorderPoint: values.reorderPoint || null,
+    costPrice: values.costPrice || null,
+    sellingPrice: values.sellingPrice || null,
     openingStock:
       validLines.length > 0
         ? {
@@ -310,5 +325,7 @@ export function toUpdateItemInput(
     isActive: values.isActive,
     allowNegativeStock: values.allowNegativeStock,
     reorderPoint: values.reorderPoint || null,
+    costPrice: values.costPrice || null,
+    sellingPrice: values.sellingPrice || null,
   }
 }

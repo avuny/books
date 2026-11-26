@@ -174,6 +174,26 @@ export function ItemFields({
 
       <InputField
         control={control}
+        name="costPrice"
+        copy={copy.costPrice}
+        type="text"
+        inputMode="decimal"
+        autoComplete="off"
+        disabled={disabled}
+      />
+
+      <InputField
+        control={control}
+        name="sellingPrice"
+        copy={copy.sellingPrice}
+        type="text"
+        inputMode="decimal"
+        autoComplete="off"
+        disabled={disabled}
+      />
+
+      <InputField
+        control={control}
         name="reorderPoint"
         copy={copy.reorderPoint}
         type="text"
