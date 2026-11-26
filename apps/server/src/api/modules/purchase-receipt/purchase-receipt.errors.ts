@@ -22,5 +22,6 @@ export const purchaseReceiptErrorsHttpMap = {
   PURCHASE_RECEIPT_STOCK_ALREADY_USED: { statusCode: 409, responseMessage: "The received stock was already used, so the receipt cannot be reversed" },
   PURCHASE_RECEIPT_POSTING_FAILED: { statusCode: 409, responseMessage: "Posting the receipt to stock or accounting failed" },
   PURCHASE_RECEIPT_PROJECTION_CONFLICT: { statusCode: 409, responseMessage: "Stock quantities changed while posting. Please try again" },
+  PURCHASE_RECEIPT_ALREADY_BILLED: { statusCode: 409, responseMessage: "The receipt has a posted supplier bill. Reverse the bill first" },
   PURCHASE_RECEIPT_NUMBER_TAKEN: { statusCode: 409, responseMessage: "Could not allocate a receipt number. Please try again" },
 } as const satisfies Record<PurchaseReceiptErrorCode, ErrorMeta>

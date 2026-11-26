@@ -131,8 +131,8 @@ export const PurchaseReceiptDtoSchema = z.object({
   totalValue: z.string(),
   stockMovementId: id.nullable(),
   journalEntryId: id.nullable(),
-  /** Derived until the AP module exists: a posted receipt is always awaiting its supplier bill. */
-  billStatus: z.enum(["NOT_APPLICABLE", "AWAITING_BILL"]),
+  /** Derived from the posted vendor bills that match this receipt's lines. */
+  billStatus: z.enum(["NOT_APPLICABLE", "AWAITING_BILL", "PARTIALLY_BILLED", "BILLED"]),
   postedAt: timestamp.nullable(),
   postedBy: id.nullable(),
   reversedAt: timestamp.nullable(),

@@ -1,4 +1,4 @@
-import type { PurchaseReceiptDto, PurchaseReceiptLineDto } from "@avuny/contracts"
+import { deriveReceiptBillStatus, type PurchaseReceiptDto, PurchaseReceiptLineDto } from "@avuny/contracts"
 import type { PurchaseReceiptDetailRow, PurchaseReceiptLineDetailRow } from "./purchase-receipt.types.js"
 
 const toLineDto = (l: PurchaseReceiptLineDetailRow): PurchaseReceiptLineDto => ({
@@ -46,8 +46,10 @@ export const toPurchaseReceiptDto = (
   totalValue: String(r.totalValue),
   stockMovementId: r.stockMovementId ?? null,
   journalEntryId: r.journalEntryId ?? null,
-  // No AP module yet: every posted receipt is awaiting its supplier bill.
-  billStatus: r.status === "POSTED" ? "AWAITING_BILL" : "NOT_APPLICABLE",
+  billStatus: deriveReceiptBillStatus(
+    r.status,
+    lines.map((l) => ({ acceptedBaseQty: l.acceptedBaseQty, billedBaseQty: l.billedBaseQty ?? "0" }))
+  ),
   postedAt: r.postedAt?.toISOString() ?? null,
   postedBy: r.postedBy ?? null,
   reversedAt: r.reversedAt?.toISOString() ?? null,

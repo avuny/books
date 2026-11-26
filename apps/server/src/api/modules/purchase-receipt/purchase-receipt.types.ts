@@ -30,6 +30,8 @@ export interface PurchaseReceiptLineDetailRow extends PurchaseReceiptLine {
   itemName?: string | null
   unitSymbol?: string | null
   locationName?: string | null
+  /** Base quantity billed on posted vendor bills. */
+  billedBaseQty?: string
 }
 
 export type NewReceiptLine = Omit<NewPurchaseReceiptLine, "orgId" | "id" | "purchaseReceiptId">
@@ -60,6 +62,8 @@ export interface PurchaseReceiptRepository {
     tx?: Tx
   ): Promise<PurchaseReceipt | null>
   replaceLines(orgId: string, id: string, lines: readonly NewReceiptLine[], tx?: Tx): Promise<void>
+  /** True when a posted vendor bill bills any line of this receipt. */
+  hasPostedBills(orgId: string, id: string, tx?: Tx): Promise<boolean>
   /** Records the batch a posted line went into (created automatically when the item is batch tracked). */
   setLineBatch(orgId: string, lineId: string, batchId: string, tx?: Tx): Promise<void>
   deleteById(orgId: string, id: string, tx?: Tx): Promise<void>

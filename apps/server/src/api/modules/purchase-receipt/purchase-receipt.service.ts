@@ -433,6 +433,7 @@ export function createPurchaseReceiptService(deps: PurchaseReceiptServiceDeps) {
           const current = await repo.findAggregate(orgId, id, tx)
           if (!current) throw new PostingAbort(Err.PURCHASE_RECEIPT_NOT_FOUND)
           if (current.row.status !== "POSTED") throw new PostingAbort(Err.PURCHASE_RECEIPT_NOT_POSTED)
+          if (await repo.hasPostedBills(orgId, id, tx)) throw new PostingAbort(Err.PURCHASE_RECEIPT_ALREADY_BILLED)
 
           const order = await deps.orders.findAggregate(orgId, current.row.purchaseOrderId, tx)
           if (!order) throw new PostingAbort(Err.PURCHASE_RECEIPT_PURCHASE_ORDER_NOT_FOUND)

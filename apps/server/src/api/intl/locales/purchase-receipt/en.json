@@ -20,6 +20,58 @@
     "PURCHASE_RECEIPT_STOCK_ALREADY_USED": "The received stock has already been used, so this receipt cannot be reversed",
     "PURCHASE_RECEIPT_POSTING_FAILED": "Posting the receipt failed. Nothing was changed. Please try again",
     "PURCHASE_RECEIPT_PROJECTION_CONFLICT": "Stock quantities changed while posting. Please try again",
+    "PURCHASE_RECEIPT_ALREADY_BILLED": "The receipt has a posted supplier bill. Reverse the bill first",
     "PURCHASE_RECEIPT_NUMBER_TAKEN": "Could not allocate a receipt number. Please try again"
+  },
+  "labels": {
+    "status": {
+      "DRAFT": "Draft",
+      "POSTED": "Posted",
+      "REVERSED": "Reversed"
+    },
+    "billStatus": {
+      "NOT_APPLICABLE": "Not applicable",
+      "AWAITING_BILL": "Awaiting supplier bill",
+      "PARTIALLY_BILLED": "Partly billed",
+      "BILLED": "Billed"
+    }
+  },
+  "msgs": {
+    "PURCHASE_RECEIPT_CREATED": "Purchase receipt created successfully",
+    "PURCHASE_RECEIPT_UPDATED": "Purchase receipt updated successfully",
+    "PURCHASE_RECEIPT_DELETED": "Purchase receipt deleted successfully",
+    "PURCHASE_RECEIPT_POSTED": "Receipt posted. Accepted goods are now on hand",
+    "PURCHASE_RECEIPT_REVERSED": "Receipt reversed"
+  },
+  "ui": {
+    "title": "Goods receipts",
+    "new": "New receipt",
+    "none": "No receipts yet.",
+    "number": "Receipt",
+    "date": "Date",
+    "reference": "Supplier delivery reference",
+    "notes": "Notes",
+    "status": "Status",
+    "bill": "Bill",
+    "value": "Value",
+    "post": "Post",
+    "reverse": "Reverse",
+    "cancel": "Cancel",
+    "create": "Create receipt",
+    "creating": "Creating...",
+    "reverseTitle": "Reverse receipt",
+    "reverseDescription": "This takes the received goods back out of stock and reverses the journal. It fails if the stock was already used.",
+    "reason": "Reason",
+    "noOpenLines": "Enter what arrived for each line. Leave a line empty to skip it.",
+    "item": "Item",
+    "inTransit": "In transit",
+    "unshipped": "Not shipped",
+    "received": "Received",
+    "rejected": "Rejected",
+    "rejectionReason": "Rejection reason",
+    "expiryDate": "Expiry date (expiry-tracked items)",
+    "direct": "Not shipped yet (direct receipt)",
+    "invalidQty": "Check the quantities: received must be above zero and rejected cannot exceed received.",
+    "reasonRequired": "Enter a reason for rejected goods."
   }
 }

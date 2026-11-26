@@ -42,6 +42,10 @@ class InMemoryReceiptRepository implements PurchaseReceiptRepository {
     const row = this.receipts.find((s) => s.id === id)
     return row ? { row, lines: this.lines.filter((l) => l.purchaseReceiptId === id) } : null
   }
+  billed = false
+  async hasPostedBills() {
+    return this.billed
+  }
   async findDetail(o: string, id: string) {
     const a = await this.findAggregate(o, id)
     return a ? { row: { ...a.row, purchaseOrderNumber: "PO-000001" }, lines: a.lines } : null
@@ -289,6 +293,16 @@ describe("PurchaseReceiptService", () => {
     expect(orders.lines[0]).toMatchObject({ receivedBaseQty: "0", acceptedBaseQty: "0" })
     expect(orders.orders[0]!.status).toBe("IN_TRANSIT")
     expect(projection.calls.flat()[0]).toMatchObject({ inTransitDelta: "4" })
+  })
+
+  it("refuses to reverse a receipt that has a posted supplier bill", async () => {
+    shipped("10")
+    const r = await newReceipt()
+    await service().post(actorId, orgId, r.id)
+    receipts.billed = true
+    const res = await service().reverse(actorId, orgId, r.id, { reason: "Wrong delivery" })
+    expect(!res.success && res.error).toBe("PURCHASE_RECEIPT_ALREADY_BILLED")
+    expect(reversedMovements).toEqual([])
   })
 
   it("refuses to reverse when the received stock was already used", async () => {

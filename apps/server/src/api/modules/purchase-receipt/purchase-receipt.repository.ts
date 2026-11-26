@@ -5,6 +5,8 @@ import {
   purchaseReceiptLines,
   purchaseReceipts,
   units,
+  vendorBillLines,
+  vendorBills,
   warehouseLocations,
   type DB,
   type Tx,
@@ -27,7 +29,13 @@ export function createPurchaseReceiptRepository({ db }: { db: DB }): PurchaseRec
 
   const detailLines = (exec: DB | Tx, orgId: string, where: ReturnType<typeof and>) =>
     exec
-      .select({ line: purchaseReceiptLines, itemName: items.name, unitSymbol: units.symbol, locationName: warehouseLocations.name })
+      .select({
+        line: purchaseReceiptLines,
+        itemName: items.name,
+        unitSymbol: units.symbol,
+        locationName: warehouseLocations.name,
+        billedBaseQty: sql<string>`coalesce((select sum(vbl.billed_base_qty) from ${vendorBillLines} vbl join ${vendorBills} vb on vb.org_id = vbl.org_id and vb.id = vbl.vendor_bill_id where vbl.org_id = ${purchaseReceiptLines.orgId} and vbl.purchase_receipt_line_id = ${purchaseReceiptLines.id} and vb.status = 'POSTED'), 0)::text`,
+      })
       .from(purchaseReceiptLines)
       .leftJoin(items, and(eq(items.orgId, purchaseReceiptLines.orgId), eq(items.id, purchaseReceiptLines.itemId)))
       .leftJoin(units, eq(units.id, purchaseReceiptLines.unitId))
@@ -97,7 +105,7 @@ export function createPurchaseReceiptRepository({ db }: { db: DB }): PurchaseRec
       const lines = await detailLines(exec, orgId, eq(purchaseReceiptLines.purchaseReceiptId, id))
       return {
         row: { ...head.receipt, purchaseOrderNumber: head.purchaseOrderNumber },
-        lines: lines.map((r) => ({ ...r.line, itemName: r.itemName, unitSymbol: r.unitSymbol, locationName: r.locationName })),
+        lines: lines.map((r) => ({ ...r.line, itemName: r.itemName, unitSymbol: r.unitSymbol, locationName: r.locationName, billedBaseQty: r.billedBaseQty })),
       }
     },
 
@@ -116,7 +124,7 @@ export function createPurchaseReceiptRepository({ db }: { db: DB }): PurchaseRec
         const lines = await detailLines(db, orgId, eq(purchaseReceiptLines.purchaseReceiptId, h.receipt.id))
         out.push({
           row: { ...h.receipt, purchaseOrderNumber: h.purchaseOrderNumber },
-          lines: lines.map((r) => ({ ...r.line, itemName: r.itemName, unitSymbol: r.unitSymbol, locationName: r.locationName })),
+          lines: lines.map((r) => ({ ...r.line, itemName: r.itemName, unitSymbol: r.unitSymbol, locationName: r.locationName, billedBaseQty: r.billedBaseQty })),
         })
       }
       return out
@@ -137,6 +145,15 @@ export function createPurchaseReceiptRepository({ db }: { db: DB }): PurchaseRec
         .delete(purchaseReceiptLines)
         .where(and(eq(purchaseReceiptLines.orgId, orgId), eq(purchaseReceiptLines.purchaseReceiptId, id)))
       await insertLines(exec, orgId, id, lines)
+    },
+
+    async hasPostedBills(orgId, id, tx) {
+      const [r] = await ex(tx)
+        .select({ n: sql<number>`count(*)::int` })
+        .from(vendorBillLines)
+        .innerJoin(vendorBills, and(eq(vendorBills.orgId, vendorBillLines.orgId), eq(vendorBills.id, vendorBillLines.vendorBillId)))
+        .where(and(eq(vendorBillLines.orgId, orgId), eq(vendorBillLines.purchaseReceiptId, id), eq(vendorBills.status, "POSTED")))
+      return (r?.n ?? 0) > 0
     },
 
     async setLineBatch(orgId, lineId, batchId, tx) {
