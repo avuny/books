@@ -82,6 +82,7 @@ jobs:
             echo "::warning::PRODUCTION_DATABASE_URL is not set: skipping migrate and seed. Run them by hand."
             exit 0
           fi
+          pnpm --filter @avuny/contracts build
           pnpm --filter @avuny/db build
           pnpm --filter @avuny/db db:migrate
           pnpm seed
