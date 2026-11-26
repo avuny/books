@@ -65,6 +65,27 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
+      # Schema first, so the new API never runs against old tables. Skipped (with a notice) until the
+      # PRODUCTION_DATABASE_URL secret exists in the "production" environment. Both steps are idempotent.
+      - name: Migrate database and sync seed data
+        env:
+          DATABASE_URL: ${{ secrets.PRODUCTION_DATABASE_URL }}
+          # The seed loads the API config, which validates these; they are not used by the seed itself.
+          ACCESS_TOKEN_SECRET: ci-seed-placeholder-secret-0000000000
+          VERIFICATION_TOKEN_SECRET: ci-seed-placeholder-secret-0000000000
+          OTP_SECRET: ci-seed-placeholder-secret-0000000000
+          AUDIT_HMAC_SECRET: ci-seed-placeholder-secret-0000000000
+          RESEND_API_KEY: ci-seed-placeholder
+          EMAIL_FROM: ci@example.com
+        run: |
+          if [ -z "$DATABASE_URL" ]; then
+            echo "::warning::PRODUCTION_DATABASE_URL is not set: skipping migrate and seed. Run them by hand."
+            exit 0
+          fi
+          pnpm --filter @avuny/db build
+          pnpm --filter @avuny/db db:migrate
+          pnpm seed
+
       # API first, so the web app never goes live pointing at an API that isn't there.
       - name: Deploy API (Worker)
         run: pnpm turbo run deploy --filter="${{ env.API_PACKAGE }}"
