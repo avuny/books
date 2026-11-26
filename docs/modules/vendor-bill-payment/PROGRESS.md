@@ -23,8 +23,8 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done · `[!]` blocked · `[-]` 
 
 | Phase | Title | Gate | Status |
 |---|---|---|---|
-| 0 | Discovery and decisions | G0 | not started |
-| 1 | Build | G1 | not started |
+| 0 | Discovery and decisions | G0 | done 2026-11-26 |
+| 1 | Build | G1 | in progress: M1 (vendor bill backend) done, M2 payment next |
 | 2 | Web and copy | G2 | not started |
 | 3 | Hardening and acceptance | G3 | not started |
 
@@ -37,7 +37,11 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done · `[!]` blocked · `[-]` 
 | D3 | Cash/bank account on a payment is chosen by method (cash or bank), not by a free ledger account id | closed (deviation from SPEC 7 `cashBankAccountId`) | The accounting event resolves the account from the method through the org's account settings. A per-payment account choice needs a new event field; deferred, tracked as a follow-up. 2026-11-26 |
 | D4 | Due date = existing `computeDueDate(invoiceDate, term)` in `packages/contracts/src/payment-term/rules.ts`; the bill stores term snapshots | closed | P1-02 is reuse only. 2026-11-26 |
 | D5 | Money is integer minor units (bigint in DB, strings in contracts), rates in basis points | closed | Same as PO and receipt. 2026-11-26 |
-| D6 | Receipt `billStatus` AWAITING_BILL moves to PARTIALLY_BILLED / BILLED from the sum of posted bill allocations per receipt line | open, build in M1 | Derived, not toggled. |
+| D6 | Receipt `billStatus` AWAITING_BILL moves to PARTIALLY_BILLED / BILLED from the posted billed quantity per receipt line | closed (M1) | Derived in the receipt mapper from posted bill lines, never stored. Reversing a receipt with a posted bill is blocked (PURCHASE_RECEIPT_ALREADY_BILLED). |
+| D7 | M1 bills goods lines matched to receipt lines only; no free-form expense/service lines | closed (deviation from SPEC 9.2) | The existing `supplier_invoice` event has no expense account. Expense bills need a new accounting event. Follow-up. |
+| D8 | A bill line references one receipt line directly; no `vendor_bill_line_receipt_allocations` table | closed (deviation from SPEC 9.2) | One line to one receipt line makes the allocation table redundant. A line can bill part of a receipt line; several bills can bill the same line. |
+| D9 | Bill line carries `netAmountMinor` as printed on the supplier invoice, not unit price x qty | closed | Avoids rounding differences with the supplier's paper. Variance = invoiced net - received value (GRNI), posted by the `supplier_invoice` event. |
+| D10 | Duplicate supplier invoice number is blocked per supplier among non-reversed bills (partial unique index) | closed | Drafts count, so a clash shows up at entry time. |
 
 ## Deviations
 
@@ -47,3 +51,8 @@ None.
 
 | Date | Task | Command | Result |
 |---|---|---|---|
+
+### M1 log (2026-11-26)
+
+Contracts (`vendor-bill`, en/ar, permissions via registry), schema `vendor_bills` + `vendor_bill_lines` (migration 0027, also adds a unique (org_id, id) on `purchase_receipt_lines` for the composite FK), server module with 8 routes (`/vendorBill/organizations/{orgId}/vendor-bills[...]`: create, create from receipt, list, get, update, delete, post, reverse), service unit tests (8), route integration test (CI only), receipt `billStatus` derivation and reverse guard.
+Not yet done: web screens (M3), payments and outstanding balance (M2), reverse guard when payments exist (M2), AP aging and reconciliation (M4), production smoke (M4).
