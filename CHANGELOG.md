@@ -1,6 +1,8 @@
 # Changelog
 
 ## [Unreleased]
+
+## [0.2.0] - 2026-11-26
 ### Added
 - Purchase order module: purchase orders with per-line discount and tax rates, supplier shipments (create, post, reverse), payment terms, English and Arabic UI
 - SaaS monetization specs: plan, subscription, payment, billing, feature-gate modules, phased implementation plan
