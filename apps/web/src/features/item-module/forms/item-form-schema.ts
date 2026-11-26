@@ -24,7 +24,7 @@ const optionalId = z.preprocess(blankToUndefined, z.string().uuid().optional())
 const ItemFormShape = z.object({
   name: z.string().trim().min(ITEM_NAME_MIN_LENGTH).max(ITEM_NAME_MAX_LENGTH),
   description: z.string().trim().max(ITEM_DESCRIPTION_MAX_LENGTH),
-  categoryId: z.string().uuid(),
+  categoryId: z.string().uuid("Choose a category"),
   baseUnitId: optionalId,
   unitCollectionId: optionalId,
   canAssembled: z.boolean(),
