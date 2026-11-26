@@ -17,7 +17,13 @@ export default function DashboardButton({
 }: DashboardButtonProps) {
   if (isLoading) {
     return (
-      <Button variant="outline" size="icon" className="cursor-pointer" disabled>
+      <Button
+        variant="outline"
+        size="icon"
+        className="cursor-pointer"
+        aria-label="Loading dashboard"
+        disabled
+      >
         <Loading />
       </Button>
     )
@@ -33,8 +39,9 @@ export default function DashboardButton({
       variant="outline"
       size="icon"
       className="cursor-pointer"
+      aria-label="Dashboard"
     >
-      <BriefcaseBusinessIcon />
+      <BriefcaseBusinessIcon aria-hidden />
     </Button>
   )
 }

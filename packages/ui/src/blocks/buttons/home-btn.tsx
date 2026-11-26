@@ -14,8 +14,9 @@ export default function HomeButton({ onClick }: HomeButtonProps) {
       variant="outline"
       size="icon"
       className="cursor-pointer"
+      aria-label="Home"
     >
-      <HomeIcon />
+      <HomeIcon aria-hidden />
     </Button>
   )
 }

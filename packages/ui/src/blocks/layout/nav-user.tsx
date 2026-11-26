@@ -34,8 +34,13 @@ export function UserNav({ iconOnly, ...props }: NavUserProps) {
     <UserDropdownMenu
       {...props}
       dropdownMenuTrigger={
-        <Button variant="outline" size="icon" className="cursor-pointer">
-          <UserIcon />
+        <Button
+          variant="outline"
+          size="icon"
+          className="cursor-pointer"
+          aria-label="Account menu"
+        >
+          <UserIcon aria-hidden />
         </Button>
       }
     />
