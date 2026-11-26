@@ -1,0 +1,58 @@
+{
+  "errors": {
+    "SALES_ORDER_NOT_FOUND": "Sales order not found",
+    "SALES_ORDER_NOT_EDITABLE": "Only draft sales orders can be edited",
+    "SALES_ORDER_NOT_DELETABLE": "Only draft sales orders can be deleted. Cancel a confirmed order instead",
+    "SALES_ORDER_NOT_DRAFT": "This action is only available for draft sales orders",
+    "SALES_ORDER_NOT_OPEN": "This sales order is not open",
+    "SALES_ORDER_ALREADY_CONFIRMED": "The sales order is already confirmed",
+    "SALES_ORDER_ALREADY_CLOSED": "The sales order is already closed",
+    "SALES_ORDER_ALREADY_CANCELLED": "The sales order is already cancelled",
+    "SALES_ORDER_HAS_FULFILLMENT": "This order already has deliveries. Close it instead of cancelling",
+    "SALES_ORDER_NO_LINES": "At least one order line is required",
+    "SALES_ORDER_PARTY_REQUIRED": "Select a customer",
+    "SALES_ORDER_PARTY_NOT_FOUND": "The selected customer does not exist",
+    "SALES_ORDER_PARTY_NOT_CUSTOMER": "The selected party is not a customer",
+    "SALES_ORDER_PARTY_INACTIVE": "The selected customer is inactive",
+    "SALES_ORDER_PAYMENT_TERM_NOT_FOUND": "The selected payment term does not exist",
+    "SALES_ORDER_PAYMENT_TERM_INACTIVE": "The selected payment term is inactive",
+    "SALES_ORDER_WAREHOUSE_REQUIRED": "Select a fulfillment warehouse for every line",
+    "SALES_ORDER_WAREHOUSE_NOT_FOUND": "The selected warehouse does not exist",
+    "SALES_ORDER_WAREHOUSE_NOT_PHYSICAL": "Only physical warehouses can fulfill sales",
+    "SALES_ORDER_LOCATION_NOT_FOUND": "The specified warehouse location does not exist",
+    "SALES_ORDER_LOCATION_NOT_IN_WAREHOUSE": "The location does not belong to the selected warehouse",
+    "SALES_ORDER_LOCATION_NOT_STOCKABLE": "The location cannot hold stock",
+    "SALES_ORDER_LOCATION_BLOCKED": "The location is blocked",
+    "SALES_ORDER_ITEM_NOT_FOUND": "The specified item does not exist",
+    "SALES_ORDER_ITEM_INACTIVE": "Cannot sell inactive items",
+    "SALES_ORDER_ITEM_NOT_STOCKED": "Only stock-tracked items can be sold",
+    "SALES_ORDER_UNIT_NOT_IN_COLLECTION": "The selected unit is not configured for this item",
+    "SALES_ORDER_AMOUNT_OUT_OF_RANGE": "An amount on this order is too large",
+    "SALES_ORDER_DISCOUNT_EXCEEDS_LINE": "A line discount cannot be more than the line amount",
+    "SALES_ORDER_DISCOUNT_CONFLICT": "Use either a discount rate or a discount amount on a line, not both",
+    "SALES_ORDER_CURRENCY_MISMATCH": "The order currency does not match the organization currency",
+    "SALES_ORDER_NUMBER_TAKEN": "Could not allocate a sales order number. Please try again",
+    "SALES_ORDER_INSUFFICIENT_STOCK": "Not enough available stock to reserve the full quantity"
+  },
+  "labels": {
+    "status": {
+      "DRAFT": "Draft",
+      "CONFIRMED": "Confirmed",
+      "CLOSED": "Closed",
+      "CANCELLED": "Cancelled"
+    },
+    "reservationPolicy": {
+      "REQUIRE_FULL_RESERVATION": "Require full reservation",
+      "ALLOW_PARTIAL_RESERVATION": "Allow partial reservation",
+      "ALLOW_BACKORDER_WITHOUT_RESERVATION": "Allow backorder without reservation"
+    }
+  },
+  "msgs": {
+    "SALES_ORDER_CREATED": "Sales order created successfully",
+    "SALES_ORDER_UPDATED": "Sales order updated successfully",
+    "SALES_ORDER_DELETED": "Sales order deleted successfully",
+    "SALES_ORDER_CONFIRMED": "Sales order confirmed. Stock is reserved",
+    "SALES_ORDER_CLOSED": "Sales order closed",
+    "SALES_ORDER_CANCELLED": "Sales order cancelled"
+  }
+}
