@@ -5,6 +5,7 @@ import { globalErrorResponses } from "@avuny/utils"
 import {
   CreateInventoryTransferSchema,
   DispatchInventoryTransferSchema,
+  ReceiveInventoryTransferSchema,
   ReverseInventoryTransferSchema,
   SettleInventoryTransferSchema,
   InventoryTransferDtoSchema,
@@ -133,7 +134,7 @@ export const createInventoryTransferRoutes = ({
   const action = <B extends z.ZodTypeAny>(
     name: string,
     summary: string,
-    permission: "dispatch" | "return" | "reverse",
+    permission: "dispatch" | "return" | "reverse" | "receive" | "close_short",
     schema: B,
     call: (uid: string, orgId: string, id: string, body: any) => Promise<any>
   ) => {
@@ -163,6 +164,33 @@ export const createInventoryTransferRoutes = ({
   action("reverse", "Reverse a dispatch before anything was received", "reverse", ReverseInventoryTransferSchema, (u, o, i, b) =>
     service.reverseDispatch(u, o, i, b)
   )
+  action("receive", "Receive goods at the destination", "receive", ReceiveInventoryTransferSchema, (u, o, i, b) =>
+    service.receive(u, o, i, b)
+  )
+  action("close-short", "Write off what is still in transit as lost", "close_short", SettleInventoryTransferSchema, (u, o, i, b) =>
+    service.closeShort(u, o, i, b)
+  )
+  {
+    const r = createRoute({
+      method: "post",
+      path: `${base}/{id}/receipts/{receiptId}/reverse`,
+      operationId: "reverseInventoryTransferReceipt",
+      tags,
+      summary: "Reverse one receipt",
+      middleware: [requireAuth, requirePermission("reverse:inventory-transfer" as never)] as const,
+      request: {
+        params: idParam.extend({ receiptId: z.string().uuid() }),
+        body: { required: false, content: { "application/json": { schema: ReverseInventoryTransferSchema } } },
+      },
+      responses: { 200: jsonOk("Receipt reversed", InventoryTransferDtoSchema), ...errs },
+    })
+    router.use(honoPath(r.path), requireAuth)
+    router.openapi(r, (async (c: any) => {
+      const { orgId, id, receiptId } = c.req.valid("param")
+      const body = c.req.valid("json") ?? {}
+      return run(c, 200, (uid) => service.reverseReceipt(uid, orgId, id, receiptId, body))
+    }) as never)
+  }
 
   const get = createRoute({
     method: "get",

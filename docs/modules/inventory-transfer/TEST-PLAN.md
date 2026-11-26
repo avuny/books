@@ -53,3 +53,7 @@ CI is stricter than local checks: run `pnpm run typecheck` in each package befor
 ## Phase 3 coverage (unit, service.spec)
 Dispatch success, FEFO batch allocation across batches, insufficient batch stock, engine rejection, lowering a line, exceeding requested, double dispatch, cancelled transfer, partial return, exceeds pending, nothing pending, reverse blocked after a return, reverse success.
 Not yet covered: API integration tests for the new routes, permission denial per route.
+
+## Phase 4 coverage (unit)
+Partial receive twice then full, over-receipt, zero, duplicate and unknown allocation, wrong state, permission denial, close short after partial receive, reverse receipt restores counters and status, double reversal, unknown event, reversing a loss event.
+Not yet covered: integration tests, deadlock test for opposite concurrent transfers.

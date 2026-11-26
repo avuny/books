@@ -137,6 +137,19 @@ export interface InventoryTransferRepository {
   updateLineDispatched(orgId: string, lineId: string, dispatchedBaseQty: string, tx: Tx): Promise<void>
   deleteLine(orgId: string, lineId: string, tx: Tx): Promise<void>
   nextEventNo(orgId: string, transferId: string, tx: Tx): Promise<number>
+  findEvent(
+    orgId: string,
+    transferId: string,
+    eventId: string,
+    tx: Tx
+  ): Promise<{
+    id: string
+    kind: "RECEIPT" | "RETURN" | "LOSS"
+    status: "POSTED" | "REVERSED"
+    stockMovementId: string | null
+    lines: Array<{ allocationId: string; baseQuantity: string }>
+  } | null>
+  setEventStatus(orgId: string, eventId: string, status: "POSTED" | "REVERSED", tx: Tx): Promise<void>
   insertEvent(
     orgId: string,
     event: {

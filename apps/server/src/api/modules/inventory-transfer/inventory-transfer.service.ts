@@ -12,6 +12,7 @@ import {
   type UpdateInventoryTransferInput,
   type DispatchInventoryTransferInput,
   type SettleInventoryTransferInput,
+  type ReceiveInventoryTransferInput,
   type ReverseInventoryTransferInput,
   type ActivityLogAction,
 } from "@avuny/contracts"
@@ -542,6 +543,279 @@ export function createInventoryTransferService(deps: InventoryTransferServiceDep
       if (!outcome.ok) return fail({ error: outcome.error, msg: message(outcome.error) })
       await audit(orgId, actorId, AUDIT.RETURNED, id)
       return ok({ data: outcome.value, msg: "Inventory transfer returned to source successfully" })
+    },
+
+    /** Books goods into the destination. Partial quantities are fine; the rest stays in transit. */
+    async receive(
+      actorId: string,
+      orgId: string,
+      id: string,
+      input: ReceiveInventoryTransferInput
+    ): Promise<Result<InventoryTransferDto, Code>> {
+      if (!(await can(actorId, P.RECEIVE, orgId, id))) return forbidden()
+
+      let outcome: Step<InventoryTransferDto>
+      try {
+        outcome = await repo.transaction(async (tx): Promise<Step<InventoryTransferDto>> => {
+          const current = await repo.findAggregate(orgId, id, tx, { forUpdate: true })
+          if (!current) throw new PostingAbort(Err.INVENTORY_TRANSFER_NOT_FOUND)
+          if (current.row.status !== "IN_TRANSIT" && current.row.status !== "PARTIALLY_RECEIVED") {
+            throw new PostingAbort(Err.INVENTORY_TRANSFER_NOT_IN_TRANSIT)
+          }
+          const allocations = await repo.findAllocations(orgId, id, tx, { forUpdate: true })
+          const lineOf = new Map(current.lines.map((l) => [l.id, l]))
+
+          const seen = new Set<string>()
+          const parts: Array<{ a: (typeof allocations)[number]; qty: string; toLocationId: string }> = []
+          for (const l of input.lines) {
+            const a = allocations.find((x) => x.id === l.allocationId)
+            if (!a) throw new PostingAbort(Err.INVENTORY_TRANSFER_ALLOCATION_NOT_FOUND)
+            if (seen.has(a.id)) throw new PostingAbort(Err.INVENTORY_TRANSFER_DUPLICATE_LINES)
+            seen.add(a.id)
+            if (compareDecimal(l.baseQuantity, "0") <= 0) throw new PostingAbort(Err.INVENTORY_TRANSFER_INVALID_QUANTITY)
+            if (compareDecimal(l.baseQuantity, pendingOf(a)) > 0) throw new PostingAbort(Err.INVENTORY_TRANSFER_EXCEEDS_PENDING)
+            const line = lineOf.get(a.lineId)
+            if (!line) throw new PostingAbort(Err.INVENTORY_TRANSFER_LINE_NOT_FOUND)
+            const toLocationId = l.destinationLocationId ?? line.destinationLocationId
+            const v = await deps.locations.validateLocation(orgId, current.row.destinationWarehouseId, toLocationId, tx)
+            if (!v.ok) throw new PostingAbort(LOCATION_ERRORS[v.reason])
+            const recv = await deps.locations.assertIntent(orgId, toLocationId, "receive", tx)
+            if (!recv.ok) {
+              throw new PostingAbort(
+                recv.reason === "blocked" ? Err.INVENTORY_TRANSFER_LOCATION_BLOCKED : Err.INVENTORY_TRANSFER_LOCATION_NOT_RECEIVABLE
+              )
+            }
+            parts.push({ a, qty: l.baseQuantity, toLocationId })
+          }
+
+          const transitId = await deps.stock.transitLocationId(orgId, tx)
+          if (!transitId) throw new PostingAbort(Err.INVENTORY_TRANSFER_POSTING_FAILED)
+          const eventId = randomUUID()
+          const moved = await deps.stock.post(
+            actorId,
+            orgId,
+            {
+              type: "transfer",
+              sourceType: INVENTORY_TRANSFER_SOURCE_TYPES.RECEIPT,
+              sourceId: eventId,
+              sourceRef: current.row.number,
+              ...(input.receivedAt ? { postedAt: input.receivedAt } : {}),
+              lines: parts.map((p) => ({
+                itemId: p.a.itemId,
+                batchId: p.a.batchId ?? undefined,
+                fromLocationId: transitId,
+                toLocationId: p.toLocationId,
+                quantity: p.qty,
+              })),
+            },
+            tx
+          )
+          if (!moved.success) throw new PostingAbort(postingFailure((moved as any).error))
+          const posted = [...moved.data.lines].sort((a, b) => a.lineNo - b.lineNo)
+          if (posted.length !== parts.length) throw new PostingAbort(Err.INVENTORY_TRANSFER_POSTING_FAILED)
+
+          const eventNo = await repo.nextEventNo(orgId, id, tx)
+          await repo.insertEvent(
+            orgId,
+            {
+              id: eventId,
+              transferId: id,
+              eventNo,
+              kind: "RECEIPT",
+              occurredAt: input.receivedAt ? new Date(input.receivedAt) : new Date(),
+              note: input.note ?? null,
+              stockMovementId: moved.data.id,
+              createdBy: actorId,
+            },
+            parts.map((p, i) => ({
+              allocationId: p.a.id,
+              destinationLocationId: p.toLocationId,
+              baseQuantity: p.qty,
+              stockMovementLineId: posted[i]!.id,
+            })),
+            tx
+          )
+          const updated = allocations.map((a) => ({ ...a }))
+          for (const p of parts) {
+            const next = addDecimal(p.a.receivedBaseQty, p.qty)
+            await repo.updateAllocationCounters(orgId, p.a.id, { receivedBaseQty: next }, tx)
+            updated.find((x) => x.id === p.a.id)!.receivedBaseQty = next
+          }
+          await repo.updateAggregate(orgId, id, { status: deriveStatus(updated) }, tx)
+          const dto = await detailDto(orgId, id, tx)
+          return dto ? { ok: true, value: dto } : { ok: false, error: Err.INVENTORY_TRANSFER_NOT_FOUND }
+        })
+      } catch (err) {
+        if (err instanceof PostingAbort) return fail({ error: err.code, msg: message(err.code) })
+        throw err
+      }
+
+      if (!outcome.ok) return fail({ error: outcome.error, msg: message(outcome.error) })
+      await audit(orgId, actorId, AUDIT.RECEIVED, id)
+      return ok({ data: outcome.value, msg: "Inventory transfer received successfully" })
+    },
+
+    /** Writes off what is still in transit as lost (all of it, or the chosen allocations). Movement only, no journal. */
+    async closeShort(
+      actorId: string,
+      orgId: string,
+      id: string,
+      input: SettleInventoryTransferInput = {}
+    ): Promise<Result<InventoryTransferDto, Code>> {
+      if (!(await can(actorId, P.CLOSE_SHORT, orgId, id))) return forbidden()
+
+      let outcome: Step<InventoryTransferDto>
+      try {
+        outcome = await repo.transaction(async (tx): Promise<Step<InventoryTransferDto>> => {
+          const current = await repo.findAggregate(orgId, id, tx, { forUpdate: true })
+          if (!current) throw new PostingAbort(Err.INVENTORY_TRANSFER_NOT_FOUND)
+          if (current.row.status !== "IN_TRANSIT" && current.row.status !== "PARTIALLY_RECEIVED") {
+            throw new PostingAbort(Err.INVENTORY_TRANSFER_NOT_IN_TRANSIT)
+          }
+          const allocations = await repo.findAllocations(orgId, id, tx, { forUpdate: true })
+
+          const chosen = new Map<string, string>()
+          if (input.lines) {
+            for (const l of input.lines) {
+              if (!allocations.some((a) => a.id === l.allocationId)) throw new PostingAbort(Err.INVENTORY_TRANSFER_ALLOCATION_NOT_FOUND)
+              if (compareDecimal(l.baseQuantity, "0") <= 0) throw new PostingAbort(Err.INVENTORY_TRANSFER_INVALID_QUANTITY)
+              chosen.set(l.allocationId, l.baseQuantity)
+            }
+          } else {
+            for (const a of allocations) if (compareDecimal(pendingOf(a), "0") > 0) chosen.set(a.id, pendingOf(a))
+          }
+          if (chosen.size === 0) throw new PostingAbort(Err.INVENTORY_TRANSFER_NOTHING_PENDING)
+
+          const parts: Array<{ a: (typeof allocations)[number]; qty: string }> = []
+          for (const a of allocations) {
+            const qty = chosen.get(a.id)
+            if (qty === undefined) continue
+            if (compareDecimal(qty, pendingOf(a)) > 0) throw new PostingAbort(Err.INVENTORY_TRANSFER_EXCEEDS_PENDING)
+            parts.push({ a, qty })
+          }
+
+          const transitId = await deps.stock.transitLocationId(orgId, tx)
+          if (!transitId) throw new PostingAbort(Err.INVENTORY_TRANSFER_POSTING_FAILED)
+          const eventId = randomUUID()
+          const moved = await deps.stock.post(
+            actorId,
+            orgId,
+            {
+              type: "adjustment",
+              sourceType: INVENTORY_TRANSFER_SOURCE_TYPES.LOSS,
+              sourceId: eventId,
+              sourceRef: current.row.number,
+              note: input.note ?? `Lost in transit ${current.row.number}`,
+              lines: parts.map((p) => ({
+                itemId: p.a.itemId,
+                batchId: p.a.batchId ?? undefined,
+                fromLocationId: transitId,
+                quantity: p.qty,
+              })),
+            },
+            tx
+          )
+          if (!moved.success) throw new PostingAbort(postingFailure((moved as any).error))
+          const posted = [...moved.data.lines].sort((a, b) => a.lineNo - b.lineNo)
+          if (posted.length !== parts.length) throw new PostingAbort(Err.INVENTORY_TRANSFER_POSTING_FAILED)
+
+          const eventNo = await repo.nextEventNo(orgId, id, tx)
+          await repo.insertEvent(
+            orgId,
+            {
+              id: eventId,
+              transferId: id,
+              eventNo,
+              kind: "LOSS",
+              occurredAt: new Date(),
+              note: input.note ?? null,
+              stockMovementId: moved.data.id,
+              createdBy: actorId,
+            },
+            parts.map((p, i) => ({
+              allocationId: p.a.id,
+              destinationLocationId: null,
+              baseQuantity: p.qty,
+              stockMovementLineId: posted[i]!.id,
+            })),
+            tx
+          )
+          const updated = allocations.map((a) => ({ ...a }))
+          for (const p of parts) {
+            const next = addDecimal(p.a.lostBaseQty, p.qty)
+            await repo.updateAllocationCounters(orgId, p.a.id, { lostBaseQty: next }, tx)
+            updated.find((x) => x.id === p.a.id)!.lostBaseQty = next
+          }
+          await repo.updateAggregate(orgId, id, { status: deriveStatus(updated) }, tx)
+          const dto = await detailDto(orgId, id, tx)
+          return dto ? { ok: true, value: dto } : { ok: false, error: Err.INVENTORY_TRANSFER_NOT_FOUND }
+        })
+      } catch (err) {
+        if (err instanceof PostingAbort) return fail({ error: err.code, msg: message(err.code) })
+        throw err
+      }
+
+      if (!outcome.ok) return fail({ error: outcome.error, msg: message(outcome.error) })
+      await audit(orgId, actorId, AUDIT.CLOSED_SHORT, id)
+      return ok({ data: outcome.value, msg: "Inventory transfer closed short successfully" })
+    },
+
+    /** Undoes one receipt: goods go back to in transit and the counters are restored. A reversal cannot be reversed. */
+    async reverseReceipt(
+      actorId: string,
+      orgId: string,
+      id: string,
+      eventId: string,
+      input: ReverseInventoryTransferInput = {}
+    ): Promise<Result<InventoryTransferDto, Code>> {
+      if (!(await can(actorId, P.REVERSE, orgId, id))) return forbidden()
+
+      let outcome: Step<InventoryTransferDto>
+      try {
+        outcome = await repo.transaction(async (tx): Promise<Step<InventoryTransferDto>> => {
+          const current = await repo.findAggregate(orgId, id, tx, { forUpdate: true })
+          if (!current) throw new PostingAbort(Err.INVENTORY_TRANSFER_NOT_FOUND)
+          if (current.row.status === "CANCELLED" || current.row.status === "DRAFT") {
+            throw new PostingAbort(Err.INVENTORY_TRANSFER_CANNOT_REVERSE)
+          }
+          const event = await repo.findEvent(orgId, id, eventId, tx)
+          if (!event) throw new PostingAbort(Err.INVENTORY_TRANSFER_EVENT_NOT_FOUND)
+          if (event.kind !== "RECEIPT" || event.status !== "POSTED" || !event.stockMovementId) {
+            throw new PostingAbort(Err.INVENTORY_TRANSFER_CANNOT_REVERSE)
+          }
+          const allocations = await repo.findAllocations(orgId, id, tx, { forUpdate: true })
+
+          const reversed = await deps.stock.reverse(
+            actorId,
+            orgId,
+            event.stockMovementId,
+            { note: input.note ?? `Reversal of receipt on ${current.row.number}` },
+            tx
+          )
+          if (!reversed.success) throw new PostingAbort(postingFailure((reversed as any).error))
+
+          const updated = allocations.map((a) => ({ ...a }))
+          for (const l of event.lines) {
+            const a = updated.find((x) => x.id === l.allocationId)
+            if (!a) throw new PostingAbort(Err.INVENTORY_TRANSFER_ALLOCATION_NOT_FOUND)
+            const next = sub(a.receivedBaseQty, l.baseQuantity)
+            if (compareDecimal(next, "0") < 0) throw new PostingAbort(Err.INVENTORY_TRANSFER_CANNOT_REVERSE)
+            await repo.updateAllocationCounters(orgId, a.id, { receivedBaseQty: next }, tx)
+            a.receivedBaseQty = next
+          }
+          await repo.setEventStatus(orgId, eventId, "REVERSED", tx)
+          await repo.updateAggregate(orgId, id, { status: deriveStatus(updated) }, tx)
+          const dto = await detailDto(orgId, id, tx)
+          return dto ? { ok: true, value: dto } : { ok: false, error: Err.INVENTORY_TRANSFER_NOT_FOUND }
+        })
+      } catch (err) {
+        if (err instanceof PostingAbort) return fail({ error: err.code, msg: message(err.code) })
+        throw err
+      }
+
+      if (!outcome.ok) return fail({ error: outcome.error, msg: message(outcome.error) })
+      await audit(orgId, actorId, AUDIT.REVERSED, id)
+      return ok({ data: outcome.value, msg: "Inventory transfer receipt reversed successfully" })
     },
 
     /** Undoes a dispatch while nothing was received, lost or returned. The transfer ends CANCELLED. */
