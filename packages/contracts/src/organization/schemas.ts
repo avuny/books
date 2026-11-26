@@ -54,6 +54,26 @@ export const OrganizationNameSchema = z
   .min(ORGANIZATION_NAME_MIN_LENGTH)
   .max(ORGANIZATION_NAME_MAX_LENGTH)
 
+// ── Owner username ──────────────────────────────────────────────────────────
+
+/** Mirrors the DB check `ck_org_user_username_format`: lowercase, 3-31 chars, no ':' or '@'. */
+export const OWNER_USERNAME_PATTERN = /^[a-z0-9][a-z0-9._-]{2,30}$/
+
+/**
+ * Turn a free-form name or email local part into a valid username handle
+ * ("John Doe" -> "john-doe"). Returns "" when nothing usable is left.
+ */
+export function toOwnerUsername(raw: string): string {
+  const handle = raw
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9._-]+/g, "-")
+    .replace(/^[^a-z0-9]+/, "")
+    .replace(/-+$/, "")
+    .slice(0, 31)
+  return OWNER_USERNAME_PATTERN.test(handle) ? handle : ""
+}
+
 // ── Inputs ──────────────────────────────────────────────────────────────────
 
 export const CreateOrganizationSchema = z.object({
@@ -64,7 +84,12 @@ export const CreateOrganizationSchema = z.object({
   defaultCurrency: z.string().length(3),
   timezone: z.string().min(1).optional(),
   /** The owner's sign-in handle inside the new organization. */
-  ownerUsername: z.string().min(1),
+  ownerUsername: z
+    .string()
+    .regex(
+      OWNER_USERNAME_PATTERN,
+      "Use 3-31 lowercase letters, numbers, dots, dashes or underscores, starting with a letter or number",
+    ),
 })
 export type CreateOrganizationInput = z.infer<typeof CreateOrganizationSchema>
 

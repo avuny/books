@@ -44,7 +44,13 @@ export default function UserButton({
 
   if (isLoading) {
     return (
-      <Button variant="outline" size="icon" className="cursor-pointer" disabled>
+      <Button
+        variant="outline"
+        size="icon"
+        className="cursor-pointer"
+        aria-label="Loading account"
+        disabled
+      >
         <Loading />
       </Button>
     )
@@ -57,8 +63,9 @@ export default function UserButton({
         variant="outline"
         size="icon"
         className="cursor-pointer"
+        aria-label="Sign in"
       >
-        <LogInIcon />
+        <LogInIcon aria-hidden />
       </Button>
     )
   }

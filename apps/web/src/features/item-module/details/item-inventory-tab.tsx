@@ -16,6 +16,7 @@ import {
 } from "@workspace/ui/components/table"
 
 import { useGetItemStock, useListStockBalances } from "@/api"
+import { formatQuantity } from "../lib/format-quantity"
 import {
   WarehouseLocationFilter,
   type WarehouseLocationFilterValue,
@@ -140,7 +141,7 @@ export function ItemInventoryTab({
               <Skeleton className="h-6 w-16" />
             ) : (
               <p className="text-lg font-bold text-foreground tabular-nums">
-                {stockSummary?.available ?? "0"}{" "}
+                {formatQuantity(stockSummary?.available)}{" "}
                 <span className="text-xs font-normal text-muted-foreground">
                   {baseUnitSymbol}
                 </span>
@@ -160,7 +161,7 @@ export function ItemInventoryTab({
               <Skeleton className="h-6 w-16" />
             ) : (
               <p className="text-lg font-bold text-foreground tabular-nums">
-                {stockSummary?.onHand ?? "0"}{" "}
+                {formatQuantity(stockSummary?.onHand)}{" "}
                 <span className="text-xs font-normal text-muted-foreground">
                   {baseUnitSymbol}
                 </span>
@@ -180,7 +181,7 @@ export function ItemInventoryTab({
               <Skeleton className="h-6 w-16" />
             ) : (
               <p className="text-lg font-bold text-foreground tabular-nums">
-                {stockSummary?.reserved ?? "0"}{" "}
+                {formatQuantity(stockSummary?.reserved)}{" "}
                 <span className="text-xs font-normal text-muted-foreground">
                   {baseUnitSymbol}
                 </span>
@@ -200,7 +201,7 @@ export function ItemInventoryTab({
               <Skeleton className="h-6 w-16" />
             ) : (
               <p className="text-lg font-bold text-foreground tabular-nums">
-                {stockSummary?.onOrder ?? "0"}{" "}
+                {formatQuantity(stockSummary?.onOrder)}{" "}
                 <span className="text-xs font-normal text-muted-foreground">
                   {baseUnitSymbol}
                 </span>
@@ -220,7 +221,7 @@ export function ItemInventoryTab({
               <Skeleton className="h-6 w-16" />
             ) : (
               <p className="text-lg font-bold text-foreground tabular-nums">
-                {stockSummary?.inTransit ?? "0"}{" "}
+                {formatQuantity(stockSummary?.inTransit)}{" "}
                 <span className="text-xs font-normal text-muted-foreground">
                   {baseUnitSymbol}
                 </span>
@@ -322,22 +323,22 @@ export function ItemInventoryTab({
 
                     {/* Available */}
                     <TableCell className="text-end font-mono font-semibold text-foreground tabular-nums">
-                      {b.availableQty ?? b.quantity} {baseUnitSymbol}
+                      {formatQuantity(b.availableQty ?? b.quantity)} {baseUnitSymbol}
                     </TableCell>
 
                     {/* On Hand */}
                     <TableCell className="text-end font-mono text-foreground tabular-nums">
-                      {b.onHandQty ?? b.quantity} {baseUnitSymbol}
+                      {formatQuantity(b.onHandQty ?? b.quantity)} {baseUnitSymbol}
                     </TableCell>
 
                     {/* Reserved */}
                     <TableCell className="text-end font-mono text-muted-foreground tabular-nums">
-                      {b.reservedQty ?? "0"} {baseUnitSymbol}
+                      {formatQuantity(b.reservedQty)} {baseUnitSymbol}
                     </TableCell>
 
                     {/* On Order */}
                     <TableCell className="text-end font-mono text-muted-foreground tabular-nums">
-                      {b.onOrderQty ?? "0"} {baseUnitSymbol}
+                      {formatQuantity(b.onOrderQty)} {baseUnitSymbol}
                     </TableCell>
 
                     {/* Updated At */}

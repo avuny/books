@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import type { OrganizationDto } from "@avuny/contracts/organization"
+import { toOwnerUsername } from "@avuny/contracts/organization"
 
 import {
   useCreateOrganization,
@@ -95,6 +96,14 @@ export function CreateOrganization({
     }))
   }, [countriesQuery.data?.data])
 
+  const countryCurrencyByCode = useMemo(
+    () =>
+      Object.fromEntries(
+        (countriesQuery.data?.data ?? []).map((c) => [c.code, c.currencyCode])
+      ),
+    [countriesQuery.data?.data]
+  )
+
   const stateOptions = useMemo(() => {
     const items = statesQuery.data?.data ?? []
     return items.map((s) => ({
@@ -133,7 +142,8 @@ export function CreateOrganization({
   }
 
   const defaultOwnerUsername =
-    authData?.data?.name || (authData?.data?.identifier?.split("@")[0] ?? "")
+    toOwnerUsername(authData?.data?.name ?? "") ||
+    toOwnerUsername(authData?.data?.identifier?.split("@")[0] ?? "")
 
   return (
     <div className="mx-auto w-full max-w-2xl">
@@ -150,6 +160,7 @@ export function CreateOrganization({
         isPending={createMutation.isPending}
         errorMessage={serverError}
         defaultOwnerUsername={defaultOwnerUsername}
+        countryCurrencyByCode={countryCurrencyByCode}
       />
     </div>
   )

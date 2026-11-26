@@ -3,6 +3,7 @@ import { useMemo } from "react"
 import { Link, useLocation } from "@tanstack/react-router"
 import { useTranslation } from "react-i18next"
 import {
+  ArrowLeftRightIcon,
   BadgeDollarSignIcon,
   BoxesIcon,
   Building2Icon,
@@ -20,6 +21,7 @@ import {
   ShieldIcon,
   ShoppingBagIcon,
   ShoppingCartIcon,
+  TagsIcon,
   TruckIcon,
   UserIcon,
   UsersIcon,
@@ -74,6 +76,8 @@ const ICON_MAP: Record<string, ComponentType<{ className?: string }>> = {
   warehouse: WarehouseIcon,
   "badge-dollar-sign": BadgeDollarSignIcon,
   boxes: BoxesIcon,
+  tags: TagsIcon,
+  "arrow-left-right": ArrowLeftRightIcon,
   mail: MailIcon,
   organizationInvitation: MailIcon,
 }

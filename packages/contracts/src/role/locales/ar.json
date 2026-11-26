@@ -23,6 +23,16 @@
       "purchase_shipment": "شحنات الموردين",
       "payment_term": "شروط الدفع",
       "vendor": "الموردون",
+      "activity_log": "سجل النشاط",
+      "item": "الأصناف",
+      "item_category": "فئات الأصناف",
+      "unit": "الوحدات",
+      "unit_collection": "مجموعات الوحدات",
+      "warehouse": "المستودعات",
+      "warehouse_location": "مواقع المستودع",
+      "batch": "الدفعات",
+      "stock_movement": "حركات المخزون",
+      "accounting": "المحاسبة",
       "*": "كل شيء"
     },
     "actions": {

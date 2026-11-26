@@ -23,6 +23,16 @@
       "purchase_shipment": "Supplier shipments",
       "payment_term": "Payment terms",
       "vendor": "Vendors",
+      "activity_log": "Activity log",
+      "item": "Items",
+      "item_category": "Item categories",
+      "unit": "Units",
+      "unit_collection": "Unit collections",
+      "warehouse": "Warehouses",
+      "warehouse_location": "Warehouse locations",
+      "batch": "Batches",
+      "stock_movement": "Stock movements",
+      "accounting": "Accounting",
       "*": "Everything"
     },
     "actions": {

@@ -1,5 +1,6 @@
 import type { ColumnDef } from "@tanstack/react-table"
 
+import { formatQuantity } from "../lib/format-quantity"
 import {
   createActionsColumn,
   type RowAction,
@@ -88,7 +89,7 @@ export function createItemColumns({
         if (!item.isInventoryTracked) {
           return <span className="text-muted-foreground">—</span>
         }
-        const qty = item.availableQuantity ?? "0"
+        const qty = formatQuantity(item.availableQuantity)
         return (
           <span className="font-mono text-sm font-medium text-foreground tabular-nums">
             {qty} {item.baseUnit.symbol}
