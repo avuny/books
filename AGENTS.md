@@ -680,3 +680,21 @@ The objective is to make development resumable and resilient to lost AI conversa
 - When the user asks to release or merge dev to main: run `pnpm release <patch|minor|major>`.
 - After any user-facing feature or fix, add a line under `## [Unreleased]` in CHANGELOG.md as part of the same commit.
 - Versions follow semver. Pre-1.0 until the SaaS launch.
+
+### Release flow (how v0.2.0 and v0.3.0 shipped)
+
+1. Feature branches PR into `dev`; CI (typecheck/build, API integration, web e2e) must be green before merge.
+2. Release prep on a branch off `dev`: CHANGELOG entries under `## [Unreleased]`, then `pnpm release minor` (bumps root version, moves the notes, tags). PR it into `dev`.
+3. Open a PR `dev` -> `main`, wait for green CI, merge it (merge commit). The push to `main` runs the deploy job. Push the tag (`git push origin vX.Y.Z`).
+4. Smoke test production after the deploy (API + web URLs are in the module PROGRESS notes). Prod sign-in: `POST /api/auth/sign-in` with `{identifier,password}`, send a browser-like User-Agent (the default Python one is blocked by Cloudflare).
+
+### Deploy: migrations and seed run automatically
+
+- `.github/workflows/deploy.yml` job `deploy` (environment `production`) runs, before shipping code: migrate the production database, check that the newest journal entry in `packages/db/drizzle/meta/_journal.json` matches `max(created_at)` in `drizzle.__drizzle_migrations`, then `pnpm seed` (system data only: roles, permissions, sidebar, units, default accounting for orgs lacking it; idempotent, never changes existing org accounts).
+- Needs the GitHub environment secret `PRODUCTION_DATABASE_URL` (Settings > Environments > production). It fails closed: with the secret missing, the migrate step exits 1 and nothing deploys. Never print or commit the URL.
+- A new module needs its sidebar/role/accounting defaults in the seed, not in a migration; the deploy runs the seed, so no manual step.
+- Migrations are append-only. A backfill that rewrites existing rows is a separate reviewed script run by hand with the owner's OK (see batches below), not a migration.
+
+## Batches (always on)
+
+Every inventory-tracked item is batch-tracked (`is_batch_tracked` follows `is_inventory_tracked`; not a user choice). Receipts and opening stock create a batch (`<receipt number>-<lineNo>`, `BAT-...`). Outbound lines with no batch are split per batch by `allocateBatches` (`packages/contracts/src/stock-movement/batch-allocation.ts`): FEFO for expiry-tracked items, FIFO by receipt otherwise, one movement line per batch; a shortfall fails with insufficient stock (no negative stock for batch-tracked items). Costing stays on FIFO cost layers; batches only choose the physical lot. Existing stock moves into one `LEGACY` batch per item via `packages/db/scripts/backfill-legacy-batches/` (`run.ts dry-run | apply | rollback`); never run `apply` on production without the owner's OK. Design and decisions: `docs/proposals/batches-under-the-hood.md`.
