@@ -82,6 +82,10 @@ export const items = pgTable(
         )
             .notNull()
             .default(DEFAULT_INVENTORY_VALUATION_METHOD),
+        /** Default purchase price per base unit, decimal in major units. Prefills order lines; editable there. */
+        costPrice: quantity("cost_price"),
+        /** Default selling price per base unit, decimal in major units. */
+        sellingPrice: quantity("selling_price"),
         isActive: boolean("is_active").notNull().default(true),
         ...timestamps(),
     },
@@ -105,6 +109,7 @@ export const items = pgTable(
         uniqueIndex("ux_item_org_name").on(t.orgId, sql`lower(${t.name})`),
         index("ix_item_org_category").on(t.orgId, t.categoryId),
         index("ix_item_unit_collection").on(t.unitCollectionId),
+        check("ck_item_prices_non_negative", sql`(${t.costPrice} is null or ${t.costPrice} >= 0) and (${t.sellingPrice} is null or ${t.sellingPrice} >= 0)`),
         check(
             "ck_item_name_len",
             lengthBetween(t.name, ITEM_NAME_MIN_LENGTH, ITEM_NAME_MAX_LENGTH)

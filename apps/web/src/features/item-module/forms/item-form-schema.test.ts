@@ -45,6 +45,8 @@ const item: ItemDto = {
   inventoryValuationMethod: "fifo",
   isActive: true,
   allowNegativeStock: false,
+  costPrice: null,
+  sellingPrice: null,
   reorderPoint: "20.000000",
   createdAt: "2026-01-01T00:00:00Z",
   updatedAt: "2026-01-01T00:00:00Z",
@@ -128,6 +130,8 @@ describe("form values -> API input", () => {
       description: null,
       baseUnitId: uuid(2),
       reorderPoint: null,
+      costPrice: null,
+      sellingPrice: null,
     })
     expect(input).not.toHaveProperty("unitCollectionId")
 

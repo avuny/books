@@ -178,6 +178,11 @@ export function CreatePurchaseOrder({ orgId, order, onCreated, onCancel }: Props
     if (!itemId) return
     const details = await fetchItemUnits(orgId, itemId)
     setUnitMap((m) => ({ ...m, [itemId]: details.units }))
+    // Default the unit price from the item's cost price, unless the user already typed one.
+    const typed = form.getValues(`lines.${index}.unitPrice`)
+    if (details.costPrice && (!typed || Number(typed) === 0)) {
+      form.setValue(`lines.${index}.unitPrice`, details.costPrice)
+    }
     if (!form.getValues(`lines.${index}.unitId`)) {
       form.setValue(`lines.${index}.unitId`, details.baseUnitId || details.units[0]?.value || "")
     }

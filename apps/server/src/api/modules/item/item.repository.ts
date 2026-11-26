@@ -58,6 +58,8 @@ export type ItemPatch = {
   unitCollectionId?: string
   canAssembled?: boolean
   isReturnable?: boolean
+  costPrice?: string | null
+  sellingPrice?: string | null
   isInventoryTracked?: boolean
   isBatchTracked?: boolean
   isExpiryTracked?: boolean

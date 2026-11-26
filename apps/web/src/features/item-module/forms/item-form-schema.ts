@@ -46,6 +46,14 @@ const ItemFormShape = z.object({
     .string()
     .trim()
     .refine((v) => v === "" || UNIT_QUANTITY_PATTERN.test(v), "Invalid number"),
+  costPrice: z
+    .string()
+    .trim()
+    .refine((v) => v === "" || UNIT_QUANTITY_PATTERN.test(v), "Invalid number"),
+  sellingPrice: z
+    .string()
+    .trim()
+    .refine((v) => v === "" || UNIT_QUANTITY_PATTERN.test(v), "Invalid number"),
   isActive: z.boolean(),
   openingStockPostedAt: z.string().trim().optional(),
   openingStockLines: z
@@ -190,6 +198,8 @@ export function getCreateItemDefaults(
     inventoryValuationMethod: DEFAULT_INVENTORY_VALUATION_METHOD,
     allowNegativeStock: false,
     reorderPoint: "",
+    costPrice: "",
+    sellingPrice: "",
     isActive: true,
     openingStockPostedAt: "",
     openingStockLines: [],
@@ -215,6 +225,8 @@ export function getUpdateItemDefaults(item: ItemDto): UpdateItemFormInput {
     inventoryValuationMethod: item.inventoryValuationMethod,
     allowNegativeStock: item.allowNegativeStock,
     reorderPoint: item.reorderPoint ? trimQuantity(item.reorderPoint) : "",
+    costPrice: item.costPrice ? trimQuantity(item.costPrice) : "",
+    sellingPrice: item.sellingPrice ? trimQuantity(item.sellingPrice) : "",
     isActive: item.isActive,
   }
 }
@@ -267,6 +279,8 @@ export function toCreateItemInput(
     inventoryValuationMethod: values.inventoryValuationMethod,
     allowNegativeStock: values.allowNegativeStock,
     reorderPoint: values.reorderPoint || null,
+    costPrice: values.costPrice || null,
+    sellingPrice: values.sellingPrice || null,
     openingStock:
       validLines.length > 0
         ? {
@@ -311,5 +325,7 @@ export function toUpdateItemInput(
     isActive: values.isActive,
     allowNegativeStock: values.allowNegativeStock,
     reorderPoint: values.reorderPoint || null,
+    costPrice: values.costPrice || null,
+    sellingPrice: values.sellingPrice || null,
   }
 }

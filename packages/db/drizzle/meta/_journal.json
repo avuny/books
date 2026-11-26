@@ -176,6 +176,13 @@
       "when": 1795716392098,
       "tag": "0024_purchase_receipt",
       "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "7",
+      "when": 1795718825898,
+      "tag": "0025_item_default_prices",
+      "breakpoints": true
     }
   ]
 }
