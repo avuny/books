@@ -1,6 +1,6 @@
 # Audit progress: 2026-11-26 app audit
 
-Tracks work against [2026-11-26-app-audit.md](./2026-11-26-app-audit.md). Updated by Instinct on behalf of Khalid. Last updated: 2026-11-26 14:55 (Cairo).
+Tracks work against [2026-11-26-app-audit.md](./2026-11-26-app-audit.md). Updated by Instinct on behalf of Khalid. Last updated: 2026-11-26 14:48 (Cairo).
 
 Rule used: nothing goes to `main` directly any more. Each fix is a PR with a regression test where the code allows one.
 
