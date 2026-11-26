@@ -23,6 +23,8 @@
       "purchase_order": "أوامر الشراء",
       "purchase_shipment": "شحنات الموردين",
       "purchase_receipt": "إيصالات الاستلام",
+      "vendor_bill": "فواتير الموردين",
+      "vendor_payment": "مدفوعات الموردين",
       "payment_term": "شروط الدفع",
       "vendor": "الموردون",
       "activity_log": "سجل النشاط",

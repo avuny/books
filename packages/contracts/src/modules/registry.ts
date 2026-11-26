@@ -191,6 +191,32 @@ export const MODULES = {
       reverse: { permission: true, event: "reversed" },
     },
   },
+  vendor_bill: {
+    sidebar: {
+      group: "purchases",
+      icon: "file-text",
+      path: "/vendor-bills",
+      label: { en: "Vendor bills", ar: "فواتير الموردين" },
+    },
+    actions: {
+      ...CRUD,
+      post: { permission: true, event: "posted" },
+      reverse: { permission: true, event: "reversed" },
+    },
+  },
+  vendor_payment: {
+    sidebar: {
+      group: "purchases",
+      icon: "badge-dollar-sign",
+      path: "/vendor-payments",
+      label: { en: "Vendor payments", ar: "مدفوعات الموردين" },
+    },
+    actions: {
+      ...CRUD,
+      post: { permission: true, event: "posted" },
+      reverse: { permission: true, event: "reversed" },
+    },
+  },
   payment_term: {
     actions: { ...CRUD },
   },

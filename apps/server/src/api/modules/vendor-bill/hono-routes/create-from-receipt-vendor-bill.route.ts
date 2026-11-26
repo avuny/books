@@ -1,0 +1,103 @@
+import { createRoute } from "@hono/zod-openapi"
+import { z } from "@avuny/zod"
+import { createOpenAPIRouter, getRequestLocale, handleResult } from "@avuny/hono"
+import { globalErrorResponses } from "@avuny/utils"
+import {
+  CreateVendorBillFromReceiptSchema,
+  VendorBillDtoSchema,
+  VendorBillErrorCode as Code,
+  RoleErrorCode,
+} from "@avuny/contracts"
+import { trans } from "../../../intl/i18next.js"
+import { requirePermission as defaultRequirePermission } from "../../role/role.middleware.js"
+import { roleErrorsHttpMap } from "../../role/index.js"
+import { honoPath, jsonError, jsonOk } from "../../shared/route-helpers.js"
+import { vendorBillErrorsHttpMap as errors } from "../vendor-bill.errors.js"
+import type { RouteDeps } from "./module-routes.types.js"
+
+// Keys here must match the codes declared in `responses` below; the cast only widens the key type.
+const rawErrorMap = {
+  ROLE_PERMISSION_DENIED: roleErrorsHttpMap.ROLE_PERMISSION_DENIED,
+  VENDOR_BILL_SUPPLIER_NOT_FOUND: errors.VENDOR_BILL_SUPPLIER_NOT_FOUND,
+  VENDOR_BILL_SUPPLIER_NOT_VENDOR: errors.VENDOR_BILL_SUPPLIER_NOT_VENDOR,
+  VENDOR_BILL_SUPPLIER_INACTIVE: errors.VENDOR_BILL_SUPPLIER_INACTIVE,
+  VENDOR_BILL_NO_LINES: errors.VENDOR_BILL_NO_LINES,
+  VENDOR_BILL_LINE_NOT_FOUND: errors.VENDOR_BILL_LINE_NOT_FOUND,
+  VENDOR_BILL_DUPLICATE_LINES: errors.VENDOR_BILL_DUPLICATE_LINES,
+  VENDOR_BILL_QUANTITY_NOT_POSITIVE: errors.VENDOR_BILL_QUANTITY_NOT_POSITIVE,
+  VENDOR_BILL_AMOUNT_NOT_POSITIVE: errors.VENDOR_BILL_AMOUNT_NOT_POSITIVE,
+  VENDOR_BILL_EXCEEDS_UNBILLED: errors.VENDOR_BILL_EXCEEDS_UNBILLED,
+  VENDOR_BILL_RECEIPT_NOT_POSTED: errors.VENDOR_BILL_RECEIPT_NOT_POSTED,
+  VENDOR_BILL_RECEIPT_SUPPLIER_MISMATCH: errors.VENDOR_BILL_RECEIPT_SUPPLIER_MISMATCH,
+  VENDOR_BILL_PAYMENT_TERM_NOT_FOUND: errors.VENDOR_BILL_PAYMENT_TERM_NOT_FOUND,
+  VENDOR_BILL_DUE_DATE_BEFORE_INVOICE: errors.VENDOR_BILL_DUE_DATE_BEFORE_INVOICE,
+  VENDOR_BILL_RECEIPT_NOT_FOUND: errors.VENDOR_BILL_RECEIPT_NOT_FOUND,
+  VENDOR_BILL_NOTHING_TO_BILL: errors.VENDOR_BILL_NOTHING_TO_BILL,
+  VENDOR_BILL_DUPLICATE_SUPPLIER_INVOICE: errors.VENDOR_BILL_DUPLICATE_SUPPLIER_INVOICE,
+  VENDOR_BILL_NUMBER_TAKEN: errors.VENDOR_BILL_NUMBER_TAKEN,
+} as const
+
+const errorMap = rawErrorMap as unknown as Record<Code | RoleErrorCode, (typeof rawErrorMap)[keyof typeof rawErrorMap]>
+
+export const createFromReceiptVendorBillRoute = ({
+  service,
+  requireAuth,
+  requirePermission = defaultRequirePermission,
+}: RouteDeps) => {
+  const router = createOpenAPIRouter()
+
+  const route = createRoute({
+    method: "post",
+    path: "/organizations/{orgId}/vendor-bills/from-receipt",
+    operationId: "createVendorBillFromReceipt",
+    tags: ["vendor-bill"],
+    summary: "Create a draft vendor bill from a posted receipt",
+    middleware: [requireAuth, requirePermission("create:vendor-bill")] as const,
+    request: {
+      params: z.object({ orgId: z.string().uuid() }),
+      body: { content: { "application/json": { schema: CreateVendorBillFromReceiptSchema } } },
+    },
+    responses: {
+      201: jsonOk("Create a draft vendor bill from a posted receipt", VendorBillDtoSchema),
+      403: jsonError("Forbidden", [RoleErrorCode.ROLE_PERMISSION_DENIED]),
+      404: jsonError("Not found", [
+        Code.VENDOR_BILL_SUPPLIER_NOT_FOUND,
+        Code.VENDOR_BILL_RECEIPT_NOT_FOUND,
+      ]),
+      409: jsonError("Conflict", [
+        Code.VENDOR_BILL_EXCEEDS_UNBILLED,
+        Code.VENDOR_BILL_RECEIPT_NOT_POSTED,
+        Code.VENDOR_BILL_NOTHING_TO_BILL,
+        Code.VENDOR_BILL_DUPLICATE_SUPPLIER_INVOICE,
+        Code.VENDOR_BILL_NUMBER_TAKEN,
+      ]),
+      422: jsonError("Invalid request", [
+        Code.VENDOR_BILL_SUPPLIER_NOT_VENDOR,
+        Code.VENDOR_BILL_SUPPLIER_INACTIVE,
+        Code.VENDOR_BILL_NO_LINES,
+        Code.VENDOR_BILL_LINE_NOT_FOUND,
+        Code.VENDOR_BILL_DUPLICATE_LINES,
+        Code.VENDOR_BILL_QUANTITY_NOT_POSITIVE,
+        Code.VENDOR_BILL_AMOUNT_NOT_POSITIVE,
+        Code.VENDOR_BILL_RECEIPT_SUPPLIER_MISMATCH,
+        Code.VENDOR_BILL_PAYMENT_TERM_NOT_FOUND,
+        Code.VENDOR_BILL_DUE_DATE_BEFORE_INVOICE,
+      ]),
+      ...globalErrorResponses,
+    },
+  })
+
+  router.use(honoPath(route.path), requireAuth)
+
+  router.openapi(route, async (c) => {
+    const errorTrans = trans({ lang: getRequestLocale() })
+    const user = c.get("user")
+    const { orgId } = c.req.valid("param")
+    const body = c.req.valid("json")
+
+    const result = await service.createFromReceipt(user.id, orgId, body)
+    return handleResult({ c, result, successStatus: 201, errorMap, errorTrans, moduleName: "vendor-bill" })
+  })
+
+  return router
+}

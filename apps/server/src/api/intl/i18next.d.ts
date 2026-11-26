@@ -21,6 +21,8 @@ import type sidebarEn from "./locales/sidebar/en.json"
 import type unitEn from "./locales/unit/en.json"
 import type unitCollectionEn from "./locales/unit-collection/en.json"
 import type usersEn from "./locales/users/en.json"
+import type vendorBillEn from "./locales/vendor-bill/en.json"
+import type vendorPaymentEn from "./locales/vendor-payment/en.json"
 import type warehouseEn from "./locales/warehouse/en.json"
 import type warehouseLocationEn from "./locales/warehouse-location/en.json"
 
@@ -47,6 +49,8 @@ type SidebarMessages = typeof sidebarEn
 type UnitMessages = typeof unitEn
 type UnitCollectionMessages = typeof unitCollectionEn
 type UsersMessages = typeof usersEn
+type VendorBillMessages = typeof vendorBillEn
+type VendorPaymentMessages = typeof vendorPaymentEn
 type WarehouseMessages = typeof warehouseEn
 type WarehouseLocationMessages = typeof warehouseLocationEn
 
@@ -87,6 +91,10 @@ declare module "i18next" {
       "unit-collection": UnitCollectionMessages
       unitCollection: UnitCollectionMessages
       users: UsersMessages
+      "vendor-bill": VendorBillMessages
+      vendorBill: VendorBillMessages
+      "vendor-payment": VendorPaymentMessages
+      vendorPayment: VendorPaymentMessages
       warehouse: WarehouseMessages
       "warehouse-location": WarehouseLocationMessages
       warehouseLocation: WarehouseLocationMessages

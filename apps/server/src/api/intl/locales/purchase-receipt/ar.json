@@ -20,6 +20,58 @@
     "PURCHASE_RECEIPT_STOCK_ALREADY_USED": "تم استخدام المخزون المستلم بالفعل، لذا لا يمكن عكس هذا الإيصال",
     "PURCHASE_RECEIPT_POSTING_FAILED": "فشل ترحيل الإيصال. لم يتغير شيء. حاول مرة أخرى",
     "PURCHASE_RECEIPT_PROJECTION_CONFLICT": "تغيرت كميات المخزون أثناء الترحيل. حاول مرة أخرى",
+    "PURCHASE_RECEIPT_ALREADY_BILLED": "للإيصال فاتورة مورد مرحّلة. اعكس الفاتورة أولاً",
     "PURCHASE_RECEIPT_NUMBER_TAKEN": "تعذر تخصيص رقم الإيصال. حاول مرة أخرى"
+  },
+  "labels": {
+    "status": {
+      "DRAFT": "مسودة",
+      "POSTED": "مرحّل",
+      "REVERSED": "معكوس"
+    },
+    "billStatus": {
+      "NOT_APPLICABLE": "غير منطبق",
+      "AWAITING_BILL": "بانتظار فاتورة المورّد",
+      "PARTIALLY_BILLED": "مفوترة جزئيًا",
+      "BILLED": "مفوترة"
+    }
+  },
+  "msgs": {
+    "PURCHASE_RECEIPT_CREATED": "تم إنشاء إيصال الاستلام بنجاح",
+    "PURCHASE_RECEIPT_UPDATED": "تم تحديث إيصال الاستلام بنجاح",
+    "PURCHASE_RECEIPT_DELETED": "تم حذف إيصال الاستلام بنجاح",
+    "PURCHASE_RECEIPT_POSTED": "تم ترحيل الإيصال. البضاعة المقبولة أصبحت في المخزون",
+    "PURCHASE_RECEIPT_REVERSED": "تم عكس الإيصال"
+  },
+  "ui": {
+    "title": "إيصالات استلام البضائع",
+    "new": "إيصال جديد",
+    "none": "لا توجد إيصالات بعد.",
+    "number": "الإيصال",
+    "date": "التاريخ",
+    "reference": "مرجع تسليم المورد",
+    "notes": "ملاحظات",
+    "status": "الحالة",
+    "bill": "الفاتورة",
+    "value": "القيمة",
+    "post": "ترحيل",
+    "reverse": "عكس",
+    "cancel": "إلغاء",
+    "create": "إنشاء إيصال",
+    "creating": "جارٍ الإنشاء...",
+    "reverseTitle": "عكس الإيصال",
+    "reverseDescription": "سيتم إخراج البضائع المستلمة من المخزون وعكس القيد. يفشل إذا تم استخدام المخزون.",
+    "reason": "السبب",
+    "noOpenLines": "أدخل ما وصل لكل سطر. اترك السطر فارغًا لتخطيه.",
+    "item": "الصنف",
+    "inTransit": "في الطريق",
+    "unshipped": "غير مشحون",
+    "received": "المستلم",
+    "rejected": "المرفوض",
+    "rejectionReason": "سبب الرفض",
+    "expiryDate": "تاريخ الانتهاء (للأصناف ذات الصلاحية)",
+    "direct": "لم يُشحن بعد (استلام مباشر)",
+    "invalidQty": "تحقق من الكميات: يجب أن يكون المستلم أكبر من صفر ولا يزيد المرفوض عن المستلم.",
+    "reasonRequired": "أدخل سببًا للبضائع المرفوضة."
   }
 }

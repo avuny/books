@@ -176,6 +176,7 @@ export const purchaseReceiptLines = pgTable(
             columns: [t.orgId, t.itemId, t.batchId],
             foreignColumns: [batches.orgId, batches.itemId, batches.id],
         }).onDelete("restrict"),
+        unique("ux_purchase_receipt_line_org_id").on(t.orgId, t.id),
         unique("ux_purchase_receipt_line_no").on(t.purchaseReceiptId, t.lineNo),
         unique("ux_purchase_receipt_line_order_line").on(t.purchaseReceiptId, t.purchaseOrderLineId),
         check(

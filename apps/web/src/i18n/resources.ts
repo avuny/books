@@ -63,6 +63,14 @@ import {
 } from "@avuny/contracts/unit-collection"
 import { userTranslationsAr, userTranslationsEn } from "@avuny/contracts/user"
 import {
+  vendorBillTranslationsAr,
+  vendorBillTranslationsEn,
+} from "@avuny/contracts/vendor-bill"
+import {
+  vendorPaymentTranslationsAr,
+  vendorPaymentTranslationsEn,
+} from "@avuny/contracts/vendor-payment"
+import {
   warehouseTranslationsAr,
   warehouseTranslationsEn,
 } from "@avuny/contracts/warehouse"
@@ -92,6 +100,8 @@ export const resources = {
     unit: unitTranslationsEn,
     "unit-collection": unitCollectionTranslationsEn,
     user: userTranslationsEn,
+    "vendor-bill": vendorBillTranslationsEn,
+    "vendor-payment": vendorPaymentTranslationsEn,
     warehouse: warehouseTranslationsEn,
     "warehouse-location": warehouseLocationTranslationsEn,
   },
@@ -115,6 +125,8 @@ export const resources = {
     unit: unitTranslationsAr,
     "unit-collection": unitCollectionTranslationsAr,
     user: userTranslationsAr,
+    "vendor-bill": vendorBillTranslationsAr,
+    "vendor-payment": vendorPaymentTranslationsAr,
     warehouse: warehouseTranslationsAr,
     "warehouse-location": warehouseLocationTranslationsAr,
   },
