@@ -66,6 +66,7 @@
     "received": "Received",
     "rejected": "Rejected",
     "rejectionReason": "Rejection reason",
+    "expiryDate": "Expiry date (expiry-tracked items)",
     "direct": "Not shipped yet (direct receipt)",
     "invalidQty": "Check the quantities: received must be above zero and rejected cannot exceed received.",
     "reasonRequired": "Enter a reason for rejected goods."

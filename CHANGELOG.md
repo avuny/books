@@ -1,6 +1,9 @@
 # Changelog
 
 ## [Unreleased]
+### Added
+- Batches always on: stock issues are split across batches automatically (earliest expiry first for expiry-tracked items, oldest first otherwise), negative stock is blocked for batch items, batch tracking follows inventory tracking
+- Receipt lines take an expiry date, so expiry-tracked items can be received
 
 ## [0.3.0] - 2026-11-26
 ### Added

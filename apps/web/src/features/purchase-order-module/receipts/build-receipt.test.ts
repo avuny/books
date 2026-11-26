@@ -26,6 +26,10 @@ describe("buildReceiptPayload", () => {
     })
     expect(res.ok && res.data.lines).toHaveLength(1)
   })
+  it("sends the typed expiry date, or null when blank", () => {
+    const res = buildReceiptPayload(header, open, { [uuid(1)]: { received: "5", rejected: "", reason: "", direct: false, expiresOn: "2027-06-30" }, [uuid(2)]: { received: "4", rejected: "", reason: "", direct: true } }, "2026-11-28")
+    expect(res.ok && res.data.lines.map((l) => l.expiresOn)).toEqual(["2027-06-30", null])
+  })
   it("marks direct lines", () => {
     const res = buildReceiptPayload(header, open, { [uuid(2)]: { received: "4", rejected: "", reason: "", direct: true } }, "2026-11-28")
     expect(res.ok && res.data.lines[0]).toMatchObject({ isDirect: true, acceptedQty: "4", rejectedQty: "0" })

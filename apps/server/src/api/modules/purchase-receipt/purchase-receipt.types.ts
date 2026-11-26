@@ -96,7 +96,7 @@ export interface ReceiptBatchPort {
   /** Returns the batch id to use, or null when the item is not batch tracked. Number is unique per receipt line. */
   resolve(
     orgId: string,
-    input: { itemId: string; number: string; manufacturedOn: string },
+    input: { itemId: string; number: string; manufacturedOn: string; expiresOn?: string | null },
     tx?: Tx
   ): Promise<string | null>
 }

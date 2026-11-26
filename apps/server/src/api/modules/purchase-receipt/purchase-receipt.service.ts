@@ -157,6 +157,7 @@ export function createPurchaseReceiptService(deps: PurchaseReceiptServiceDeps) {
         rejectedBaseQty: rejectedBase,
         isDirect,
         batchId: input.batchId ?? null,
+        expiresOn: input.expiresOn ?? null,
         unitCostSnapshot: Number(computeUnitCostSnapshot(ol.orderedBaseQty, net)),
         receiptValue: Number(computeReceiptValue(acceptedBase, ol.orderedBaseQty, net)),
         rejectionReason: cmpQty(rejectedQty, "0") > 0 ? (input.rejectionReason?.trim() ?? null) : null,
@@ -312,7 +313,12 @@ export function createPurchaseReceiptService(deps: PurchaseReceiptServiceDeps) {
               if (l.batchId) continue
               const batchId = await deps.batches.resolve(
                 orgId,
-                { itemId: l.itemId, number: `${current.row.number}-${l.lineNo}`, manufacturedOn: current.row.receiptDate },
+                {
+                  itemId: l.itemId,
+                  number: `${current.row.number}-${l.lineNo}`,
+                  manufacturedOn: current.row.receiptDate,
+                  expiresOn: l.expiresOn ?? null,
+                },
                 tx
               )
               if (batchId) {

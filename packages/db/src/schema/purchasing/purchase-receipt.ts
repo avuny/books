@@ -137,6 +137,8 @@ export const purchaseReceiptLines = pgTable(
         rejectedBaseQty: quantity("rejected_base_qty").notNull().default("0"),
         isDirect: boolean("is_direct").notNull().default(false),
         batchId: uuid("batch_id"),
+        /** Expiry date typed at receiving; used for the new batch of an expiry-tracked item (falls back to the item default shelf life). */
+        expiresOn: date("expires_on", { mode: "string" }),
         unitCostSnapshot: money("unit_cost_snapshot").default(0),
         receiptValue: money("receipt_value").default(0),
         rejectionReason: text("rejection_reason"),

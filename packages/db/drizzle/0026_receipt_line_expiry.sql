@@ -1,0 +1,1 @@
+ALTER TABLE "purchase_receipt_lines" ADD COLUMN "expires_on" date;
