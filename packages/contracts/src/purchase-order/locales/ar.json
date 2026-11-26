@@ -1,0 +1,56 @@
+{
+  "errors": {
+    "PURCHASE_ORDER_NOT_FOUND": "أمر الشراء غير موجود",
+    "PURCHASE_ORDER_NOT_EDITABLE": "يمكن تعديل أوامر الشراء المسودة فقط",
+    "PURCHASE_ORDER_NOT_DELETABLE": "يمكن حذف أوامر الشراء المسودة فقط. ألغِ الأمر المؤكد بدلًا من حذفه",
+    "PURCHASE_ORDER_NOT_DRAFT": "هذا الإجراء متاح لأوامر الشراء المسودة فقط",
+    "PURCHASE_ORDER_NOT_OPEN": "أمر الشراء هذا غير مفتوح",
+    "PURCHASE_ORDER_ALREADY_CONFIRMED": "أمر الشراء مؤكد بالفعل",
+    "PURCHASE_ORDER_ALREADY_CLOSED": "أمر الشراء مغلق بالفعل",
+    "PURCHASE_ORDER_ALREADY_CANCELLED": "أمر الشراء ملغى بالفعل",
+    "PURCHASE_ORDER_HAS_FULFILLMENT": "يحتوي هذا الأمر على شحنات أو استلامات. أغلقه بدلًا من إلغائه",
+    "PURCHASE_ORDER_HAS_IN_TRANSIT": "ما زالت بضائع في الطريق. استلمها أو اعكس الشحنة قبل الإغلاق",
+    "PURCHASE_ORDER_NO_LINES": "مطلوب سطر واحد على الأقل في الأمر",
+    "PURCHASE_ORDER_PARTY_REQUIRED": "اختر موردًا",
+    "PURCHASE_ORDER_PARTY_NOT_FOUND": "المورد المحدد غير موجود",
+    "PURCHASE_ORDER_PARTY_NOT_VENDOR": "الجهة المحددة ليست موردًا",
+    "PURCHASE_ORDER_PARTY_INACTIVE": "المورد المحدد غير نشط",
+    "PURCHASE_ORDER_PAYMENT_TERM_NOT_FOUND": "شرط الدفع المحدد غير موجود",
+    "PURCHASE_ORDER_PAYMENT_TERM_INACTIVE": "شرط الدفع المحدد غير نشط",
+    "PURCHASE_ORDER_WAREHOUSE_REQUIRED": "اختر مستودع الاستلام لكل سطر",
+    "PURCHASE_ORDER_WAREHOUSE_NOT_FOUND": "المستودع المحدد غير موجود",
+    "PURCHASE_ORDER_WAREHOUSE_NOT_PHYSICAL": "المستودعات الفعلية فقط يمكنها استلام البضائع المشتراة",
+    "PURCHASE_ORDER_LOCATION_NOT_FOUND": "موقع المستودع المحدد غير موجود",
+    "PURCHASE_ORDER_LOCATION_NOT_IN_WAREHOUSE": "الموقع لا يتبع المستودع المحدد",
+    "PURCHASE_ORDER_LOCATION_NOT_STOCKABLE": "لا يمكن تخزين مخزون في هذا الموقع",
+    "PURCHASE_ORDER_LOCATION_BLOCKED": "الموقع محظور",
+    "PURCHASE_ORDER_ITEM_NOT_FOUND": "الصنف المحدد غير موجود",
+    "PURCHASE_ORDER_ITEM_INACTIVE": "لا يمكن طلب أصناف غير نشطة",
+    "PURCHASE_ORDER_ITEM_NOT_STOCKED": "يمكن طلب الأصناف المتتبعة في المخزون فقط",
+    "PURCHASE_ORDER_UNIT_NOT_IN_COLLECTION": "الوحدة المحددة غير مهيأة لهذا الصنف",
+    "PURCHASE_ORDER_AMOUNT_OUT_OF_RANGE": "أحد المبالغ في هذا الأمر كبير جدًا",
+    "PURCHASE_ORDER_DISCOUNT_EXCEEDS_LINE": "لا يمكن أن يزيد خصم السطر عن مبلغ السطر",
+    "PURCHASE_ORDER_CURRENCY_MISMATCH": "عملة الأمر لا تطابق عملة المؤسسة",
+    "PURCHASE_ORDER_NUMBER_TAKEN": "تعذر تخصيص رقم لأمر الشراء. حاول مرة أخرى"
+  },
+  "labels": {
+    "status": {
+      "DRAFT": "مسودة",
+      "CONFIRMED": "مؤكد",
+      "PARTIALLY_SHIPPED": "شُحن جزئيًا",
+      "IN_TRANSIT": "في الطريق",
+      "PARTIALLY_RECEIVED": "استُلم جزئيًا",
+      "RECEIVED": "تم الاستلام",
+      "CLOSED": "مغلق",
+      "CANCELLED": "ملغى"
+    }
+  },
+  "msgs": {
+    "PURCHASE_ORDER_CREATED": "تم إنشاء أمر الشراء بنجاح",
+    "PURCHASE_ORDER_UPDATED": "تم تحديث أمر الشراء بنجاح",
+    "PURCHASE_ORDER_DELETED": "تم حذف أمر الشراء بنجاح",
+    "PURCHASE_ORDER_CONFIRMED": "تم تأكيد أمر الشراء. الكميات الآن قيد الطلب",
+    "PURCHASE_ORDER_CLOSED": "تم إغلاق أمر الشراء",
+    "PURCHASE_ORDER_CANCELLED": "تم إلغاء أمر الشراء"
+  }
+}

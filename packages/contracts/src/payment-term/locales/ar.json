@@ -1,0 +1,33 @@
+{
+  "errors": {
+    "PAYMENT_TERM_NOT_FOUND": "شرط الدفع غير موجود",
+    "PAYMENT_TERM_LIMIT_REACHED": "وصلت إلى الحد الأقصى لعدد شروط الدفع",
+    "PAYMENT_TERM_NAME_TAKEN": "يوجد شرط دفع بهذا الاسم بالفعل",
+    "PAYMENT_TERM_SYSTEM_READONLY": "لا يمكن تعديل شروط الدفع الأساسية",
+    "PAYMENT_TERM_DAYS_NOT_ALLOWED": "طريقة الحساب هذه لا تستخدم عدد أيام",
+    "PAYMENT_TERM_DAYS_REQUIRED": "أدخل عدد الأيام لطريقة الحساب هذه"
+  },
+  "labels": {
+    "methods": {
+      "DUE_ON_RECEIPT": "مستحق عند الاستلام",
+      "NET_DAYS": "عدد أيام بعد تاريخ الفاتورة",
+      "END_OF_MONTH": "نهاية شهر الفاتورة",
+      "END_OF_NEXT_MONTH": "نهاية الشهر التالي",
+      "DAYS_AFTER_END_OF_MONTH": "عدد أيام بعد نهاية الشهر"
+    },
+    "system": {
+      "DUE_ON_RECEIPT": "مستحق عند الاستلام",
+      "NET_15": "صافي 15 يومًا",
+      "NET_30": "صافي 30 يومًا",
+      "NET_45": "صافي 45 يومًا",
+      "NET_60": "صافي 60 يومًا",
+      "EOM": "مستحق نهاية الشهر",
+      "NEXT_EOM": "مستحق نهاية الشهر التالي"
+    }
+  },
+  "msgs": {
+    "PAYMENT_TERMS_LISTED": "تم جلب شروط الدفع بنجاح",
+    "PAYMENT_TERM_CREATED": "تم إنشاء شرط الدفع بنجاح",
+    "PAYMENT_TERM_UPDATED": "تم تحديث شرط الدفع بنجاح"
+  }
+}

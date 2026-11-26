@@ -90,6 +90,21 @@
       "import": "./dist/party/index.js",
       "default": "./dist/party/index.js"
     },
+    "./payment-term": {
+      "types": "./dist/payment-term/index.d.ts",
+      "import": "./dist/payment-term/index.js",
+      "default": "./dist/payment-term/index.js"
+    },
+    "./purchase-order": {
+      "types": "./dist/purchase-order/index.d.ts",
+      "import": "./dist/purchase-order/index.js",
+      "default": "./dist/purchase-order/index.js"
+    },
+    "./purchase-shipment": {
+      "types": "./dist/purchase-shipment/index.d.ts",
+      "import": "./dist/purchase-shipment/index.js",
+      "default": "./dist/purchase-shipment/index.js"
+    },
     "./role": {
       "types": "./dist/role/index.d.ts",
       "import": "./dist/role/index.js",
