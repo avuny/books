@@ -139,6 +139,13 @@ export function createPurchaseReceiptRepository({ db }: { db: DB }): PurchaseRec
       await insertLines(exec, orgId, id, lines)
     },
 
+    async setLineBatch(orgId, lineId, batchId, tx) {
+      await ex(tx)
+        .update(purchaseReceiptLines)
+        .set({ batchId })
+        .where(and(eq(purchaseReceiptLines.orgId, orgId), eq(purchaseReceiptLines.id, lineId)))
+    },
+
     async deleteById(orgId, id, tx) {
       await ex(tx)
         .delete(purchaseReceipts)

@@ -61,6 +61,10 @@ class InMemoryReceiptRepository implements PurchaseReceiptRepository {
     this.lines = this.lines.filter((l) => l.purchaseReceiptId !== id)
     lines.forEach((l, i) => this.lines.push({ ...l, id: `${id}-${i}`, purchaseReceiptId: id } as unknown as PurchaseReceiptLine))
   }
+  batchSet: Record<string, string> = {}
+  async setLineBatch(_o: string, lineId: string, batchId: string) {
+    this.batchSet[lineId] = batchId
+  }
   async deleteById(_o: string, id: string) {
     this.receipts = this.receipts.filter((s) => s.id !== id)
     this.lines = this.lines.filter((l) => l.purchaseReceiptId !== id)
@@ -85,6 +89,7 @@ describe("PurchaseReceiptService", () => {
   let reversedJournals: string[]
   let layerUsed: boolean
   let failMovement: boolean
+  let batchTracked: boolean
 
   const service = () =>
     createPurchaseReceiptService({
@@ -122,6 +127,11 @@ describe("PurchaseReceiptService", () => {
           return { success: true, data: { id: `jr-${id}` } } as any
         },
       },
+      batches: {
+        async resolve(_o, input) {
+          return batchTracked ? `batch-for-${input.number}` : null
+        },
+      },
       projection,
       permissions: allowAll,
       activityLog: noopActivityLog,
@@ -146,7 +156,7 @@ describe("PurchaseReceiptService", () => {
     receipts = new InMemoryReceiptRepository()
     projection = new FakeProjection()
     movements = []; reversedMovements = []; layers = []; journals = []; reversedJournals = []
-    layerUsed = false; failMovement = false
+    layerUsed = false; failMovement = false; batchTracked = false
     const poService = createPurchaseOrderService({
       repository: orders, items: okItems, locations: okLocations, suppliers: okSuppliers, paymentTerms: okTerms,
       orgSettings: okOrgSettings, projection, permissions: allowAll, activityLog: noopActivityLog,
@@ -202,6 +212,17 @@ describe("PurchaseReceiptService", () => {
     expect(orders.lines[0]).toMatchObject({ receivedBaseQty: "4", acceptedBaseQty: "4", rejectedBaseQty: "0", shippedBaseQty: "10" })
     expect(orders.orders[0]!.status).toBe("PARTIALLY_RECEIVED")
     expect(projection.calls.flat()[0]).toMatchObject({ inTransitDelta: "-4" })
+  })
+
+  it("batch-tracked items go into a new batch named after the receipt line", async () => {
+    batchTracked = true
+    shipped("10")
+    const r = await newReceipt()
+    await service().post(actorId, orgId, r.id)
+    const batchId = movements[0].lines[0].batchId as string
+    expect(batchId).toMatch(/^batch-for-.+-1$/)
+    expect(layers[0].batchId).toBe(batchId)
+    expect(Object.values(receipts.batchSet)).toEqual([batchId])
   })
 
   it("rejected goods count as received but put nothing on hand", async () => {

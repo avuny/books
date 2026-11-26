@@ -60,6 +60,8 @@ export interface PurchaseReceiptRepository {
     tx?: Tx
   ): Promise<PurchaseReceipt | null>
   replaceLines(orgId: string, id: string, lines: readonly NewReceiptLine[], tx?: Tx): Promise<void>
+  /** Records the batch a posted line went into (created automatically when the item is batch tracked). */
+  setLineBatch(orgId: string, lineId: string, batchId: string, tx?: Tx): Promise<void>
   deleteById(orgId: string, id: string, tx?: Tx): Promise<void>
 }
 
@@ -89,6 +91,16 @@ export interface CostLayerPort {
   consumeLayer(orgId: string, layer: InventoryCostLayer, reversalLineId: string, tx?: Tx): Promise<void>
 }
 
+/** Batches under the hood: every receipt of a batch-tracked item goes into its own new batch. */
+export interface ReceiptBatchPort {
+  /** Returns the batch id to use, or null when the item is not batch tracked. Number is unique per receipt line. */
+  resolve(
+    orgId: string,
+    input: { itemId: string; number: string; manufacturedOn: string },
+    tx?: Tx
+  ): Promise<string | null>
+}
+
 export interface AccountingPort {
   postBusinessEvent(actorId: string | null, orgId: string, event: PostBusinessEventInput, tx?: Tx): Promise<Result<JournalEntryDto, any>>
   reverseJournalEntry(
@@ -107,6 +119,8 @@ export interface PurchaseReceiptServiceDeps {
   locations: LocationPort
   stockMovement: StockMovementPort
   costing: CostLayerPort
+  /** Optional: without it lines are posted as given (no automatic batches). */
+  batches?: ReceiptBatchPort
   accounting: AccountingPort
   projection: { applyInboundDeltas(orgId: string, deltas: readonly InboundDelta[], tx?: Tx): Promise<void> }
   permissions: {

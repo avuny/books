@@ -305,6 +305,22 @@ export function createPurchaseReceiptService(deps: PurchaseReceiptServiceDeps) {
           let stockMovementId: string | null = null
           let journalEntryId: string | null = null
           let totalValue = 0
+          // Batches under the hood: a batch-tracked item without a chosen batch gets a new batch for this receipt line.
+          const batchByLine = new Map<string, string>()
+          if (deps.batches) {
+            for (const l of accepted) {
+              if (l.batchId) continue
+              const batchId = await deps.batches.resolve(
+                orgId,
+                { itemId: l.itemId, number: `${current.row.number}-${l.lineNo}`, manufacturedOn: current.row.receiptDate },
+                tx
+              )
+              if (batchId) {
+                batchByLine.set(l.id, batchId)
+                await deps.repository.setLineBatch(orgId, l.id, batchId, tx)
+              }
+            }
+          }
           if (accepted.length > 0) {
             const moved = await deps.stockMovement.post(
               actorId,
@@ -316,7 +332,7 @@ export function createPurchaseReceiptService(deps: PurchaseReceiptServiceDeps) {
                 sourceRef: current.row.number,
                 lines: accepted.map((l) => ({
                   itemId: l.itemId,
-                  batchId: l.batchId ?? undefined,
+                  batchId: l.batchId ?? batchByLine.get(l.id) ?? undefined,
                   toLocationId: l.locationId,
                   quantity: l.acceptedBaseQty,
                 })),
@@ -335,7 +351,7 @@ export function createPurchaseReceiptService(deps: PurchaseReceiptServiceDeps) {
                 {
                   itemId: l.itemId,
                   locationId: l.locationId,
-                  batchId: l.batchId ?? null,
+                  batchId: l.batchId ?? batchByLine.get(l.id) ?? null,
                   movementLineId: posted.id,
                   qty: l.acceptedBaseQty,
                   valueMinor: String(l.receiptValue),
