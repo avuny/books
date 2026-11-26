@@ -1,6 +1,8 @@
 # Changelog
 
 ## [Unreleased]
+
+## [0.3.0] - 2026-11-26
 ### Added
 - Purchase receipt module: receive goods against purchase orders into stock (inventory, FIFO cost layers, Dr Inventory / Cr GRNI journal), post and reverse
 - Item default cost and selling price; purchase order lines prefill the unit price from the cost price
