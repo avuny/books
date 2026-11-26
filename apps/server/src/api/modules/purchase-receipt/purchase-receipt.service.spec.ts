@@ -90,6 +90,7 @@ describe("PurchaseReceiptService", () => {
   let layerUsed: boolean
   let failMovement: boolean
   let batchTracked: boolean
+  let resolveInputs: { expiresOn?: string | null }[]
 
   const service = () =>
     createPurchaseReceiptService({
@@ -129,6 +130,7 @@ describe("PurchaseReceiptService", () => {
       },
       batches: {
         async resolve(_o, input) {
+          resolveInputs.push(input)
           return batchTracked ? `batch-for-${input.number}` : null
         },
       },
@@ -156,7 +158,7 @@ describe("PurchaseReceiptService", () => {
     receipts = new InMemoryReceiptRepository()
     projection = new FakeProjection()
     movements = []; reversedMovements = []; layers = []; journals = []; reversedJournals = []
-    layerUsed = false; failMovement = false; batchTracked = false
+    layerUsed = false; failMovement = false; batchTracked = false; resolveInputs = []
     const poService = createPurchaseOrderService({
       repository: orders, items: okItems, locations: okLocations, suppliers: okSuppliers, paymentTerms: okTerms,
       orgSettings: okOrgSettings, projection, permissions: allowAll, activityLog: noopActivityLog,
@@ -223,6 +225,14 @@ describe("PurchaseReceiptService", () => {
     expect(batchId).toMatch(/^batch-for-.+-1$/)
     expect(layers[0].batchId).toBe(batchId)
     expect(Object.values(receipts.batchSet)).toEqual([batchId])
+  })
+
+  it("the expiry date typed on the receipt line reaches the new batch", async () => {
+    batchTracked = true
+    shipped("10")
+    const r = await newReceipt({ expiresOn: "2027-06-30" })
+    await service().post(actorId, orgId, r.id)
+    expect(resolveInputs[0]?.expiresOn).toBe("2027-06-30")
   })
 
   it("rejected goods count as received but put nothing on hand", async () => {

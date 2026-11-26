@@ -1,6 +1,6 @@
 import { and, asc, count, eq, ilike, inArray, sql } from "drizzle-orm"
 import type { BatchOffsetListQuery, BatchStatus, ShelfLifeUnit } from "@avuny/contracts"
-import { batches, itemExpirySettings, type Batch, type DB, type NewBatch, type Tx } from "@avuny/db"
+import { batches, inventoryItemBatches, inventoryItems, itemExpirySettings, type Batch, type DB, type NewBatch, type Tx } from "@avuny/db"
 import { isForeignKeyViolation, isUniqueViolation } from "../shared/pg-errors.js"
 
 const NUMBER_INDEXES = ["ux_batch_org_item_number"] as const
@@ -84,6 +84,40 @@ export function createBatchRepository({ db }: { db: DB }) {
         })
         .from(batches)
         .where(and(eq(batches.orgId, orgId), inArray(batches.id, [...ids])))
+    },
+
+    /**
+     * Batches of one item with stock at one location, for auto-allocation of an outbound line.
+     * `available` is on hand minus reserved; rows with nothing available are left out.
+     */
+    async listAllocatable(
+      orgId: string,
+      itemId: string,
+      locationId: string,
+      tx?: Tx
+    ): Promise<
+      { batchId: string; available: string; expiresOn: string | null; receivedAt: string; status: BatchStatus }[]
+    > {
+      const rows = await exec(tx)
+        .select({
+          batchId: batches.id,
+          available: sql<string>`(${inventoryItemBatches.onHandQty} - ${inventoryItemBatches.reservedQty})::text`,
+          expiresOn: batches.expiresOn,
+          receivedAt: sql<string>`${batches.createdAt}::text`,
+          status: batches.status,
+        })
+        .from(inventoryItemBatches)
+        .innerJoin(inventoryItems, eq(inventoryItems.id, inventoryItemBatches.inventoryItemId))
+        .innerJoin(batches, eq(batches.id, inventoryItemBatches.batchId))
+        .where(
+          and(
+            eq(inventoryItemBatches.orgId, orgId),
+            eq(inventoryItemBatches.itemId, itemId),
+            eq(inventoryItems.locationId, locationId),
+            sql`${inventoryItemBatches.onHandQty} - ${inventoryItemBatches.reservedQty} > 0`
+          )
+        )
+      return rows
     },
 
     /** Item default shelf-life configuration for expiry date resolution. */

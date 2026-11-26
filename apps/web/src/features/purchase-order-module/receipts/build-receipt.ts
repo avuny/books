@@ -8,7 +8,7 @@ export function openReceiptLines(order: PurchaseOrderDto): PurchaseOrderLineDto[
 }
 
 export type ReceiptFormHeader = { date: string; reference: string; notes: string }
-export type ReceiptLineInput = { received: string; rejected: string; reason: string; direct: boolean }
+export type ReceiptLineInput = { received: string; rejected: string; reason: string; direct: boolean; expiresOn?: string }
 
 export type BuildReceiptResult =
   | { ok: true; data: CreatePurchaseReceiptInput }
@@ -47,6 +47,7 @@ export function buildReceiptPayload(
       acceptedQty: subQty(received, rejected),
       rejectedQty: rejected,
       isDirect: row?.direct ?? false,
+      expiresOn: (row?.expiresOn ?? "").trim() || null,
       rejectionReason: Number(rejected) > 0 ? (row?.reason ?? "").trim() : null,
     })
   }

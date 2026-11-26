@@ -24,3 +24,9 @@ Status: proposal only. Nothing here is implemented except step 1. Needs the owne
 - Quarantine and blocked batches must be skipped by auto allocation.
 - Negative stock: items that allow negative stock have no batch to draw from; use an "unbatched" bucket or the newest batch (decision needed).
 - Choose FEFO vs FIFO for items with expiry (recommended: FEFO).
+
+## Status (feat/batches-always-on)
+
+Built: allocation rule (`allocateBatches`, FEFO for expiry-tracked, FIFO otherwise, one line per batch, shortfall fails), auto-allocation of unbatched issues in the stock-movement service, `is_batch_tracked` follows `is_inventory_tracked` on create and update.
+
+Backfill: `packages/db/scripts/backfill-legacy-batches/` (`backfill.sql`, `rollback.sql`, `report.sql`, `run.ts` with `dry-run | apply | rollback`). Checked on pglite with fixtures: counts, no on-hand mismatch, re-run is a no-op, rollback restores the exact prior state. NOT run on production; needs the owner's OK. Run `dry-run` against prod first and read the report.

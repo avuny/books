@@ -22,6 +22,7 @@ const toLineDto = (l: PurchaseReceiptLineDetailRow): PurchaseReceiptLineDto => (
   rejectedBaseQty: l.rejectedBaseQty,
   isDirect: l.isDirect,
   batchId: l.batchId ?? null,
+  expiresOn: l.expiresOn ?? null,
   unitCostSnapshot: String(l.unitCostSnapshot),
   receiptValue: String(l.receiptValue),
   rejectionReason: l.rejectionReason ?? null,

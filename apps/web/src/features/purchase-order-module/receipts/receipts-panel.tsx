@@ -27,7 +27,7 @@ import { buildReceiptPayload, openReceiptLines, type ReceiptLineInput } from "./
 
 type Props = { orgId: string; order: PurchaseOrderDto }
 
-const EMPTY: ReceiptLineInput = { received: "", rejected: "", reason: "", direct: false }
+const EMPTY: ReceiptLineInput = { received: "", rejected: "", reason: "", direct: false, expiresOn: "" }
 
 export function ReceiptsPanel({ orgId, order }: Props) {
   const { t } = useTranslation("purchase-receipt")
@@ -171,6 +171,7 @@ export function ReceiptsPanel({ orgId, order }: Props) {
                     {Number(row.rejected) > 0 ? (
                       <Input className="min-w-40 flex-1" value={row.reason} onChange={(e) => setRow(l.id, { reason: e.target.value })} placeholder={t("ui.rejectionReason")} aria-label={t("ui.rejectionReason")} />
                     ) : null}
+                    <Input className="w-40" type="date" value={row.expiresOn} onChange={(e) => setRow(l.id, { expiresOn: e.target.value })} aria-label={`${t("ui.expiryDate")} ${l.itemName ?? ""}`} title={t("ui.expiryDate")} />
                     {canDirect ? (
                       <label className="flex items-center gap-1 text-xs text-muted-foreground">
                         <input type="checkbox" checked={row.direct} onChange={(e) => setRow(l.id, { direct: e.target.checked })} />

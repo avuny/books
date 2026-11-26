@@ -52,9 +52,11 @@ export function effectiveTracking(
   current: TrackingFlags,
   patch: Partial<TrackingFlags>
 ): TrackingFlags {
+  const isInventoryTracked = patch.isInventoryTracked ?? current.isInventoryTracked
   return {
-    isInventoryTracked: patch.isInventoryTracked ?? current.isInventoryTracked,
-    isBatchTracked: patch.isBatchTracked ?? current.isBatchTracked,
+    isInventoryTracked,
+    // Batches are always on for stocked items: the flag follows inventory tracking, it is not a choice.
+    isBatchTracked: isInventoryTracked,
     isExpiryTracked: patch.isExpiryTracked ?? current.isExpiryTracked ?? false,
   }
 }

@@ -337,10 +337,10 @@ describe("itemService", () => {
       expect(t.repository.upsertSettings).not.toHaveBeenCalled()
     })
 
-    it("turning inventory tracking off while batches are tracked is refused", async () => {
-      t.repository.findById.mockResolvedValue(item({ isBatchTracked: true }))
+    it("turning inventory tracking off while expiry is tracked is refused", async () => {
+      t.repository.findById.mockResolvedValue(item({ isBatchTracked: true, isExpiryTracked: true }))
       const res = await t.service.update("u1", "org-1", "item-1", { isInventoryTracked: false })
-      expect(res).toMatchObject({ success: false, error: "ITEM_BATCH_REQUIRES_TRACKING" })
+      expect(res).toMatchObject({ success: false, error: "ITEM_EXPIRY_REQUIRES_BATCH_AND_TRACKING" })
     })
 
     it("switching to another base unit builds a new collection and writes the unit pair together", async () => {
