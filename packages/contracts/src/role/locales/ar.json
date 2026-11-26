@@ -18,6 +18,7 @@
       "organization_invitation": "الدعوات",
       "role": "الأدوار",
       "inventory_adjustment": "تسويات المخزون",
+      "inventory_transfer": "تحويلات المخزون",
       "customer": "العملاء",
       "purchase_order": "أوامر الشراء",
       "purchase_shipment": "شحنات الموردين",

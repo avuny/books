@@ -32,9 +32,9 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done · `[!]` blocked · `[-]` 
 ## Tasks
 | ID | Task | Done when | Status |
 |---|---|---|---|
-| P0-01 | Close open decisions Q1 to Q6 and Q9 with the owner | Phase 0 acceptance in SPEC section 12 | [ ] |
-| P1-01 | Contracts, registry entry, locales | Phase 1 acceptance in SPEC section 12 | [ ] |
-| P1-02 | DB schema and migration 0027 | Phase 1 acceptance in SPEC section 12 | [ ] |
+| P0-01 | Close open decisions Q1 to Q6 and Q9 with the owner | Phase 0 acceptance in SPEC section 12 | [x] |
+| P1-01 | Contracts, registry entry, locales | Phase 1 acceptance in SPEC section 12 | [x] |
+| P1-02 | DB schema and migration 0027 | Phase 1 acceptance in SPEC section 12 | [x] |
 | P1-03 | Sidebar seed verified | Phase 1 acceptance in SPEC section 12 | [ ] |
 | P2-01 | Repository and service for drafts | Phase 2 acceptance in SPEC section 12 | [ ] |
 | P2-02 | Routes, permissions, audit, number generation | Phase 2 acceptance in SPEC section 12 | [ ] |
@@ -70,6 +70,9 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done · `[!]` blocked · `[-]` 
 | Q12 | Receiving a deactivated item or into a blocked location? Default: Destination can be changed; deactivated item blocks receive until reactivated or returned, which needs a decision. | open | no response yet |
 | Q13 | May a receipt go to a warehouse other than the transfer's destination? Default: No. | open | no response yet |
 
+### Phase 0 decisions (owner said to use the spec defaults, 2026-11-26)
+Q1 dispatch and receive in one step allowed (optional). Q2 same-warehouse transfer allowed. Q3 no approval step. Q4 no over-receipt. Q5 stock without cost layers moves and is reported. Q6 destination must be receivable and source pickable, enforced in the service. Q9 no negative dispatch. Q10 the unshipped remainder is dropped. Q13 receipt only into the transfer's destination warehouse.
+
 ## Deviations
 None yet.
 
@@ -77,3 +80,7 @@ None yet.
 | Date | Task | Command | Result |
 |---|---|---|---|
 | 2026-11-26 | Spec | read code on main 1a41a01 | Spec written from code reading only. Nothing was run. |
+| 2026-11-26 | P1-01 | `pnpm --filter @avuny/contracts build`, `pnpm vitest run` in packages/contracts | Build ok, 30 files / 265 tests pass, including new inventory-transfer schemas.test.ts. |
+| 2026-11-26 | P1-02 | `pnpm typecheck` in packages/db, `db:generate` | Typecheck ok. Migration 0027 only adds 3 enums, 5 tables, FKs and indexes. No drops. |
+| 2026-11-26 | P1-01 | `pnpm typecheck` in apps/server | Ok after adding the sidebar permission map entry and role permission labels. |
+| 2026-11-26 | P1-03 | not yet | Sidebar option is created by `pnpm seed` in the deploy job. Verify on production after merge. |
