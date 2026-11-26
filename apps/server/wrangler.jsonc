@@ -7,8 +7,18 @@
   "observability": {
     "enabled": true
   },
+  // Non-secret production values live here, in git. `wrangler deploy` replaces
+  // dashboard-set plain variables with this block, so anything missing here is
+  // wiped on the next deploy. Secrets (DATABASE_URL, JWT keys, API keys...) are
+  // NOT here: set them with `wrangler secret put`; they persist across deploys.
+  // Alternative: set "keep_vars": true to keep dashboard variables, at the cost
+  // of config that is not reviewable or reproducible from git.
   "vars": {
     "ENVIRONMENT": "production",
-    "LOG_LEVEL": "info"
+    "LOG_LEVEL": "info",
+    "NODE_ENV": "production",
+    "COOKIE_SAMESITE": "none",
+    "WEB_APP_URL": "https://avuny-books-web.khaledeveloper.workers.dev",
+    "CORS_ORIGINS": "https://avuny-books-web.khaledeveloper.workers.dev"
   }
 }
