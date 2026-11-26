@@ -12,7 +12,13 @@ const isRecord = (v: unknown): v is Record<string, unknown> =>
 export function parseApiError(error: unknown): ApiError {
   if (!isRecord(error)) return {}
   const response = isRecord(error.response) ? error.response : undefined
-  const body = response?.data ?? error.data ?? error.body ?? error
+  // A bare Error (network failure, thrown bug) carries no API body: its
+  // message is not user-facing, so callers fall back to the localized text.
+  const body =
+    response?.data ??
+    error.data ??
+    error.body ??
+    (error instanceof Error ? undefined : error)
   if (!isRecord(body)) return {}
   return {
     code: typeof body.code === "string" ? body.code : undefined,

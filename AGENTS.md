@@ -654,3 +654,9 @@ Clearly identify the immediate next actions for the next working session or agen
 
 The objective is to make development resumable and resilient to lost AI conversation context, session interruptions, and agent handoffs.
 
+## Releases
+
+- One version for the whole monorepo, in the root package.json. Never version packages individually.
+- When the user asks to release or merge dev to main: run `pnpm release <patch|minor|major>`.
+- After any user-facing feature or fix, add a line under `## [Unreleased]` in CHANGELOG.md as part of the same commit.
+- Versions follow semver. Pre-1.0 until the SaaS launch.

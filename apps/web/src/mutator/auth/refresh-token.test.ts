@@ -5,6 +5,23 @@ import { tokenStorage } from "./token-storage"
 
 vi.mock("axios")
 
+// Node has no Web Storage before v25 and this suite runs without a DOM env.
+const storage: Record<string, string> = {}
+globalThis.localStorage = {
+  getItem: (key: string) => storage[key] ?? null,
+  setItem: (key: string, value: string) => {
+    storage[key] = value
+  },
+  removeItem: (key: string) => {
+    delete storage[key]
+  },
+  clear: () => {
+    for (const key of Object.keys(storage)) delete storage[key]
+  },
+  length: 0,
+  key: () => null,
+}
+
 describe("refreshAccessToken", () => {
   beforeEach(() => {
     vi.clearAllMocks()

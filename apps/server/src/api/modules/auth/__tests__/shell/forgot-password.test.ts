@@ -356,7 +356,7 @@ describe("Hono routes - Slice 3: Forgot Password (D9 enumeration safety & rate l
       const res = await testApp.request("/auth/forgot-password/send-otp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ identifier: "alice" }),
+        body: JSON.stringify({ identifier: "alice@example.com" }),
       })
 
       expect(res.status).toBe(202)
@@ -364,11 +364,15 @@ describe("Hono routes - Slice 3: Forgot Password (D9 enumeration safety & rate l
         expect.anything(),
         expect.objectContaining({
           purpose: "FORGET_PASSWORD",
-          identifier: "alice",
-          userId: "user-alice",
+          identifier: "alice@example.com",
           isSuppressed: false,
         })
       )
+      // FORGET_PASSWORD is a public purpose: the OTP row must not bind a user
+      // (DB constraint otps_user_binding_chk).
+      expect(
+        vi.mocked(otpModule.issueOtp).mock.calls[0]?.[1]
+      ).not.toHaveProperty("userId")
 
       expect(mockSendOtp).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -433,7 +437,7 @@ describe("Hono routes - Slice 3: Forgot Password (D9 enumeration safety & rate l
       const res = await testApp.request("/auth/forgot-password/send-otp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ identifier: "bob" }),
+        body: JSON.stringify({ identifier: "bob@example.com" }),
       })
 
       expect(res.status).toBe(202)
@@ -494,7 +498,7 @@ describe("Hono routes - Slice 3: Forgot Password (D9 enumeration safety & rate l
       const res = await testApp.request("/auth/forgot-password/send-otp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ identifier: "abc def" }),
+        body: JSON.stringify({ identifier: "abc@example.com" }),
       })
 
       expect(res.status).toBe(400)
