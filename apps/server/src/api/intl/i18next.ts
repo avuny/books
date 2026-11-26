@@ -45,6 +45,8 @@ import usersEn from "./locales/users/en.json" with { type: "json" }
 import usersAr from "./locales/users/ar.json" with { type: "json" }
 import vendorBillEn from "./locales/vendor-bill/en.json" with { type: "json" }
 import vendorBillAr from "./locales/vendor-bill/ar.json" with { type: "json" }
+import vendorPaymentEn from "./locales/vendor-payment/en.json" with { type: "json" }
+import vendorPaymentAr from "./locales/vendor-payment/ar.json" with { type: "json" }
 import warehouseEn from "./locales/warehouse/en.json" with { type: "json" }
 import warehouseAr from "./locales/warehouse/ar.json" with { type: "json" }
 import warehouseLocationEn from "./locales/warehouse-location/en.json" with { type: "json" }
@@ -86,6 +88,8 @@ export const resources = {
         users: usersEn,
         "vendor-bill": vendorBillEn,
         vendorBill: vendorBillEn,
+        "vendor-payment": vendorPaymentEn,
+        vendorPayment: vendorPaymentEn,
         warehouse: warehouseEn,
         "warehouse-location": warehouseLocationEn,
         warehouseLocation: warehouseLocationEn,
@@ -124,6 +128,8 @@ export const resources = {
         users: usersAr,
         "vendor-bill": vendorBillAr,
         vendorBill: vendorBillAr,
+        "vendor-payment": vendorPaymentAr,
+        vendorPayment: vendorPaymentAr,
         warehouse: warehouseAr,
         "warehouse-location": warehouseLocationAr,
         warehouseLocation: warehouseLocationAr,
@@ -140,7 +146,7 @@ export function installRequestLanguage(): void {
   i18next.init({
     lng: "en",
     fallbackLng: "en",
-    ns: ["accounting", "admin", "auth", "batch", "geo", "inventory-adjustment", "inventoryAdjustment", "item", "item-category", "itemCategory", "organization", "organization-invitation", "organizationInvitation", "organization-user", "organizationUser", "otp", "party", "payment-term", "paymentTerm", "purchase-order", "purchaseOrder", "purchase-receipt", "purchaseReceipt", "purchase-shipment", "purchaseShipment", "role", "sidebar", "unit", "unit-collection", "unitCollection", "users", "vendor-bill", "vendorBill", "warehouse", "warehouse-location", "warehouseLocation"],
+    ns: ["accounting", "admin", "auth", "batch", "geo", "inventory-adjustment", "inventoryAdjustment", "item", "item-category", "itemCategory", "organization", "organization-invitation", "organizationInvitation", "organization-user", "organizationUser", "otp", "party", "payment-term", "paymentTerm", "purchase-order", "purchaseOrder", "purchase-receipt", "purchaseReceipt", "purchase-shipment", "purchaseShipment", "role", "sidebar", "unit", "unit-collection", "unitCollection", "users", "vendor-bill", "vendorBill", "vendor-payment", "vendorPayment", "warehouse", "warehouse-location", "warehouseLocation"],
     defaultNS: "otp",
     resources,
     interpolation: { escapeValue: false },

@@ -8,6 +8,8 @@ import {
   units,
   vendorBillLines,
   vendorBills,
+  vendorPaymentAllocations,
+  vendorPayments,
   type DB,
   type Tx,
 } from "@avuny/db"
@@ -155,19 +157,19 @@ export function createVendorBillRepository({ db }: { db: DB }): VendorBillReposi
     async findDetail(orgId, id, tx) {
       const exec = ex(tx)
       const [head] = await exec
-        .select({ bill: vendorBills, partyName: parties.displayName })
+        .select({ bill: vendorBills, partyName: parties.displayName, paidAmount: sql<string>`coalesce((select sum(vpa.allocated_amount) from ${vendorPaymentAllocations} vpa join ${vendorPayments} vp on vp.org_id = vpa.org_id and vp.id = vpa.vendor_payment_id where vpa.org_id = ${vendorBills.orgId} and vpa.vendor_bill_id = ${vendorBills.id} and vp.status = 'POSTED'), 0)::text` })
         .from(vendorBills)
         .leftJoin(parties, and(eq(parties.orgId, vendorBills.orgId), eq(parties.id, vendorBills.partyId)))
         .where(and(eq(vendorBills.orgId, orgId), eq(vendorBills.id, id)))
         .limit(1)
       if (!head) return null
       const lines = await detailLines(exec, orgId, [id])
-      return { row: { ...head.bill, partyName: head.partyName }, lines: lines.map(toLine) }
+      return { row: { ...head.bill, partyName: head.partyName, paidAmount: Number(head.paidAmount) }, lines: lines.map(toLine) }
     },
 
     async list(orgId, filter) {
       const heads = await db
-        .select({ bill: vendorBills, partyName: parties.displayName })
+        .select({ bill: vendorBills, partyName: parties.displayName, paidAmount: sql<string>`coalesce((select sum(vpa.allocated_amount) from ${vendorPaymentAllocations} vpa join ${vendorPayments} vp on vp.org_id = vpa.org_id and vp.id = vpa.vendor_payment_id where vpa.org_id = ${vendorBills.orgId} and vpa.vendor_bill_id = ${vendorBills.id} and vp.status = 'POSTED'), 0)::text` })
         .from(vendorBills)
         .leftJoin(parties, and(eq(parties.orgId, vendorBills.orgId), eq(parties.id, vendorBills.partyId)))
         .where(
@@ -181,7 +183,7 @@ export function createVendorBillRepository({ db }: { db: DB }): VendorBillReposi
       if (heads.length === 0) return []
       const lines = await detailLines(db, orgId, heads.map((h) => h.bill.id))
       return heads.map((h) => ({
-        row: { ...h.bill, partyName: h.partyName },
+        row: { ...h.bill, partyName: h.partyName, paidAmount: Number(h.paidAmount) },
         lines: lines.filter((l) => l.line.vendorBillId === h.bill.id).map(toLine),
       }))
     },
@@ -209,6 +211,18 @@ export function createVendorBillRepository({ db }: { db: DB }): VendorBillReposi
 
     async deleteById(orgId, id, tx) {
       await ex(tx).delete(vendorBills).where(and(eq(vendorBills.orgId, orgId), eq(vendorBills.id, id)))
+    },
+
+    async hasPostedPayments(orgId, id, tx) {
+      const [r] = await ex(tx)
+        .select({ n: sql<number>`count(*)::int` })
+        .from(vendorPaymentAllocations)
+        .innerJoin(
+          vendorPayments,
+          and(eq(vendorPayments.orgId, vendorPaymentAllocations.orgId), eq(vendorPayments.id, vendorPaymentAllocations.vendorPaymentId))
+        )
+        .where(and(eq(vendorPaymentAllocations.orgId, orgId), eq(vendorPaymentAllocations.vendorBillId, id), eq(vendorPayments.status, "POSTED")))
+      return (r?.n ?? 0) > 0
     },
 
     async loadReceiptLines(orgId, lineIds, opts, tx) {

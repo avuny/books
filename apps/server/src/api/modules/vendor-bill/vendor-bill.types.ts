@@ -14,6 +14,8 @@ export type Code = VendorBillErrorCode | RoleErrorCode
 
 export interface VendorBillDetailRow extends VendorBill {
   partyName?: string | null
+  /** Applied by posted vendor payments, minor units. */
+  paidAmount?: number
 }
 export interface VendorBillLineDetailRow extends VendorBillLine {
   purchaseReceiptNumber?: string | null
@@ -58,6 +60,8 @@ export interface VendorBillRepository {
   ): Promise<{ ok: true } | { ok: false; reason: "duplicate_invoice" }>
   replaceLines(orgId: string, id: string, lines: readonly NewBillLine[], tx?: Tx): Promise<void>
   deleteById(orgId: string, id: string, tx?: Tx): Promise<void>
+  /** True when a posted vendor payment is applied to this bill. */
+  hasPostedPayments(orgId: string, id: string, tx?: Tx): Promise<boolean>
   /**
    * Receipt lines with their receipt, ordered tax rate and the quantity already billed on posted bills.
    * `lock` takes a row lock on the receipt lines so two bills cannot over-bill the same goods concurrently.

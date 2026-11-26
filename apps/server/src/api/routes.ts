@@ -36,6 +36,7 @@ import { unitRoutes } from "./modules/unit/index.js"
 import { unitCollectionRoutes } from "./modules/unit-collection/index.js"
 import { usersRoutes } from "./modules/users/index.js"
 import { vendorBillRoutes } from "./modules/vendor-bill/index.js"
+import { vendorPaymentRoutes } from "./modules/vendor-payment/index.js"
 import { warehouseRoutes } from "./modules/warehouse/index.js"
 import { warehouseLocationRoutes } from "./modules/warehouse-location/index.js"
 // [codegen:imports:end]
@@ -121,6 +122,7 @@ app.route("/unit", unitRoutes)
 app.route("/unitCollection", unitCollectionRoutes)
 app.route("/users", usersRoutes)
 app.route("/vendorBill", vendorBillRoutes)
+app.route("/vendorPayment", vendorPaymentRoutes)
 app.route("/warehouse", warehouseRoutes)
 app.route("/warehouseLocation", warehouseLocationRoutes)
 // [codegen:routes:end]

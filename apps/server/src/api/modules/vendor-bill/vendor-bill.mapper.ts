@@ -1,4 +1,4 @@
-import type { VendorBillDto, VendorBillLineDto } from "@avuny/contracts"
+import { computeOutstanding, deriveBillPaymentStatus, type VendorBillDto, VendorBillLineDto } from "@avuny/contracts"
 import type { VendorBillDetailRow, VendorBillLineDetailRow } from "./vendor-bill.types.js"
 
 const toLineDto = (l: VendorBillLineDetailRow): VendorBillLineDto => ({
@@ -39,6 +39,9 @@ export const toVendorBillDto = (r: VendorBillDetailRow, lines: readonly VendorBi
   total: String(r.totalAmount),
   receivedValue: String(r.receivedValue),
   priceVariance: String(BigInt(r.subtotalAmount) - BigInt(r.receivedValue)),
+  paidAmount: String(r.paidAmount ?? 0),
+  outstandingAmount: r.status === "POSTED" ? String(computeOutstanding(String(r.totalAmount), String(r.paidAmount ?? 0))) : "0",
+  paymentStatus: deriveBillPaymentStatus(r.status, String(r.totalAmount), String(r.paidAmount ?? 0)),
   journalEntryId: r.journalEntryId ?? null,
   postedAt: r.postedAt?.toISOString() ?? null,
   postedBy: r.postedBy ?? null,

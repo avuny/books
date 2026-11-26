@@ -45,6 +45,7 @@ function setup(opts: { allowed?: boolean; lines?: BillableReceiptLine[] } = {}) 
     replaceLines: async (_o: string, id: string, ls: any[]) => {
       bills.get(id).lines = ls.map((l, i) => ({ id: `bl-${i}`, vendorBillId: id, ...l }))
     },
+    hasPostedPayments: async () => (globalThis as any).__billPaid ?? false,
     deleteById: async (_o: string, id: string) => void bills.delete(id),
     loadReceiptLines: async (_o: string, ids: string[]) => lines.filter((l) => ids.includes(l.line.id)),
     loadReceiptForBilling: async () => lines,
@@ -145,6 +146,23 @@ describe("vendor bill service", () => {
       expect(res.data.status).toBe("POSTED")
       expect(res.data.priceVariance).toBe("2000")
     }
+  })
+
+  it("refuses to reverse a bill that has posted payments", async () => {
+    const { service, reverseJournalEntry } = setup()
+    const created = await service.create(ACTOR, ORG, {
+      partyId: SUPPLIER,
+      supplierInvoiceNumber: "INV-79",
+      invoiceDate: "2026-11-26",
+      lines: [{ purchaseReceiptLineId: RL1, billedQty: "10", netAmountMinor: "50000", taxRateBps: 0 }],
+    })
+    if (!created.success) throw new Error("setup")
+    await service.post(ACTOR, ORG, created.data.id)
+    ;(globalThis as any).__billPaid = true
+    const res = await service.reverse(ACTOR, ORG, created.data.id, { reason: "wrong" })
+    ;(globalThis as any).__billPaid = false
+    expect(!res.success && res.error).toBe("VENDOR_BILL_HAS_PAYMENTS")
+    expect(reverseJournalEntry).not.toHaveBeenCalled()
   })
 
   it("reverses a posted bill and refuses to reverse a draft", async () => {

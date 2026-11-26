@@ -145,6 +145,11 @@
       "import": "./dist/vendor-bill/index.js",
       "default": "./dist/vendor-bill/index.js"
     },
+    "./vendor-payment": {
+      "types": "./dist/vendor-payment/index.d.ts",
+      "import": "./dist/vendor-payment/index.js",
+      "default": "./dist/vendor-payment/index.js"
+    },
     "./warehouse": {
       "types": "./dist/warehouse/index.d.ts",
       "import": "./dist/warehouse/index.js",
