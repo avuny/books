@@ -1,6 +1,6 @@
 # Audit progress: 2026-11-26 app audit
 
-Tracks work against [2026-11-26-app-audit.md](./2026-11-26-app-audit.md). Updated by Instinct on behalf of Khalid. Last updated: 2026-11-26 15:20 (Cairo).
+Tracks work against [2026-11-26-app-audit.md](./2026-11-26-app-audit.md). Updated by Instinct on behalf of Khalid. Last updated: 2026-11-26 15:22 (Cairo).
 
 Rule used: nothing goes to `main` directly any more. Each fix is a PR with a regression test where the code allows one.
 
@@ -13,6 +13,8 @@ Rule used: nothing goes to `main` directly any more. Each fix is a PR with a reg
 | B11 (title) | S3 | Page title is now "Avuny Books". | commit 2cbbec3 |
 | B6 | S2 | `WEB_APP_URL` is set in `wrangler.jsonc`, so invitation links point at the web app. Not re-tested with a live invitation. | commit 1c9ef3c |
 | B3 | S1 | New items default to batch tracking off (contract and form). | PR #4 (open, needs review) |
+| B12 | S3 | Permission picker group labels: en and ar labels for every catalog resource, plus a test. Arabic needs a native check. | PR #7 (open, needs review) |
+| B13 | S3 | aria-labels on the header icon buttons. English defaults, not yet translated. | PR #7 (open, needs review) |
 | B7 | S2 | Role list counts: the SQL compared against a bare `"id"` so every count was 0. Fixed, test on the generated SQL. | PR #5 (open, needs review) |
 
 ## Not done, and why
@@ -23,7 +25,7 @@ Rule used: nothing goes to `main` directly any more. Each fix is a PR with a reg
 | B4 (S2) | Per-location inventory table is empty. Investigated, no code fix made. The read side checks out: the stock-balances query and the item stock summary both generate correctly qualified SQL (printed and checked), and the web tab passes the right filters. The most likely cause is B2: the item was created with opening stock, the "transaction" failed half way on the Neon HTTP driver, and the stock movement was written without the per-location projection rows. If that is right, B4 goes away once B2 is fixed (and the broken test item is cleaned up). Not confirmed against live data, I have no database access. Needs a repro on a fresh item after B3 and B2. |
 | B5 (S2) | Sidebar "Accounting" link opens a 404. The entry comes from the shared module registry (`packages/contracts/src/modules/registry.ts`), and the sidebar option type is tied to it, so hiding it needs a deliberate change. Not started. |
 | B8 to B10 (S2) | Item form required markers, TRANSIT location in the dropdown, country not driving currency and timezone. Not started. |
-| B11 (rest), B12 to B15 (S3) | Six-decimal quantities, raw OTP enum text, raw permission group keys, missing aria-labels, Delete vs Deactivate wording, missing sidebar entries. Not started. |
+| B11 (rest), B14, B15 (S3) | Six-decimal quantities, raw OTP enum text, Delete vs Deactivate wording, missing sidebar entries. Not started. |
 | Sections 3 and 4 | Enhancements and new modules (purchasing, sales, accounting UI, reports, SaaS layer, and so on). Large product work, each needs its own spec and plan. Not started. |
 | Live verification | B1, B3 and B7 are covered by unit tests only. None was exercised against the live database. |
 
