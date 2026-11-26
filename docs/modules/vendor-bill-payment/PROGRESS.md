@@ -24,7 +24,7 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done · `[!]` blocked · `[-]` 
 | Phase | Title | Gate | Status |
 |---|---|---|---|
 | 0 | Discovery and decisions | G0 | done 2026-11-26 |
-| 1 | Build | G1 | in progress: M1 (bill backend) and M2 (payment backend) done, web next |
+| 1 | Build | G1 | in progress: M1 (bill backend), M2 (payment backend) and M3 (web) done, reports next |
 | 2 | Web and copy | G2 | not started |
 | 3 | Hardening and acceptance | G3 | not started |
 
@@ -64,3 +64,8 @@ Not yet done: web screens (M3), payments and outstanding balance (M2), reverse g
 
 Contracts `vendor-payment` (constants, errors, schemas, rules, en/ar, permissions), schema `vendor_payments` + `vendor_payment_allocations` (migration 0028), server module with 7 routes (`/vendorPayment/organizations/{orgId}/vendor-payments[...]`: create, list, get, update, delete, post, reverse), 6 service tests, route integration test (CI only). Posting uses the existing `supplier_payment` event (Dr AP, Cr cash or bank by method). Bills now carry paidAmount / outstandingAmount / paymentStatus and cannot be reversed while a posted payment is applied.
 Not yet done: web screens and the Pay later / Already paid / Partially paid flow (M3), AP aging, supplier statement, GRNI/AP reconciliation, prod smoke (M4).
+
+### M3 log (2026-11-26)
+
+Web feature `vendor-bill-module`: bill list (status tabs), bill details (lines, totals, paid/outstanding, post, reverse, delete), vendor payments list (post, reverse, delete), receipts panel gets "Create bill" on posted receipts that are not fully billed (dialog: supplier invoice number, invoice date, optional due date, then opens the draft bill). Posting a draft bill opens the Pay later / Already paid / Partially paid dialog: it posts the bill, then creates and posts one payment for the chosen amount (full total or typed partial). A posted bill with an outstanding amount has "Record payment". Sidebar entries (purchases group): Vendor bills, Vendor payments. en and ar strings under `ui` in the vendor-bill locale. Amount rule in `build-payment.ts` (tested).
+Known gaps: no bill edit screen yet (draft lines cannot be edited in the UI; API supports it), no web e2e spec, no manual Arabic/RTL pass. AP aging, supplier statement, GRNI/AP reconciliation and prod smoke are M4.
