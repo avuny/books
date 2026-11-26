@@ -16,6 +16,8 @@ export const sidebarOptionResources = {
 
   role: "role",
   item: "item",
+  itemCategory: "item-category",
+  stockMovement: "stock-movement",
   unit: "unit",
   unitCollection: "unit-collection",
   // invoice: "invoice",
