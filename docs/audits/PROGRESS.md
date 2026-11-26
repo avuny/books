@@ -1,6 +1,6 @@
 # Audit progress: 2026-11-26 app audit
 
-Tracks work against [2026-11-26-app-audit.md](./2026-11-26-app-audit.md). Updated by Instinct on behalf of Khalid. Last updated: 2026-11-26 14:48 (Cairo).
+Tracks work against [2026-11-26-app-audit.md](./2026-11-26-app-audit.md). Updated by Instinct on behalf of Khalid. Last updated: 2026-11-26 15:20 (Cairo).
 
 Rule used: nothing goes to `main` directly any more. Each fix is a PR with a regression test where the code allows one.
 
@@ -20,7 +20,7 @@ Rule used: nothing goes to `main` directly any more. Each fix is a PR with a reg
 | Row | Why it is open |
 |---|---|
 | B2 (S1) | Item with opening stock is not atomic. The Neon HTTP driver has no transactions (docs/TESTING.md known gap). The real fix is a transaction-capable driver (Neon WebSocket pool or Hyperdrive). That changes the production DB connection and may need a pooled DATABASE_URL, so it waits for Khalid's OK. |
-| B4 (S2) | Per-location inventory table is empty. Not investigated yet. |
+| B4 (S2) | Per-location inventory table is empty. Investigated, no code fix made. The read side checks out: the stock-balances query and the item stock summary both generate correctly qualified SQL (printed and checked), and the web tab passes the right filters. The most likely cause is B2: the item was created with opening stock, the "transaction" failed half way on the Neon HTTP driver, and the stock movement was written without the per-location projection rows. If that is right, B4 goes away once B2 is fixed (and the broken test item is cleaned up). Not confirmed against live data, I have no database access. Needs a repro on a fresh item after B3 and B2. |
 | B5 (S2) | Sidebar "Accounting" link opens a 404. The entry comes from the shared module registry (`packages/contracts/src/modules/registry.ts`), and the sidebar option type is tied to it, so hiding it needs a deliberate change. Not started. |
 | B8 to B10 (S2) | Item form required markers, TRANSIT location in the dropdown, country not driving currency and timezone. Not started. |
 | B11 (rest), B12 to B15 (S3) | Six-decimal quantities, raw OTP enum text, raw permission group keys, missing aria-labels, Delete vs Deactivate wording, missing sidebar entries. Not started. |
