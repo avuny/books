@@ -2,6 +2,7 @@ import { logger } from "@avuny/logger"
 import { Resend } from "resend"
 import { config } from "../../../config.js"
 import { CaptureMessageSender } from "./capture-message-sender.js"
+import { otpPurposeLabel } from "./otp-purpose-label.js"
 /* -------------------------------------------------------------------------- */
 /*                                  Contracts                                 */
 /* -------------------------------------------------------------------------- */
@@ -110,13 +111,12 @@ export class ResendEmailSender implements MessageSender {
   }
 
   async sendOtp({ to, code, purpose }: SendOtpMessageInput): Promise<void> {
-    console.log("resend is called!!!!!!!!!!!!!!")
     await this.send({
       to,
       subject: "Your verification code",
       html: `
         <div style="font-family:sans-serif;max-width:480px;margin:auto">
-          <p>Use this code to complete your <b>${escapeHtml(purpose)}</b>:</p>
+          <p>Use this code to complete your <b>${escapeHtml(otpPurposeLabel(purpose))}</b>:</p>
           <p style="font-size:32px;letter-spacing:6px;font-weight:700">${escapeHtml(code)}</p>
           <p style="color:#666">If you didn't request this, you can ignore this email.</p>
         </div>`,

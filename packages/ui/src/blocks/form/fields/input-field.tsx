@@ -14,6 +14,7 @@ import {
 } from "@workspace/ui/components/field"
 import { Input } from "@workspace/ui/components/input"
 import type { FieldCopy } from "@workspace/ui/blocks/types"
+import { RequiredMark } from "../required-mark"
 
 export type InputFieldProps<
   TFieldValues extends FieldValues = FieldValues,
@@ -54,11 +55,17 @@ export function InputField<
         <Field data-invalid={fieldState.invalid} className={className}>
           {action ? (
             <div className="flex items-center justify-between">
-              <FieldLabel htmlFor={field.name}>{copy.label}</FieldLabel>
+              <FieldLabel htmlFor={field.name}>
+                {copy.label}
+                <RequiredMark required={copy.required} />
+              </FieldLabel>
               {action}
             </div>
           ) : (
-            <FieldLabel htmlFor={field.name}>{copy.label}</FieldLabel>
+            <FieldLabel htmlFor={field.name}>
+                {copy.label}
+                <RequiredMark required={copy.required} />
+              </FieldLabel>
           )}
 
           <Input

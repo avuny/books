@@ -50,6 +50,21 @@ const item: ItemDto = {
   updatedAt: "2026-01-01T00:00:00Z",
 }
 
+describe("CreateItemFormSchema category (audit B8)", () => {
+  it("asks to choose a category instead of showing a raw UUID error", () => {
+    const result = CreateItemFormSchema.safeParse({
+      ...filled,
+      baseUnitId: uuid(2),
+      categoryId: "",
+    })
+    expect(result.success).toBe(false)
+    if (!result.success) {
+      const issue = result.error.issues.find((i) => i.path[0] === "categoryId")
+      expect(issue?.message).toBe("Choose a category")
+    }
+  })
+})
+
 describe("CreateItemFormSchema", () => {
   it("needs exactly one of base unit / unit collection (blank counts as not picked)", () => {
     expect(CreateItemFormSchema.safeParse(filled).success).toBe(false)

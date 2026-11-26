@@ -38,7 +38,11 @@ export function useItemPickers(
   const categorySource = useItemCategoryTreeOptions(orgId)
   const baseUnitSource = useUnitOptions(orgId)
   const collectionSource = useUnitCollectionOptions(orgId)
-  const locationSource = useLocationOptions(orgId, { stockableOnly: true })
+  const locationSource = useLocationOptions(orgId, {
+    stockableOnly: true,
+    // Opening stock is a receipt: skip virtual system bins such as IN-TRANSIT (audit B9).
+    receivableOnly: true,
+  })
 
   const categoryAbilities = useItemCategoryAbilities(orgId)
   const categoryAction = useComboboxAction<ItemCategoryDto>((category) => ({

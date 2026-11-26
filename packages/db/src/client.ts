@@ -1,5 +1,6 @@
 import { drizzle } from "drizzle-orm/neon-http"
-import { neon, neonConfig } from "@neondatabase/serverless"
+import { drizzle as drizzlePool } from "drizzle-orm/neon-serverless"
+import { neon, neonConfig, Pool } from "@neondatabase/serverless"
 import type { PgDatabase, PgTransaction } from "drizzle-orm/pg-core"
 import * as schema from "./schema/index.js"
 
@@ -45,20 +46,58 @@ const configureLocalNeonProxy = () => {
   neonConfig.pipelineConnect = false
 }
 
+/** Minimal shape of the pool used for transactions, so tests can inject a fake. */
+export type TransactionPool = { end: () => Promise<void> }
+
+type TxRunner = <T>(
+  run: (tx: Database) => Promise<T>,
+  config?: unknown
+) => Promise<T>
+
+/**
+ * Builds the real transaction runner: a short-lived Neon WebSocket pool per
+ * transaction (BEGIN / COMMIT / ROLLBACK on one connection), closed afterwards.
+ * A pool per call, never a shared one, because Workers forbid reusing I/O objects
+ * across requests. Plain queries stay on the HTTP driver.
+ */
+export const createPoolTransactionRunner =
+  (
+    makePool: () => TransactionPool,
+    wrap: (pool: TransactionPool) => Database = (pool) =>
+      drizzlePool(pool as unknown as Pool, { schema }) as unknown as Database
+  ): TxRunner =>
+  async (run, config) => {
+    const pool = makePool()
+    try {
+      const pooled = wrap(pool)
+      return await (
+        pooled.transaction as unknown as (
+          cb: (tx: Database) => Promise<unknown>,
+          c?: unknown
+        ) => Promise<unknown>
+      ).call(pooled, run as (tx: Database) => Promise<unknown>, config) as never
+    } finally {
+      await pool.end().catch(() => undefined)
+    }
+  }
+
 export const createDbClient = (connectionString: string): Database => {
-  if (isLocalNeonProxy(connectionString)) configureLocalNeonProxy()
+  const local = isLocalNeonProxy(connectionString)
+  if (local) configureLocalNeonProxy()
   const sql = neon(connectionString)
   const db = drizzle(sql, { schema }) as unknown as Database
 
-  // drizzle-orm/neon-http throws "No transactions support in neon-http driver"
-  // because HTTP queries are stateless. Provide a sequential execution fallback
-  // so callers of db.transaction(async (tx) => ...) work seamlessly on edge/workers.
-  db.transaction = (async <T>(
-    transaction: (tx: Database) => Promise<T>
-  ): Promise<T> => {
-    return await transaction(db)
-  }) as typeof db.transaction
+  // drizzle-orm/neon-http has no transactions (HTTP queries are stateless).
+  // Production: run db.transaction on a real WebSocket connection so a failure
+  // rolls everything back. The local test proxy speaks HTTP only, so there the
+  // callback runs on the same client with no BEGIN/COMMIT (see docs/TESTING.md).
+  db.transaction = (
+    local
+      ? async <T>(run: (tx: Database) => Promise<T>): Promise<T> => run(db)
+      : createPoolTransactionRunner(
+          () => new Pool({ connectionString }) as unknown as TransactionPool
+        )
+  ) as typeof db.transaction
 
   return db
 }
-

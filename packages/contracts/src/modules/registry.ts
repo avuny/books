@@ -234,7 +234,15 @@ export const MODULES = {
     },
     actions: CRUD,
   },
-  item_category: { actions: CRUD },
+  item_category: {
+    sidebar: {
+      group: "inventory",
+      icon: "tags",
+      path: "/item-categories",
+      label: { en: "Item categories", ar: "فئات الأصناف" },
+    },
+    actions: CRUD,
+  },
   unit: {
     sidebar: {
       group: "inventory",
@@ -286,6 +294,12 @@ export const MODULES = {
     },
   },
   stock_movement: {
+    sidebar: {
+      group: "inventory",
+      icon: "arrow-left-right",
+      path: "/stock-movements",
+      label: { en: "Stock movements", ar: "حركات المخزون" },
+    },
     actions: {
       ...CRUD,
       post: { permission: true, event: "posted" },

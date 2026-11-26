@@ -52,6 +52,17 @@ const unwrap = <T>(r: { success: boolean; data?: T }): T => {
   return r.data as T
 }
 
+describe("sidebarService.getForUser, options without a web page (audit B5)", () => {
+  it("hides the accounting link even for a user who holds its permissions", async () => {
+    const rows = [row("inventory", "item"), row("accounting", "accounting")] as SidebarCatalogRow[]
+    const { service } = build(["read:item", "read:accounting"], rows)
+    const data = unwrap(await service.getForUser(input))
+    const names = data.flatMap((h) => h.options.map((o) => o.name))
+    expect(names).toContain("item")
+    expect(names).not.toContain("accounting")
+  })
+})
+
 describe("sidebarService.getForUser", () => {
   it("keeps only permitted options and drops headings left with none", async () => {
     const { service } = build(["read:role", "delete:item"])

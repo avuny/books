@@ -16,6 +16,7 @@ export function useItemFormCopy(mode: "create" | "update"): ItemFormCopy {
     description: t(`${mode}.description`),
     name: {
       label: t("fields.name.label"),
+      required: true,
       placeholder: t("fields.name.placeholder"),
     },
     itemDescription: {
@@ -24,6 +25,7 @@ export function useItemFormCopy(mode: "create" | "update"): ItemFormCopy {
     },
     category: {
       label: t("fields.category.label"),
+      required: true,
       placeholder: t("fields.category.placeholder"),
     },
     baseUnit: {
