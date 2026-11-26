@@ -1,4 +1,5 @@
 import {
+  get,
   useForm,
   type DefaultValues,
   type FieldPath,
@@ -50,6 +51,9 @@ export function useApiForm<T extends FieldValues, R>({
     // Reset before setError: resetField also clears that field's error.
     for (const name of (code && resetOnCode?.[code]) || []) {
       form.resetField(name)
+      // resetField only touches registered fields; make sure the value itself
+      // returns to its default either way.
+      form.setValue(name, get(defaultValues, name))
     }
 
     const field = code ? fieldErrors?.[code] : undefined
