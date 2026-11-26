@@ -1,0 +1,10 @@
+{
+  "errors": {
+    "PAYMENT_TERM_NOT_FOUND": "شرط الدفع غير موجود",
+    "PAYMENT_TERM_LIMIT_REACHED": "وصلت إلى الحد الأقصى لعدد شروط الدفع",
+    "PAYMENT_TERM_NAME_TAKEN": "يوجد شرط دفع بهذا الاسم بالفعل",
+    "PAYMENT_TERM_SYSTEM_READONLY": "لا يمكن تعديل شروط الدفع الأساسية",
+    "PAYMENT_TERM_DAYS_NOT_ALLOWED": "طريقة الحساب هذه لا تستخدم عدد أيام",
+    "PAYMENT_TERM_DAYS_REQUIRED": "أدخل عدد الأيام لطريقة الحساب هذه"
+  }
+}

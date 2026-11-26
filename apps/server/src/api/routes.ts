@@ -18,6 +18,8 @@ import { authRoutes } from "./modules/auth/index.js"
 import { batchRoutes } from "./modules/batch/index.js"
 import { geoRoutes } from "./modules/geo/index.js"
 import { inventoryAdjustmentRoutes } from "./modules/inventory-adjustment/index.js"
+import { paymentTermRoutes } from "./modules/payment-term/index.js"
+import { purchaseOrderRoutes } from "./modules/purchase-order/index.js"
 import { itemRoutes } from "./modules/item/index.js"
 import { itemCategoryRoutes } from "./modules/item-category/index.js"
 import { organizationRoutes } from "./modules/organization/index.js"
@@ -105,6 +107,8 @@ app.route("/organization-invitations", organizationInvitationRoutes)
 app.route("/organization-users", organizationUserRoutes)
 app.route("/otp", otpRoutes)
 app.route("/party", partyRoutes)
+app.route("/paymentTerm", paymentTermRoutes)
+app.route("/purchaseOrder", purchaseOrderRoutes)
 app.route("/roles", roleRoutes)
 app.route("/sidebar", sidebarRoutes)
 app.route("/stockMovement", stockMovementRoutes)
