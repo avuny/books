@@ -24,8 +24,8 @@ describe("party routes (integration)", () => {
   /* ------------------------------------------------------------------ Authentication */
   describe("authentication", () => {
     it("rejects unauthenticated requests to party routes", async () => {
-      expectFailure(await t.anonymous.get("/organizations/00000000-0000-0000-0000-000000000000/parties"), 401)
-      expectFailure(await t.anonymous.post("/organizations/00000000-0000-0000-0000-000000000000/parties", { json: {} }), 401)
+      expectFailure(await t.anonymous.get("/party/organizations/00000000-0000-0000-0000-000000000000/parties"), 401)
+      expectFailure(await t.anonymous.post("/party/organizations/00000000-0000-0000-0000-000000000000/parties", { json: {} }), 401)
     })
   })
 
@@ -33,7 +33,7 @@ describe("party routes (integration)", () => {
   describe("lifecycle", () => {
     it("creates, reads, lists, options, updates, and deactivates party roles", async () => {
       const { owner, org } = await createUserWithOrganization(t.app)
-      const base = `/organizations/${org.id}/parties`
+      const base = `/party/organizations/${org.id}/parties`
 
       // 1. Create a customer party
       const created = expectOk(
@@ -91,7 +91,7 @@ describe("party routes (integration)", () => {
 
       // 4. Options endpoint
       const options = expectOk(
-        await owner.api.get<OptionListResponse>(`/organizations/${org.id}/party-options`, {
+        await owner.api.get<OptionListResponse>(`/party/organizations/${org.id}/party-options`, {
           query: { role: "CUSTOMER", limit: 10 },
         }),
         200
@@ -134,7 +134,7 @@ describe("party routes (integration)", () => {
   describe("dual roles and independent lifecycle", () => {
     it("allows adding vendor role to existing customer and independent deactivation", async () => {
       const { owner, org } = await createUserWithOrganization(t.app)
-      const base = `/organizations/${org.id}/parties`
+      const base = `/party/organizations/${org.id}/parties`
 
       // Create CUSTOMER
       const party = expectOk(
@@ -193,7 +193,7 @@ describe("party routes (integration)", () => {
   describe("conflicts and domain validations", () => {
     it("rejects duplicate emails on create with 409 PARTY_EMAIL_ALREADY_EXISTS", async () => {
       const { owner, org } = await createUserWithOrganization(t.app)
-      const base = `/organizations/${org.id}/parties`
+      const base = `/party/organizations/${org.id}/parties`
 
       await expectFailure(
         await owner.api.post(base, {
@@ -216,7 +216,7 @@ describe("party routes (integration)", () => {
 
     it("rejects salutation on ORGANIZATION parties with 422 PARTY_SALUTATION_NOT_ALLOWED", async () => {
       const { owner, org } = await createUserWithOrganization(t.app)
-      const base = `/organizations/${org.id}/parties`
+      const base = `/party/organizations/${org.id}/parties`
 
       // Create valid organization first
       const party = expectOk(
@@ -246,7 +246,7 @@ describe("party routes (integration)", () => {
 
     it("rejects adding an already active role with 409 PARTY_ROLE_ALREADY_ACTIVE", async () => {
       const { owner, org } = await createUserWithOrganization(t.app)
-      const base = `/organizations/${org.id}/parties`
+      const base = `/party/organizations/${org.id}/parties`
 
       const party = expectOk(
         await owner.api.post<PartyDto>(base, {
@@ -273,7 +273,7 @@ describe("party routes (integration)", () => {
 
     it("rejects updating with an unknown contact ID with 404 PARTY_CONTACT_NOT_FOUND", async () => {
       const { owner, org } = await createUserWithOrganization(t.app)
-      const base = `/organizations/${org.id}/parties`
+      const base = `/party/organizations/${org.id}/parties`
 
       const party = expectOk(
         await owner.api.post<PartyDto>(base, {
@@ -309,7 +309,7 @@ describe("party routes (integration)", () => {
       const { owner: ownerB } = await createUserWithOrganization(t.app)
 
       const partyA = expectOk(
-        await ownerA.api.post<PartyDto>(`/organizations/${orgA.id}/parties`, {
+        await ownerA.api.post<PartyDto>(`/party/organizations/${orgA.id}/parties`, {
           json: {
             partyType: "PERSON",
             displayName: "Org A Secret Customer",
@@ -324,7 +324,7 @@ describe("party routes (integration)", () => {
 
       // Owner B attempts to access Org A's party
       await expectFailure(
-        await ownerB.api.get(`/organizations/${orgA.id}/parties/${partyA.id}`, {
+        await ownerB.api.get(`/party/organizations/${orgA.id}/parties/${partyA.id}`, {
           query: { role: "CUSTOMER" },
         }),
         403
