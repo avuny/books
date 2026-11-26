@@ -17,7 +17,7 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done · `[!]` blocked · `[-]` 
 
 ## Next action
 
-> Review the PR. Then, in order: (1) PO edit form (`UpdatePurchaseOrder`) and payment-term management screen; (2) shipments UI (create, post, reverse) on the PO details page; (3) run `pnpm test:int` in CI or locally with docker and fix what it finds; (4) write the e2e journey; (5) decide D1 (real transactions) before relying on posting in production.
+> Review the PR. Then, in order: (1) full draft to receipt journey integration test (needs a seeded catalog helper, see TEST-PLAN); (2) e2e journey spec; (3) decide D1 (real transactions) before relying on posting in production. Edit form, shipments UI and payment-term management are done.
 
 ## Task status (from IMPLEMENTATION-PLAN)
 
@@ -31,11 +31,11 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done · `[!]` blocked · `[-]` 
 | P1-02 | [x] | `packages/contracts/src/{purchase-order,purchase-shipment,payment-term}`; contracts tests 234 pass |
 | P1-03 | [-] | `DatePickerField` already existed in `@workspace/ui/blocks/form`; LineItems was reused unchanged, so no refactor was needed |
 | P1-04 | [~] | Server done (lazy system seed, 20-term cap, custom codes). No management screen yet; create-only API hooks exist |
-| P1-05 | [~] | Server, list, details, create form, confirm/close/cancel done. Edit form not built |
+| P1-05 | [x] | Server, list, details, create and edit forms, confirm/close/cancel done |
 | P1-06 | [x] | Migration `0022_purchase_orders` applied on pglite; `inventory_items.in_transit_qty` |
 | P1-07 | [~] | Server post and reverse done with spec. No web UI |
 | P1-08 | [-] | Receipt and AP modules do not exist yet; stable ids and `receivedBaseQty` fields are in place |
-| P2-01 | [~] | List, create, details, actions done; edit, shipments, payment terms open |
+| P2-01 | [x] | List, create, edit, details, actions, shipments panel (create, post, reverse), payment-term screen done |
 | P2-02 | [x] | Sidebar entry comes from the registry (`/purchase-orders`); routes added; abilities hide actions |
 | P2-03 | [~] | `sync:i18n:check` passes, en and ar copy complete for built screens. RTL not reviewed visually |
 | P3-01 to P3-03 | [ ] | Not started (P3-02 registry row updated) |
@@ -80,4 +80,4 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done · `[!]` blocked · `[-]` 
 | 2026-11-26 | web unit | `VITE_API_URL=http://localhost:3000 pnpm exec vitest run` (apps/web) | 38 files, 141 tests pass |
 | 2026-11-26 | server unit, whole suite | `pnpm exec vitest run --project unit` (apps/server) | 765 pass, 12 fail in auth, otp, geo and health; those files are unchanged on this branch and return 500 in the sandbox (runtime config missing). Not re-run on dev |
 | 2026-11-26 | int | `*.routes.int.test.ts` for payment-term and purchase-order | written, NOT run (needs docker) |
-| 2026-11-26 | e2e | none written | open |
+| 2026-11-26 | e2e | none written; CI Web e2e (existing specs) passes | open |
