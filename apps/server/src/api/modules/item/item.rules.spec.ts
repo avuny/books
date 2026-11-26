@@ -45,9 +45,14 @@ describe("tracking", () => {
   it("effectiveTracking applies a patch over the current flags", () => {
     expect(effectiveTracking({ isInventoryTracked: true, isBatchTracked: true }, { isInventoryTracked: false })).toEqual({
       isInventoryTracked: false,
-      isBatchTracked: true,
+      isBatchTracked: false,
       isExpiryTracked: false,
     })
+  })
+
+  it("batch tracking follows inventory tracking, whatever the patch says", () => {
+    expect(effectiveTracking({ isInventoryTracked: false, isBatchTracked: false }, { isInventoryTracked: true }).isBatchTracked).toBe(true)
+    expect(effectiveTracking({ isInventoryTracked: true, isBatchTracked: true }, { isBatchTracked: false }).isBatchTracked).toBe(true)
   })
 })
 
