@@ -193,6 +193,8 @@ import {
   useUpdatePaymentTerm,
   useUpdatePurchaseOrder,
   useListWarehouseLocationOptions,
+  listWarehouseLocationOptions,
+  getListWarehouseLocationOptionsQueryKey,
   useListWarehouseOptions,
   usePreviewPurchaseOrderNumber,
 } from "@/api"
@@ -247,6 +249,22 @@ export function useStockLocationOptions(orgId: string, warehouseId?: string) {
       })),
     [query.data]
   )
+}
+
+/** Async picker source for stockable locations of one warehouse (search and paging like the item picker). */
+export function useLocationSource(orgId: string, warehouseId?: string) {
+  return useCursorOptions({
+    queryKey: getListWarehouseLocationOptionsQueryKey(orgId, { warehouseId: warehouseId || undefined }),
+    fetchPage: async ({ cursor, search, limit, signal }) =>
+      (
+        await listWarehouseLocationOptions(
+          orgId,
+          { warehouseId: warehouseId || undefined, stockableOnly: "true" as never, cursor, search, limit },
+          { signal }
+        )
+      ).data,
+    enabled: Boolean(orgId && warehouseId),
+  })
 }
 
 export function useItemSource(orgId: string) {
