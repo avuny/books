@@ -352,6 +352,23 @@ export const MODULES = {
       cancel: { permission: true, event: "cancelled" },
     },
   },
+  inventory_transfer: {
+    sidebar: {
+      group: "inventory",
+      icon: "truck",
+      path: "/inventory-transfers",
+      label: { en: "Inventory transfers", ar: "تحويلات المخزون" },
+    },
+    actions: {
+      ...CRUD,
+      dispatch: { permission: true, event: "dispatched" },
+      receive: { permission: true, event: "received" },
+      return: { permission: true, event: "returned" },
+      close_short: { permission: true, event: "closed_short" },
+      cancel: { permission: true, event: "cancelled" },
+      reverse: { permission: true, event: "reversed" },
+    },
+  },
 
 
 

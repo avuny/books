@@ -1,6 +1,6 @@
 {
-  "id": "ce2bc0e6-4b3b-4293-a3df-ad71714c136f",
-  "prevId": "e7e5dbc4-ead0-4e5c-9f6c-0aa80a605fd6",
+  "id": "84f80456-0334-47a2-8f6f-336f4f316e8b",
+  "prevId": "2b0a60a9-ec63-4ca3-92e1-07a462313ca8",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -4572,6 +4572,1233 @@
         "ck_inventory_adjustment_text_len": {
           "name": "ck_inventory_adjustment_text_len",
           "value": "(\"inventory_adjustments\".\"reference_number\" is null or char_length(\"inventory_adjustments\".\"reference_number\") <= 64) and (\"inventory_adjustments\".\"description\" is null or char_length(\"inventory_adjustments\".\"description\") <= 500)"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.inventory_transfer_allocations": {
+      "name": "inventory_transfer_allocations",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "org_id": {
+          "name": "org_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "line_id": {
+          "name": "line_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "item_id": {
+          "name": "item_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "batch_id": {
+          "name": "batch_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "dispatched_base_qty": {
+          "name": "dispatched_base_qty",
+          "type": "numeric(18, 6)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "received_base_qty": {
+          "name": "received_base_qty",
+          "type": "numeric(18, 6)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'0'"
+        },
+        "lost_base_qty": {
+          "name": "lost_base_qty",
+          "type": "numeric(18, 6)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'0'"
+        },
+        "returned_base_qty": {
+          "name": "returned_base_qty",
+          "type": "numeric(18, 6)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'0'"
+        },
+        "dispatch_movement_line_id": {
+          "name": "dispatch_movement_line_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "ix_inventory_transfer_allocation_line": {
+          "name": "ix_inventory_transfer_allocation_line",
+          "columns": [
+            {
+              "expression": "org_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "line_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "ix_inventory_transfer_allocation_batch": {
+          "name": "ix_inventory_transfer_allocation_batch",
+          "columns": [
+            {
+              "expression": "org_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "batch_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "inventory_transfer_allocations_org_id_organizations_id_fk": {
+          "name": "inventory_transfer_allocations_org_id_organizations_id_fk",
+          "tableFrom": "inventory_transfer_allocations",
+          "tableTo": "organizations",
+          "columnsFrom": [
+            "org_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "fk_inventory_transfer_allocation_line": {
+          "name": "fk_inventory_transfer_allocation_line",
+          "tableFrom": "inventory_transfer_allocations",
+          "tableTo": "inventory_transfer_lines",
+          "columnsFrom": [
+            "org_id",
+            "line_id"
+          ],
+          "columnsTo": [
+            "org_id",
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "fk_inventory_transfer_allocation_item": {
+          "name": "fk_inventory_transfer_allocation_item",
+          "tableFrom": "inventory_transfer_allocations",
+          "tableTo": "items",
+          "columnsFrom": [
+            "org_id",
+            "item_id"
+          ],
+          "columnsTo": [
+            "org_id",
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "fk_inventory_transfer_allocation_batch": {
+          "name": "fk_inventory_transfer_allocation_batch",
+          "tableFrom": "inventory_transfer_allocations",
+          "tableTo": "batches",
+          "columnsFrom": [
+            "org_id",
+            "item_id",
+            "batch_id"
+          ],
+          "columnsTo": [
+            "org_id",
+            "item_id",
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "fk_inventory_transfer_allocation_movement_line": {
+          "name": "fk_inventory_transfer_allocation_movement_line",
+          "tableFrom": "inventory_transfer_allocations",
+          "tableTo": "stock_movement_lines",
+          "columnsFrom": [
+            "org_id",
+            "dispatch_movement_line_id"
+          ],
+          "columnsTo": [
+            "org_id",
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "ux_inventory_transfer_allocation_org_id": {
+          "name": "ux_inventory_transfer_allocation_org_id",
+          "nullsNotDistinct": false,
+          "columns": [
+            "org_id",
+            "id"
+          ]
+        },
+        "ux_inventory_transfer_allocation_movement_line": {
+          "name": "ux_inventory_transfer_allocation_movement_line",
+          "nullsNotDistinct": false,
+          "columns": [
+            "org_id",
+            "dispatch_movement_line_id"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {
+        "ck_inventory_transfer_allocation_dispatched_positive": {
+          "name": "ck_inventory_transfer_allocation_dispatched_positive",
+          "value": "\"inventory_transfer_allocations\".\"dispatched_base_qty\" > 0"
+        },
+        "ck_inventory_transfer_allocation_counters": {
+          "name": "ck_inventory_transfer_allocation_counters",
+          "value": "\"inventory_transfer_allocations\".\"received_base_qty\" >= 0 and \"inventory_transfer_allocations\".\"lost_base_qty\" >= 0 and \"inventory_transfer_allocations\".\"returned_base_qty\" >= 0 and \"inventory_transfer_allocations\".\"received_base_qty\" + \"inventory_transfer_allocations\".\"lost_base_qty\" + \"inventory_transfer_allocations\".\"returned_base_qty\" <= \"inventory_transfer_allocations\".\"dispatched_base_qty\""
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.inventory_transfer_event_lines": {
+      "name": "inventory_transfer_event_lines",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "org_id": {
+          "name": "org_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "event_id": {
+          "name": "event_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "allocation_id": {
+          "name": "allocation_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "destination_location_id": {
+          "name": "destination_location_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "base_quantity": {
+          "name": "base_quantity",
+          "type": "numeric(18, 6)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "stock_movement_line_id": {
+          "name": "stock_movement_line_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "ix_inventory_transfer_event_line_allocation": {
+          "name": "ix_inventory_transfer_event_line_allocation",
+          "columns": [
+            {
+              "expression": "org_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "allocation_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "inventory_transfer_event_lines_org_id_organizations_id_fk": {
+          "name": "inventory_transfer_event_lines_org_id_organizations_id_fk",
+          "tableFrom": "inventory_transfer_event_lines",
+          "tableTo": "organizations",
+          "columnsFrom": [
+            "org_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "fk_inventory_transfer_event_line_event": {
+          "name": "fk_inventory_transfer_event_line_event",
+          "tableFrom": "inventory_transfer_event_lines",
+          "tableTo": "inventory_transfer_events",
+          "columnsFrom": [
+            "org_id",
+            "event_id"
+          ],
+          "columnsTo": [
+            "org_id",
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "fk_inventory_transfer_event_line_allocation": {
+          "name": "fk_inventory_transfer_event_line_allocation",
+          "tableFrom": "inventory_transfer_event_lines",
+          "tableTo": "inventory_transfer_allocations",
+          "columnsFrom": [
+            "org_id",
+            "allocation_id"
+          ],
+          "columnsTo": [
+            "org_id",
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "fk_inventory_transfer_event_line_location": {
+          "name": "fk_inventory_transfer_event_line_location",
+          "tableFrom": "inventory_transfer_event_lines",
+          "tableTo": "warehouse_locations",
+          "columnsFrom": [
+            "org_id",
+            "destination_location_id"
+          ],
+          "columnsTo": [
+            "org_id",
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "fk_inventory_transfer_event_line_movement_line": {
+          "name": "fk_inventory_transfer_event_line_movement_line",
+          "tableFrom": "inventory_transfer_event_lines",
+          "tableTo": "stock_movement_lines",
+          "columnsFrom": [
+            "org_id",
+            "stock_movement_line_id"
+          ],
+          "columnsTo": [
+            "org_id",
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "ux_inventory_transfer_event_line_allocation": {
+          "name": "ux_inventory_transfer_event_line_allocation",
+          "nullsNotDistinct": false,
+          "columns": [
+            "event_id",
+            "allocation_id"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {
+        "ck_inventory_transfer_event_line_qty_positive": {
+          "name": "ck_inventory_transfer_event_line_qty_positive",
+          "value": "\"inventory_transfer_event_lines\".\"base_quantity\" > 0"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.inventory_transfer_events": {
+      "name": "inventory_transfer_events",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "org_id": {
+          "name": "org_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "transfer_id": {
+          "name": "transfer_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "event_no": {
+          "name": "event_no",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "kind": {
+          "name": "kind",
+          "type": "inventory_transfer_event_kind",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "status": {
+          "name": "status",
+          "type": "inventory_transfer_event_status",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'POSTED'"
+        },
+        "occurred_at": {
+          "name": "occurred_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "note": {
+          "name": "note",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "stock_movement_id": {
+          "name": "stock_movement_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_by": {
+          "name": "created_by",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "ix_inventory_transfer_event_transfer": {
+          "name": "ix_inventory_transfer_event_transfer",
+          "columns": [
+            {
+              "expression": "org_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "transfer_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "inventory_transfer_events_org_id_organizations_id_fk": {
+          "name": "inventory_transfer_events_org_id_organizations_id_fk",
+          "tableFrom": "inventory_transfer_events",
+          "tableTo": "organizations",
+          "columnsFrom": [
+            "org_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "inventory_transfer_events_created_by_users_id_fk": {
+          "name": "inventory_transfer_events_created_by_users_id_fk",
+          "tableFrom": "inventory_transfer_events",
+          "tableTo": "users",
+          "columnsFrom": [
+            "created_by"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "fk_inventory_transfer_event_transfer": {
+          "name": "fk_inventory_transfer_event_transfer",
+          "tableFrom": "inventory_transfer_events",
+          "tableTo": "inventory_transfers",
+          "columnsFrom": [
+            "org_id",
+            "transfer_id"
+          ],
+          "columnsTo": [
+            "org_id",
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "fk_inventory_transfer_event_movement": {
+          "name": "fk_inventory_transfer_event_movement",
+          "tableFrom": "inventory_transfer_events",
+          "tableTo": "stock_movements",
+          "columnsFrom": [
+            "org_id",
+            "stock_movement_id"
+          ],
+          "columnsTo": [
+            "org_id",
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "ux_inventory_transfer_event_org_id": {
+          "name": "ux_inventory_transfer_event_org_id",
+          "nullsNotDistinct": false,
+          "columns": [
+            "org_id",
+            "id"
+          ]
+        },
+        "ux_inventory_transfer_event_no": {
+          "name": "ux_inventory_transfer_event_no",
+          "nullsNotDistinct": false,
+          "columns": [
+            "transfer_id",
+            "event_no"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {
+        "ck_inventory_transfer_event_text_len": {
+          "name": "ck_inventory_transfer_event_text_len",
+          "value": "\"inventory_transfer_events\".\"note\" is null or char_length(\"inventory_transfer_events\".\"note\") <= 500"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.inventory_transfer_lines": {
+      "name": "inventory_transfer_lines",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "org_id": {
+          "name": "org_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "transfer_id": {
+          "name": "transfer_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "line_no": {
+          "name": "line_no",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "item_id": {
+          "name": "item_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "source_location_id": {
+          "name": "source_location_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "destination_location_id": {
+          "name": "destination_location_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "unit_id": {
+          "name": "unit_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "base_unit_id": {
+          "name": "base_unit_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "requested_qty": {
+          "name": "requested_qty",
+          "type": "numeric(18, 6)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "requested_base_qty": {
+          "name": "requested_base_qty",
+          "type": "numeric(18, 6)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "dispatched_base_qty": {
+          "name": "dispatched_base_qty",
+          "type": "numeric(18, 6)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'0'"
+        },
+        "notes": {
+          "name": "notes",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "ix_inventory_transfer_line_item": {
+          "name": "ix_inventory_transfer_line_item",
+          "columns": [
+            {
+              "expression": "org_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "item_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "ix_inventory_transfer_line_source_location": {
+          "name": "ix_inventory_transfer_line_source_location",
+          "columns": [
+            {
+              "expression": "org_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "source_location_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "ix_inventory_transfer_line_destination_location": {
+          "name": "ix_inventory_transfer_line_destination_location",
+          "columns": [
+            {
+              "expression": "org_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "destination_location_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "inventory_transfer_lines_org_id_organizations_id_fk": {
+          "name": "inventory_transfer_lines_org_id_organizations_id_fk",
+          "tableFrom": "inventory_transfer_lines",
+          "tableTo": "organizations",
+          "columnsFrom": [
+            "org_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "inventory_transfer_lines_unit_id_units_id_fk": {
+          "name": "inventory_transfer_lines_unit_id_units_id_fk",
+          "tableFrom": "inventory_transfer_lines",
+          "tableTo": "units",
+          "columnsFrom": [
+            "unit_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "inventory_transfer_lines_base_unit_id_units_id_fk": {
+          "name": "inventory_transfer_lines_base_unit_id_units_id_fk",
+          "tableFrom": "inventory_transfer_lines",
+          "tableTo": "units",
+          "columnsFrom": [
+            "base_unit_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "fk_inventory_transfer_line_transfer": {
+          "name": "fk_inventory_transfer_line_transfer",
+          "tableFrom": "inventory_transfer_lines",
+          "tableTo": "inventory_transfers",
+          "columnsFrom": [
+            "org_id",
+            "transfer_id"
+          ],
+          "columnsTo": [
+            "org_id",
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "fk_inventory_transfer_line_item": {
+          "name": "fk_inventory_transfer_line_item",
+          "tableFrom": "inventory_transfer_lines",
+          "tableTo": "items",
+          "columnsFrom": [
+            "org_id",
+            "item_id"
+          ],
+          "columnsTo": [
+            "org_id",
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "fk_inventory_transfer_line_source_location": {
+          "name": "fk_inventory_transfer_line_source_location",
+          "tableFrom": "inventory_transfer_lines",
+          "tableTo": "warehouse_locations",
+          "columnsFrom": [
+            "org_id",
+            "source_location_id"
+          ],
+          "columnsTo": [
+            "org_id",
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "fk_inventory_transfer_line_destination_location": {
+          "name": "fk_inventory_transfer_line_destination_location",
+          "tableFrom": "inventory_transfer_lines",
+          "tableTo": "warehouse_locations",
+          "columnsFrom": [
+            "org_id",
+            "destination_location_id"
+          ],
+          "columnsTo": [
+            "org_id",
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "ux_inventory_transfer_line_org_id": {
+          "name": "ux_inventory_transfer_line_org_id",
+          "nullsNotDistinct": false,
+          "columns": [
+            "org_id",
+            "id"
+          ]
+        },
+        "ux_inventory_transfer_line_no": {
+          "name": "ux_inventory_transfer_line_no",
+          "nullsNotDistinct": false,
+          "columns": [
+            "transfer_id",
+            "line_no"
+          ]
+        },
+        "ux_inventory_transfer_line_dimensions": {
+          "name": "ux_inventory_transfer_line_dimensions",
+          "nullsNotDistinct": false,
+          "columns": [
+            "transfer_id",
+            "item_id",
+            "source_location_id",
+            "destination_location_id"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {
+        "ck_inventory_transfer_line_requested_positive": {
+          "name": "ck_inventory_transfer_line_requested_positive",
+          "value": "\"inventory_transfer_lines\".\"requested_base_qty\" > 0"
+        },
+        "ck_inventory_transfer_line_dispatched_bounds": {
+          "name": "ck_inventory_transfer_line_dispatched_bounds",
+          "value": "\"inventory_transfer_lines\".\"dispatched_base_qty\" >= 0"
+        },
+        "ck_inventory_transfer_line_locations_differ": {
+          "name": "ck_inventory_transfer_line_locations_differ",
+          "value": "\"inventory_transfer_lines\".\"source_location_id\" <> \"inventory_transfer_lines\".\"destination_location_id\""
+        },
+        "ck_inventory_transfer_line_text_len": {
+          "name": "ck_inventory_transfer_line_text_len",
+          "value": "\"inventory_transfer_lines\".\"notes\" is null or char_length(\"inventory_transfer_lines\".\"notes\") <= 500"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.inventory_transfers": {
+      "name": "inventory_transfers",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "org_id": {
+          "name": "org_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "number": {
+          "name": "number",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "reference_number": {
+          "name": "reference_number",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "date": {
+          "name": "date",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "source_warehouse_id": {
+          "name": "source_warehouse_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "destination_warehouse_id": {
+          "name": "destination_warehouse_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "description": {
+          "name": "description",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "status": {
+          "name": "status",
+          "type": "inventory_transfer_status",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'DRAFT'"
+        },
+        "dispatched_at": {
+          "name": "dispatched_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "dispatched_by": {
+          "name": "dispatched_by",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "dispatch_stock_movement_id": {
+          "name": "dispatch_stock_movement_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_by": {
+          "name": "created_by",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "ix_inventory_transfer_source_warehouse": {
+          "name": "ix_inventory_transfer_source_warehouse",
+          "columns": [
+            {
+              "expression": "org_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "source_warehouse_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "ix_inventory_transfer_destination_warehouse": {
+          "name": "ix_inventory_transfer_destination_warehouse",
+          "columns": [
+            {
+              "expression": "org_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "destination_warehouse_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "ix_inventory_transfer_status": {
+          "name": "ix_inventory_transfer_status",
+          "columns": [
+            {
+              "expression": "org_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "status",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "ix_inventory_transfer_date": {
+          "name": "ix_inventory_transfer_date",
+          "columns": [
+            {
+              "expression": "org_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "date",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "inventory_transfers_org_id_organizations_id_fk": {
+          "name": "inventory_transfers_org_id_organizations_id_fk",
+          "tableFrom": "inventory_transfers",
+          "tableTo": "organizations",
+          "columnsFrom": [
+            "org_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "inventory_transfers_dispatched_by_users_id_fk": {
+          "name": "inventory_transfers_dispatched_by_users_id_fk",
+          "tableFrom": "inventory_transfers",
+          "tableTo": "users",
+          "columnsFrom": [
+            "dispatched_by"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "inventory_transfers_created_by_users_id_fk": {
+          "name": "inventory_transfers_created_by_users_id_fk",
+          "tableFrom": "inventory_transfers",
+          "tableTo": "users",
+          "columnsFrom": [
+            "created_by"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "fk_inventory_transfer_source_warehouse": {
+          "name": "fk_inventory_transfer_source_warehouse",
+          "tableFrom": "inventory_transfers",
+          "tableTo": "warehouses",
+          "columnsFrom": [
+            "org_id",
+            "source_warehouse_id"
+          ],
+          "columnsTo": [
+            "org_id",
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "fk_inventory_transfer_destination_warehouse": {
+          "name": "fk_inventory_transfer_destination_warehouse",
+          "tableFrom": "inventory_transfers",
+          "tableTo": "warehouses",
+          "columnsFrom": [
+            "org_id",
+            "destination_warehouse_id"
+          ],
+          "columnsTo": [
+            "org_id",
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "fk_inventory_transfer_dispatch_movement": {
+          "name": "fk_inventory_transfer_dispatch_movement",
+          "tableFrom": "inventory_transfers",
+          "tableTo": "stock_movements",
+          "columnsFrom": [
+            "org_id",
+            "dispatch_stock_movement_id"
+          ],
+          "columnsTo": [
+            "org_id",
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "ux_inventory_transfer_org_id": {
+          "name": "ux_inventory_transfer_org_id",
+          "nullsNotDistinct": false,
+          "columns": [
+            "org_id",
+            "id"
+          ]
+        },
+        "ux_inventory_transfer_org_number": {
+          "name": "ux_inventory_transfer_org_number",
+          "nullsNotDistinct": false,
+          "columns": [
+            "org_id",
+            "number"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {
+        "ck_inventory_transfer_number_fmt": {
+          "name": "ck_inventory_transfer_number_fmt",
+          "value": "\"inventory_transfers\".\"number\" ~ '^TRF-[0-9]{6,}$'"
+        },
+        "ck_inventory_transfer_text_len": {
+          "name": "ck_inventory_transfer_text_len",
+          "value": "(\"inventory_transfers\".\"reference_number\" is null or char_length(\"inventory_transfers\".\"reference_number\") <= 64) and (\"inventory_transfers\".\"description\" is null or char_length(\"inventory_transfers\".\"description\") <= 500)"
         }
       },
       "isRLSEnabled": false
@@ -12973,6 +14200,34 @@
       "values": [
         "DRAFT",
         "CONFIRMED",
+        "CANCELLED"
+      ]
+    },
+    "public.inventory_transfer_event_kind": {
+      "name": "inventory_transfer_event_kind",
+      "schema": "public",
+      "values": [
+        "RECEIPT",
+        "RETURN",
+        "LOSS"
+      ]
+    },
+    "public.inventory_transfer_event_status": {
+      "name": "inventory_transfer_event_status",
+      "schema": "public",
+      "values": [
+        "POSTED",
+        "REVERSED"
+      ]
+    },
+    "public.inventory_transfer_status": {
+      "name": "inventory_transfer_status",
+      "schema": "public",
+      "values": [
+        "DRAFT",
+        "IN_TRANSIT",
+        "PARTIALLY_RECEIVED",
+        "RECEIVED",
         "CANCELLED"
       ]
     },

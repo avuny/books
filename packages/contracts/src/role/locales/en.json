@@ -18,6 +18,7 @@
       "organization_invitation": "Invitations",
       "role": "Roles",
       "inventory_adjustment": "Inventory adjustments",
+      "inventory_transfer": "Inventory transfers",
       "customer": "Customers",
       "purchase_order": "Purchase orders",
       "purchase_shipment": "Supplier shipments",
