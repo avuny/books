@@ -38,9 +38,9 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done · `[!]` blocked · `[-]` 
 | P1-03 | Sidebar seed verified | Phase 1 acceptance in SPEC section 12 | [ ] |
 | P2-01 | Repository and service for drafts | Phase 2 acceptance in SPEC section 12 | [x] |
 | P2-02 | Routes, permissions, audit, number generation | Phase 2 acceptance in SPEC section 12 | [x] |
-| P3-01 | Batch pre-allocation and available check | Phase 3 acceptance in SPEC section 12 | [ ] |
-| P3-02 | Dispatch posting and allocations | Phase 3 acceptance in SPEC section 12 | [ ] |
-| P3-03 | Return rest, reverse dispatch | Phase 3 acceptance in SPEC section 12 | [ ] |
+| P3-01 | Batch pre-allocation and available check | Phase 3 acceptance in SPEC section 12 | [x] |
+| P3-02 | Dispatch posting and allocations | Phase 3 acceptance in SPEC section 12 | [x] |
+| P3-03 | Return rest, reverse dispatch | Phase 3 acceptance in SPEC section 12 | [x] |
 | P4-01 | Receive and partial receive | Phase 4 acceptance in SPEC section 12 | [ ] |
 | P4-02 | Close short | Phase 4 acceptance in SPEC section 12 | [ ] |
 | P4-03 | Reverse receipt | Phase 4 acceptance in SPEC section 12 | [ ] |
@@ -85,3 +85,10 @@ None yet.
 | 2026-11-26 | P1-01 | `pnpm typecheck` in apps/server | Ok after adding the sidebar permission map entry and role permission labels. |
 | 2026-11-26 | P1-03 | not yet | Sidebar option is created by `pnpm seed` in the deploy job. Verify on production after merge. |
 | 2026-11-26 | P2-01, P2-02 | `tsc --noEmit` and `vitest run --project unit src/api/modules/inventory-transfer` in apps/server | Typecheck ok, 8 service tests pass. Other unit files that fail locally (health, auth crypto, geo, otp) need env secrets and fail the same way without this change. DB-backed route tests run in CI only. |
+
+## Phase 3 notes (dispatch, return, reverse)
+- Routes: POST {id}/dispatch, {id}/return, {id}/reverse (permissions dispatch/return/reverse).
+- Reversing a dispatch sets allocation returned counters equal to dispatched and writes no event row.
+- Availability check uses batch available for batch-tracked items only. Non-batch items rely on the stock engine's on-hand check. Reservations are not considered for them (known gap).
+- A partial return re-derives status to PARTIALLY_RECEIVED.
+- Verification: tsc clean, 15 unit tests pass for the module. Live production test deferred until the Phase 7 UI.

@@ -4,6 +4,9 @@ import { createOpenAPIRouter, getRequestLocale, handleResult } from "@avuny/hono
 import { globalErrorResponses } from "@avuny/utils"
 import {
   CreateInventoryTransferSchema,
+  DispatchInventoryTransferSchema,
+  ReverseInventoryTransferSchema,
+  SettleInventoryTransferSchema,
   InventoryTransferDtoSchema,
   InventoryTransferOffsetListQuerySchema,
   InventoryTransferOffsetListResponseSchema,
@@ -125,6 +128,40 @@ export const createInventoryTransferRoutes = ({
       const { orgId, id } = c.req.valid("param")
       return service.cancel(uid, orgId, id)
     }) as never
+  )
+
+  const action = <B extends z.ZodTypeAny>(
+    name: string,
+    summary: string,
+    permission: "dispatch" | "return" | "reverse",
+    schema: B,
+    call: (uid: string, orgId: string, id: string, body: any) => Promise<any>
+  ) => {
+    const r = createRoute({
+      method: "post",
+      path: `${base}/{id}/${name}`,
+      operationId: `${name}InventoryTransfer`,
+      tags,
+      summary,
+      middleware: [requireAuth, requirePermission(`${permission}:inventory-transfer` as never)] as const,
+      request: { params: idParam, body: { required: false, content: { "application/json": { schema } } } },
+      responses: { 200: jsonOk(summary, InventoryTransferDtoSchema), ...errs },
+    })
+    router.use(honoPath(r.path), requireAuth)
+    router.openapi(r, (async (c: any) => {
+      const { orgId, id } = c.req.valid("param")
+      const body = c.req.valid("json") ?? {}
+      return run(c, 200, (uid) => call(uid, orgId, id, body))
+    }) as never)
+  }
+  action("dispatch", "Dispatch a draft inventory transfer", "dispatch", DispatchInventoryTransferSchema, (u, o, i, b) =>
+    service.dispatch(u, o, i, b)
+  )
+  action("return", "Return what is in transit to the source", "return", SettleInventoryTransferSchema, (u, o, i, b) =>
+    service.returnToSource(u, o, i, b)
+  )
+  action("reverse", "Reverse a dispatch before anything was received", "reverse", ReverseInventoryTransferSchema, (u, o, i, b) =>
+    service.reverseDispatch(u, o, i, b)
   )
 
   const get = createRoute({

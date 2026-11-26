@@ -75,6 +75,38 @@ class FakeRepo implements InventoryTransferRepository {
   async listOptions() {
     return [...this.headers.values()].map((h) => ({ id: h.id, number: h.number, status: h.status }))
   }
+  allocs: any[] = []
+  events: any[] = []
+  async findAllocations(_o: string, transferId: string) {
+    const ids = new Set((this.lines.get(transferId) ?? []).map((l) => l.id))
+    return this.allocs.filter((a) => ids.has(a.lineId))
+  }
+  async insertAllocations(_o: string, rows: readonly any[]) {
+    const made = rows.map((r, i) => ({
+      id: `alloc-${this.allocs.length + i}`,
+      receivedBaseQty: "0",
+      lostBaseQty: "0",
+      returnedBaseQty: "0",
+      ...r,
+    }))
+    this.allocs.push(...made)
+    return made
+  }
+  async updateAllocationCounters(_o: string, id: string, patch: any) {
+    Object.assign(this.allocs.find((a) => a.id === id), patch)
+  }
+  async updateLineDispatched(_o: string, lineId: string, qty: string) {
+    for (const ls of this.lines.values()) for (const l of ls) if (l.id === lineId) (l as any).dispatchedBaseQty = qty
+  }
+  async deleteLine(_o: string, lineId: string) {
+    for (const [k, ls] of this.lines) this.lines.set(k, ls.filter((l) => l.id !== lineId))
+  }
+  async nextEventNo() {
+    return this.events.length + 1
+  }
+  async insertEvent(_o: string, event: any) {
+    this.events.push(event)
+  }
 }
 
 describe("InventoryTransferService drafts", () => {
@@ -84,6 +116,10 @@ describe("InventoryTransferService drafts", () => {
   let itemFailure: "item_not_found" | "item_inactive" | "item_not_stocked" | "unit_not_in_collection" | null = null
   let factor = "1"
   let audits: string[] = []
+  let pool: any[] = []
+  let postFails = false
+  let posts: any[] = []
+  let reversed = 0
   let service: ReturnType<typeof createInventoryTransferService>
 
   const line = { itemId, sourceLocationId: srcLoc, destinationLocationId: dstLoc, unitId, quantity: "5" }
@@ -96,14 +132,44 @@ describe("InventoryTransferService drafts", () => {
     itemFailure = null
     factor = "1"
     audits = []
+    pool = []
+    postFails = false
+    posts = []
+    reversed = 0
     service = createInventoryTransferService({
       repository: repo,
+      stock: {
+        async post(_a: string, _o: string, input: any) {
+          if (postFails) return { success: false, error: "STOCK_MOVEMENT_INSUFFICIENT_STOCK" } as any
+          posts.push(input)
+          return {
+            success: true,
+            data: { id: `mv-${posts.length}`, lines: input.lines.map((_: any, i: number) => ({ id: `ml-${posts.length}-${i}`, lineNo: i + 1 })) },
+          } as any
+        },
+        async reverse() {
+          reversed++
+          return { success: true, data: { id: "mv-rev", lines: [] } } as any
+        },
+        async listAllocatable() {
+          return pool
+        },
+        async transitLocationId() {
+          return "99999999-9999-4999-a999-999999999999"
+        },
+      },
       items: {
+        async findPolicy() {
+          return { isBatchTracked: pool.length > 0, isExpiryTracked: true }
+        },
         async resolveUnitConversion() {
           return itemFailure ? { ok: false, reason: itemFailure } : { ok: true, baseUnitId: unitId, factor }
         },
       },
       locations: {
+        async assertIntent() {
+          return { ok: true as const }
+        },
         async validateLocation() {
           return locationFailure ? { ok: false, reason: locationFailure } : { ok: true }
         },
@@ -189,5 +255,91 @@ describe("InventoryTransferService drafts", () => {
     expect(!again.success && again.error).toBe(Err.INVENTORY_TRANSFER_ALREADY_CANCELLED)
     const missing = await service.get(actorId, orgId, a.data.id)
     expect(!missing.success && missing.error).toBe(Err.INVENTORY_TRANSFER_NOT_FOUND)
+  })
+
+  describe("dispatch, return and reverse", () => {
+    const mk = async () => {
+      const c = await service.create(actorId, orgId, input)
+      if (!c.success) throw new Error("create failed")
+      return c.data.id
+    }
+
+    it("dispatches a draft to in transit and records allocations", async () => {
+      const id = await mk()
+      const res = await service.dispatch(actorId, orgId, id)
+      expect(res.success && res.data.status).toBe("IN_TRANSIT")
+      expect(posts[0].type).toBe("transfer")
+      expect(posts[0].lines[0].quantity).toBe("5")
+      expect(repo.allocs).toHaveLength(1)
+    })
+
+    it("allocates across batches first-expiry-first", async () => {
+      pool = [
+        { batchId: "b2", available: "10", expiresOn: "2027-06-01", receivedAt: "2026-01-02", issuable: true },
+        { batchId: "b1", available: "3", expiresOn: "2027-01-01", receivedAt: "2026-01-03", issuable: true },
+      ]
+      const id = await mk()
+      const res = await service.dispatch(actorId, orgId, id)
+      expect(res.success).toBe(true)
+      expect(repo.allocs.map((a) => [a.batchId, a.dispatchedBaseQty])).toEqual([
+        ["b1", "3"],
+        ["b2", "2"],
+      ])
+    })
+
+    it("fails on insufficient batch stock and on engine rejection", async () => {
+      pool = [{ batchId: "b1", available: "2", expiresOn: null, receivedAt: "x", issuable: true }]
+      const id = await mk()
+      const a = await service.dispatch(actorId, orgId, id)
+      expect(!a.success && a.error).toBe(Err.INVENTORY_TRANSFER_INSUFFICIENT_STOCK)
+      pool = []
+      postFails = true
+      const b = await service.dispatch(actorId, orgId, id)
+      expect(b.success).toBe(false)
+    })
+
+    it("lowers a line, and rejects raising it or dispatching twice", async () => {
+      const id = await mk()
+      const lineId = repo.lines.get(id)![0]!.id
+      const raise = await service.dispatch(actorId, orgId, id, { lines: [{ lineId, baseQuantity: "6" }] })
+      expect(!raise.success && raise.error).toBe(Err.INVENTORY_TRANSFER_EXCEEDS_REQUESTED)
+      const ok = await service.dispatch(actorId, orgId, id, { lines: [{ lineId, baseQuantity: "2" }] })
+      expect(ok.success).toBe(true)
+      expect(posts[0].lines[0].quantity).toBe("2")
+      const again = await service.dispatch(actorId, orgId, id)
+      expect(!again.success && again.error).toBe(Err.INVENTORY_TRANSFER_ALREADY_DISPATCHED)
+    })
+
+    it("does not dispatch a cancelled transfer", async () => {
+      const id = await mk()
+      await service.cancel(actorId, orgId, id)
+      const res = await service.dispatch(actorId, orgId, id)
+      expect(!res.success && res.error).toBe(Err.INVENTORY_TRANSFER_NOT_DISPATCHABLE)
+    })
+
+    it("returns part to source, rejects more than pending, then reverse is blocked", async () => {
+      const id = await mk()
+      await service.dispatch(actorId, orgId, id)
+      const allocationId = repo.allocs[0].id
+      const over = await service.returnToSource(actorId, orgId, id, { lines: [{ allocationId, baseQuantity: "6" }] })
+      expect(!over.success && over.error).toBe(Err.INVENTORY_TRANSFER_EXCEEDS_PENDING)
+      const part = await service.returnToSource(actorId, orgId, id, { lines: [{ allocationId, baseQuantity: "2" }] })
+      expect(part.success && part.data.status).toBe("PARTIALLY_RECEIVED")
+      expect(repo.allocs[0].returnedBaseQty).toBe("2")
+      const rev = await service.reverseDispatch(actorId, orgId, id, {})
+      expect(!rev.success && rev.error).toBe(Err.INVENTORY_TRANSFER_CANNOT_REVERSE)
+      const rest = await service.returnToSource(actorId, orgId, id, {})
+      expect(rest.success).toBe(true)
+      const none = await service.returnToSource(actorId, orgId, id, {})
+      expect(none.success).toBe(false)
+    })
+
+    it("reverses an untouched dispatch and cancels", async () => {
+      const id = await mk()
+      await service.dispatch(actorId, orgId, id)
+      const res = await service.reverseDispatch(actorId, orgId, id, {})
+      expect(res.success && res.data.status).toBe("CANCELLED")
+      expect(reversed).toBe(1)
+    })
   })
 })

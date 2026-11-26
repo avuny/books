@@ -272,6 +272,65 @@ export function createInventoryTransferRepository({ db }: { db: DB }): Inventory
       return { rows, total: counted?.total ?? 0 }
     },
 
+    async findAllocations(orgId, transferId, tx, opts = {}) {
+      const q = tx
+        .select({ a: inventoryTransferAllocations })
+        .from(inventoryTransferAllocations)
+        .innerJoin(inventoryTransferLines, eq(inventoryTransferAllocations.lineId, inventoryTransferLines.id))
+        .where(
+          and(
+            eq(inventoryTransferAllocations.orgId, orgId),
+            eq(inventoryTransferLines.transferId, transferId)
+          )
+        )
+        .orderBy(asc(inventoryTransferLines.lineNo), asc(inventoryTransferAllocations.id))
+      const rows = await (opts.forUpdate ? q.for("update", { of: inventoryTransferAllocations }) : q)
+      return rows.map((r) => r.a)
+    },
+
+    async insertAllocations(orgId, rows, tx) {
+      if (rows.length === 0) return []
+      return tx
+        .insert(inventoryTransferAllocations)
+        .values(rows.map((r) => ({ ...r, orgId })))
+        .returning()
+    },
+
+    async updateAllocationCounters(orgId, id, patch, tx) {
+      await tx
+        .update(inventoryTransferAllocations)
+        .set({ ...patch, updatedAt: new Date() })
+        .where(and(eq(inventoryTransferAllocations.orgId, orgId), eq(inventoryTransferAllocations.id, id)))
+    },
+
+    async updateLineDispatched(orgId, lineId, dispatchedBaseQty, tx) {
+      await tx
+        .update(inventoryTransferLines)
+        .set({ dispatchedBaseQty, updatedAt: new Date() })
+        .where(and(eq(inventoryTransferLines.orgId, orgId), eq(inventoryTransferLines.id, lineId)))
+    },
+
+    async deleteLine(orgId, lineId, tx) {
+      await tx
+        .delete(inventoryTransferLines)
+        .where(and(eq(inventoryTransferLines.orgId, orgId), eq(inventoryTransferLines.id, lineId)))
+    },
+
+    async nextEventNo(orgId, transferId, tx) {
+      const [row] = await tx
+        .select({ max: sql<number | null>`max(${inventoryTransferEvents.eventNo})` })
+        .from(inventoryTransferEvents)
+        .where(and(eq(inventoryTransferEvents.orgId, orgId), eq(inventoryTransferEvents.transferId, transferId)))
+      return (row?.max ?? 0) + 1
+    },
+
+    async insertEvent(orgId, event, lines, tx) {
+      await tx.insert(inventoryTransferEvents).values({ ...event, orgId })
+      if (lines.length) {
+        await tx.insert(inventoryTransferEventLines).values(lines.map((l) => ({ ...l, orgId, eventId: event.id })))
+      }
+    },
+
     async listOptions(orgId, filters, tx) {
       const c: SQL[] = [eq(inventoryTransfers.orgId, orgId)]
       if (filters.search) c.push(ilike(inventoryTransfers.number, `%${escapeLike(filters.search)}%`))

@@ -49,3 +49,7 @@ Use the existing patterns: service specs with `testing.ts` fakes (`inventory-adj
 
 CI is stricter than local checks: run `pnpm run typecheck` in each package before pushing.
 
+
+## Phase 3 coverage (unit, service.spec)
+Dispatch success, FEFO batch allocation across batches, insufficient batch stock, engine rejection, lowering a line, exceeding requested, double dispatch, cancelled transfer, partial return, exceeds pending, nothing pending, reverse blocked after a return, reverse success.
+Not yet covered: API integration tests for the new routes, permission denial per route.
