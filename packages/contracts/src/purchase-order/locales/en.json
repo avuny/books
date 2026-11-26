@@ -129,5 +129,33 @@
     "unshipped": "Unshipped",
     "unitPrice": "Unit price",
     "net": "Net"
+  },
+  "form": {
+    "title": "New purchase order",
+    "description": "Order stock from a supplier. Save as a draft, then confirm when it is final.",
+    "supplier": "Supplier",
+    "supplierPlaceholder": "Select a supplier",
+    "orderDate": "Order date",
+    "expectedDelivery": "Expected delivery",
+    "paymentTerm": "Payment term",
+    "paymentTermPlaceholder": "Due on receipt",
+    "warehouse": "Warehouse",
+    "supplierReference": "Supplier reference",
+    "notes": "Notes",
+    "linesTitle": "Order lines",
+    "addLine": "Add line",
+    "removeLine": "Remove line",
+    "noLines": "Add at least one item",
+    "itemPlaceholder": "Select an item",
+    "quantity": "Quantity",
+    "unitPrice": "Unit price",
+    "discount": "Discount",
+    "lineNotes": "Line notes",
+    "save": "Save draft",
+    "saving": "Saving...",
+    "saveConfirm": "Save and confirm",
+    "cancel": "Cancel",
+    "invalidMoney": "Prices must be plain numbers with the currency's decimals",
+    "currencyNote": "Amounts are in {currency}"
   }
 }

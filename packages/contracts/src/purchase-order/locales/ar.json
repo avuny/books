@@ -129,5 +129,33 @@
     "unshipped": "غير المشحون",
     "unitPrice": "سعر الوحدة",
     "net": "الصافي"
+  },
+  "form": {
+    "title": "أمر شراء جديد",
+    "description": "اطلب مخزونًا من مورد. احفظه كمسودة ثم أكده عند الانتهاء.",
+    "supplier": "المورد",
+    "supplierPlaceholder": "اختر مورد",
+    "orderDate": "تاريخ الأمر",
+    "expectedDelivery": "التسليم المتوقع",
+    "paymentTerm": "شرط الدفع",
+    "paymentTermPlaceholder": "مستحق عند الاستلام",
+    "warehouse": "المستودع",
+    "supplierReference": "مرجع المورد",
+    "notes": "ملاحظات",
+    "linesTitle": "بنود الأمر",
+    "addLine": "إضافة بند",
+    "removeLine": "حذف البند",
+    "noLines": "أضف صنفًا واحدًا على الأقل",
+    "itemPlaceholder": "اختر صنفًا",
+    "quantity": "الكمية",
+    "unitPrice": "سعر الوحدة",
+    "discount": "الخصم",
+    "lineNotes": "ملاحظات البند",
+    "save": "حفظ كمسودة",
+    "saving": "جارٍ الحفظ...",
+    "saveConfirm": "حفظ وتأكيد",
+    "cancel": "إلغاء",
+    "invalidMoney": "يجب أن تكون الأسعار أرقامًا عادية بخانات عملة صحيحة",
+    "currencyNote": "المبالغ بعملة {currency}"
   }
 }

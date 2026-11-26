@@ -40,6 +40,7 @@ import { Route as OrganizationOrgIdItemsIndexRouteImport } from './routes/organi
 import { Route as OrganizationOrgIdItemsItemIdRouteImport } from './routes/organization/$orgId/items/$itemId'
 import { Route as OrganizationOrgIdPurchaseOrdersIndexRouteImport } from './routes/organization/$orgId/purchase-orders/index'
 import { Route as OrganizationOrgIdPurchaseOrdersOrderIdRouteImport } from './routes/organization/$orgId/purchase-orders/$orderId'
+import { Route as OrganizationOrgIdPurchaseOrdersNewRouteImport } from './routes/organization/$orgId/purchase-orders/new'
 import { Route as OrganizationOrgIdRolesIndexRouteImport } from './routes/organization/$orgId/roles/index'
 import { Route as OrganizationOrgIdRolesRoleIdRouteImport } from './routes/organization/$orgId/roles/$roleId'
 import { Route as OrganizationOrgIdSettingsIndexRouteImport } from './routes/organization/$orgId/settings/index'
@@ -224,6 +225,12 @@ const OrganizationOrgIdPurchaseOrdersOrderIdRoute =
     path: '/purchase-orders/$orderId',
     getParentRoute: () => OrganizationOrgIdRouteRoute,
   } as any)
+const OrganizationOrgIdPurchaseOrdersNewRoute =
+  OrganizationOrgIdPurchaseOrdersNewRouteImport.update({
+    id: '/purchase-orders/new',
+    path: '/purchase-orders/new',
+    getParentRoute: () => OrganizationOrgIdRouteRoute,
+  } as any)
 const OrganizationOrgIdRolesIndexRoute =
   OrganizationOrgIdRolesIndexRouteImport.update({
     id: '/roles/',
@@ -341,6 +348,7 @@ export interface FileRoutesByFullPath {
   '/organization/$orgId/item-categories/$categoryId': typeof OrganizationOrgIdItemCategoriesCategoryIdRoute
   '/organization/$orgId/items/$itemId': typeof OrganizationOrgIdItemsItemIdRoute
   '/organization/$orgId/purchase-orders/$orderId': typeof OrganizationOrgIdPurchaseOrdersOrderIdRoute
+  '/organization/$orgId/purchase-orders/new': typeof OrganizationOrgIdPurchaseOrdersNewRoute
   '/organization/$orgId/roles/$roleId': typeof OrganizationOrgIdRolesRoleIdRoute
   '/organization/$orgId/unit-collections/$collectionId': typeof OrganizationOrgIdUnitCollectionsCollectionIdRoute
   '/organization/$orgId/units/$unitId': typeof OrganizationOrgIdUnitsUnitIdRoute
@@ -383,6 +391,7 @@ export interface FileRoutesByTo {
   '/organization/$orgId/item-categories/$categoryId': typeof OrganizationOrgIdItemCategoriesCategoryIdRoute
   '/organization/$orgId/items/$itemId': typeof OrganizationOrgIdItemsItemIdRoute
   '/organization/$orgId/purchase-orders/$orderId': typeof OrganizationOrgIdPurchaseOrdersOrderIdRoute
+  '/organization/$orgId/purchase-orders/new': typeof OrganizationOrgIdPurchaseOrdersNewRoute
   '/organization/$orgId/roles/$roleId': typeof OrganizationOrgIdRolesRoleIdRoute
   '/organization/$orgId/unit-collections/$collectionId': typeof OrganizationOrgIdUnitCollectionsCollectionIdRoute
   '/organization/$orgId/units/$unitId': typeof OrganizationOrgIdUnitsUnitIdRoute
@@ -432,6 +441,7 @@ export interface FileRoutesById {
   '/organization/$orgId/item-categories/$categoryId': typeof OrganizationOrgIdItemCategoriesCategoryIdRoute
   '/organization/$orgId/items/$itemId': typeof OrganizationOrgIdItemsItemIdRoute
   '/organization/$orgId/purchase-orders/$orderId': typeof OrganizationOrgIdPurchaseOrdersOrderIdRoute
+  '/organization/$orgId/purchase-orders/new': typeof OrganizationOrgIdPurchaseOrdersNewRoute
   '/organization/$orgId/roles/$roleId': typeof OrganizationOrgIdRolesRoleIdRoute
   '/organization/$orgId/unit-collections/$collectionId': typeof OrganizationOrgIdUnitCollectionsCollectionIdRoute
   '/organization/$orgId/units/$unitId': typeof OrganizationOrgIdUnitsUnitIdRoute
@@ -482,6 +492,7 @@ export interface FileRouteTypes {
     | '/organization/$orgId/item-categories/$categoryId'
     | '/organization/$orgId/items/$itemId'
     | '/organization/$orgId/purchase-orders/$orderId'
+    | '/organization/$orgId/purchase-orders/new'
     | '/organization/$orgId/roles/$roleId'
     | '/organization/$orgId/unit-collections/$collectionId'
     | '/organization/$orgId/units/$unitId'
@@ -524,6 +535,7 @@ export interface FileRouteTypes {
     | '/organization/$orgId/item-categories/$categoryId'
     | '/organization/$orgId/items/$itemId'
     | '/organization/$orgId/purchase-orders/$orderId'
+    | '/organization/$orgId/purchase-orders/new'
     | '/organization/$orgId/roles/$roleId'
     | '/organization/$orgId/unit-collections/$collectionId'
     | '/organization/$orgId/units/$unitId'
@@ -572,6 +584,7 @@ export interface FileRouteTypes {
     | '/organization/$orgId/item-categories/$categoryId'
     | '/organization/$orgId/items/$itemId'
     | '/organization/$orgId/purchase-orders/$orderId'
+    | '/organization/$orgId/purchase-orders/new'
     | '/organization/$orgId/roles/$roleId'
     | '/organization/$orgId/unit-collections/$collectionId'
     | '/organization/$orgId/units/$unitId'
@@ -822,6 +835,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OrganizationOrgIdPurchaseOrdersOrderIdRouteImport
       parentRoute: typeof OrganizationOrgIdRouteRoute
     }
+    '/organization/$orgId/purchase-orders/new': {
+      id: '/organization/$orgId/purchase-orders/new'
+      path: '/purchase-orders/new'
+      fullPath: '/organization/$orgId/purchase-orders/new'
+      preLoaderRoute: typeof OrganizationOrgIdPurchaseOrdersNewRouteImport
+      parentRoute: typeof OrganizationOrgIdRouteRoute
+    }
     '/organization/$orgId/roles/': {
       id: '/organization/$orgId/roles/'
       path: '/roles'
@@ -985,6 +1005,7 @@ interface OrganizationOrgIdRouteRouteChildren {
   OrganizationOrgIdItemCategoriesCategoryIdRoute: typeof OrganizationOrgIdItemCategoriesCategoryIdRoute
   OrganizationOrgIdItemsItemIdRoute: typeof OrganizationOrgIdItemsItemIdRoute
   OrganizationOrgIdPurchaseOrdersOrderIdRoute: typeof OrganizationOrgIdPurchaseOrdersOrderIdRoute
+  OrganizationOrgIdPurchaseOrdersNewRoute: typeof OrganizationOrgIdPurchaseOrdersNewRoute
   OrganizationOrgIdRolesRoleIdRoute: typeof OrganizationOrgIdRolesRoleIdRoute
   OrganizationOrgIdUnitCollectionsCollectionIdRoute: typeof OrganizationOrgIdUnitCollectionsCollectionIdRoute
   OrganizationOrgIdUnitsUnitIdRoute: typeof OrganizationOrgIdUnitsUnitIdRoute
@@ -1023,6 +1044,8 @@ const OrganizationOrgIdRouteRouteChildren: OrganizationOrgIdRouteRouteChildren =
     OrganizationOrgIdItemsItemIdRoute: OrganizationOrgIdItemsItemIdRoute,
     OrganizationOrgIdPurchaseOrdersOrderIdRoute:
       OrganizationOrgIdPurchaseOrdersOrderIdRoute,
+    OrganizationOrgIdPurchaseOrdersNewRoute:
+      OrganizationOrgIdPurchaseOrdersNewRoute,
     OrganizationOrgIdRolesRoleIdRoute: OrganizationOrgIdRolesRoleIdRoute,
     OrganizationOrgIdUnitCollectionsCollectionIdRoute:
       OrganizationOrgIdUnitCollectionsCollectionIdRoute,
