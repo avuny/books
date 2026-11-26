@@ -439,9 +439,10 @@ export function createStockMovementService(deps: StockMovementServiceDeps) {
 
     /** Where one item is: on hand in real warehouses, in transit, and the split per warehouse. */
     async getItemStock(orgId: string, itemId: string): Promise<Result<ItemStockDto, Code>> {
-      const rows = await repo.sumByWarehouse(orgId, itemId)
+      const [rows, shipped] = await Promise.all([repo.sumByWarehouse(orgId, itemId), repo.sumInTransitQty(orgId, itemId)])
       let onHand = "0"
-      let inTransit = "0"
+      // Supplier shipments move the projection inTransitQty; stock sitting in a system warehouse counts too.
+      let inTransit = shipped
       let reserved = "0"
       let onOrder = "0"
       let available = "0"

@@ -14,6 +14,7 @@ import {
   DialogTitle,
 } from "@workspace/ui/components/dialog"
 
+import { ReceiptsPanel } from "../receipts"
 import { ShipmentsPanel } from "../shipments"
 import { PurchaseOrderStatusBadge } from "../components"
 import { bpsToPercent, formatMinorAmount, usePurchaseOrderLabels } from "../lib"
@@ -177,6 +178,8 @@ export function PurchaseOrderDetails({ orgId, orderId, onBack, onEdit }: Props) 
       </section>
 
       <ShipmentsPanel orgId={orgId} order={order} />
+
+      <ReceiptsPanel orgId={orgId} order={order} />
 
       <ConfirmDialog
         open={action === "confirm"}

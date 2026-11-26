@@ -1,0 +1,73 @@
+{
+  "errors": {
+    "PURCHASE_RECEIPT_NOT_FOUND": "إيصال الاستلام غير موجود",
+    "PURCHASE_RECEIPT_NOT_EDITABLE": "يمكن تعديل الإيصالات المسودة فقط",
+    "PURCHASE_RECEIPT_NOT_DELETABLE": "يمكن حذف الإيصالات المسودة فقط. اعكس الإيصال المرحّل بدلاً من ذلك",
+    "PURCHASE_RECEIPT_ALREADY_POSTED": "الإيصال مرحّل بالفعل",
+    "PURCHASE_RECEIPT_NOT_POSTED": "يمكن عكس الإيصالات المرحّلة فقط",
+    "PURCHASE_RECEIPT_PURCHASE_ORDER_NOT_FOUND": "أمر الشراء غير موجود",
+    "PURCHASE_RECEIPT_PURCHASE_ORDER_NOT_OPEN": "يجب أن يكون أمر الشراء مؤكدًا ومفتوحًا لاستلام البضاعة",
+    "PURCHASE_RECEIPT_NO_LINES": "مطلوب بند استلام واحد على الأقل",
+    "PURCHASE_RECEIPT_LINE_NOT_ON_ORDER": "أحد بنود الاستلام لا ينتمي إلى أمر الشراء هذا",
+    "PURCHASE_RECEIPT_DUPLICATE_LINES": "نفس بند الأمر مكرر",
+    "PURCHASE_RECEIPT_UNIT_NOT_IN_COLLECTION": "الوحدة المختارة غير مهيأة لهذا الصنف",
+    "PURCHASE_RECEIPT_QUANTITY_NOT_POSITIVE": "يجب أن تكون الكميات المستلمة أكبر من صفر",
+    "PURCHASE_RECEIPT_QUANTITY_MISMATCH": "المستلم يجب أن يساوي المقبول زائد المرفوض",
+    "PURCHASE_RECEIPT_REJECTION_REASON_REQUIRED": "اذكر سبب الكمية المرفوضة",
+    "PURCHASE_RECEIPT_EXCEEDS_IN_TRANSIT": "الكمية المستلمة أكبر من الكمية قيد الشحن لهذا البند",
+    "PURCHASE_RECEIPT_EXCEEDS_UNSHIPPED": "الاستلام المباشر أكبر من الكمية غير المشحونة في الأمر",
+    "PURCHASE_RECEIPT_LOCATION_REQUIRED": "اختر موقعًا للبضاعة المقبولة",
+    "PURCHASE_RECEIPT_STOCK_ALREADY_USED": "تم استخدام المخزون المستلم بالفعل، لذا لا يمكن عكس هذا الإيصال",
+    "PURCHASE_RECEIPT_POSTING_FAILED": "فشل ترحيل الإيصال. لم يتغير شيء. حاول مرة أخرى",
+    "PURCHASE_RECEIPT_PROJECTION_CONFLICT": "تغيرت كميات المخزون أثناء الترحيل. حاول مرة أخرى",
+    "PURCHASE_RECEIPT_NUMBER_TAKEN": "تعذر تخصيص رقم الإيصال. حاول مرة أخرى"
+  },
+  "labels": {
+    "status": {
+      "DRAFT": "مسودة",
+      "POSTED": "مرحّل",
+      "REVERSED": "معكوس"
+    },
+    "billStatus": {
+      "NOT_APPLICABLE": "غير منطبق",
+      "AWAITING_BILL": "بانتظار فاتورة المورّد"
+    }
+  },
+  "msgs": {
+    "PURCHASE_RECEIPT_CREATED": "تم إنشاء إيصال الاستلام بنجاح",
+    "PURCHASE_RECEIPT_UPDATED": "تم تحديث إيصال الاستلام بنجاح",
+    "PURCHASE_RECEIPT_DELETED": "تم حذف إيصال الاستلام بنجاح",
+    "PURCHASE_RECEIPT_POSTED": "تم ترحيل الإيصال. البضاعة المقبولة أصبحت في المخزون",
+    "PURCHASE_RECEIPT_REVERSED": "تم عكس الإيصال"
+  },
+  "ui": {
+    "title": "إيصالات استلام البضائع",
+    "new": "إيصال جديد",
+    "none": "لا توجد إيصالات بعد.",
+    "number": "الإيصال",
+    "date": "التاريخ",
+    "reference": "مرجع تسليم المورد",
+    "notes": "ملاحظات",
+    "status": "الحالة",
+    "bill": "الفاتورة",
+    "value": "القيمة",
+    "post": "ترحيل",
+    "reverse": "عكس",
+    "cancel": "إلغاء",
+    "create": "إنشاء إيصال",
+    "creating": "جارٍ الإنشاء...",
+    "reverseTitle": "عكس الإيصال",
+    "reverseDescription": "سيتم إخراج البضائع المستلمة من المخزون وعكس القيد. يفشل إذا تم استخدام المخزون.",
+    "reason": "السبب",
+    "noOpenLines": "أدخل ما وصل لكل سطر. اترك السطر فارغًا لتخطيه.",
+    "item": "الصنف",
+    "inTransit": "في الطريق",
+    "unshipped": "غير مشحون",
+    "received": "المستلم",
+    "rejected": "المرفوض",
+    "rejectionReason": "سبب الرفض",
+    "direct": "لم يُشحن بعد (استلام مباشر)",
+    "invalidQty": "تحقق من الكميات: يجب أن يكون المستلم أكبر من صفر ولا يزيد المرفوض عن المستلم.",
+    "reasonRequired": "أدخل سببًا للبضائع المرفوضة."
+  }
+}

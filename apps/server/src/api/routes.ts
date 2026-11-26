@@ -27,6 +27,7 @@ import { otpRoutes } from "./modules/otp/index.js"
 import { partyRoutes } from "./modules/party/index.js"
 import { paymentTermRoutes } from "./modules/payment-term/index.js"
 import { purchaseOrderRoutes } from "./modules/purchase-order/index.js"
+import { purchaseReceiptRoutes } from "./modules/purchase-receipt/index.js"
 import { purchaseShipmentRoutes } from "./modules/purchase-shipment/index.js"
 import { roleRoutes } from "./modules/role/index.js"
 import { sidebarRoutes } from "./modules/sidebar/index.js"
@@ -110,6 +111,7 @@ app.route("/otp", otpRoutes)
 app.route("/party", partyRoutes)
 app.route("/paymentTerm", paymentTermRoutes)
 app.route("/purchaseOrder", purchaseOrderRoutes)
+app.route("/purchaseReceipt", purchaseReceiptRoutes)
 app.route("/purchaseShipment", purchaseShipmentRoutes)
 app.route("/roles", roleRoutes)
 app.route("/sidebar", sidebarRoutes)

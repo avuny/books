@@ -21,6 +21,7 @@
       "customer": "العملاء",
       "purchase_order": "أوامر الشراء",
       "purchase_shipment": "شحنات الموردين",
+      "purchase_receipt": "إيصالات الاستلام",
       "payment_term": "شروط الدفع",
       "vendor": "الموردون",
       "activity_log": "سجل النشاط",

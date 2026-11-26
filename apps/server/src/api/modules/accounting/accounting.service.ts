@@ -654,9 +654,9 @@ export const createAccountingService = ({
      * Reverses a POSTED entry by posting a new entry with every debit and credit swapped, then marking
      * the original REVERSED. Nothing is edited or deleted, so the trail stays complete.
      */
-    async reverseJournalEntry(actorId: string, orgId: string, id: string, input: ReverseJournalEntryInput) {
+    async reverseJournalEntry(actorId: string, orgId: string, id: string, input: ReverseJournalEntryInput, outerTx?: Tx) {
       const result = await abortable(() =>
-        repo.transaction(async (tx) => {
+        inTx(outerTx, async (tx) => {
           await repo.lockOrg(orgId, tx)
           const view = await repo.findEntryView(orgId, id, tx)
           if (!view) return entryNotFound()
