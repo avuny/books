@@ -37,9 +37,18 @@ export class DummyCache implements SidebarCache {
 export const SIDEBAR_CATALOG_CACHE_KEY = "sidebar:catalog"
 export const SIDEBAR_CATALOG_TTL_SECONDS = 60
 
+/**
+ * Options whose web page does not exist yet. The registry lists them (permissions and API are
+ * ready) but the sidebar link would open a bare "Page not found" (audit B5). Remove an entry
+ * here when its page ships.
+ */
+export const OPTIONS_WITHOUT_WEB_PAGE: ReadonlySet<string> = new Set(["accounting"])
+
 /** Every sidebar option in display order, from the module registry. */
 const OPTIONS = SIDEBAR_TREE.flatMap((heading) =>
-  heading.options.map((option) => ({ heading: heading.name, option }))
+  heading.options
+    .filter((option) => !OPTIONS_WITHOUT_WEB_PAGE.has(option.name))
+    .map((option) => ({ heading: heading.name, option }))
 )
 
 export interface SidebarServiceDeps {
