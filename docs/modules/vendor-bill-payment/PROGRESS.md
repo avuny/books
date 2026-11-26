@@ -24,7 +24,7 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done · `[!]` blocked · `[-]` 
 | Phase | Title | Gate | Status |
 |---|---|---|---|
 | 0 | Discovery and decisions | G0 | done 2026-11-26 |
-| 1 | Build | G1 | in progress: M1 (bill backend), M2 (payment backend) and M3 (web) done, reports next |
+| 1 | Build | G1 | in progress: M1 (bill backend), M2 (payment backend) and M3 (web) and M4 (reports) built, prod smoke after release |
 | 2 | Web and copy | G2 | not started |
 | 3 | Hardening and acceptance | G3 | not started |
 
@@ -69,3 +69,9 @@ Not yet done: web screens and the Pay later / Already paid / Partially paid flow
 
 Web feature `vendor-bill-module`: bill list (status tabs), bill details (lines, totals, paid/outstanding, post, reverse, delete), vendor payments list (post, reverse, delete), receipts panel gets "Create bill" on posted receipts that are not fully billed (dialog: supplier invoice number, invoice date, optional due date, then opens the draft bill). Posting a draft bill opens the Pay later / Already paid / Partially paid dialog: it posts the bill, then creates and posts one payment for the chosen amount (full total or typed partial). A posted bill with an outstanding amount has "Record payment". Sidebar entries (purchases group): Vendor bills, Vendor payments. en and ar strings under `ui` in the vendor-bill locale. Amount rule in `build-payment.ts` (tested).
 Known gaps: no bill edit screen yet (draft lines cannot be edited in the UI; API supports it), no web e2e spec, no manual Arabic/RTL pass. AP aging, supplier statement, GRNI/AP reconciliation and prod smoke are M4.
+
+### M4 log (2026-11-26)
+
+Reports on the vendor-bill routes (read:vendor-bill): `GET /vendorBill/organizations/{orgId}/ap-reports/aging`, `.../supplier-statement?partyId&from&to`, `.../reconciliation`. Pure rules in contracts (`vendor-bill/reports.ts`: aging buckets by days past due, statement running balance, reconcile difference; 7 tests). Aging is outstanding on posted bills today (total less posted allocations), grouped by supplier and currency. Statement lists posted bills and posted payments with an opening balance before `from`. Reconciliation compares the Accounts Payable ledger (credits less debits over POSTED and REVERSED entries, so a reversal nets its original) with the sum of bill outstanding, and GRNI ledger with posted receipt value less value cleared by posted bills. Any difference is shown, not hidden. Web: "AP reports" page at `/vendor-bills/reports` (aging table with a Statement dialog per supplier, reconciliation table), en/ar.
+Decisions: D14 aging has no back-dated as-of (outstanding is derived from current posted allocations), so it is always today. D15 no supplier exposure summary yet (AP + open GRNI), no payments-by-method report, no overdue-bills filter: follow-ups.
+Open: prod smoke of the full bill and payment journey and the reconciliation numbers happens after the vendor work is released to main (dev only today).

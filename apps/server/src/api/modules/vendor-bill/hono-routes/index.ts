@@ -1,6 +1,9 @@
 import { createOpenAPIRouter } from "@avuny/hono"
 import { requireAuth } from "../../auth/index.js"
 import { vendorBillService } from "../deps.js"
+import { apAgingRoute } from "./ap-aging.route.js"
+import { apReconciliationRoute } from "./ap-reconciliation.route.js"
+import { supplierStatementRoute } from "./supplier-statement.route.js"
 import { createFromReceiptVendorBillRoute } from "./create-from-receipt-vendor-bill.route.js"
 import { createVendorBillRoute } from "./create-vendor-bill.route.js"
 import { deleteVendorBillRoute } from "./delete-vendor-bill.route.js"
@@ -17,6 +20,10 @@ export const createVendorBillRoutes = (deps: RouteDeps) => {
   router.route("/", createVendorBillRoute(deps))
   router.route("/", createFromReceiptVendorBillRoute(deps))
   router.route("/", listVendorBillsRoute(deps))
+
+  router.route("/", apAgingRoute(deps))
+  router.route("/", supplierStatementRoute(deps))
+  router.route("/", apReconciliationRoute(deps))
 
   // Action routes on {id}
   router.route("/", postVendorBillRoute(deps))

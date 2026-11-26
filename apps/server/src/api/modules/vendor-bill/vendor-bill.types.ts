@@ -40,6 +40,25 @@ export interface VendorBillListFilter {
   partyId?: string
 }
 
+export interface ApReportBillRow {
+  id: string
+  number: string
+  supplierInvoiceNumber: string | null
+  partyId: string
+  partyName: string | null
+  currency: string
+  invoiceDate: string
+  dueDate: string
+  total: string
+  paid: string
+}
+
+export interface StatementSource {
+  partyName: string | null
+  currency: string | null
+  rows: { kind: "BILL" | "PAYMENT"; date: string; number: string; reference: string | null; amount: string }[]
+}
+
 export interface VendorBillRepository {
   transaction<T>(fn: (tx: Tx) => Promise<T>): Promise<T>
   maxNumberSuffix(orgId: string, tx?: Tx): Promise<number>
@@ -72,6 +91,14 @@ export interface VendorBillRepository {
     opts: { excludeBillId?: string; lock?: boolean },
     tx?: Tx
   ): Promise<BillableReceiptLine[]>
+  /** Posted bills with what has been paid on them (posted payments only). */
+  postedBillsWithPaid(orgId: string, partyId?: string): Promise<ApReportBillRow[]>
+  /** Every posted bill and posted payment of one supplier, for the statement. */
+  statementSource(orgId: string, partyId: string): Promise<StatementSource | null>
+  /** Credits less debits on a system account over POSTED and REVERSED entries (a reversal entry nets its original). */
+  ledgerCreditBalance(orgId: string, systemKey: string): Promise<string>
+  /** Posted receipt value less the received value cleared by posted bills. */
+  openReceiptValue(orgId: string): Promise<string>
   /** Unbilled accepted lines of one receipt, for create-from-receipt. */
   loadReceiptForBilling(orgId: string, receiptId: string, tx?: Tx): Promise<BillableReceiptLine[]>
 }
