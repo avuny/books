@@ -18,6 +18,7 @@ import { authRoutes } from "./modules/auth/index.js"
 import { batchRoutes } from "./modules/batch/index.js"
 import { geoRoutes } from "./modules/geo/index.js"
 import { inventoryAdjustmentRoutes } from "./modules/inventory-adjustment/index.js"
+import { inventoryTransferRoutes } from "./modules/inventory-transfer/index.js"
 import { itemRoutes } from "./modules/item/index.js"
 import { itemCategoryRoutes } from "./modules/item-category/index.js"
 import { organizationRoutes } from "./modules/organization/index.js"
@@ -30,6 +31,7 @@ import { purchaseOrderRoutes } from "./modules/purchase-order/index.js"
 import { purchaseReceiptRoutes } from "./modules/purchase-receipt/index.js"
 import { purchaseShipmentRoutes } from "./modules/purchase-shipment/index.js"
 import { roleRoutes } from "./modules/role/index.js"
+import { salesOrderRoutes } from "./modules/sales-order/index.js"
 import { sidebarRoutes } from "./modules/sidebar/index.js"
 import { stockMovementRoutes } from "./modules/stock-movement/index.js"
 import { unitRoutes } from "./modules/unit/index.js"
@@ -104,6 +106,7 @@ app.route("/auth", authRoutes)
 app.route("/batch", batchRoutes)
 app.route("/geo", geoRoutes)
 app.route("/inventoryAdjustment", inventoryAdjustmentRoutes)
+app.route("/inventoryTransfer", inventoryTransferRoutes)
 app.route("/item", itemRoutes)
 app.route("/itemCategory", itemCategoryRoutes)
 app.route("/organizations", organizationRoutes)
@@ -116,6 +119,7 @@ app.route("/purchaseOrder", purchaseOrderRoutes)
 app.route("/purchaseReceipt", purchaseReceiptRoutes)
 app.route("/purchaseShipment", purchaseShipmentRoutes)
 app.route("/roles", roleRoutes)
+app.route("/salesOrder", salesOrderRoutes)
 app.route("/sidebar", sidebarRoutes)
 app.route("/stockMovement", stockMovementRoutes)
 app.route("/unit", unitRoutes)

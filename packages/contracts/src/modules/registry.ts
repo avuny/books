@@ -177,6 +177,20 @@ export const MODULES = {
       cancel: { permission: true, event: "cancelled" },
     },
   },
+  sales_order: {
+    sidebar: {
+      group: "sales",
+      icon: "clipboard-check",
+      path: "/sales-orders",
+      label: { en: "Sales orders", ar: "أوامر البيع" },
+    },
+    actions: {
+      ...CRUD,
+      confirm: { permission: true, event: "confirmed" },
+      close: { permission: true, event: "closed" },
+      cancel: { permission: true, event: "cancelled" },
+    },
+  },
   purchase_shipment: {
     actions: {
       ...CRUD,
@@ -350,6 +364,23 @@ export const MODULES = {
       ...CRUD,
       confirm: { permission: true, event: "confirmed" },
       cancel: { permission: true, event: "cancelled" },
+    },
+  },
+  inventory_transfer: {
+    sidebar: {
+      group: "inventory",
+      icon: "truck",
+      path: "/inventory-transfers",
+      label: { en: "Inventory transfers", ar: "تحويلات المخزون" },
+    },
+    actions: {
+      ...CRUD,
+      dispatch: { permission: true, event: "dispatched" },
+      receive: { permission: true, event: "received" },
+      return: { permission: true, event: "returned" },
+      close_short: { permission: true, event: "closed_short" },
+      cancel: { permission: true, event: "cancelled" },
+      reverse: { permission: true, event: "reversed" },
     },
   },
 

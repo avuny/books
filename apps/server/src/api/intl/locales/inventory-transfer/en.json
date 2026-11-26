@@ -1,0 +1,67 @@
+{
+  "errors": {
+    "INVENTORY_TRANSFER_NOT_FOUND": "Inventory transfer not found",
+    "INVENTORY_TRANSFER_NOT_EDITABLE": "Only draft transfers can be edited",
+    "INVENTORY_TRANSFER_NOT_DELETABLE": "Only draft transfers can be deleted",
+    "INVENTORY_TRANSFER_NOT_DRAFT": "Only draft transfers can be cancelled",
+    "INVENTORY_TRANSFER_ALREADY_DISPATCHED": "The transfer is already dispatched",
+    "INVENTORY_TRANSFER_NOT_DISPATCHABLE": "Only draft transfers can be dispatched",
+    "INVENTORY_TRANSFER_NOT_IN_TRANSIT": "The transfer has no goods in transit",
+    "INVENTORY_TRANSFER_ALREADY_CANCELLED": "The transfer is already cancelled",
+    "INVENTORY_TRANSFER_NO_LINES": "At least one transfer line is required",
+    "INVENTORY_TRANSFER_TOO_MANY_LINES": "The transfer exceeds the maximum allowed lines",
+    "INVENTORY_TRANSFER_DUPLICATE_LINES": "Duplicate lines found for the same item and locations",
+    "INVENTORY_TRANSFER_SAME_LOCATION": "Source and destination location must be different",
+    "INVENTORY_TRANSFER_WAREHOUSE_NOT_FOUND": "The selected warehouse does not exist",
+    "INVENTORY_TRANSFER_WAREHOUSE_NOT_PHYSICAL": "Only physical warehouses can be selected for transfers",
+    "INVENTORY_TRANSFER_LOCATION_NOT_FOUND": "The specified warehouse location does not exist",
+    "INVENTORY_TRANSFER_LOCATION_NOT_IN_WAREHOUSE": "The location does not belong to the selected warehouse",
+    "INVENTORY_TRANSFER_LOCATION_NOT_STOCKABLE": "The location is not stockable",
+    "INVENTORY_TRANSFER_LOCATION_BLOCKED": "The location is blocked",
+    "INVENTORY_TRANSFER_LOCATION_NOT_RECEIVABLE": "The destination location cannot receive goods",
+    "INVENTORY_TRANSFER_LOCATION_NOT_PICKABLE": "The source location cannot issue goods",
+    "INVENTORY_TRANSFER_ITEM_NOT_FOUND": "The specified item does not exist",
+    "INVENTORY_TRANSFER_ITEM_INACTIVE": "Cannot transfer inactive items",
+    "INVENTORY_TRANSFER_ITEM_NOT_STOCKED": "Cannot transfer non-stocked items",
+    "INVENTORY_TRANSFER_UNIT_NOT_IN_COLLECTION": "The selected unit is not configured for this item",
+    "INVENTORY_TRANSFER_BATCH_NOT_FOUND": "The specified batch was not found",
+    "INVENTORY_TRANSFER_BATCH_NOT_AVAILABLE": "The batch cannot be moved in its current status",
+    "INVENTORY_TRANSFER_INSUFFICIENT_STOCK": "Insufficient available stock at the source location",
+    "INVENTORY_TRANSFER_LINE_NOT_FOUND": "The transfer line was not found",
+    "INVENTORY_TRANSFER_ALLOCATION_NOT_FOUND": "The transfer allocation was not found",
+    "INVENTORY_TRANSFER_INVALID_QUANTITY": "The quantity is invalid",
+    "INVENTORY_TRANSFER_EXCEEDS_REQUESTED": "The dispatch quantity is more than requested",
+    "INVENTORY_TRANSFER_EXCEEDS_PENDING": "The quantity is more than what is still in transit",
+    "INVENTORY_TRANSFER_NOTHING_PENDING": "Nothing is left in transit",
+    "INVENTORY_TRANSFER_EVENT_NOT_FOUND": "The transfer event was not found",
+    "INVENTORY_TRANSFER_CANNOT_REVERSE": "This transfer step cannot be reversed",
+    "INVENTORY_TRANSFER_HAS_EVENTS": "The transfer already has receipts, returns or losses",
+    "INVENTORY_TRANSFER_POSTING_FAILED": "Stock could not be posted for this transfer",
+    "INVENTORY_TRANSFER_NUMBER_TAKEN": "An inventory transfer with this number already exists"
+  },
+  "labels": {
+    "status": {
+      "DRAFT": "Draft",
+      "IN_TRANSIT": "In transit",
+      "PARTIALLY_RECEIVED": "Partially received",
+      "RECEIVED": "Received",
+      "CANCELLED": "Cancelled"
+    },
+    "eventKind": {
+      "RECEIPT": "Receipt",
+      "RETURN": "Return to source",
+      "LOSS": "Written off"
+    }
+  },
+  "msgs": {
+    "INVENTORY_TRANSFER_CREATED": "Inventory transfer created successfully",
+    "INVENTORY_TRANSFER_UPDATED": "Inventory transfer updated successfully",
+    "INVENTORY_TRANSFER_DELETED": "Inventory transfer deleted successfully",
+    "INVENTORY_TRANSFER_DISPATCHED": "Inventory transfer dispatched, stock is in transit",
+    "INVENTORY_TRANSFER_RECEIVED": "Goods received successfully",
+    "INVENTORY_TRANSFER_RETURNED": "Goods returned to the source",
+    "INVENTORY_TRANSFER_CLOSED_SHORT": "Remaining goods written off",
+    "INVENTORY_TRANSFER_CANCELLED": "Inventory transfer cancelled successfully",
+    "INVENTORY_TRANSFER_REVERSED": "Inventory transfer step reversed successfully"
+  }
+}

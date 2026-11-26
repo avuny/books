@@ -57,12 +57,12 @@ None.
 
 ### M1 log (2026-11-26)
 
-Contracts (`vendor-bill`, en/ar, permissions via registry), schema `vendor_bills` + `vendor_bill_lines` (migration 0027, also adds a unique (org_id, id) on `purchase_receipt_lines` for the composite FK), server module with 8 routes (`/vendorBill/organizations/{orgId}/vendor-bills[...]`: create, create from receipt, list, get, update, delete, post, reverse), service unit tests (8), route integration test (CI only), receipt `billStatus` derivation and reverse guard.
+Contracts (`vendor-bill`, en/ar, permissions via registry), schema `vendor_bills` + `vendor_bill_lines` (migration 0028 (one combined bill + payment migration; renumbered on merge with inventory-transfer 0027), also adds a unique (org_id, id) on `purchase_receipt_lines` for the composite FK), server module with 8 routes (`/vendorBill/organizations/{orgId}/vendor-bills[...]`: create, create from receipt, list, get, update, delete, post, reverse), service unit tests (8), route integration test (CI only), receipt `billStatus` derivation and reverse guard.
 Not yet done: web screens (M3), payments and outstanding balance (M2), reverse guard when payments exist (M2), AP aging and reconciliation (M4), production smoke (M4).
 
 ### M2 log (2026-11-26)
 
-Contracts `vendor-payment` (constants, errors, schemas, rules, en/ar, permissions), schema `vendor_payments` + `vendor_payment_allocations` (migration 0028), server module with 7 routes (`/vendorPayment/organizations/{orgId}/vendor-payments[...]`: create, list, get, update, delete, post, reverse), 6 service tests, route integration test (CI only). Posting uses the existing `supplier_payment` event (Dr AP, Cr cash or bank by method). Bills now carry paidAmount / outstandingAmount / paymentStatus and cannot be reversed while a posted payment is applied.
+Contracts `vendor-payment` (constants, errors, schemas, rules, en/ar, permissions), schema `vendor_payments` + `vendor_payment_allocations` (migration 0028, combined with the bill tables), server module with 7 routes (`/vendorPayment/organizations/{orgId}/vendor-payments[...]`: create, list, get, update, delete, post, reverse), 6 service tests, route integration test (CI only). Posting uses the existing `supplier_payment` event (Dr AP, Cr cash or bank by method). Bills now carry paidAmount / outstandingAmount / paymentStatus and cannot be reversed while a posted payment is applied.
 Not yet done: web screens and the Pay later / Already paid / Partially paid flow (M3), AP aging, supplier statement, GRNI/AP reconciliation, prod smoke (M4).
 
 ### M3 log (2026-11-26)

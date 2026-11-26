@@ -4,6 +4,7 @@ import type authEn from "./locales/auth/en.json"
 import type batchEn from "./locales/batch/en.json"
 import type geoEn from "./locales/geo/en.json"
 import type inventoryAdjustmentEn from "./locales/inventory-adjustment/en.json"
+import type inventoryTransferEn from "./locales/inventory-transfer/en.json"
 import type itemEn from "./locales/item/en.json"
 import type itemCategoryEn from "./locales/item-category/en.json"
 import type organizationEn from "./locales/organization/en.json"
@@ -16,6 +17,7 @@ import type purchaseOrderEn from "./locales/purchase-order/en.json"
 import type purchaseReceiptEn from "./locales/purchase-receipt/en.json"
 import type purchaseShipmentEn from "./locales/purchase-shipment/en.json"
 import type roleEn from "./locales/role/en.json"
+import type salesOrderEn from "./locales/sales-order/en.json"
 import type sidebarEn from "./locales/sidebar/en.json"
 import type unitEn from "./locales/unit/en.json"
 import type unitCollectionEn from "./locales/unit-collection/en.json"
@@ -31,6 +33,7 @@ type AuthMessages = typeof authEn
 type BatchMessages = typeof batchEn
 type GeoMessages = typeof geoEn
 type InventoryAdjustmentMessages = typeof inventoryAdjustmentEn
+type InventoryTransferMessages = typeof inventoryTransferEn
 type ItemMessages = typeof itemEn
 type ItemCategoryMessages = typeof itemCategoryEn
 type OrganizationMessages = typeof organizationEn
@@ -43,6 +46,7 @@ type PurchaseOrderMessages = typeof purchaseOrderEn
 type PurchaseReceiptMessages = typeof purchaseReceiptEn
 type PurchaseShipmentMessages = typeof purchaseShipmentEn
 type RoleMessages = typeof roleEn
+type SalesOrderMessages = typeof salesOrderEn
 type SidebarMessages = typeof sidebarEn
 type UnitMessages = typeof unitEn
 type UnitCollectionMessages = typeof unitCollectionEn
@@ -63,6 +67,8 @@ declare module "i18next" {
       geo: GeoMessages
       "inventory-adjustment": InventoryAdjustmentMessages
       inventoryAdjustment: InventoryAdjustmentMessages
+      "inventory-transfer": InventoryTransferMessages
+      inventoryTransfer: InventoryTransferMessages
       item: ItemMessages
       "item-category": ItemCategoryMessages
       itemCategory: ItemCategoryMessages
@@ -82,6 +88,8 @@ declare module "i18next" {
       "purchase-shipment": PurchaseShipmentMessages
       purchaseShipment: PurchaseShipmentMessages
       role: RoleMessages
+      "sales-order": SalesOrderMessages
+      salesOrder: SalesOrderMessages
       sidebar: SidebarMessages
       unit: UnitMessages
       "unit-collection": UnitCollectionMessages
