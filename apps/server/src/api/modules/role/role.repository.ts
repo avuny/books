@@ -17,6 +17,18 @@ const ROLE_NAME_INDEXES = ["ux_role_org_name", "ux_role_system_name"] as const
 
 type NewRole = typeof roles.$inferInsert
 
+
+// Drizzle renders `${roles.id}` as a bare "id" in a single-table select, and inside these
+// subqueries a bare "id" binds to the subquery's own table, so every count was 0 (audit B7).
+// Qualify the outer column explicitly.
+const OUTER_ROLE_ID = sql.raw('"roles"."id"')
+
+export const permissionCountSql = () =>
+  sql<number>`(select count(*)::int from ${rolePermissions} where ${rolePermissions.roleId} = ${OUTER_ROLE_ID})`
+
+export const memberCountSql = (orgId: string) =>
+  sql<number>`(select count(*)::int from ${organizationUserRoles} where ${organizationUserRoles.roleId} = ${OUTER_ROLE_ID} and ${organizationUserRoles.orgId} = ${orgId})`
+
 export type RoleWriteResult =
   | { ok: true; row: Role }
   | { ok: false; reason: "name_taken" | "not_found" }
@@ -104,8 +116,8 @@ export function createRoleRepository({ db }: { db: DB }) {
       const rows = await exec(tx)
         .select({
           role: roles,
-          permissionCount: sql<number>`(select count(*)::int from ${rolePermissions} where ${rolePermissions.roleId} = ${roles.id})`,
-          memberCount: sql<number>`(select count(*)::int from ${organizationUserRoles} where ${organizationUserRoles.roleId} = ${roles.id} and ${organizationUserRoles.orgId} = ${orgId})`,
+          permissionCount: permissionCountSql(),
+          memberCount: memberCountSql(orgId),
         })
         .from(roles)
         .where(where)
