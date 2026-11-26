@@ -43,6 +43,9 @@ export const PURCHASE_ORDER_MAX_LINES = 500
 /** 15 digits keeps every stored amount below 2^53 (money() is a bigint in number mode). */
 export const PURCHASE_ORDER_MAX_MINOR_AMOUNT = 999_999_999_999_999 // ck_purchase_order_*_amount_max
 
+/** Discount and tax rates are integer basis points (1 bp = 0.01%); 10000 = 100%. ck_purchase_order_line_rate_bps */
+export const PURCHASE_ORDER_MAX_RATE_BPS = 10_000
+
 export const PURCHASE_ORDER_LIST_DEFAULT_PAGE_SIZE = 20
 export const PURCHASE_ORDER_LIST_MAX_PAGE_SIZE = 100
 

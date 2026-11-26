@@ -30,6 +30,7 @@
     "PURCHASE_ORDER_UNIT_NOT_IN_COLLECTION": "The selected unit is not configured for this item",
     "PURCHASE_ORDER_AMOUNT_OUT_OF_RANGE": "An amount on this order is too large",
     "PURCHASE_ORDER_DISCOUNT_EXCEEDS_LINE": "A line discount cannot be more than the line amount",
+    "PURCHASE_ORDER_DISCOUNT_CONFLICT": "Use either a discount rate or a discount amount on a line, not both",
     "PURCHASE_ORDER_CURRENCY_MISMATCH": "The order currency does not match the organization currency",
     "PURCHASE_ORDER_NUMBER_TAKEN": "Could not allocate a purchase order number. Please try again"
   }

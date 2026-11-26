@@ -97,7 +97,7 @@ export function createPurchaseOrderService(deps: PurchaseOrderServiceDeps) {
     headerWarehouseId: string | null | undefined,
     inputs: readonly PurchaseOrderLineInput[],
     tx?: Tx
-  ): Promise<Result<{ lines: NewLine[]; subtotal: bigint; discount: bigint; total: bigint }, Code>> => {
+  ): Promise<Result<{ lines: NewLine[]; subtotal: bigint; discount: bigint; tax: bigint; total: bigint }, Code>> => {
     const lines: NewLine[] = []
     const amounts = []
     for (const [i, input] of inputs.entries()) {
@@ -110,10 +110,18 @@ export function createPurchaseOrderService(deps: PurchaseOrderServiceDeps) {
       const unit = await deps.items.resolve(orgId, input.itemId, input.unitId, tx)
       if (!unit.ok) return failWith(ITEM_ERRORS[unit.reason])
 
-      const amount = computeLineAmounts(input.orderedQty, input.unitPrice, input.discountAmount)
+      const discountRateBps = input.discountRateBps ?? 0
+      const taxRateBps = input.taxRateBps ?? 0
+      if (discountRateBps > 0 && BigInt(input.discountAmount ?? "0") > 0n) {
+        return failWith(Err.PURCHASE_ORDER_DISCOUNT_CONFLICT)
+      }
+      const amount = computeLineAmounts(input.orderedQty, input.unitPrice, input.discountAmount ?? "0", {
+        discountRateBps,
+        taxRateBps,
+      })
       if (amount.discount > amount.gross) return failWith(Err.PURCHASE_ORDER_DISCOUNT_EXCEEDS_LINE)
       const max = BigInt(PURCHASE_ORDER_MAX_MINOR_AMOUNT)
-      if (amount.gross > max || amount.net > max) return failWith(Err.PURCHASE_ORDER_AMOUNT_OUT_OF_RANGE)
+      if (amount.gross > max || amount.total > max) return failWith(Err.PURCHASE_ORDER_AMOUNT_OUT_OF_RANGE)
       amounts.push(amount)
 
       lines.push({
@@ -128,14 +136,18 @@ export function createPurchaseOrderService(deps: PurchaseOrderServiceDeps) {
         orderedBaseQty: mulQty(input.orderedQty, unit.factor),
         unitPrice: Number(input.unitPrice),
         discountAmount: Number(amount.discount),
+        discountRateBps,
+        taxRateBps,
         lineNetAmount: Number(amount.net),
+        taxAmount: Number(amount.tax),
+        lineTotalAmount: Number(amount.total),
         expectedDeliveryDate: input.expectedDeliveryDate ?? null,
         notes: input.notes ?? null,
       })
     }
     const sum = sumLineAmounts(amounts)
-    if (sum.subtotal > BigInt(PURCHASE_ORDER_MAX_MINOR_AMOUNT)) return failWith(Err.PURCHASE_ORDER_AMOUNT_OUT_OF_RANGE)
-    return ok({ data: { lines, subtotal: sum.subtotal, discount: sum.discount, total: sum.total } })
+    if (sum.subtotal > BigInt(PURCHASE_ORDER_MAX_MINOR_AMOUNT) || sum.total > BigInt(PURCHASE_ORDER_MAX_MINOR_AMOUNT)) return failWith(Err.PURCHASE_ORDER_AMOUNT_OUT_OF_RANGE)
+    return ok({ data: { lines, subtotal: sum.subtotal, discount: sum.discount, tax: sum.tax, total: sum.total } })
   }
 
   const resolvePaymentTerm = async (
@@ -208,7 +220,7 @@ export function createPurchaseOrderService(deps: PurchaseOrderServiceDeps) {
       const settings = await deps.orgSettings.get(orgId)
       if (!settings) return failWith(Err.PURCHASE_ORDER_CURRENCY_MISMATCH)
 
-      const { lines, subtotal, discount, total } = built.data
+      const { lines, subtotal, discount, tax, total } = built.data
       let created: string | null = null
       for (let attempt = 0; attempt < 5 && !created; attempt++) {
         const number = formatPurchaseOrderNumber((await repo.maxNumberSuffix(orgId)) + 1)
@@ -227,6 +239,7 @@ export function createPurchaseOrderService(deps: PurchaseOrderServiceDeps) {
             status: "DRAFT",
             subtotalAmount: Number(subtotal),
             discountAmount: Number(discount),
+            taxAmount: Number(tax),
             totalAmount: Number(total),
             createdBy: actorId,
           },
@@ -277,6 +290,7 @@ export function createPurchaseOrderService(deps: PurchaseOrderServiceDeps) {
         newLines = built.data.lines
         header.subtotalAmount = Number(built.data.subtotal)
         header.discountAmount = Number(built.data.discount)
+        header.taxAmount = Number(built.data.tax)
         header.totalAmount = Number(built.data.total)
       }
 

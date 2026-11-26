@@ -32,6 +32,7 @@ export const purchaseOrderErrorsHttpMap = {
   PURCHASE_ORDER_UNIT_NOT_IN_COLLECTION: { statusCode: 422, responseMessage: "The selected unit is not configured for this item" },
   PURCHASE_ORDER_AMOUNT_OUT_OF_RANGE: { statusCode: 422, responseMessage: "An amount on this order is too large" },
   PURCHASE_ORDER_DISCOUNT_EXCEEDS_LINE: { statusCode: 422, responseMessage: "A line discount cannot be more than the line amount" },
+  PURCHASE_ORDER_DISCOUNT_CONFLICT: { statusCode: 422, responseMessage: "Use either a discount rate or a discount amount on a line, not both" },
   PURCHASE_ORDER_CURRENCY_MISMATCH: { statusCode: 422, responseMessage: "The order currency does not match the organization currency" },
   PURCHASE_ORDER_NUMBER_TAKEN: { statusCode: 409, responseMessage: "Could not allocate a purchase order number. Please try again" },
 } as const satisfies Record<PurchaseOrderErrorCode, ErrorMeta>

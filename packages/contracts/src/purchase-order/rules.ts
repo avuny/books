@@ -60,20 +60,53 @@ export function computeLineGross(orderedQty: string, unitPriceMinor: string): bi
   return (n * 2n + divisor) / (divisor * 2n)
 }
 
+/** Rounds `numerator / denominator` half up for non-negative values. */
+const divRoundHalfUp = (numerator: bigint, denominator: bigint): bigint =>
+  (numerator * 2n + denominator) / (denominator * 2n)
+
+/** A rate in basis points (1 bp = 0.01%, so 1500 = 15%). */
+export const RATE_BPS_DENOMINATOR = 10_000n
+
+/** `amount x rate`, rounded half up to a minor unit. */
+export const applyRateBps = (amountMinor: bigint, rateBps: number): bigint =>
+  divRoundHalfUp(amountMinor * BigInt(rateBps), RATE_BPS_DENOMINATOR)
+
 export interface LineAmounts {
   gross: bigint
   discount: bigint
+  /** gross - discount, the taxable amount. */
   net: bigint
+  /** Tax on the net amount, rounded per line. */
+  tax: bigint
+  /** net + tax. */
+  total: bigint
 }
 
+export interface LineAmountOptions {
+  /** Percent discount in basis points. When above zero it replaces the fixed amount. */
+  discountRateBps?: number
+  /** Tax in basis points, applied to the net (discounted) amount. */
+  taxRateBps?: number
+}
+
+/**
+ * Line math, in order: gross = qty x price; discount = rate of gross when a rate is set,
+ * otherwise the fixed amount; net = gross - discount; tax = rate of net; total = net + tax.
+ * Each step rounds half up to a minor unit, per line, so header totals are sums of line values.
+ */
 export function computeLineAmounts(
   orderedQty: string,
   unitPriceMinor: string,
-  discountMinor: string
+  discountMinor: string,
+  options: LineAmountOptions = {}
 ): LineAmounts {
   const gross = computeLineGross(orderedQty, unitPriceMinor)
-  const discount = BigInt(discountMinor)
-  return { gross, discount, net: gross - discount }
+  const discount = options.discountRateBps
+    ? applyRateBps(gross, options.discountRateBps)
+    : BigInt(discountMinor)
+  const net = gross - discount
+  const tax = options.taxRateBps && net > 0n ? applyRateBps(net, options.taxRateBps) : 0n
+  return { gross, discount, net, tax, total: net + tax }
 }
 
 export function sumLineAmounts(lines: readonly LineAmounts[]) {
@@ -81,9 +114,10 @@ export function sumLineAmounts(lines: readonly LineAmounts[]) {
     (acc, l) => ({
       subtotal: acc.subtotal + l.gross,
       discount: acc.discount + l.discount,
-      total: acc.total + l.net,
+      tax: acc.tax + l.tax,
+      total: acc.total + l.total,
     }),
-    { subtotal: 0n, discount: 0n, total: 0n }
+    { subtotal: 0n, discount: 0n, tax: 0n, total: 0n }
   )
 }
 

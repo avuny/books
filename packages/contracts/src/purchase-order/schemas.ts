@@ -6,6 +6,7 @@ import {
   PURCHASE_ORDER_LIST_DEFAULT_PAGE_SIZE,
   PURCHASE_ORDER_LIST_MAX_PAGE_SIZE,
   PURCHASE_ORDER_MAX_LINES,
+  PURCHASE_ORDER_MAX_RATE_BPS,
   PURCHASE_ORDER_NOTES_MAX_LENGTH,
   PURCHASE_ORDER_REASON_MAX_LENGTH,
   PURCHASE_ORDER_STATUSES,
@@ -19,6 +20,8 @@ const date = z.string().trim().regex(/^\d{4}-\d{2}-\d{2}$/, "Use YYYY-MM-DD")
 const quantity = z.string().trim().regex(UNIT_QUANTITY_PATTERN, "Invalid quantity")
 /** Integer minor units as a string ("12500" = 125.00 in a two-decimal currency). */
 const minorAmount = z.string().trim().regex(/^\d{1,15}$/, "Invalid amount")
+/** Rate in basis points (1500 = 15%). */
+const rateBps = z.number().int().min(0).max(PURCHASE_ORDER_MAX_RATE_BPS)
 const text = (max: number) => z.string().trim().max(max)
 
 export const PurchaseOrderStatusSchema = z.enum(PURCHASE_ORDER_STATUSES)
@@ -34,7 +37,12 @@ export const PurchaseOrderLineInputSchema = z.object({
   unitId: id,
   orderedQty: quantity,
   unitPrice: minorAmount,
+  /** Fixed discount. Use either this or `discountRateBps`, not both. */
   discountAmount: minorAmount.default("0"),
+  /** Percent discount in basis points, applied to the gross line amount. */
+  discountRateBps: rateBps.default(0),
+  /** Tax in basis points, applied to the discounted line amount. */
+  taxRateBps: rateBps.default(0),
   expectedDeliveryDate: date.nullish(),
   notes: text(PURCHASE_ORDER_LINE_NOTES_MAX_LENGTH).nullish(),
 })
@@ -71,7 +79,11 @@ export const PurchaseOrderLineDtoSchema = z.object({
   inTransitBaseQty: z.string(),
   unitPrice: z.string(),
   discountAmount: z.string(),
+  discountRateBps: z.number().int(),
+  taxRateBps: z.number().int(),
   lineNetAmount: z.string(),
+  taxAmount: z.string(),
+  lineTotalAmount: z.string(),
   expectedDeliveryDate: z.string().nullable(),
   notes: z.string().nullable(),
   createdAt: timestamp,
@@ -133,6 +145,7 @@ export const PurchaseOrderDtoSchema = z.object({
   status: PurchaseOrderStatusSchema,
   subtotalAmount: z.string(),
   discountAmount: z.string(),
+  taxAmount: z.string(),
   totalAmount: z.string(),
   closeReason: z.string().nullable(),
   createdBy: id.nullable(),

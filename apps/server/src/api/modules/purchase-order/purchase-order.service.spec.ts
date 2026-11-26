@@ -29,6 +29,8 @@ const line = (over: Record<string, unknown> = {}) => ({
   orderedQty: "10",
   unitPrice: "2500",
   discountAmount: "0",
+  discountRateBps: 0,
+  taxRateBps: 0,
   ...over,
 })
 
@@ -104,6 +106,44 @@ describe("PurchaseOrderService", () => {
     it("rejects a discount larger than the line gross", async () => {
       const res = await make().create(actorId, orgId, input({ lines: [line({ unitPrice: "100", orderedQty: "1", discountAmount: "101" })] }))
       expect(res).toMatchObject({ error: Err.PURCHASE_ORDER_DISCOUNT_EXCEEDS_LINE })
+    })
+
+    it("rejects a line that has both a discount rate and a discount amount", async () => {
+      const res = await make().create(actorId, orgId, input({ lines: [line({ discountRateBps: 1000, discountAmount: "5" })] }))
+      expect(res).toMatchObject({ error: Err.PURCHASE_ORDER_DISCOUNT_CONFLICT })
+    })
+
+    it("applies a discount rate then tax per line and totals them on the header", async () => {
+      // line 1: 10 x 2500 = 25000 gross; 10% off = 2500; net 22500; 14% tax = 3150; total 25650
+      // line 2: 3 x 333 = 999 gross; no discount; 5% tax = 49.95 -> 50; total 1049
+      const po = await createDraft({
+        lines: [
+          line({ discountRateBps: 1000, taxRateBps: 1400 }),
+          line({ itemId: itemB, orderedQty: "3", unitPrice: "333", taxRateBps: 500 }),
+        ],
+      })
+      expect(po.lines[0]).toMatchObject({
+        discountRateBps: 1000,
+        taxRateBps: 1400,
+        discountAmount: "2500",
+        lineNetAmount: "22500",
+        taxAmount: "3150",
+        lineTotalAmount: "25650",
+      })
+      expect(po.lines[1]).toMatchObject({ lineNetAmount: "999", taxAmount: "50", lineTotalAmount: "1049" })
+      expect(po).toMatchObject({
+        subtotalAmount: "25999",
+        discountAmount: "2500",
+        taxAmount: "3200",
+        totalAmount: "26699",
+      })
+    })
+
+    it("recomputes tax and totals when lines are replaced on update", async () => {
+      const svc = make()
+      const po = await createDraft({ lines: [line({ taxRateBps: 1000 })] })
+      const res = await svc.update(actorId, orgId, po.id, { lines: [line({ unitPrice: "1000", taxRateBps: 2000 })] })
+      expect(res.success && res.data).toMatchObject({ subtotalAmount: "10000", taxAmount: "2000", totalAmount: "12000" })
     })
 
     it("requires a warehouse on the header or the line", async () => {

@@ -44,7 +44,7 @@ const po: PurchaseOrderDto = {
   id: poId, number: "PO-000001", partyId, partyName: "Supplier", orderDate: "2026-11-26", expectedDeliveryDate: null,
   paymentTermId: null, paymentTermName: null, paymentTermMethod: null, paymentTermDays: null, currency: "EGP",
   warehouseId: null, supplierReference: null, notes: null, status: "DRAFT", subtotalAmount: "0", discountAmount: "0",
-  totalAmount: "0", closeReason: null, createdBy: userId, confirmedAt: null, confirmedBy: null, closedAt: null,
+  taxAmount: "0", totalAmount: "0", closeReason: null, createdBy: userId, confirmedAt: null, confirmedBy: null, closedAt: null,
   cancelledAt: null, lines: [], createdAt: iso, updatedAt: iso,
 }
 const body = {

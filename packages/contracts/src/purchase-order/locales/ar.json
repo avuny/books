@@ -30,6 +30,7 @@
     "PURCHASE_ORDER_UNIT_NOT_IN_COLLECTION": "الوحدة المحددة غير مهيأة لهذا الصنف",
     "PURCHASE_ORDER_AMOUNT_OUT_OF_RANGE": "أحد المبالغ في هذا الأمر كبير جدًا",
     "PURCHASE_ORDER_DISCOUNT_EXCEEDS_LINE": "لا يمكن أن يزيد خصم السطر عن مبلغ السطر",
+    "PURCHASE_ORDER_DISCOUNT_CONFLICT": "استخدم نسبة خصم أو مبلغ خصم في السطر، وليس الاثنين معًا",
     "PURCHASE_ORDER_CURRENCY_MISMATCH": "عملة الأمر لا تطابق عملة المؤسسة",
     "PURCHASE_ORDER_NUMBER_TAKEN": "تعذر تخصيص رقم لأمر الشراء. حاول مرة أخرى"
   },
@@ -117,7 +118,11 @@
     "discount": "الخصم",
     "total": "الإجمالي",
     "none": "لا يوجد",
-    "notFound": "أمر الشراء غير موجود"
+    "notFound": "أمر الشراء غير موجود",
+    "tax": "الضريبة",
+    "taxRate": "نسبة الضريبة",
+    "discountRate": "نسبة الخصم",
+    "lineTotal": "الإجمالي"
   },
   "lineFields": {
     "item": "الصنف",
@@ -156,6 +161,10 @@
     "saveConfirm": "حفظ وتأكيد",
     "cancel": "إلغاء",
     "invalidMoney": "يجب أن تكون الأسعار أرقامًا عادية بخانات عملة صحيحة",
-    "currencyNote": "المبالغ بعملة {currency}"
+    "currencyNote": "المبالغ بعملة {currency}",
+    "taxRate": "الضريبة %",
+    "discountRate": "الخصم %",
+    "invalidRate": "النسب بين 0 و100 بحد أقصى خانتين عشريتين",
+    "rateConflict": "استخدم نسبة خصم أو مبلغ خصم في السطر، وليس الاثنين"
   }
 }

@@ -16,6 +16,7 @@ import {
     PURCHASE_ORDER_LINE_DESCRIPTION_MAX_LENGTH,
     PURCHASE_ORDER_LINE_NOTES_MAX_LENGTH,
     PURCHASE_ORDER_MAX_MINOR_AMOUNT,
+    PURCHASE_ORDER_MAX_RATE_BPS,
     PURCHASE_ORDER_NOTES_MAX_LENGTH,
     PURCHASE_ORDER_REASON_MAX_LENGTH,
     PURCHASE_ORDER_STATUSES,
@@ -79,6 +80,7 @@ export const purchaseOrders = pgTable(
         status: purchaseOrderStatusEnum("status").notNull().default("DRAFT"),
         subtotalAmount: money("subtotal_amount").default(0),
         discountAmount: money("discount_amount").default(0),
+        taxAmount: money("tax_amount").default(0),
         totalAmount: money("total_amount").default(0),
         closeReason: text("close_reason"),
         createdBy: uuid("created_by").references(() => users.id, { onDelete: "set null" }),
@@ -116,7 +118,7 @@ export const purchaseOrders = pgTable(
         ),
         check(
             "ck_purchase_order_amount_max",
-            sql`${t.subtotalAmount} between 0 and ${sqlNum(PURCHASE_ORDER_MAX_MINOR_AMOUNT)} and ${t.discountAmount} between 0 and ${sqlNum(PURCHASE_ORDER_MAX_MINOR_AMOUNT)} and ${t.totalAmount} between 0 and ${sqlNum(PURCHASE_ORDER_MAX_MINOR_AMOUNT)}`
+            sql`${t.subtotalAmount} between 0 and ${sqlNum(PURCHASE_ORDER_MAX_MINOR_AMOUNT)} and ${t.discountAmount} between 0 and ${sqlNum(PURCHASE_ORDER_MAX_MINOR_AMOUNT)} and ${t.taxAmount} between 0 and ${sqlNum(PURCHASE_ORDER_MAX_MINOR_AMOUNT)} and ${t.totalAmount} between 0 and ${sqlNum(PURCHASE_ORDER_MAX_MINOR_AMOUNT)}`
         ),
         index("ix_purchase_order_party").on(t.orgId, t.partyId),
         index("ix_purchase_order_status").on(t.orgId, t.status),
@@ -165,7 +167,11 @@ export const purchaseOrderLines = pgTable(
         cancelledBaseQty: quantity("cancelled_base_qty").notNull().default("0"),
         unitPrice: money("unit_price"),
         discountAmount: money("discount_amount").default(0),
+        discountRateBps: integer("discount_rate_bps").notNull().default(0),
+        taxRateBps: integer("tax_rate_bps").notNull().default(0),
         lineNetAmount: money("line_net_amount"),
+        taxAmount: money("tax_amount").default(0),
+        lineTotalAmount: money("line_total_amount").default(0),
         expectedDeliveryDate: date("expected_delivery_date"),
         notes: text("notes"),
         ...timestamps(),
@@ -206,6 +212,14 @@ export const purchaseOrderLines = pgTable(
         check(
             "ck_purchase_order_line_amount_max",
             sql`${t.unitPrice} between 0 and ${sqlNum(PURCHASE_ORDER_MAX_MINOR_AMOUNT)} and ${t.discountAmount} between 0 and ${sqlNum(PURCHASE_ORDER_MAX_MINOR_AMOUNT)} and ${t.lineNetAmount} between 0 and ${sqlNum(PURCHASE_ORDER_MAX_MINOR_AMOUNT)}`
+        ),
+        check(
+            "ck_purchase_order_line_rate_bps",
+            sql`${t.discountRateBps} between 0 and ${sqlNum(PURCHASE_ORDER_MAX_RATE_BPS)} and ${t.taxRateBps} between 0 and ${sqlNum(PURCHASE_ORDER_MAX_RATE_BPS)}`
+        ),
+        check(
+            "ck_purchase_order_line_tax_amount",
+            sql`${t.taxAmount} between 0 and ${sqlNum(PURCHASE_ORDER_MAX_MINOR_AMOUNT)} and ${t.lineTotalAmount} between 0 and ${sqlNum(PURCHASE_ORDER_MAX_MINOR_AMOUNT)}`
         ),
         check(
             "ck_purchase_order_line_text_len",
