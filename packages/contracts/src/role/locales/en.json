@@ -21,6 +21,7 @@
       "customer": "Customers",
       "purchase_order": "Purchase orders",
       "purchase_shipment": "Supplier shipments",
+      "purchase_receipt": "Goods receipts",
       "payment_term": "Payment terms",
       "vendor": "Vendors",
       "activity_log": "Activity log",
