@@ -119,6 +119,10 @@ export const VendorBillDtoSchema = z.object({
   /** Goods value cleared from GRNI. Variance = subtotal - receivedValue. */
   receivedValue: z.string(),
   priceVariance: z.string(),
+  /** Applied by posted vendor payments. */
+  paidAmount: z.string(),
+  outstandingAmount: z.string(),
+  paymentStatus: z.enum(["UNPAID", "PARTIALLY_PAID", "PAID"]).nullable(),
   journalEntryId: id.nullable(),
   postedAt: timestamp.nullable(),
   postedBy: id.nullable(),

@@ -1,0 +1,44 @@
+{
+  "errors": {
+    "VENDOR_PAYMENT_NOT_FOUND": "دفعة المورد غير موجودة",
+    "VENDOR_PAYMENT_NOT_EDITABLE": "يمكن تعديل الدفعات المسودة فقط",
+    "VENDOR_PAYMENT_NOT_DELETABLE": "يمكن حذف الدفعات المسودة فقط. اعكس الدفعة المرحّلة بدلاً من ذلك",
+    "VENDOR_PAYMENT_ALREADY_POSTED": "الدفعة مرحّلة بالفعل",
+    "VENDOR_PAYMENT_NOT_POSTED": "يمكن عكس الدفعات المرحّلة فقط",
+    "VENDOR_PAYMENT_SUPPLIER_NOT_FOUND": "المورد غير موجود",
+    "VENDOR_PAYMENT_SUPPLIER_NOT_VENDOR": "الطرف المحدد ليس موردًا",
+    "VENDOR_PAYMENT_SUPPLIER_INACTIVE": "المورد غير نشط",
+    "VENDOR_PAYMENT_NO_ALLOCATIONS": "طبّق الدفعة على فاتورة واحدة على الأقل",
+    "VENDOR_PAYMENT_DUPLICATE_BILLS": "الفاتورة نفسها مكررة",
+    "VENDOR_PAYMENT_BILL_NOT_FOUND": "إحدى الفواتير في الدفعة غير موجودة",
+    "VENDOR_PAYMENT_BILL_NOT_POSTED": "يمكن دفع الفواتير المرحّلة فقط",
+    "VENDOR_PAYMENT_BILL_SUPPLIER_MISMATCH": "يجب أن تعود كل الفواتير في الدفعة إلى مورد الدفعة",
+    "VENDOR_PAYMENT_AMOUNT_NOT_POSITIVE": "يجب أن تكون المبالغ أكبر من صفر",
+    "VENDOR_PAYMENT_EXCEEDS_OUTSTANDING": "إحدى الدفعات أكبر من المبلغ المتبقي على الفاتورة",
+    "VENDOR_PAYMENT_POSTING_FAILED": "فشل ترحيل الدفعة. لم يتم تغيير أي شيء. حاول مرة أخرى",
+    "VENDOR_PAYMENT_NUMBER_TAKEN": "تعذر تخصيص رقم للدفعة. حاول مرة أخرى"
+  },
+  "labels": {
+    "status": {
+      "DRAFT": "مسودة",
+      "POSTED": "مرحّلة",
+      "REVERSED": "معكوسة"
+    },
+    "method": {
+      "cash": "نقدًا",
+      "bank": "بنك"
+    },
+    "paymentStatus": {
+      "UNPAID": "غير مدفوعة",
+      "PARTIALLY_PAID": "مدفوعة جزئيًا",
+      "PAID": "مدفوعة"
+    }
+  },
+  "msgs": {
+    "VENDOR_PAYMENT_CREATED": "تم إنشاء دفعة المورد بنجاح",
+    "VENDOR_PAYMENT_UPDATED": "تم تحديث دفعة المورد بنجاح",
+    "VENDOR_PAYMENT_DELETED": "تم حذف دفعة المورد بنجاح",
+    "VENDOR_PAYMENT_POSTED": "تم ترحيل الدفعة. انخفض رصيد المورد",
+    "VENDOR_PAYMENT_REVERSED": "تم عكس الدفعة"
+  }
+}

@@ -22,6 +22,7 @@
     "VENDOR_BILL_DUPLICATE_SUPPLIER_INVOICE": "رقم فاتورة المورد هذا مُدخل مسبقًا لهذا المورد",
     "VENDOR_BILL_PAYMENT_TERM_NOT_FOUND": "شرط الدفع غير موجود",
     "VENDOR_BILL_DUE_DATE_BEFORE_INVOICE": "لا يمكن أن يكون تاريخ الاستحقاق قبل تاريخ الفاتورة",
+    "VENDOR_BILL_HAS_PAYMENTS": "للفاتورة دفعات مرحّلة. اعكسها أولاً",
     "VENDOR_BILL_POSTING_FAILED": "فشل ترحيل الفاتورة. لم يتم تغيير أي شيء. حاول مرة أخرى",
     "VENDOR_BILL_NUMBER_TAKEN": "تعذر تخصيص رقم للفاتورة. حاول مرة أخرى"
   },
