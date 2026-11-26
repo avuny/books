@@ -38,6 +38,9 @@ export const PurchaseReceiptLineInputSchema = z
     notes: text(PURCHASE_RECEIPT_LINE_NOTES_MAX_LENGTH).nullish(),
   })
   .superRefine((v, ctx) => {
+    // Refinements can run after a field failed its pattern: only do quantity math on plain decimals.
+    const decimal = /^\d+(\.\d+)?$/
+    if (![v.receivedQty, v.acceptedQty, v.rejectedQty].every((q) => decimal.test(q))) return
     if (!isPositiveQty(v.receivedQty)) {
       ctx.addIssue({ code: "custom", path: ["receivedQty"], message: "Received quantity must be greater than zero" })
     }
