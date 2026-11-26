@@ -169,6 +169,13 @@
       "when": 1795711326998,
       "tag": "0023_purchase_order_tax_discount_rates",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1795716392098,
+      "tag": "0024_purchase_receipt",
+      "breakpoints": true
     }
   ]
 }
