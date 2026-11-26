@@ -27,6 +27,7 @@ import {
   type ComboboxEditAction,
   type ComboboxOption,
 } from "./async-combobox"
+import { RequiredMark } from "./required-mark"
 
 export type AsyncComboboxFieldProps<
   TFieldValues extends FieldValues = FieldValues,
@@ -77,11 +78,17 @@ export function AsyncComboboxField<
         <Field data-invalid={fieldState.invalid} className={className}>
           {action ? (
             <div className="flex items-center justify-between">
-              <FieldLabel htmlFor={field.name}>{copy.label}</FieldLabel>
+              <FieldLabel htmlFor={field.name}>
+                {copy.label}
+                <RequiredMark required={copy.required} />
+              </FieldLabel>
               {action}
             </div>
           ) : (
-            <FieldLabel htmlFor={field.name}>{copy.label}</FieldLabel>
+            <FieldLabel htmlFor={field.name}>
+                {copy.label}
+                <RequiredMark required={copy.required} />
+              </FieldLabel>
           )}
 
           <AsyncCombobox
