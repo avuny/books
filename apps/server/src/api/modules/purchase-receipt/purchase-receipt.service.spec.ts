@@ -165,6 +165,7 @@ describe("PurchaseReceiptService", () => {
   })
 
   it("creates a draft with the accepted value and no side effects", async () => {
+    shipped("10")
     const r = await newReceipt()
     expect(r).toMatchObject({ status: "DRAFT", number: "PR-000001", billStatus: "NOT_APPLICABLE" })
     expect(r.lines[0]!.receiptValue).toBe("400")
