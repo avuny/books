@@ -18,6 +18,7 @@ import { authRoutes } from "./modules/auth/index.js"
 import { batchRoutes } from "./modules/batch/index.js"
 import { geoRoutes } from "./modules/geo/index.js"
 import { inventoryAdjustmentRoutes } from "./modules/inventory-adjustment/index.js"
+import { inventoryTransferRoutes } from "./modules/inventory-transfer/index.js"
 import { itemRoutes } from "./modules/item/index.js"
 import { itemCategoryRoutes } from "./modules/item-category/index.js"
 import { organizationRoutes } from "./modules/organization/index.js"
@@ -102,6 +103,7 @@ app.route("/auth", authRoutes)
 app.route("/batch", batchRoutes)
 app.route("/geo", geoRoutes)
 app.route("/inventoryAdjustment", inventoryAdjustmentRoutes)
+app.route("/inventoryTransfer", inventoryTransferRoutes)
 app.route("/item", itemRoutes)
 app.route("/itemCategory", itemCategoryRoutes)
 app.route("/organizations", organizationRoutes)
