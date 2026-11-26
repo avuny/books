@@ -23,8 +23,8 @@ If an answer is missing, pick the default in the right column and state it as an
 `constants.ts`, `errors.ts`, `schemas.ts`, `index.ts`, `locales/en.json` + `ar.json` (errors/labels/msgs).
 **Gate:** locale parity script passes with `--errors`; contracts build.
 
-## Phase 2 — Backend core ⚠ (no skill: follow neighbouring modules)
-DB table (Drizzle) + migration, `<module>.errors.ts` (code → HTTP status + msg key), `<module>.service.ts` returning `Result` (permission → plan limit → rules → write → audit event).
+## Phase 2 — Backend core (reference: `apps/server/src/api/modules/party`; draft/confirm/cancel documents with lines: `inventory-adjustment`)
+Registry entry in `packages/contracts/src/modules/registry.ts` first. Then DB table (Drizzle, in `packages/db/src/schema/<dir>/`, rebuild the barrel) + migration; `<module>.types.ts` (repository + ports), `<module>.repository.ts`, `<module>.mapper.ts`, `<module>.errors.ts` (`as const satisfies Record<Code, ErrorMeta>`), `<module>.error-map.ts`, `<module>.permissions.ts`, `<module>.service.ts` returning `Result` (permission → validation → rules → write → audit event), `deps.ts` (lazy singleton + `Proxy`), `testing.ts` (in-memory repository and fakes) and `<module>.service.spec.ts`. Server intl: `apps/server/src/api/intl/locales/<module>/`.
 **Gate:** service unit tests for forbidden / not found / happy path.
 
 ## Phase 3 — RBAC → `skills/rbac-permissions`
@@ -52,7 +52,7 @@ Add the web string map (`list.*`, `create.*`, …) for **en and ar**.
 **Gate:** route tree regenerates; clicking list → details → back works.
 
 ## Phase 8 — Verify
-- `typecheck`, `lint`, `test` green ⚠ commands in `AGENTS.md`.
+- `typecheck`, `lint`, `test` green (commands in `AGENTS.md` §5; use the low-memory typecheck on small boxes).
 - `pnpm --filter @avuny/books-server test:int` green (needs the test database: `docker compose -f apps/server/docker-compose.test.yml up -d --wait`).
 - New screen or flow in the web app? Add or extend a spec under `apps/web/e2e/specs` (`skills/web-e2e-tests`) and run `pnpm --filter @avuny/books-web e2e`.
 - Manual: create, edit, delete (with and without the blocking rule), search, tabs, pagination, empty state, a forbidden user (buttons hidden **and** server returns 403), Arabic/RTL.
