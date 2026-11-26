@@ -52,5 +52,82 @@
     "PURCHASE_ORDER_CONFIRMED": "تم تأكيد أمر الشراء. الكميات الآن قيد الطلب",
     "PURCHASE_ORDER_CLOSED": "تم إغلاق أمر الشراء",
     "PURCHASE_ORDER_CANCELLED": "تم إلغاء أمر الشراء"
+  },
+  "list": {
+    "title": "أوامر الشراء",
+    "description": "الأوامر المقدمة للموردين وما تبقى قيد الطلب.",
+    "newButton": "أمر شراء جديد",
+    "searchPlaceholder": "ابحث بالرقم أو المورد"
+  },
+  "table": {
+    "number": "الرقم",
+    "supplier": "المورد",
+    "orderDate": "تاريخ الأمر",
+    "expectedDelivery": "التسليم المتوقع",
+    "total": "الإجمالي",
+    "lines": "البنود",
+    "status": "الحالة",
+    "actions": "الإجراءات",
+    "actionsFor": "إجراءات {number}"
+  },
+  "scopes": {
+    "all": "الكل",
+    "DRAFT": "مسودة",
+    "CONFIRMED": "مؤكد",
+    "CLOSED": "مغلق",
+    "CANCELLED": "ملغي"
+  },
+  "empty": {
+    "title": "لا توجد أوامر شراء",
+    "description": "أنشئ أمر شراء لطلب مخزون من مورد."
+  },
+  "pagination": {
+    "showing": "عرض {from} إلى {to} من {total} أمر شراء"
+  },
+  "actions": {
+    "view": "عرض التفاصيل",
+    "delete": "حذف المسودة",
+    "confirm": "تأكيد",
+    "confirmTitle": "تأكيد أمر الشراء",
+    "confirmDescription": "التأكيد يجعل الكميات المطلوبة تظهر كقيد الطلب. لا يمكن تعديل الأمر المؤكد.",
+    "close": "إغلاق الأمر",
+    "closeTitle": "إغلاق أمر الشراء",
+    "closeDescription": "الإغلاق يوقف توقع الكمية غير المشحونة المتبقية. اذكر السبب.",
+    "cancel": "إلغاء الأمر",
+    "cancelTitle": "إلغاء أمر الشراء",
+    "cancelDescription": "الإلغاء يحرر الكمية قيد الطلب. يعمل فقط قبل أي شحن.",
+    "deleteTitle": "حذف المسودة",
+    "deleteDescription": "سيتم حذف مسودة أمر الشراء نهائيًا.",
+    "reason": "السبب",
+    "dismiss": "إبقاء",
+    "back": "العودة إلى أوامر الشراء"
+  },
+  "details": {
+    "title": "أمر الشراء",
+    "supplier": "المورد",
+    "orderDate": "تاريخ الأمر",
+    "expectedDelivery": "التسليم المتوقع",
+    "paymentTerm": "شرط الدفع",
+    "warehouse": "المستودع",
+    "supplierReference": "مرجع المورد",
+    "notes": "ملاحظات",
+    "closeReason": "سبب الإغلاق",
+    "lines": "بنود الأمر",
+    "subtotal": "المجموع الفرعي",
+    "discount": "الخصم",
+    "total": "الإجمالي",
+    "none": "لا يوجد",
+    "notFound": "أمر الشراء غير موجود"
+  },
+  "lineFields": {
+    "item": "الصنف",
+    "location": "الموقع",
+    "unit": "الوحدة",
+    "ordered": "المطلوب",
+    "shipped": "المشحون",
+    "received": "المستلم",
+    "unshipped": "غير المشحون",
+    "unitPrice": "سعر الوحدة",
+    "net": "الصافي"
   }
 }

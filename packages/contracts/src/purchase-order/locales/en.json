@@ -52,5 +52,82 @@
     "PURCHASE_ORDER_CONFIRMED": "Purchase order confirmed. The quantities are now on order",
     "PURCHASE_ORDER_CLOSED": "Purchase order closed",
     "PURCHASE_ORDER_CANCELLED": "Purchase order cancelled"
+  },
+  "list": {
+    "title": "Purchase orders",
+    "description": "Orders placed with your suppliers and what is still on order.",
+    "newButton": "New purchase order",
+    "searchPlaceholder": "Search by number or supplier"
+  },
+  "table": {
+    "number": "Number",
+    "supplier": "Supplier",
+    "orderDate": "Order date",
+    "expectedDelivery": "Expected delivery",
+    "total": "Total",
+    "lines": "Lines",
+    "status": "Status",
+    "actions": "Actions",
+    "actionsFor": "Actions for {number}"
+  },
+  "scopes": {
+    "all": "All",
+    "DRAFT": "Draft",
+    "CONFIRMED": "Confirmed",
+    "CLOSED": "Closed",
+    "CANCELLED": "Cancelled"
+  },
+  "empty": {
+    "title": "No purchase orders",
+    "description": "Create a purchase order to order stock from a supplier."
+  },
+  "pagination": {
+    "showing": "Showing {from} to {to} of {total} purchase orders"
+  },
+  "actions": {
+    "view": "View details",
+    "delete": "Delete draft",
+    "confirm": "Confirm",
+    "confirmTitle": "Confirm purchase order",
+    "confirmDescription": "Confirming makes the ordered quantities show as on order. A confirmed order cannot be edited.",
+    "close": "Close order",
+    "closeTitle": "Close purchase order",
+    "closeDescription": "Closing stops the remaining unshipped quantity from being expected. Give a reason.",
+    "cancel": "Cancel order",
+    "cancelTitle": "Cancel purchase order",
+    "cancelDescription": "Cancelling releases the on-order quantity. This only works before anything has shipped.",
+    "deleteTitle": "Delete draft",
+    "deleteDescription": "This permanently deletes the draft purchase order.",
+    "reason": "Reason",
+    "dismiss": "Keep it",
+    "back": "Back to purchase orders"
+  },
+  "details": {
+    "title": "Purchase order",
+    "supplier": "Supplier",
+    "orderDate": "Order date",
+    "expectedDelivery": "Expected delivery",
+    "paymentTerm": "Payment term",
+    "warehouse": "Warehouse",
+    "supplierReference": "Supplier reference",
+    "notes": "Notes",
+    "closeReason": "Close reason",
+    "lines": "Order lines",
+    "subtotal": "Subtotal",
+    "discount": "Discount",
+    "total": "Total",
+    "none": "None",
+    "notFound": "Purchase order not found"
+  },
+  "lineFields": {
+    "item": "Item",
+    "location": "Location",
+    "unit": "Unit",
+    "ordered": "Ordered",
+    "shipped": "Shipped",
+    "received": "Received",
+    "unshipped": "Unshipped",
+    "unitPrice": "Unit price",
+    "net": "Net"
   }
 }
