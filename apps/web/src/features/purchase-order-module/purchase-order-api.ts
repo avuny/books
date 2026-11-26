@@ -106,6 +106,9 @@ export function usePurchaseOrderAbilities(orgId: string) {
         canCreateShipment: false,
         canPostShipment: false,
         canReverseShipment: false,
+        canCreateReceipt: false,
+        canPostReceipt: false,
+        canReverseReceipt: false,
         canManagePaymentTerms: false,
       }
     }
@@ -124,6 +127,9 @@ export function usePurchaseOrderAbilities(orgId: string) {
       canCreateShipment: hasPermission(s, "create:purchase-shipment"),
       canPostShipment: hasPermission(s, "post:purchase-shipment"),
       canReverseShipment: hasPermission(s, "reverse:purchase-shipment"),
+      canCreateReceipt: hasPermission(s, "create:purchase-receipt"),
+      canPostReceipt: hasPermission(s, "post:purchase-receipt"),
+      canReverseReceipt: hasPermission(s, "reverse:purchase-receipt"),
       canManagePaymentTerms:
         hasPermission(s, "create:payment-term") && hasPermission(s, "update:payment-term"),
     }
@@ -170,14 +176,19 @@ import {
   getListItemOptionsQueryKey,
   getUnitCollection,
   listItemOptions,
+  getListPurchaseReceiptsQueryKey,
   getListPurchaseShipmentsQueryKey,
   getListPaymentTermsQueryKey,
   useCreatePaymentTerm,
   useCreatePurchaseOrder,
+  useCreatePurchaseReceipt,
   useCreatePurchaseShipment,
   useListPaymentTerms,
+  useListPurchaseReceipts,
   useListPurchaseShipments,
+  usePostPurchaseReceipt,
   usePostPurchaseShipment,
+  useReversePurchaseReceipt,
   useReversePurchaseShipment,
   useUpdatePaymentTerm,
   useUpdatePurchaseOrder,
@@ -314,6 +325,44 @@ export function usePostShipmentMutation(orgId: string, orderId: string) {
 export function useReverseShipmentMutation(orgId: string, orderId: string) {
   const invalidate = useInvalidateShipments(orgId, orderId)
   return useReversePurchaseShipment({ mutation: { onSuccess: () => invalidate() } })
+}
+
+/* -------------------------------- receipts -------------------------------- */
+
+export type ReceiptDto = import("@avuny/contracts").PurchaseReceiptDto
+
+export function usePurchaseReceipts(orgId: string, orderId: string) {
+  const query = useListPurchaseReceipts(orgId, orderId)
+  const receipts = useMemo(
+    () => ((query.data?.data as { items?: ReceiptDto[] } | undefined)?.items ?? []) as ReceiptDto[],
+    [query.data]
+  )
+  return { receipts, isLoading: query.isLoading }
+}
+
+function useInvalidateReceipts(orgId: string, orderId: string) {
+  const queryClient = useQueryClient()
+  const invalidateOrders = useInvalidatePurchaseOrders(orgId)
+  return () =>
+    Promise.all([
+      queryClient.invalidateQueries({ queryKey: getListPurchaseReceiptsQueryKey(orgId, orderId) }),
+      invalidateOrders(orderId),
+    ])
+}
+
+export function useCreateReceiptMutation(orgId: string, orderId: string) {
+  const invalidate = useInvalidateReceipts(orgId, orderId)
+  return useCreatePurchaseReceipt({ mutation: { onSuccess: () => invalidate() } })
+}
+
+export function usePostReceiptMutation(orgId: string, orderId: string) {
+  const invalidate = useInvalidateReceipts(orgId, orderId)
+  return usePostPurchaseReceipt({ mutation: { onSuccess: () => invalidate() } })
+}
+
+export function useReverseReceiptMutation(orgId: string, orderId: string) {
+  const invalidate = useInvalidateReceipts(orgId, orderId)
+  return useReversePurchaseReceipt({ mutation: { onSuccess: () => invalidate() } })
 }
 
 /* ------------------------------ payment terms ----------------------------- */

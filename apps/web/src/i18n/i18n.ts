@@ -33,6 +33,7 @@ i18n
       "party",
       "payment-term",
       "purchase-order",
+      "purchase-receipt",
       "purchase-shipment",
       "role",
       "stock-movement",
