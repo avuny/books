@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest"
 import { PERMISSION_RESOURCES } from "./permission-catalog.js"
-import ar from "./locales/ar.json"
-import en from "./locales/en.json"
+import { roleTranslationsAr as ar, roleTranslationsEn as en } from "./locales/index.js"
 
 describe("permission resource labels (audit B12)", () => {
   for (const [name, locale] of [
