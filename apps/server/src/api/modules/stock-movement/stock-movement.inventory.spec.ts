@@ -1,3 +1,4 @@
+import type { AllocatableBatch } from "@avuny/contracts"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import type { BatchStatus } from "@avuny/contracts"
 import { ok } from "@avuny/utils"
@@ -170,6 +171,7 @@ function createSimulator() {
       ): Promise<Map<string, { itemId: string; status: BatchStatus; expiresOn: string | null }>> =>
         new Map(ids.map((id) => [id, { itemId: ITEM_BATCHED, status: "available", expiresOn: "2028-01-01" }]))
     ),
+    listAllocatable: vi.fn(async (): Promise<AllocatableBatch[]> => []),
   }
 
   const service = createStockMovementService({

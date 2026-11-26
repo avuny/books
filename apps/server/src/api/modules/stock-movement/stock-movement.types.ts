@@ -1,4 +1,5 @@
 import type {
+  AllocatableBatch,
   BatchStatus,
   StockMovementErrorCode,
   WarehouseLocationErrorCode,
@@ -49,6 +50,8 @@ export interface StockBatchesPort {
     batchIds: readonly string[],
     tx?: Tx
   ): Promise<Map<string, StockBatchInfo>>
+  /** Batches with stock at a location, for auto-allocation of outbound lines that name no batch. */
+  listAllocatable(orgId: string, itemId: string, locationId: string, tx?: Tx): Promise<AllocatableBatch[]>
 }
 
 /** Port to the warehouse location module: the same gate every stock posting must pass. */

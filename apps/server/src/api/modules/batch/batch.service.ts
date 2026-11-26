@@ -1,4 +1,5 @@
 import {
+  batchAllowsIntent,
   BATCH_AUDIT_EVENTS,
   BATCH_ENSURE_MAX,
   BatchErrorCode as Err,
@@ -132,6 +133,18 @@ export function createBatchService(deps: BatchServiceDeps) {
     async findForPosting(orgId: string, ids: readonly string[], tx?: Tx) {
       const rows = await repo.findForPosting(orgId, ids, tx)
       return new Map(rows.map((r) => [r.id, { itemId: r.itemId, status: r.status, expiresOn: r.expiresOn }]))
+    },
+
+    /** Batches with stock at a location, as the allocator needs them. Only "available" batches can be issued. */
+    async listAllocatable(orgId: string, itemId: string, locationId: string, tx?: Tx) {
+      const rows = await repo.listAllocatable(orgId, itemId, locationId, tx)
+      return rows.map((r) => ({
+        batchId: r.batchId,
+        available: r.available,
+        expiresOn: r.expiresOn,
+        receivedAt: r.receivedAt,
+        issuable: batchAllowsIntent(r.status, "issue") && !(r.expiresOn !== null && r.expiresOn < new Date().toISOString().slice(0, 10)),
+      }))
     },
 
     async get(orgId: string, id: string): Promise<Result<BatchDto, Code>> {

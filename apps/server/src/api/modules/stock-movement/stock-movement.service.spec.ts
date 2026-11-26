@@ -1,3 +1,4 @@
+import type { AllocatableBatch } from "@avuny/contracts"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import type { BatchStatus } from "@avuny/contracts"
 import { ok } from "@avuny/utils"
@@ -81,6 +82,7 @@ function setup() {
     findForPosting: vi.fn(
       async (): Promise<Map<string, { itemId: string; status: BatchStatus; expiresOn: string | null }>> => new Map()
     ),
+    listAllocatable: vi.fn(async (): Promise<AllocatableBatch[]> => []),
   }
   const service = createStockMovementService({
     repository: repository as unknown as StockMovementRepository,
@@ -361,6 +363,47 @@ describe("stockMovementService batches", () => {
         lines: [{ itemId: ITEM, batchId: BATCH, fromLocationId: BIN, toLocationId: "bin-2", quantity: "2" }],
       })
     ).toMatchObject({ success: true })
+  })
+
+  it("splits an issue with no batch across batches, oldest first (FIFO)", async () => {
+    t.batches.listAllocatable.mockResolvedValue([
+      { batchId: "b-new", available: "5", expiresOn: null, receivedAt: "2026-02-01", issuable: true },
+      { batchId: "b-old", available: "4", expiresOn: null, receivedAt: "2026-01-01", issuable: true },
+    ])
+    t.batches.findForPosting.mockResolvedValue(
+      new Map([
+        ["b-new", { itemId: ITEM, status: "available", expiresOn: null }],
+        ["b-old", { itemId: ITEM, status: "available", expiresOn: null }],
+      ])
+    )
+    t.repository.lockBalances.mockResolvedValue(
+      new Map([
+        [`${BIN}:${ITEM}:b-new`, "5"],
+        [`${BIN}:${ITEM}:b-old`, "4"],
+      ])
+    )
+    const res = await t.service.post("u1", ORG, {
+      type: "sale",
+      lines: [{ itemId: ITEM, fromLocationId: BIN, quantity: "6" }],
+    })
+    expect(res).toMatchObject({ success: true })
+    const rows = t.repository.insertLines.mock.calls[0]![0] as { batchId: string; quantity: string; lineNo: number }[]
+    expect(rows.map((r) => [r.lineNo, r.batchId, r.quantity])).toEqual([
+      [1, "b-old", "4"],
+      [2, "b-new", "2"],
+    ])
+  })
+
+  it("fails an issue with no batch when batches cannot cover it", async () => {
+    t.batches.listAllocatable.mockResolvedValue([
+      { batchId: "b-old", available: "4", expiresOn: null, receivedAt: "2026-01-01", issuable: true },
+    ])
+    expect(
+      await t.service.post("u1", ORG, {
+        type: "sale",
+        lines: [{ itemId: ITEM, fromLocationId: BIN, quantity: "6" }],
+      })
+    ).toMatchObject({ success: false, error: "STOCK_MOVEMENT_INSUFFICIENT_STOCK" })
   })
 
   it("checks stock per batch, not per item", async () => {
