@@ -20,6 +20,7 @@
     "PURCHASE_RECEIPT_STOCK_ALREADY_USED": "The received stock has already been used, so this receipt cannot be reversed",
     "PURCHASE_RECEIPT_POSTING_FAILED": "Posting the receipt failed. Nothing was changed. Please try again",
     "PURCHASE_RECEIPT_PROJECTION_CONFLICT": "Stock quantities changed while posting. Please try again",
+    "PURCHASE_RECEIPT_ALREADY_BILLED": "The receipt has a posted supplier bill. Reverse the bill first",
     "PURCHASE_RECEIPT_NUMBER_TAKEN": "Could not allocate a receipt number. Please try again"
   },
   "labels": {
@@ -30,7 +31,9 @@
     },
     "billStatus": {
       "NOT_APPLICABLE": "Not applicable",
-      "AWAITING_BILL": "Awaiting supplier bill"
+      "AWAITING_BILL": "Awaiting supplier bill",
+      "PARTIALLY_BILLED": "Partly billed",
+      "BILLED": "Billed"
     }
   },
   "msgs": {

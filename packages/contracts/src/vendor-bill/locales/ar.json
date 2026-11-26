@@ -1,0 +1,48 @@
+{
+  "errors": {
+    "VENDOR_BILL_NOT_FOUND": "فاتورة المورد غير موجودة",
+    "VENDOR_BILL_NOT_EDITABLE": "يمكن تعديل الفواتير المسودة فقط",
+    "VENDOR_BILL_NOT_DELETABLE": "يمكن حذف الفواتير المسودة فقط. اعكس الفاتورة المرحّلة بدلاً من ذلك",
+    "VENDOR_BILL_ALREADY_POSTED": "الفاتورة مرحّلة بالفعل",
+    "VENDOR_BILL_NOT_POSTED": "يمكن عكس الفواتير المرحّلة فقط",
+    "VENDOR_BILL_SUPPLIER_NOT_FOUND": "المورد غير موجود",
+    "VENDOR_BILL_SUPPLIER_NOT_VENDOR": "الطرف المحدد ليس موردًا",
+    "VENDOR_BILL_SUPPLIER_INACTIVE": "المورد غير نشط",
+    "VENDOR_BILL_RECEIPT_NOT_FOUND": "أحد إيصالات الاستلام في الفاتورة غير موجود",
+    "VENDOR_BILL_RECEIPT_NOT_POSTED": "يمكن إصدار فاتورة للإيصالات المرحّلة فقط",
+    "VENDOR_BILL_RECEIPT_SUPPLIER_MISMATCH": "يجب أن تعود كل الإيصالات في الفاتورة إلى مورد الفاتورة",
+    "VENDOR_BILL_NO_LINES": "مطلوب بند واحد على الأقل في الفاتورة",
+    "VENDOR_BILL_NOTHING_TO_BILL": "لا توجد كميات متبقية للفوترة في هذا الإيصال",
+    "VENDOR_BILL_LINE_NOT_FOUND": "أحد بنود الفاتورة لا يطابق بند إيصال",
+    "VENDOR_BILL_DUPLICATE_LINES": "بند الإيصال نفسه مكرر",
+    "VENDOR_BILL_QUANTITY_NOT_POSITIVE": "يجب أن تكون الكميات المفوترة أكبر من صفر",
+    "VENDOR_BILL_AMOUNT_NOT_POSITIVE": "يجب أن تكون مبالغ البنود أكبر من صفر",
+    "VENDOR_BILL_EXCEEDS_UNBILLED": "أحد البنود يفوتر أكثر من الكمية المستلمة وغير المفوترة",
+    "VENDOR_BILL_SUPPLIER_INVOICE_REQUIRED": "أدخل رقم فاتورة المورد قبل الترحيل",
+    "VENDOR_BILL_DUPLICATE_SUPPLIER_INVOICE": "رقم فاتورة المورد هذا مُدخل مسبقًا لهذا المورد",
+    "VENDOR_BILL_PAYMENT_TERM_NOT_FOUND": "شرط الدفع غير موجود",
+    "VENDOR_BILL_DUE_DATE_BEFORE_INVOICE": "لا يمكن أن يكون تاريخ الاستحقاق قبل تاريخ الفاتورة",
+    "VENDOR_BILL_POSTING_FAILED": "فشل ترحيل الفاتورة. لم يتم تغيير أي شيء. حاول مرة أخرى",
+    "VENDOR_BILL_NUMBER_TAKEN": "تعذر تخصيص رقم للفاتورة. حاول مرة أخرى"
+  },
+  "labels": {
+    "status": {
+      "DRAFT": "مسودة",
+      "POSTED": "مرحّلة",
+      "REVERSED": "معكوسة"
+    },
+    "billStatus": {
+      "NOT_APPLICABLE": "غير منطبق",
+      "AWAITING_BILL": "بانتظار فاتورة المورد",
+      "PARTIALLY_BILLED": "مفوترة جزئيًا",
+      "BILLED": "مفوترة"
+    }
+  },
+  "msgs": {
+    "VENDOR_BILL_CREATED": "تم إنشاء فاتورة المورد بنجاح",
+    "VENDOR_BILL_UPDATED": "تم تحديث فاتورة المورد بنجاح",
+    "VENDOR_BILL_DELETED": "تم حذف فاتورة المورد بنجاح",
+    "VENDOR_BILL_POSTED": "تم ترحيل الفاتورة. المبلغ مستحق الآن للمورد",
+    "VENDOR_BILL_REVERSED": "تم عكس الفاتورة"
+  }
+}
