@@ -103,6 +103,10 @@ export function usePurchaseOrderAbilities(orgId: string) {
         canConfirm: false,
         canClose: false,
         canCancel: false,
+        canCreateShipment: false,
+        canPostShipment: false,
+        canReverseShipment: false,
+        canManagePaymentTerms: false,
       }
     }
     const s: PermissionSnapshot = {
@@ -117,6 +121,11 @@ export function usePurchaseOrderAbilities(orgId: string) {
       canConfirm: hasPermission(s, "confirm:purchase-order"),
       canClose: hasPermission(s, "close:purchase-order"),
       canCancel: hasPermission(s, "cancel:purchase-order"),
+      canCreateShipment: hasPermission(s, "create:purchase-shipment"),
+      canPostShipment: hasPermission(s, "post:purchase-shipment"),
+      canReverseShipment: hasPermission(s, "reverse:purchase-shipment"),
+      canManagePaymentTerms:
+        hasPermission(s, "create:payment-term") && hasPermission(s, "update:payment-term"),
     }
   }, [snapshot])
 }
@@ -161,8 +170,17 @@ import {
   getListItemOptionsQueryKey,
   getUnitCollection,
   listItemOptions,
+  getListPurchaseShipmentsQueryKey,
+  getListPaymentTermsQueryKey,
+  useCreatePaymentTerm,
   useCreatePurchaseOrder,
+  useCreatePurchaseShipment,
   useListPaymentTerms,
+  useListPurchaseShipments,
+  usePostPurchaseShipment,
+  useReversePurchaseShipment,
+  useUpdatePaymentTerm,
+  useUpdatePurchaseOrder,
   useListWarehouseLocationOptions,
   useListWarehouseOptions,
   usePreviewPurchaseOrderNumber,
@@ -252,5 +270,70 @@ export async function fetchItemUnits(
     }
   } catch {
     return { baseUnitId: "", units: [] }
+  }
+}
+
+export function useUpdatePurchaseOrderMutation(orgId: string) {
+  const invalidate = useInvalidatePurchaseOrders(orgId)
+  return useUpdatePurchaseOrder({ mutation: { onSuccess: (_r, v) => invalidate(v.id) } })
+}
+
+/* -------------------------------- shipments ------------------------------- */
+
+export type ShipmentDto = import("@avuny/contracts").PurchaseShipmentDto
+
+export function usePurchaseShipments(orgId: string, orderId: string) {
+  const query = useListPurchaseShipments(orgId, orderId)
+  const shipments = useMemo(
+    () => ((query.data?.data as { items?: ShipmentDto[] } | undefined)?.items ?? []) as ShipmentDto[],
+    [query.data]
+  )
+  return { shipments, isLoading: query.isLoading }
+}
+
+function useInvalidateShipments(orgId: string, orderId: string) {
+  const queryClient = useQueryClient()
+  const invalidateOrders = useInvalidatePurchaseOrders(orgId)
+  return () =>
+    Promise.all([
+      queryClient.invalidateQueries({ queryKey: getListPurchaseShipmentsQueryKey(orgId, orderId) }),
+      invalidateOrders(orderId),
+    ])
+}
+
+export function useCreateShipmentMutation(orgId: string, orderId: string) {
+  const invalidate = useInvalidateShipments(orgId, orderId)
+  return useCreatePurchaseShipment({ mutation: { onSuccess: () => invalidate() } })
+}
+
+export function usePostShipmentMutation(orgId: string, orderId: string) {
+  const invalidate = useInvalidateShipments(orgId, orderId)
+  return usePostPurchaseShipment({ mutation: { onSuccess: () => invalidate() } })
+}
+
+export function useReverseShipmentMutation(orgId: string, orderId: string) {
+  const invalidate = useInvalidateShipments(orgId, orderId)
+  return useReversePurchaseShipment({ mutation: { onSuccess: () => invalidate() } })
+}
+
+/* ------------------------------ payment terms ----------------------------- */
+
+export type PaymentTermRow = import("@avuny/contracts").PaymentTermDto
+
+export function usePaymentTermsAdmin(orgId: string) {
+  const query = useListPaymentTerms(orgId, { includeInactive: "true" } as never)
+  const terms = useMemo(
+    () => ((query.data?.data as { items?: PaymentTermRow[] } | undefined)?.items ?? []) as PaymentTermRow[],
+    [query.data]
+  )
+  return { terms, isLoading: query.isLoading }
+}
+
+export function usePaymentTermMutations(orgId: string) {
+  const queryClient = useQueryClient()
+  const refresh = () => queryClient.invalidateQueries({ queryKey: getListPaymentTermsQueryKey(orgId) })
+  return {
+    create: useCreatePaymentTerm({ mutation: { onSuccess: refresh } }),
+    update: useUpdatePaymentTerm({ mutation: { onSuccess: refresh } }),
   }
 }

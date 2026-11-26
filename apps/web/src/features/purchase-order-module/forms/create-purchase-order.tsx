@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { useForm, useWatch } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { parseApiError } from "@workspace/ui/lib/api-error"
@@ -21,11 +21,13 @@ import {
   type PurchaseOrderFormLine,
   type PurchaseOrderFormValues,
 } from "../build-payload"
-import { currencyDigits } from "../lib"
+import { bpsToPercent, currencyDigits, fromMinorUnits } from "../lib"
+import type { PurchaseOrderDto } from "../types"
 import {
   fetchItemUnits,
   useConfirmPurchaseOrderMutation,
   useCreatePurchaseOrderMutation,
+  useUpdatePurchaseOrderMutation,
   useItemSource,
   usePaymentTermOptions,
   usePurchaseOrderDefaults,
@@ -48,11 +50,38 @@ const blankLine = (locationId = ""): PurchaseOrderFormLine => ({
 
 type Props = {
   orgId: string
+  /** When set, the form edits this draft order instead of creating one. */
+  order?: PurchaseOrderDto
   onCreated: (id: string) => void
   onCancel: () => void
 }
 
-export function CreatePurchaseOrder({ orgId, onCreated, onCancel }: Props) {
+function orderToFormValues(order: PurchaseOrderDto): PurchaseOrderFormValues {
+  const digits = currencyDigits(order.currency)
+  return {
+    partyId: order.partyId,
+    orderDate: order.orderDate,
+    expectedDeliveryDate: order.expectedDeliveryDate ?? "",
+    paymentTermId: order.paymentTermId ?? "",
+    warehouseId: order.warehouseId ?? "",
+    supplierReference: order.supplierReference ?? "",
+    notes: order.notes ?? "",
+    lines: order.lines.map((l) => ({
+      itemId: l.itemId,
+      locationId: l.locationId,
+      unitId: l.unitId,
+      orderedQty: l.orderedQty,
+      unitPrice: fromMinorUnits(l.unitPrice, digits),
+      discountAmount: fromMinorUnits(l.discountAmount, digits),
+      discountRate: bpsToPercent(l.discountRateBps),
+      taxRate: bpsToPercent(l.taxRateBps),
+      expectedDeliveryDate: l.expectedDeliveryDate ?? "",
+      notes: l.notes ?? "",
+    })),
+  }
+}
+
+export function CreatePurchaseOrder({ orgId, order, onCreated, onCancel }: Props) {
   const { t } = useTranslation("purchase-order")
   const comboboxCopy = useAsyncComboboxCopy()
   const supplierSource = usePartyOptions(orgId, "VENDOR")
@@ -62,12 +91,14 @@ export function CreatePurchaseOrder({ orgId, onCreated, onCancel }: Props) {
   const defaults = usePurchaseOrderDefaults(orgId)
   const createMutation = useCreatePurchaseOrderMutation(orgId)
   const confirmMutation = useConfirmPurchaseOrderMutation(orgId)
+  const updateMutation = useUpdatePurchaseOrderMutation(orgId)
+  const isEdit = Boolean(order)
 
   const [serverError, setServerError] = useState<string | null>(null)
   const [unitMap, setUnitMap] = useState<Record<string, { value: string; label: string }[]>>({})
 
   const form = useForm<PurchaseOrderFormValues>({
-    defaultValues: {
+    defaultValues: order ? orderToFormValues(order) : {
       partyId: "",
       orderDate: "",
       expectedDeliveryDate: "",
@@ -82,7 +113,19 @@ export function CreatePurchaseOrder({ orgId, onCreated, onCancel }: Props) {
   const warehouseId = useWatch({ control: form.control, name: "warehouseId" })
   const effectiveWarehouse = warehouseId || warehouseOptions[0]?.value || ""
   const locationOptions = useStockLocationOptions(orgId, effectiveWarehouse)
-  const digits = useMemo(() => currencyDigits(defaults.currency ?? "USD"), [defaults.currency])
+  const digits = useMemo(
+    () => currencyDigits(order?.currency ?? defaults.currency ?? "USD"),
+    [order?.currency, defaults.currency]
+  )
+
+  // When editing, load each line item's unit choices once so the unit selects are populated.
+  useEffect(() => {
+    if (!order) return
+    const ids = [...new Set(order.lines.map((l) => l.itemId))]
+    void Promise.all(ids.map((id) => fetchItemUnits(orgId, id).then((d) => [id, d.units] as const))).then(
+      (pairs) => setUnitMap(Object.fromEntries(pairs))
+    )
+  }, [order, orgId])
 
   // Fields that default from the server/org (today, first warehouse) are applied at submit if left blank.
   const submit = (confirm: boolean) =>
@@ -111,6 +154,11 @@ export function CreatePurchaseOrder({ orgId, onCreated, onCancel }: Props) {
         return
       }
       try {
+        if (order) {
+          await updateMutation.mutateAsync({ orgId, id: order.id, data: built.data })
+          onCreated(order.id)
+          return
+        }
         const res = await createMutation.mutateAsync({ orgId, data: built.data })
         const id = res.data.id
         if (confirm) await confirmMutation.mutateAsync({ orgId, id })
@@ -120,7 +168,7 @@ export function CreatePurchaseOrder({ orgId, onCreated, onCancel }: Props) {
       }
     })
 
-  const pending = createMutation.isPending || confirmMutation.isPending
+  const pending = createMutation.isPending || confirmMutation.isPending || updateMutation.isPending
 
   const onItemChange = async (index: number, itemId: string) => {
     if (!itemId) return
@@ -136,7 +184,7 @@ export function CreatePurchaseOrder({ orgId, onCreated, onCancel }: Props) {
 
   return (
     <FormShell
-      title={t("form.title")}
+      title={isEdit ? t("form.editTitle") : t("form.title")}
       description={defaults.currency ? `${t("form.description")} ${t("form.currencyNote", { currency: defaults.currency })}` : t("form.description")}
       errorMessage={serverError}
     >
@@ -290,13 +338,15 @@ export function CreatePurchaseOrder({ orgId, onCreated, onCancel }: Props) {
           <SubmitButton
             className="flex-1"
             variant="outline"
-            loading={createMutation.isPending && !confirmMutation.isPending}
-            label={t("form.save")}
-            loadingLabel={t("form.saving")}
+            loading={(createMutation.isPending && !confirmMutation.isPending) || updateMutation.isPending}
+            label={isEdit ? t("form.update") : t("form.save")}
+            loadingLabel={isEdit ? t("form.updating") : t("form.saving")}
           />
-          <Button type="button" className="flex-1" disabled={pending} onClick={submit(true)}>
-            {t("form.saveConfirm")}
-          </Button>
+          {isEdit ? null : (
+            <Button type="button" className="flex-1" disabled={pending} onClick={submit(true)}>
+              {t("form.saveConfirm")}
+            </Button>
+          )}
         </div>
       </form>
     </FormShell>

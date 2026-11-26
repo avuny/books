@@ -14,6 +14,9 @@ function PurchaseOrderDetailsPage() {
     <PurchaseOrderDetails
       orgId={orgId}
       orderId={orderId}
+      onEdit={() =>
+        navigate({ to: "/organization/$orgId/purchase-orders/edit/$orderId", params: { orgId, orderId } })
+      }
       onBack={() =>
         navigate({ to: "/organization/$orgId/purchase-orders", params: { orgId } })
       }

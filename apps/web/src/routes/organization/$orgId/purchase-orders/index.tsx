@@ -18,6 +18,15 @@ function PurchaseOrdersPage() {
     <PurchaseOrderList
       orgId={orgId}
       createAction={
+        <>
+        <Button
+          variant="outline"
+          onClick={() =>
+            navigate({ to: "/organization/$orgId/payment-terms", params: { orgId } })
+          }
+        >
+          {t("paymentTerms.manage")}
+        </Button>
         <Button
           onClick={() =>
             navigate({ to: "/organization/$orgId/purchase-orders/new", params: { orgId } })
@@ -25,6 +34,7 @@ function PurchaseOrdersPage() {
         >
           {t("list.newButton")}
         </Button>
+        </>
       }
       onViewOrder={(orderId) =>
         navigate({

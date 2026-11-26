@@ -14,6 +14,7 @@ import {
   DialogTitle,
 } from "@workspace/ui/components/dialog"
 
+import { ShipmentsPanel } from "../shipments"
 import { PurchaseOrderStatusBadge } from "../components"
 import { bpsToPercent, formatMinorAmount, usePurchaseOrderLabels } from "../lib"
 import {
@@ -24,7 +25,7 @@ import {
   usePurchaseOrderAbilities,
 } from "../purchase-order-api"
 
-type Props = { orgId: string; orderId: string; onBack: () => void }
+type Props = { orgId: string; orderId: string; onBack: () => void; onEdit?: () => void }
 type Action = "confirm" | "close" | "cancel" | null
 
 function Field({ label, value }: { label: string; value: React.ReactNode }) {
@@ -36,7 +37,7 @@ function Field({ label, value }: { label: string; value: React.ReactNode }) {
   )
 }
 
-export function PurchaseOrderDetails({ orgId, orderId, onBack }: Props) {
+export function PurchaseOrderDetails({ orgId, orderId, onBack, onEdit }: Props) {
   const { t, i18n } = useTranslation("purchase-order")
   const { order, isLoading } = usePurchaseOrder(orgId, orderId)
   const abilities = usePurchaseOrderAbilities(orgId)
@@ -93,6 +94,9 @@ export function PurchaseOrderDetails({ orgId, orderId, onBack }: Props) {
           <PurchaseOrderStatusBadge status={order.status} label={getStatusLabel(order.status)} />
         </div>
         <div className="flex gap-2">
+          {order.status === "DRAFT" && abilities.canUpdate && onEdit ? (
+            <Button variant="outline" onClick={onEdit}>{t("actions.edit")}</Button>
+          ) : null}
           {order.status === "DRAFT" && abilities.canConfirm ? (
             <Button onClick={() => setAction("confirm")}>{t("actions.confirm")}</Button>
           ) : null}
@@ -171,6 +175,8 @@ export function PurchaseOrderDetails({ orgId, orderId, onBack }: Props) {
           <dd className="text-end font-medium tabular-nums">{money(order.totalAmount)}</dd>
         </dl>
       </section>
+
+      <ShipmentsPanel orgId={orgId} order={order} />
 
       <ConfirmDialog
         open={action === "confirm"}

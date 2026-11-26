@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { bpsToPercent, currencyDigits, percentToBps, toMinorUnits } from "./money-input"
+import { bpsToPercent, fromMinorUnits, currencyDigits, percentToBps, toMinorUnits } from "./money-input"
 
 describe("toMinorUnits", () => {
   it("converts decimals without float math", () => {
@@ -44,5 +44,12 @@ describe("toMinorUnits", () => {
     expect(bpsToPercent(750)).toBe("7.5")
     expect(bpsToPercent(1234)).toBe("12.34")
     expect(bpsToPercent(0)).toBe("0")
+  })
+
+  it("formats minor units as a decimal", () => {
+    expect(fromMinorUnits("12550", 2)).toBe("125.50")
+    expect(fromMinorUnits("5", 2)).toBe("0.05")
+    expect(fromMinorUnits("700", 0)).toBe("700")
+    expect(fromMinorUnits("0", 2)).toBe("0.00")
   })
 })

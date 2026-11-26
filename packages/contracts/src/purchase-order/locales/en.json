@@ -101,7 +101,8 @@
     "deleteDescription": "This permanently deletes the draft purchase order.",
     "reason": "Reason",
     "dismiss": "Keep it",
-    "back": "Back to purchase orders"
+    "back": "Back to purchase orders",
+    "edit": "Edit"
   },
   "details": {
     "title": "Purchase order",
@@ -165,6 +166,63 @@
     "taxRate": "Tax %",
     "discountRate": "Discount %",
     "invalidRate": "Rates are percentages from 0 to 100 with up to two decimals",
-    "rateConflict": "Use either a discount % or a discount amount on a line"
+    "rateConflict": "Use either a discount % or a discount amount on a line",
+    "editTitle": "Edit purchase order",
+    "update": "Save changes",
+    "updating": "Saving…"
+  },
+  "shipments": {
+    "title": "Shipments",
+    "none": "No shipments yet",
+    "new": "New shipment",
+    "number": "Shipment",
+    "date": "Date",
+    "status": "Status",
+    "carrier": "Carrier",
+    "tracking": "Tracking number",
+    "reference": "Supplier delivery reference",
+    "qty": "Qty to ship",
+    "remaining": "Remaining",
+    "post": "Post",
+    "reverse": "Reverse",
+    "reverseTitle": "Reverse shipment",
+    "reverseDescription": "Reversing returns the quantity to unshipped. Give a reason.",
+    "reason": "Reason",
+    "create": "Create shipment",
+    "creating": "Creating…",
+    "cancel": "Cancel",
+    "noOpenLines": "Nothing left to ship",
+    "invalidQty": "Enter a valid quantity",
+    "statuses": {
+      "DRAFT": "Draft",
+      "POSTED": "Posted",
+      "VOIDED": "Reversed"
+    }
+  },
+  "paymentTerms": {
+    "title": "Payment terms",
+    "description": "Terms you can pick on purchase orders. System terms cannot be edited.",
+    "new": "New term",
+    "name": "Name",
+    "method": "Method",
+    "days": "Days",
+    "system": "System",
+    "active": "Active",
+    "inactive": "Inactive",
+    "save": "Save",
+    "saving": "Saving…",
+    "edit": "Edit",
+    "deactivate": "Deactivate",
+    "activate": "Activate",
+    "back": "Back",
+    "manage": "Payment terms",
+    "invalid": "Enter a name and valid days",
+    "methods": {
+      "DUE_ON_RECEIPT": "Due on receipt",
+      "NET_DAYS": "Net days",
+      "END_OF_MONTH": "End of month",
+      "END_OF_NEXT_MONTH": "End of next month",
+      "DAYS_AFTER_END_OF_MONTH": "Days after end of month"
+    }
   }
 }

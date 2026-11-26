@@ -43,3 +43,10 @@ export function bpsToPercent(bps: number): string {
   const frac = String(bps % 100).padStart(2, "0").replace(/0+$/, "")
   return frac ? `${whole}.${frac}` : String(whole)
 }
+
+/** Integer minor units ("12550") back to the decimal a user edits ("125.50"). */
+export function fromMinorUnits(minor: string, digits: number): string {
+  if (digits <= 0) return minor
+  const padded = minor.padStart(digits + 1, "0")
+  return `${padded.slice(0, -digits)}.${padded.slice(-digits)}`
+}
