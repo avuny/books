@@ -36,8 +36,8 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done · `[!]` blocked · `[-]` 
 | P1-01 | Contracts, registry entry, locales | Phase 1 acceptance in SPEC section 12 | [x] |
 | P1-02 | DB schema and migration 0027 | Phase 1 acceptance in SPEC section 12 | [x] |
 | P1-03 | Sidebar seed verified | Phase 1 acceptance in SPEC section 12 | [ ] |
-| P2-01 | Repository and service for drafts | Phase 2 acceptance in SPEC section 12 | [ ] |
-| P2-02 | Routes, permissions, audit, number generation | Phase 2 acceptance in SPEC section 12 | [ ] |
+| P2-01 | Repository and service for drafts | Phase 2 acceptance in SPEC section 12 | [x] |
+| P2-02 | Routes, permissions, audit, number generation | Phase 2 acceptance in SPEC section 12 | [x] |
 | P3-01 | Batch pre-allocation and available check | Phase 3 acceptance in SPEC section 12 | [ ] |
 | P3-02 | Dispatch posting and allocations | Phase 3 acceptance in SPEC section 12 | [ ] |
 | P3-03 | Return rest, reverse dispatch | Phase 3 acceptance in SPEC section 12 | [ ] |
@@ -84,3 +84,4 @@ None yet.
 | 2026-11-26 | P1-02 | `pnpm typecheck` in packages/db, `db:generate` | Typecheck ok. Migration 0027 only adds 3 enums, 5 tables, FKs and indexes. No drops. |
 | 2026-11-26 | P1-01 | `pnpm typecheck` in apps/server | Ok after adding the sidebar permission map entry and role permission labels. |
 | 2026-11-26 | P1-03 | not yet | Sidebar option is created by `pnpm seed` in the deploy job. Verify on production after merge. |
+| 2026-11-26 | P2-01, P2-02 | `tsc --noEmit` and `vitest run --project unit src/api/modules/inventory-transfer` in apps/server | Typecheck ok, 8 service tests pass. Other unit files that fail locally (health, auth crypto, geo, otp) need env secrets and fail the same way without this change. DB-backed route tests run in CI only. |

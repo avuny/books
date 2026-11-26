@@ -11,6 +11,8 @@ import geoEn from "./locales/geo/en.json" with { type: "json" }
 import geoAr from "./locales/geo/ar.json" with { type: "json" }
 import inventoryAdjustmentEn from "./locales/inventory-adjustment/en.json" with { type: "json" }
 import inventoryAdjustmentAr from "./locales/inventory-adjustment/ar.json" with { type: "json" }
+import inventoryTransferEn from "./locales/inventory-transfer/en.json" with { type: "json" }
+import inventoryTransferAr from "./locales/inventory-transfer/ar.json" with { type: "json" }
 import itemEn from "./locales/item/en.json" with { type: "json" }
 import itemAr from "./locales/item/ar.json" with { type: "json" }
 import itemCategoryEn from "./locales/item-category/en.json" with { type: "json" }
@@ -58,6 +60,8 @@ export const resources = {
         geo: geoEn,
         "inventory-adjustment": inventoryAdjustmentEn,
         inventoryAdjustment: inventoryAdjustmentEn,
+        "inventory-transfer": inventoryTransferEn,
+        inventoryTransfer: inventoryTransferEn,
         item: itemEn,
         "item-category": itemCategoryEn,
         itemCategory: itemCategoryEn,
@@ -94,6 +98,8 @@ export const resources = {
         geo: geoAr,
         "inventory-adjustment": inventoryAdjustmentAr,
         inventoryAdjustment: inventoryAdjustmentAr,
+        "inventory-transfer": inventoryTransferAr,
+        inventoryTransfer: inventoryTransferAr,
         item: itemAr,
         "item-category": itemCategoryAr,
         itemCategory: itemCategoryAr,
@@ -134,7 +140,7 @@ export function installRequestLanguage(): void {
   i18next.init({
     lng: "en",
     fallbackLng: "en",
-    ns: ["accounting", "admin", "auth", "batch", "geo", "inventory-adjustment", "inventoryAdjustment", "item", "item-category", "itemCategory", "organization", "organization-invitation", "organizationInvitation", "organization-user", "organizationUser", "otp", "party", "payment-term", "paymentTerm", "purchase-order", "purchaseOrder", "purchase-receipt", "purchaseReceipt", "purchase-shipment", "purchaseShipment", "role", "sidebar", "unit", "unit-collection", "unitCollection", "users", "warehouse", "warehouse-location", "warehouseLocation"],
+    ns: ["accounting", "admin", "auth", "batch", "geo", "inventory-adjustment", "inventoryAdjustment", "inventory-transfer", "inventoryTransfer", "item", "item-category", "itemCategory", "organization", "organization-invitation", "organizationInvitation", "organization-user", "organizationUser", "otp", "party", "payment-term", "paymentTerm", "purchase-order", "purchaseOrder", "purchase-receipt", "purchaseReceipt", "purchase-shipment", "purchaseShipment", "role", "sidebar", "unit", "unit-collection", "unitCollection", "users", "warehouse", "warehouse-location", "warehouseLocation"],
     defaultNS: "otp",
     resources,
     interpolation: { escapeValue: false },
