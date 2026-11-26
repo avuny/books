@@ -32,23 +32,23 @@ describe("payment-term routes (integration)", () => {
     const system = list.items[0]!
 
     const created = expectOk(
-      await owner.api.post<PaymentTermDto>(base, { json: { name: "Net 45", method: "NET_DAYS", days: 45 } }),
+      await owner.api.post<PaymentTermDto>(base, { json: { name: "Net 50", method: "NET_DAYS", days: 50 } }),
       201
     )
-    expect(created).toMatchObject({ name: "Net 45", days: 45, isSystem: false, isActive: true })
+    expect(created).toMatchObject({ name: "Net 50", days: 50, isSystem: false, isActive: true })
     expect(created.code.startsWith("CUSTOM_")).toBe(true)
 
     expectFailure(
-      await owner.api.post(base, { json: { name: "Net 45", method: "NET_DAYS", days: 45 } }),
+      await owner.api.post(base, { json: { name: "Net 50", method: "NET_DAYS", days: 50 } }),
       409,
       PaymentTermErrorCode.PAYMENT_TERM_NAME_TAKEN
     )
 
     const renamed = expectOk(
-      await owner.api.patch<PaymentTermDto>(`${base}/${created.id}`, { json: { name: "Net 45 days" } }),
+      await owner.api.patch<PaymentTermDto>(`${base}/${created.id}`, { json: { name: "Net 50 days" } }),
       200
     )
-    expect(renamed.name).toBe("Net 45 days")
+    expect(renamed.name).toBe("Net 50 days")
 
     expectFailure(
       await owner.api.patch(`${base}/${system.id}`, { json: { name: "Renamed" } }),
