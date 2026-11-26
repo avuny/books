@@ -82,7 +82,7 @@ const expiryNeedsBatchAndTracking = (v: {
   isExpiryTracked: boolean
   isBatchTracked: boolean
   isInventoryTracked: boolean
-}) => !(v.isExpiryTracked && (!v.isBatchTracked || !v.isInventoryTracked))
+}) => !(v.isExpiryTracked && !v.isInventoryTracked)
 
 const shelfLifePairCheck = (v: {
   defaultShelfLifeValue?: number
@@ -100,7 +100,7 @@ export const CreateItemFormSchema = ItemFormShape.refine(batchNeedsTracking, {
 })
   .refine(expiryNeedsBatchAndTracking, {
     message:
-      "Expiry tracking requires both inventory tracking and batch tracking",
+      "Expiry tracking requires inventory tracking",
     path: ["isExpiryTracked"],
   })
   .refine(shelfLifePairCheck, {
@@ -150,7 +150,7 @@ export const UpdateItemFormSchema = ItemFormShape.refine(batchNeedsTracking, {
 })
   .refine(expiryNeedsBatchAndTracking, {
     message:
-      "Expiry tracking requires both inventory tracking and batch tracking",
+      "Expiry tracking requires inventory tracking",
     path: ["isExpiryTracked"],
   })
   .refine(shelfLifePairCheck, {
@@ -252,7 +252,8 @@ export function toCreateItemInput(
     canAssembled: values.canAssembled,
     isReturnable: values.isReturnable,
     isInventoryTracked: values.isInventoryTracked,
-    isBatchTracked: values.isBatchTracked,
+    // The batch checkbox is gone from the form: inventory-tracked items are always batch tracked.
+    isBatchTracked: values.isInventoryTracked,
     isExpiryTracked: values.isExpiryTracked,
     expirySettings:
       values.isExpiryTracked &&

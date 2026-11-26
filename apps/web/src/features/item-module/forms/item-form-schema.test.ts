@@ -94,6 +94,14 @@ describe("CreateItemFormSchema", () => {
     expect(res.success).toBe(false)
   })
 
+  it("expiry tracking only needs inventory tracking (batches are implied)", () => {
+    const base = { ...filled, baseUnitId: uuid(2), isInventoryTracked: true, isBatchTracked: false, isExpiryTracked: true }
+    const res = CreateItemFormSchema.safeParse(base)
+    expect(res.success).toBe(true)
+    if (res.success) expect(toCreateItemInput(res.data).isBatchTracked).toBe(true)
+    expect(CreateItemFormSchema.safeParse({ ...base, isInventoryTracked: false }).success).toBe(false)
+  })
+
   it("reorder point: blank or a numeric(18, 6) string", () => {
     const base = { ...filled, baseUnitId: uuid(2) }
     expect(
