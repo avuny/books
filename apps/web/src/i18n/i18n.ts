@@ -40,6 +40,8 @@ i18n
       "unit",
       "unit-collection",
       "user",
+      "vendor-bill",
+      "vendor-payment",
       "warehouse",
       "warehouse-location",
     ],

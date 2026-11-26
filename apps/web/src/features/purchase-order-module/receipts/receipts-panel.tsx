@@ -13,6 +13,8 @@ import {
   DialogTitle,
 } from "@workspace/ui/components/dialog"
 
+import { useNavigate } from "@tanstack/react-router"
+import { CreateBillFromReceiptDialog, useVendorBillAbilities } from "../../vendor-bill-module"
 import type { PurchaseOrderDto } from "../types"
 import {
   useCreateReceiptMutation,
@@ -32,6 +34,9 @@ const EMPTY: ReceiptLineInput = { received: "", rejected: "", reason: "", direct
 export function ReceiptsPanel({ orgId, order }: Props) {
   const { t } = useTranslation("purchase-receipt")
   const abilities = usePurchaseOrderAbilities(orgId)
+  const billAbilities = useVendorBillAbilities(orgId)
+  const navigate = useNavigate()
+  const [billing, setBilling] = useState<ReceiptDto | null>(null)
   const { receipts } = usePurchaseReceipts(orgId, order.id)
   const createMutation = useCreateReceiptMutation(orgId, order.id)
   const postMutation = usePostReceiptMutation(orgId, order.id)
@@ -130,6 +135,11 @@ export function ReceiptsPanel({ orgId, order }: Props) {
                         {t("ui.post")}
                       </Button>
                     ) : null}
+                    {r.status === "POSTED" && r.billStatus !== "BILLED" && billAbilities.canCreateBill ? (
+                      <Button size="sm" variant="outline" onClick={() => setBilling(r)}>
+                        {t("ui.createBill")}
+                      </Button>
+                    ) : null}
                     {r.status === "POSTED" && abilities.canReverseReceipt ? (
                       <Button size="sm" variant="outline" onClick={() => setReversing(r)}>
                         {t("ui.reverse")}
@@ -142,6 +152,16 @@ export function ReceiptsPanel({ orgId, order }: Props) {
           </table>
         </div>
       )}
+
+      <CreateBillFromReceiptDialog
+        orgId={orgId}
+        receiptId={billing?.id ?? null}
+        receiptNumber={billing?.number ?? ""}
+        onClose={() => setBilling(null)}
+        onCreated={(billId) =>
+          navigate({ to: "/organization/$orgId/vendor-bills/$billId", params: { orgId, billId } })
+        }
+      />
 
       <Dialog open={creating} onOpenChange={(o) => !o && setCreating(false)}>
         <DialogContent className="sm:max-w-2xl">
