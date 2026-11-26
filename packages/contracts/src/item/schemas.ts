@@ -91,7 +91,7 @@ export const CreateItemSchema = z
     canAssembled: z.boolean().default(false),
     isReturnable: z.boolean().default(true),
     isInventoryTracked: z.boolean().default(true),
-    isBatchTracked: z.boolean().default(true),
+    isBatchTracked: z.boolean().default(false),
     isExpiryTracked: z.boolean().default(false),
     expirySettings: ItemExpirySettingsInputSchema.nullish(),
     openingStock: ItemOpeningStockSchema.optional(),
