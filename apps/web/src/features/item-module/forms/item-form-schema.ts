@@ -30,7 +30,7 @@ const ItemFormShape = z.object({
   canAssembled: z.boolean(),
   isReturnable: z.boolean(),
   isInventoryTracked: z.boolean(),
-  isBatchTracked: z.boolean().default(true),
+  isBatchTracked: z.boolean().default(false),
   isExpiryTracked: z.boolean(),
   defaultShelfLifeValue: z.preprocess(
     blankToUndefined,
@@ -183,7 +183,7 @@ export function getCreateItemDefaults(
     canAssembled: false,
     isReturnable: true,
     isInventoryTracked: true,
-    isBatchTracked: true,
+    isBatchTracked: false,
     isExpiryTracked: false,
     defaultShelfLifeValue: undefined,
     defaultShelfLifeUnit: undefined,
