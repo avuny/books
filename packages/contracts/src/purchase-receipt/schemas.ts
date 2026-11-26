@@ -1,6 +1,6 @@
 import { z } from "@avuny/zod"
 import { UNIT_QUANTITY_PATTERN } from "../unit/constants.js"
-import { addQty, cmpQty } from "../purchase-order/rules.js"
+import { addQty, cmpQty, isPositiveQty } from "../purchase-order/rules.js"
 import {
   PURCHASE_RECEIPT_LINE_NOTES_MAX_LENGTH,
   PURCHASE_RECEIPT_MAX_LINES,
@@ -38,6 +38,9 @@ export const PurchaseReceiptLineInputSchema = z
     notes: text(PURCHASE_RECEIPT_LINE_NOTES_MAX_LENGTH).nullish(),
   })
   .superRefine((v, ctx) => {
+    if (!isPositiveQty(v.receivedQty)) {
+      ctx.addIssue({ code: "custom", path: ["receivedQty"], message: "Received quantity must be greater than zero" })
+    }
     if (cmpQty(addQty(v.acceptedQty, v.rejectedQty), v.receivedQty) !== 0) {
       ctx.addIssue({ code: "custom", path: ["receivedQty"], message: "Received must equal accepted plus rejected" })
     }
