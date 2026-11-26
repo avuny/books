@@ -9,11 +9,17 @@ import {
   computeBillTotals,
   computeDueDate,
   computeMatchedValue,
+  buildApAging,
+  buildStatement,
+  reconcileAmounts,
   isPositiveQty,
   mulQty,
   subQty,
   vendorBillTranslationsEn,
   type ActivityLogAction,
+  type ApAgingResponse,
+  type ApReconciliationResponse,
+  type SupplierStatementResponse,
   type CreateVendorBillFromReceiptInput,
   type CreateVendorBillInput,
   type ReverseVendorBillInput,
@@ -244,6 +250,49 @@ export function createVendorBillService(deps: VendorBillServiceDeps) {
       if (!(await can(actorId, P.READ, orgId))) return forbidden()
       const rows = await repo.list(orgId, filter)
       return ok({ data: { items: rows.map((r) => toVendorBillDto(r.row, r.lines)) } })
+    },
+
+    async apAging(actorId: string, orgId: string): Promise<Result<ApAgingResponse, Code>> {
+      if (!(await can(actorId, P.READ, orgId))) return forbidden()
+      const bills = await repo.postedBillsWithPaid(orgId)
+      const asOf = new Date().toISOString().slice(0, 10)
+      return ok({
+        data: buildApAging(
+          bills.map((b) => ({ id: b.id, number: b.number, partyId: b.partyId, partyName: b.partyName, currency: b.currency, dueDate: b.dueDate, outstanding: String(BigInt(b.total) - BigInt(b.paid)) })),
+          asOf
+        ),
+      })
+    },
+
+    async supplierStatement(actorId: string, orgId: string, q: { partyId: string; from?: string; to?: string }): Promise<Result<SupplierStatementResponse, Code>> {
+      if (!(await can(actorId, P.READ, orgId))) return forbidden()
+      const src = await repo.statementSource(orgId, q.partyId)
+      if (!src) return failWith(Err.VENDOR_BILL_SUPPLIER_NOT_FOUND)
+      const inRange = src.rows.filter((r) => !q.to || r.date <= q.to)
+      const before = q.from ? inRange.filter((r) => r.date < q.from!) : []
+      const opening = before.reduce((s, r) => s + (r.kind === "BILL" ? BigInt(r.amount) : -BigInt(r.amount)), 0n)
+      const shown = q.from ? inRange.filter((r) => r.date >= q.from!) : inRange
+      const { lines, closingBalance } = buildStatement(shown, String(opening))
+      return ok({
+        data: { partyId: q.partyId, partyName: src.partyName, currency: src.currency, from: q.from ?? null, to: q.to ?? null, openingBalance: String(opening), closingBalance, lines },
+      })
+    },
+
+    async apReconciliation(actorId: string, orgId: string): Promise<Result<ApReconciliationResponse, Code>> {
+      if (!(await can(actorId, P.READ, orgId))) return forbidden()
+      const [apLedger, grniLedger, bills, openReceipts] = await Promise.all([
+        repo.ledgerCreditBalance(orgId, "ACCOUNTS_PAYABLE"),
+        repo.ledgerCreditBalance(orgId, "GOODS_RECEIVED_NOT_INVOICED"),
+        repo.postedBillsWithPaid(orgId),
+        repo.openReceiptValue(orgId),
+      ])
+      const apSub = bills.reduce((s, b) => s + BigInt(b.total) - BigInt(b.paid), 0n)
+      return ok({
+        data: {
+          accountsPayable: reconcileAmounts(apLedger, String(apSub)),
+          goodsReceivedNotInvoiced: reconcileAmounts(grniLedger, openReceipts),
+        },
+      })
     },
 
     async get(actorId: string, orgId: string, id: string): Promise<Result<VendorBillDto, Code>> {

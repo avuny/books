@@ -49,6 +49,11 @@ function setup(opts: { allowed?: boolean; lines?: BillableReceiptLine[] } = {}) 
     deleteById: async (_o: string, id: string) => void bills.delete(id),
     loadReceiptLines: async (_o: string, ids: string[]) => lines.filter((l) => ids.includes(l.line.id)),
     loadReceiptForBilling: async () => lines,
+    postedBillsWithPaid: async () => (globalThis as any).__apBills ?? [],
+    statementSource: async (_o: string, partyId: string) =>
+      partyId === SUPPLIER ? (globalThis as any).__statement ?? null : null,
+    ledgerCreditBalance: async (_o: string, key: string) => (globalThis as any).__ledger?.[key] ?? "0",
+    openReceiptValue: async () => (globalThis as any).__openReceipts ?? "0",
   } as unknown as VendorBillRepository
   const postBusinessEvent = vi.fn(async () => ({ success: true, data: { id: "je-1" } }))
   const reverseJournalEntry = vi.fn(async () => ({ success: true, data: { id: "je-2" } }))
@@ -181,5 +186,67 @@ describe("vendor bill service", () => {
     expect(res.success).toBe(true)
     expect(reverseJournalEntry).toHaveBeenCalledTimes(1)
     if (res.success) expect(res.data.status).toBe("REVERSED")
+  })
+})
+
+describe("AP reports", () => {
+  const bill = (o: any) => ({ id: "b", number: "VB-1", supplierInvoiceNumber: null, partyId: SUPPLIER, partyName: "Acme", currency: "EGP", invoiceDate: "2026-01-01", dueDate: "2099-01-01", total: "1000", paid: "0", ...o })
+
+  it("aging uses outstanding (total less paid) and ignores settled bills", async () => {
+    ;(globalThis as any).__apBills = [bill({ paid: "400" }), bill({ id: "c", paid: "1000" })]
+    const { service } = setup()
+    const res = await service.apAging(ACTOR, ORG)
+    expect(res.success).toBe(true)
+    if (res.success) {
+      expect(res.data.rows).toHaveLength(1)
+      expect(res.data.rows[0]?.total).toBe("600")
+      expect(res.data.rows[0]?.buckets.CURRENT).toBe("600")
+    }
+  })
+
+  it("statement carries an opening balance from before the period", async () => {
+    ;(globalThis as any).__statement = {
+      partyName: "Acme",
+      currency: "EGP",
+      rows: [
+        { kind: "BILL", date: "2026-10-01", number: "VB-1", reference: "A", amount: "1000" },
+        { kind: "PAYMENT", date: "2026-10-20", number: "VP-1", reference: null, amount: "300" },
+        { kind: "BILL", date: "2026-11-05", number: "VB-2", reference: "B", amount: "500" },
+        { kind: "BILL", date: "2026-12-05", number: "VB-3", reference: "C", amount: "900" },
+      ],
+    }
+    const { service } = setup()
+    const res = await service.supplierStatement(ACTOR, ORG, { partyId: SUPPLIER, from: "2026-11-01", to: "2026-11-30" })
+    expect(res.success).toBe(true)
+    if (res.success) {
+      expect(res.data.openingBalance).toBe("700")
+      expect(res.data.lines.map((l) => l.number)).toEqual(["VB-2"])
+      expect(res.data.closingBalance).toBe("1200")
+    }
+  })
+
+  it("statement for an unknown supplier fails", async () => {
+    const { service } = setup()
+    const res = await service.supplierStatement(ACTOR, ORG, { partyId: "99999999-9999-4999-8999-999999999999" })
+    expect(res.success).toBe(false)
+  })
+
+  it("reconciliation flags a ledger that differs from the subledger", async () => {
+    ;(globalThis as any).__apBills = [bill({ paid: "400" })]
+    ;(globalThis as any).__ledger = { ACCOUNTS_PAYABLE: "600", GOODS_RECEIVED_NOT_INVOICED: "250" }
+    ;(globalThis as any).__openReceipts = "100"
+    const { service } = setup()
+    const res = await service.apReconciliation(ACTOR, ORG)
+    expect(res.success).toBe(true)
+    if (res.success) {
+      expect(res.data.accountsPayable.balanced).toBe(true)
+      expect(res.data.goodsReceivedNotInvoiced).toMatchObject({ difference: "150", balanced: false })
+    }
+  })
+
+  it("reports need read permission", async () => {
+    const { service } = setup({ allowed: false })
+    expect((await service.apAging(ACTOR, ORG)).success).toBe(false)
+    expect((await service.apReconciliation(ACTOR, ORG)).success).toBe(false)
   })
 })

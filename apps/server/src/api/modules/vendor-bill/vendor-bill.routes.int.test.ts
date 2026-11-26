@@ -63,4 +63,23 @@ describe("vendor-bill routes (integration)", () => {
     expect([403, 404]).toContain(res.status)
     expect(res.body?.success).toBe(false)
   })
+  it("serves empty AP reports and protects them", async () => {
+    const { owner, org } = await createUserWithOrganization(t.app)
+    const base = `/vendorBill/organizations/${org.id}/ap-reports`
+    expectFailure(await t.anonymous.get(`${base}/aging`), 401)
+    const aging = expectOk(await owner.api.get<{ rows: unknown[] }>(`${base}/aging`), 200)
+    expect(aging.rows).toEqual([])
+    const rec = expectOk(
+      await owner.api.get<{ accountsPayable: { balanced: boolean }; goodsReceivedNotInvoiced: { balanced: boolean } }>(`${base}/reconciliation`),
+      200
+    )
+    expect(rec.accountsPayable.balanced).toBe(true)
+    expect(rec.goodsReceivedNotInvoiced.balanced).toBe(true)
+    expectFailure(
+      await owner.api.get(`${base}/supplier-statement?partyId=${randomUUID()}`),
+      404,
+      VendorBillErrorCode.VENDOR_BILL_SUPPLIER_NOT_FOUND
+    )
+    expectFailure(await owner.api.get(`${base}/supplier-statement?partyId=nope`), 422)
+  })
 })

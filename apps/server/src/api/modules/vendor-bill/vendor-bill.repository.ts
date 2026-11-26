@@ -1,6 +1,9 @@
 import { and, asc, desc, eq, inArray, sql } from "drizzle-orm"
 import {
+  accounts,
   items,
+  journalEntries,
+  journalEntryLines,
   parties,
   purchaseOrderLines,
   purchaseReceiptLines,
@@ -228,6 +231,74 @@ export function createVendorBillRepository({ db }: { db: DB }): VendorBillReposi
     async loadReceiptLines(orgId, lineIds, opts, tx) {
       if (lineIds.length === 0) return []
       return receiptRows(ex(tx), orgId, inArray(purchaseReceiptLines.id, [...lineIds]), opts.lock ?? false, opts.excludeBillId)
+    },
+
+    async postedBillsWithPaid(orgId, partyId) {
+      const rows = await db
+        .select({
+          id: vendorBills.id,
+          number: vendorBills.number,
+          supplierInvoiceNumber: vendorBills.supplierInvoiceNumber,
+          partyId: vendorBills.partyId,
+          partyName: parties.displayName,
+          currency: vendorBills.currency,
+          invoiceDate: vendorBills.invoiceDate,
+          dueDate: vendorBills.dueDate,
+          total: sql<string>`${vendorBills.totalAmount}::text`,
+          paid: sql<string>`coalesce((select sum(vpa.allocated_amount) from ${vendorPaymentAllocations} vpa join ${vendorPayments} vp on vp.org_id = vpa.org_id and vp.id = vpa.vendor_payment_id where vpa.org_id = ${vendorBills.orgId} and vpa.vendor_bill_id = ${vendorBills.id} and vp.status = 'POSTED'), 0)::text`,
+        })
+        .from(vendorBills)
+        .leftJoin(parties, and(eq(parties.orgId, vendorBills.orgId), eq(parties.id, vendorBills.partyId)))
+        .where(and(eq(vendorBills.orgId, orgId), eq(vendorBills.status, "POSTED"), partyId ? eq(vendorBills.partyId, partyId) : undefined))
+        .orderBy(asc(vendorBills.dueDate), asc(vendorBills.number))
+      return rows
+    },
+
+    async statementSource(orgId, partyId) {
+      const [party] = await db
+        .select({ name: parties.displayName })
+        .from(parties)
+        .where(and(eq(parties.orgId, orgId), eq(parties.id, partyId)))
+        .limit(1)
+      if (!party) return null
+      const bills = await db
+        .select({ number: vendorBills.number, date: vendorBills.invoiceDate, reference: vendorBills.supplierInvoiceNumber, amount: sql<string>`${vendorBills.totalAmount}::text`, currency: vendorBills.currency })
+        .from(vendorBills)
+        .where(and(eq(vendorBills.orgId, orgId), eq(vendorBills.partyId, partyId), eq(vendorBills.status, "POSTED")))
+      const pays = await db
+        .select({ number: vendorPayments.number, date: vendorPayments.paymentDate, reference: vendorPayments.referenceNumber, amount: sql<string>`${vendorPayments.amount}::text`, currency: vendorPayments.currency })
+        .from(vendorPayments)
+        .where(and(eq(vendorPayments.orgId, orgId), eq(vendorPayments.partyId, partyId), eq(vendorPayments.status, "POSTED")))
+      return {
+        partyName: party.name,
+        currency: bills[0]?.currency ?? pays[0]?.currency ?? null,
+        rows: [
+          ...bills.map((b) => ({ kind: "BILL" as const, date: b.date, number: b.number, reference: b.reference, amount: b.amount })),
+          ...pays.map((p) => ({ kind: "PAYMENT" as const, date: p.date, number: p.number, reference: p.reference, amount: p.amount })),
+        ],
+      }
+    },
+
+    async ledgerCreditBalance(orgId, systemKey) {
+      const [r] = await db
+        .select({ v: sql<string>`coalesce(sum(${journalEntryLines.credit}) - sum(${journalEntryLines.debit}), 0)::text` })
+        .from(journalEntryLines)
+        .innerJoin(journalEntries, and(eq(journalEntries.orgId, journalEntryLines.orgId), eq(journalEntries.id, journalEntryLines.journalEntryId)))
+        .innerJoin(accounts, and(eq(accounts.orgId, journalEntryLines.orgId), eq(accounts.id, journalEntryLines.accountId)))
+        .where(and(eq(journalEntryLines.orgId, orgId), eq(accounts.systemKey, systemKey), inArray(journalEntries.status, ["POSTED", "REVERSED"])))
+      return r?.v ?? "0"
+    },
+
+    async openReceiptValue(orgId) {
+      const [r] = await db
+        .select({ v: sql<string>`coalesce(sum(${purchaseReceipts.totalValue}), 0)::text` })
+        .from(purchaseReceipts)
+        .where(and(eq(purchaseReceipts.orgId, orgId), eq(purchaseReceipts.status, "POSTED")))
+      const [b] = await db
+        .select({ v: sql<string>`coalesce(sum(${vendorBills.receivedValue}), 0)::text` })
+        .from(vendorBills)
+        .where(and(eq(vendorBills.orgId, orgId), eq(vendorBills.status, "POSTED")))
+      return String(BigInt(r?.v ?? "0") - BigInt(b?.v ?? "0"))
     },
 
     async loadReceiptForBilling(orgId, receiptId, tx) {
