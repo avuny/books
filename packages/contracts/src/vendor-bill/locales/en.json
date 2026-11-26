@@ -1,0 +1,48 @@
+{
+  "errors": {
+    "VENDOR_BILL_NOT_FOUND": "Vendor bill not found",
+    "VENDOR_BILL_NOT_EDITABLE": "Only draft bills can be edited",
+    "VENDOR_BILL_NOT_DELETABLE": "Only draft bills can be deleted. Reverse a posted bill instead",
+    "VENDOR_BILL_ALREADY_POSTED": "The bill is already posted",
+    "VENDOR_BILL_NOT_POSTED": "Only posted bills can be reversed",
+    "VENDOR_BILL_SUPPLIER_NOT_FOUND": "The supplier does not exist",
+    "VENDOR_BILL_SUPPLIER_NOT_VENDOR": "The selected party is not a supplier",
+    "VENDOR_BILL_SUPPLIER_INACTIVE": "The supplier is inactive",
+    "VENDOR_BILL_RECEIPT_NOT_FOUND": "A receipt on the bill does not exist",
+    "VENDOR_BILL_RECEIPT_NOT_POSTED": "Only posted receipts can be billed",
+    "VENDOR_BILL_RECEIPT_SUPPLIER_MISMATCH": "All receipts on a bill must belong to the bill's supplier",
+    "VENDOR_BILL_NO_LINES": "At least one bill line is required",
+    "VENDOR_BILL_NOTHING_TO_BILL": "This receipt has nothing left to bill",
+    "VENDOR_BILL_LINE_NOT_FOUND": "A bill line does not match a receipt line",
+    "VENDOR_BILL_DUPLICATE_LINES": "The same receipt line appears more than once",
+    "VENDOR_BILL_QUANTITY_NOT_POSITIVE": "Billed quantities must be greater than zero",
+    "VENDOR_BILL_AMOUNT_NOT_POSITIVE": "Line amounts must be greater than zero",
+    "VENDOR_BILL_EXCEEDS_UNBILLED": "A line bills more than what was received and not yet billed",
+    "VENDOR_BILL_SUPPLIER_INVOICE_REQUIRED": "Enter the supplier's invoice number before posting",
+    "VENDOR_BILL_DUPLICATE_SUPPLIER_INVOICE": "This supplier invoice number is already entered for this supplier",
+    "VENDOR_BILL_PAYMENT_TERM_NOT_FOUND": "The payment term does not exist",
+    "VENDOR_BILL_DUE_DATE_BEFORE_INVOICE": "The due date cannot be before the invoice date",
+    "VENDOR_BILL_POSTING_FAILED": "Posting the bill failed. Nothing was changed. Please try again",
+    "VENDOR_BILL_NUMBER_TAKEN": "Could not allocate a bill number. Please try again"
+  },
+  "labels": {
+    "status": {
+      "DRAFT": "Draft",
+      "POSTED": "Posted",
+      "REVERSED": "Reversed"
+    },
+    "billStatus": {
+      "NOT_APPLICABLE": "Not applicable",
+      "AWAITING_BILL": "Awaiting supplier bill",
+      "PARTIALLY_BILLED": "Partly billed",
+      "BILLED": "Billed"
+    }
+  },
+  "msgs": {
+    "VENDOR_BILL_CREATED": "Vendor bill created successfully",
+    "VENDOR_BILL_UPDATED": "Vendor bill updated successfully",
+    "VENDOR_BILL_DELETED": "Vendor bill deleted successfully",
+    "VENDOR_BILL_POSTED": "Bill posted. The amount is now owed to the supplier",
+    "VENDOR_BILL_REVERSED": "Bill reversed"
+  }
+}

@@ -140,6 +140,11 @@
       "import": "./dist/user/index.js",
       "default": "./dist/user/index.js"
     },
+    "./vendor-bill": {
+      "types": "./dist/vendor-bill/index.d.ts",
+      "import": "./dist/vendor-bill/index.js",
+      "default": "./dist/vendor-bill/index.js"
+    },
     "./warehouse": {
       "types": "./dist/warehouse/index.d.ts",
       "import": "./dist/warehouse/index.js",

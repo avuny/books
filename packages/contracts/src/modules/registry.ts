@@ -191,6 +191,13 @@ export const MODULES = {
       reverse: { permission: true, event: "reversed" },
     },
   },
+  vendor_bill: {
+    actions: {
+      ...CRUD,
+      post: { permission: true, event: "posted" },
+      reverse: { permission: true, event: "reversed" },
+    },
+  },
   payment_term: {
     actions: { ...CRUD },
   },
