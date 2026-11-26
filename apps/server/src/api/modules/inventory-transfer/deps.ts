@@ -3,13 +3,17 @@ import { WAREHOUSE_TYPE_PHYSICAL } from "@avuny/contracts/warehouse"
 import { items, unitCollectionUnits, warehouses, warehouseLocations, type Tx } from "@avuny/db"
 import { db } from "../../db.js"
 import { activityLogService } from "../activity-log/index.js"
+import { batchService } from "../batch/index.js"
 import { permissionChecker } from "../role/index.js"
+import { getStockMovementRepository, stockMovementService } from "../stock-movement/index.js"
+import { warehouseLocationService } from "../warehouse-location/index.js"
 import { createInventoryTransferRepository } from "./inventory-transfer.repository.js"
 import { createInventoryTransferService, type InventoryTransferService } from "./inventory-transfer.service.js"
 import type {
   InventoryTransferRepository,
   TransferItemPort,
   TransferLocationPort,
+  TransferStockPort,
 } from "./inventory-transfer.types.js"
 
 let _repo: InventoryTransferRepository | undefined
@@ -20,6 +24,14 @@ export function getInventoryTransferRepository(): InventoryTransferRepository {
 }
 
 const itemAdapter: TransferItemPort = {
+  async findPolicy(orgId: string, itemId: string, tx?: Tx) {
+    const [item] = await (tx ?? db)
+      .select({ isBatchTracked: items.isBatchTracked, isExpiryTracked: items.isExpiryTracked })
+      .from(items)
+      .where(and(eq(items.orgId, orgId), eq(items.id, itemId)))
+      .limit(1)
+    return item ?? null
+  },
   async resolveUnitConversion(orgId: string, itemId: string, unitId: string, tx?: Tx) {
     const exec = tx ?? db
     const [item] = await exec
@@ -48,7 +60,25 @@ const itemAdapter: TransferItemPort = {
   },
 }
 
+const stockAdapter: TransferStockPort = {
+  post: (actorId, orgId, input, tx) => stockMovementService.post(actorId, orgId, input, tx),
+  reverse: (actorId, orgId, movementId, input, tx) => stockMovementService.reverse(actorId, orgId, movementId, input, tx),
+  listAllocatable: (orgId, itemId, locationId, tx) => batchService.listAllocatable(orgId, itemId, locationId, tx),
+  async transitLocationId(orgId, tx) {
+    const ids = await getStockMovementRepository().findSystemLocationIds(orgId, tx)
+    return ids.transit ?? null
+  },
+}
+
 const locationAdapter: TransferLocationPort = {
+  async assertIntent(orgId, locationId, intent, tx) {
+    const res = await warehouseLocationService.assertPostable(orgId, locationId, intent, tx)
+    if (res.success) return { ok: true }
+    const code = String((res as any).error)
+    if (code.endsWith("NOT_PICKABLE")) return { ok: false, reason: "not_pickable" }
+    if (code.endsWith("NOT_RECEIVABLE")) return { ok: false, reason: "not_receivable" }
+    return { ok: false, reason: "blocked" }
+  },
   async validateLocation(orgId: string, warehouseId: string, locationId: string, tx?: Tx) {
     const exec = tx ?? db
     const [wh] = await exec
@@ -81,6 +111,7 @@ export function getInventoryTransferService(): InventoryTransferService {
     repository: getInventoryTransferRepository(),
     items: itemAdapter,
     locations: locationAdapter,
+    stock: stockAdapter,
     permissions: permissionChecker,
     activityLog: { record: (entry) => activityLogService.log(entry as any) },
   }))

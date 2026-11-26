@@ -1,12 +1,19 @@
 import type {
+  AllocatableBatch,
   ActivityLogAction,
+  PostStockMovementInput,
+  ReverseStockMovementInput,
+  StockMovementDto,
   InventoryTransferErrorCode,
   PermissionKey,
   RoleErrorCode,
 } from "@avuny/contracts"
+import type { Result } from "@avuny/utils"
 import type {
   InventoryTransfer,
   InventoryTransferAllocation,
+  NewInventoryTransferAllocation,
+  NewInventoryTransferEventLine,
   InventoryTransferEvent,
   InventoryTransferEventLine,
   InventoryTransferLine,
@@ -109,9 +116,50 @@ export interface InventoryTransferRepository {
     filters: { search?: string; status?: string; limit: number },
     tx?: Tx
   ): Promise<Array<{ id: string; number: string; status: string }>>
+  /** Allocations of a transfer, locked for update, in a stable order. */
+  findAllocations(
+    orgId: string,
+    transferId: string,
+    tx: Tx,
+    opts?: { forUpdate?: boolean }
+  ): Promise<InventoryTransferAllocation[]>
+  insertAllocations(
+    orgId: string,
+    rows: readonly Omit<NewInventoryTransferAllocation, "orgId" | "id">[],
+    tx: Tx
+  ): Promise<InventoryTransferAllocation[]>
+  updateAllocationCounters(
+    orgId: string,
+    id: string,
+    patch: { receivedBaseQty?: string; lostBaseQty?: string; returnedBaseQty?: string },
+    tx: Tx
+  ): Promise<void>
+  updateLineDispatched(orgId: string, lineId: string, dispatchedBaseQty: string, tx: Tx): Promise<void>
+  deleteLine(orgId: string, lineId: string, tx: Tx): Promise<void>
+  nextEventNo(orgId: string, transferId: string, tx: Tx): Promise<number>
+  insertEvent(
+    orgId: string,
+    event: {
+      id: string
+      transferId: string
+      eventNo: number
+      kind: "RECEIPT" | "RETURN" | "LOSS"
+      occurredAt: Date
+      note: string | null
+      stockMovementId: string | null
+      createdBy: string
+    },
+    lines: readonly Omit<NewInventoryTransferEventLine, "orgId" | "id" | "eventId">[],
+    tx: Tx
+  ): Promise<void>
 }
 
 export interface TransferItemPort {
+  findPolicy(
+    orgId: string,
+    itemId: string,
+    tx?: Tx
+  ): Promise<{ isBatchTracked: boolean; isExpiryTracked: boolean } | null>
   resolveUnitConversion(
     orgId: string,
     itemId: string,
@@ -138,6 +186,26 @@ export interface TransferLocationPort {
     locationId: string,
     tx?: Tx
   ): Promise<{ ok: true } | { ok: false; reason: LocationFailure }>
+  /** Same gate the stock engine uses; "issue" needs a pickable location, "receive" a receivable one. */
+  assertIntent(
+    orgId: string,
+    locationId: string,
+    intent: "issue" | "receive",
+    tx: Tx
+  ): Promise<{ ok: true } | { ok: false; reason: "not_pickable" | "not_receivable" | "blocked" }>
+}
+
+export interface TransferStockPort {
+  post(actorId: string, orgId: string, input: PostStockMovementInput, tx: Tx): Promise<Result<StockMovementDto, any>>
+  reverse(
+    actorId: string,
+    orgId: string,
+    movementId: string,
+    input: ReverseStockMovementInput,
+    tx: Tx
+  ): Promise<Result<StockMovementDto, any>>
+  listAllocatable(orgId: string, itemId: string, locationId: string, tx: Tx): Promise<AllocatableBatch[]>
+  transitLocationId(orgId: string, tx: Tx): Promise<string | null>
 }
 
 export interface ActivityLogPort {
@@ -154,6 +222,7 @@ export interface InventoryTransferServiceDeps {
   repository: InventoryTransferRepository
   items: TransferItemPort
   locations: TransferLocationPort
+  stock: TransferStockPort
   permissions: {
     check(
       actor: { userId: string },
