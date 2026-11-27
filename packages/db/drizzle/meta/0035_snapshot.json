@@ -1,5 +1,5 @@
 {
-  "id": "6c8c431d-727c-4c6f-bef5-b63a86c35a09",
+  "id": "127450c8-355b-4686-91e0-5da29d10aefc",
   "prevId": "7cd5f26c-10a8-4a3b-9f4e-4c88219dd2e8",
   "version": "7",
   "dialect": "postgresql",
@@ -9765,7 +9765,7 @@
         },
         "platform_invites_role_ids_chk": {
           "name": "platform_invites_role_ids_chk",
-          "value": "array_length(\"platform_invites\".\"role_ids\", 1) >= 1"
+          "value": "cardinality(\"platform_invites\".\"role_ids\") >= 1"
         },
         "platform_invites_terminal_chk": {
           "name": "platform_invites_terminal_chk",
