@@ -12,6 +12,7 @@ import {
 } from "@workspace/ui/components/tabs"
 
 import { ItemStatusBadge, ItemTrackingBadges } from "../components"
+import { trimDecimal } from "../../unit-collection-module/lib"
 import type { ItemDto } from "../types"
 import { ItemInventoryTab } from "./item-inventory-tab"
 import { ItemStockMovementsTab } from "./item-stock-movements-tab"
@@ -34,6 +35,11 @@ export type ItemDetailsViewCopy = {
   negativeStockLabel: string
   settingsTitle: string
   flagsTitle: string
+  /** Prices section. */
+  pricesTitle: string
+  pricesUnitHeader: string
+  pricesCostHeader: string
+  pricesSellingHeader: string
   assemblableLabel: string
   returnableLabel: string
   createdLabel: string
@@ -77,6 +83,26 @@ export function ItemDetailsView({
   onBack,
   editAction,
 }: ItemDetailsViewProps) {
+  const unitText = (u: { name: string; symbol: string | null }) =>
+    u.symbol ? `${u.name} (${u.symbol})` : u.name
+  const priceRows = item
+    ? [
+        {
+          id: item.baseUnit.id,
+          unit: baseUnitText,
+          costPrice: item.costPrice,
+          sellingPrice: item.sellingPrice,
+        },
+        ...item.unitPrices.map((p) => ({
+          id: p.unit.id,
+          unit: unitText(p.unit),
+          costPrice: p.costPrice,
+          sellingPrice: p.sellingPrice,
+        })),
+      ]
+    : []
+  const hasPrices = priceRows.some((r) => r.costPrice || r.sellingPrice)
+
   return (
     <div className="flex flex-col gap-6">
       {onBack ? (
@@ -187,6 +213,50 @@ export function ItemDetailsView({
                   </div>
                 </dl>
               </section>
+
+              {hasPrices ? (
+                <section className="grid gap-3">
+                  <h2 className="text-sm font-medium text-foreground">
+                    {copy.pricesTitle}
+                  </h2>
+                  <div className="overflow-x-auto rounded-md border border-border">
+                    <table className="w-full text-sm">
+                      <thead className="bg-muted/50 text-start text-xs text-muted-foreground">
+                        <tr>
+                          <th className="px-3 py-2 text-start font-medium">
+                            {copy.pricesUnitHeader}
+                          </th>
+                          <th className="px-3 py-2 text-start font-medium">
+                            {copy.pricesCostHeader}
+                          </th>
+                          <th className="px-3 py-2 text-start font-medium">
+                            {copy.pricesSellingHeader}
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {priceRows.map((row) => (
+                          <tr key={row.id} className="border-t border-border">
+                            <td className="px-3 py-2 text-foreground">
+                              {row.unit}
+                            </td>
+                            <td className="px-3 py-2 text-muted-foreground tabular-nums">
+                              {row.costPrice
+                                ? trimDecimal(row.costPrice)
+                                : copy.noneLabel}
+                            </td>
+                            <td className="px-3 py-2 text-muted-foreground tabular-nums">
+                              {row.sellingPrice
+                                ? trimDecimal(row.sellingPrice)
+                                : copy.noneLabel}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </section>
+              ) : null}
 
               <section className="grid gap-2">
                 <h2 className="text-sm font-medium text-foreground">

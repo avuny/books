@@ -302,7 +302,14 @@
     "none": "غير محدد",
     "flagsTitle": "السلوك",
     "assemblable": "يمكن تجميعه",
-    "returnable": "قابل للإرجاع"
+    "returnable": "قابل للإرجاع",
+    "pricesTitle": "الأسعار",
+    "prices": {
+      "unit": "الوحدة",
+      "costPrice": "سعر التكلفة",
+      "sellingPrice": "سعر البيع",
+      "empty": "لا توجد أسعار محددة"
+    }
   },
   "pagination": {
     "nav": "ترقيم صفحات الأصناف",

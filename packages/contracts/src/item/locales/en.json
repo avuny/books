@@ -302,7 +302,14 @@
     "none": "Not set",
     "flagsTitle": "Behaviour",
     "assemblable": "Can be assembled",
-    "returnable": "Returnable"
+    "returnable": "Returnable",
+    "pricesTitle": "Prices",
+    "prices": {
+      "unit": "Unit",
+      "costPrice": "Cost price",
+      "sellingPrice": "Selling price",
+      "empty": "No prices set"
+    }
   },
   "pagination": {
     "nav": "Items pagination",
