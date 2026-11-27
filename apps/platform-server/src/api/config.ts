@@ -10,6 +10,10 @@ import { z } from "@avuny/zod"
 export const envSchema = z.object({
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
 
+  // Postgres connection string (same Neon HTTP driver as apps/server). Optional only
+  // because the health scaffold does not use it; every module route requires it.
+  DATABASE_URL: z.string().min(1).optional(),
+
   // Admin web app origin. The admin cookie is SameSite=Strict by default and
   // CORS never allows the tenant web app origin (PLATFORM-ADMIN-SPEC 2.4).
   WEB_APP_URL: z.string().default("http://localhost:5174"),
