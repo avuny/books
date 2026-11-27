@@ -23,3 +23,6 @@ One row per module. Update in the same commit that changes status. Statuses: pro
 | sales-order | planned | [SPEC](../modules/sales-order/SPEC.md) | [PROGRESS](../modules/sales-order/PROGRESS.md) | [TEST-PLAN](../modules/sales-order/TEST-PLAN.md) | stage 2 |
 | sales-delivery | planned | [SPEC](../modules/sales-delivery/SPEC.md) | [PROGRESS](../modules/sales-delivery/PROGRESS.md) | [TEST-PLAN](../modules/sales-delivery/TEST-PLAN.md) | stage 2 |
 | sales-invoice-payment | planned | [SPEC](../modules/sales-invoice-payment/SPEC.md) | [PROGRESS](../modules/sales-invoice-payment/PROGRESS.md) | [TEST-PLAN](../modules/sales-invoice-payment/TEST-PLAN.md) | stage 2 |
+| assembly-cost-type | proposed | [SPEC](../modules/assembly-cost-type/SPEC.md) | [PROGRESS](../modules/assembly-cost-type/PROGRESS.md) | [TEST-PLAN](../modules/assembly-cost-type/TEST-PLAN.md) | item assembly, phase 2, see docs/modules/assembly/README.md |
+| bill-of-materials | proposed | [SPEC](../modules/bill-of-materials/SPEC.md) | [PROGRESS](../modules/bill-of-materials/PROGRESS.md) | [TEST-PLAN](../modules/bill-of-materials/TEST-PLAN.md) | item assembly, phase 3 |
+| assembly-order | proposed | [SPEC](../modules/assembly-order/SPEC.md) | [PROGRESS](../modules/assembly-order/PROGRESS.md) | [TEST-PLAN](../modules/assembly-order/TEST-PLAN.md) | item assembly, phases 4 to 8 |
