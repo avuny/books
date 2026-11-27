@@ -10,6 +10,7 @@ import {
   getGetSalesInvoiceQueryKey,
   getListSalesInvoicesQueryKey,
   useCreateSalesInvoiceFromDelivery,
+  useCreateSalesReceiptFromDelivery,
   useGetArAging,
   useGetArReconciliation,
   useGetCustomerStatement,
@@ -92,6 +93,10 @@ function useInvalidate(orgId: string) {
 export function useCreateInvoiceFromDeliveryMutation(orgId: string) {
   const invalidate = useInvalidate(orgId)
   return useCreateSalesInvoiceFromDelivery({ mutation: { onSuccess: () => invalidate() } })
+}
+export function useSalesReceiptMutation(orgId: string) {
+  const invalidate = useInvalidate(orgId)
+  return useCreateSalesReceiptFromDelivery({ mutation: { onSuccess: () => invalidate() } })
 }
 export function usePostInvoiceMutation(orgId: string) {
   const invalidate = useInvalidate(orgId)

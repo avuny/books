@@ -14,7 +14,7 @@ import {
   DialogTitle,
 } from "@workspace/ui/components/dialog"
 
-import { CreateInvoiceFromDeliveryDialog, useSalesInvoiceAbilities } from "../../sales-invoice-module"
+import { CreateInvoiceFromDeliveryDialog, SalesReceiptDialog, useSalesInvoiceAbilities } from "../../sales-invoice-module"
 import type { SalesOrderDto } from "../types"
 import {
   useCreateDeliveryMutation,
@@ -36,6 +36,7 @@ export function DeliveriesPanel({ orgId, order }: Props) {
   const navigate = useNavigate()
   const { t: ti } = useTranslation("sales-invoice")
   const [invoicing, setInvoicing] = useState<DeliveryDto | null>(null)
+  const [receipting, setReceipting] = useState<DeliveryDto | null>(null)
   const { deliveries } = useSalesDeliveries(orgId, order.id)
   const createMutation = useCreateDeliveryMutation(orgId, order.id)
   const postMutation = usePostDeliveryMutation(orgId, order.id)
@@ -139,6 +140,11 @@ export function DeliveriesPanel({ orgId, order }: Props) {
                         {ti("ui.fromDelivery.open")}
                       </Button>
                     ) : null}
+                    {d.status === "POSTED" && invoiceAbilities.canCreateInvoice && invoiceAbilities.canPostInvoice ? (
+                      <Button size="sm" variant="outline" onClick={() => setReceipting(d)}>
+                        {ti("ui.receipt.open")}
+                      </Button>
+                    ) : null}
                     {d.status === "POSTED" && abilities.canReverseDelivery ? (
                       <Button size="sm" variant="outline" onClick={() => setReversing(d)}>
                         {t("ui.reverse")}
@@ -151,6 +157,16 @@ export function DeliveriesPanel({ orgId, order }: Props) {
           </table>
         </div>
       )}
+
+      <SalesReceiptDialog
+        orgId={orgId}
+        deliveryId={receipting?.id ?? null}
+        deliveryNumber={receipting?.number ?? ""}
+        onClose={() => setReceipting(null)}
+        onCreated={(invoiceId) =>
+          navigate({ to: "/organization/$orgId/sales-invoices/$invoiceId", params: { orgId, invoiceId } })
+        }
+      />
 
       <CreateInvoiceFromDeliveryDialog
         orgId={orgId}
