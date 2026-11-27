@@ -61,11 +61,15 @@ export function getStockMovementService(): StockMovementService {
             .limit(1)
           inventoryItemBatchId = b?.id ?? null
         }
-        const [org] = await tx
-          .select({ currency: organizations.defaultCurrency })
-          .from(organizations)
-          .where(eq(organizations.id, line.orgId))
-          .limit(1)
+        let currency = line.currency
+        if (!currency) {
+          const [org] = await tx
+            .select({ currency: organizations.defaultCurrency })
+            .from(organizations)
+            .where(eq(organizations.id, line.orgId))
+            .limit(1)
+          currency = org?.currency ?? "USD"
+        }
         const engine = createValuationEngine({ costing: getInventoryCostingService() })
         const res = await engine.receive(
           {
@@ -75,7 +79,7 @@ export function getStockMovementService(): StockMovementService {
             inventoryItemBatchId,
             sourceMovementLineId: line.movementLineId,
             quantity: line.quantity,
-            currency: org?.currency ?? "USD",
+            currency,
             receivedAt: line.receivedAt,
             cost: line.cost,
           },

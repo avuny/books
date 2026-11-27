@@ -62,6 +62,8 @@ export const PostStockMovementSchema = z
     /** Human readable document number, for display only. */
     sourceRef: sourceRefSchema.optional(),
     note: noteSchema.optional(),
+    /** Currency of the line costs. Defaults to the organization currency. */
+    currency: z.string().regex(/^[A-Z]{3}$/).optional(),
     lines: z.array(StockMovementLineInputSchema).min(1).max(STOCK_MOVEMENT_MAX_LINES),
   })
   .refine((v) => v.sourceId === undefined || v.sourceType !== undefined, {

@@ -85,7 +85,8 @@ export function createStockMovementService(deps: StockMovementServiceDeps) {
     header: Header,
     inputLines: ResolvedLine[],
     system: SystemLocationIds,
-    forwardChecks: boolean
+    forwardChecks: boolean,
+    currency?: string
   ): Promise<Failure | StockMovementDto> => {
     let lines = inputLines
     // 1. items exist, are active and keep stock
@@ -269,6 +270,7 @@ export function createStockMovementService(deps: StockMovementServiceDeps) {
             quantity: l.quantity,
             receivedAt: header.postedAt ?? new Date(),
             cost: l.cost,
+            currency,
           },
           tx
         )
@@ -363,7 +365,8 @@ export function createStockMovementService(deps: StockMovementServiceDeps) {
           },
           lines,
           system,
-          true
+          true,
+          input.currency
         )
       }
       const outcome = await (tx ? run(tx) : repo.transaction(run))

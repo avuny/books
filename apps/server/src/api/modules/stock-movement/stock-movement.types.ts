@@ -80,6 +80,8 @@ export interface StockCostingReceiveLine {
   quantity: string
   receivedAt: Date
   cost: CostInput
+  /** Currency of the cost; the adapter falls back to the organization currency. */
+  currency?: string
 }
 
 /** Port to the valuation engine (inventory-costing). Failures come back as values. */
