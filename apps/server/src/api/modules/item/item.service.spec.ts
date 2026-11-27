@@ -78,6 +78,7 @@ function setup() {
     updateItem: vi.fn(async () => ({ ok: true as const, row: item() })),
     upsertSettings: vi.fn(async () => {}),
     upsertExpirySettings: vi.fn(async () => {}),
+    replaceUnitPrices: vi.fn(async () => {}),
     findStockPolicies: vi.fn(async () => new Map()),
     deleteItem: vi.fn(async () => ({ ok: true as const })),
     deleteCreatedItemOnFailure: vi.fn(async () => {}),
@@ -87,6 +88,7 @@ function setup() {
     findCollection: vi.fn(),
     insertCollection: vi.fn(async () => collection()),
     insertCollectionUnits: vi.fn(async () => {}),
+    listCollectionUnits: vi.fn(async () => []),
   }
   const categoryRepository = { findById: vi.fn(async () => category()) }
   const stockHistory = { hasMovements: vi.fn(async () => false) }
@@ -219,6 +221,125 @@ describe("itemService", () => {
       const res = await t.service.create("u1", "org-1", createInput)
       expect(res).toMatchObject({ success: false, error: "ITEM_NAME_TAKEN" })
       expect(t.repository.upsertSettings).not.toHaveBeenCalled()
+    })
+
+    describe("per-unit prices and opening stock units", () => {
+      const collectionUnits = [
+        { link: { unitId: "u-kg", conversionFactor: "1" } },
+        { link: { unitId: "u-ton", conversionFactor: "1000" } },
+      ]
+      const withCollection = () => {
+        t.unitRepository.findCollection.mockResolvedValue(collection({ id: "c-9", baseUnitId: "u-kg" }))
+        t.unitRepository.listCollectionUnits.mockResolvedValue(collectionUnits as never)
+      }
+      const { baseUnitId: _drop, ...noBase } = createInput
+
+      it("saves prices of other units of the collection", async () => {
+        withCollection()
+        const res = await t.service.create("u1", "org-1", {
+          ...noBase,
+          unitCollectionId: "c-9",
+          unitPrices: [{ unitId: "u-ton", costPrice: "900", sellingPrice: null }],
+        })
+        expect(res).toMatchObject({ success: true })
+        expect(t.repository.replaceUnitPrices).toHaveBeenCalledWith(
+          "org-1",
+          "item-1",
+          [{ unitId: "u-ton", costPrice: "900", sellingPrice: null }],
+          expect.anything()
+        )
+      })
+
+      it("refuses prices for the base unit or a unit outside the collection, before writing", async () => {
+        withCollection()
+        for (const unitId of ["u-kg", "u-other"]) {
+          const res = await t.service.create("u1", "org-1", {
+            ...noBase,
+            unitCollectionId: "c-9",
+            unitPrices: [{ unitId, costPrice: "1" }],
+          })
+          expect(res).toMatchObject({ success: false, error: "ITEM_UNIT_PRICE_UNIT_INVALID" })
+        }
+        expect(t.repository.insertItem).not.toHaveBeenCalled()
+      })
+
+      it("a new single-unit collection has no other unit to price", async () => {
+        const res = await t.service.create("u1", "org-1", {
+          ...createInput,
+          unitPrices: [{ unitId: "u-ton", costPrice: "1" }],
+        })
+        expect(res).toMatchObject({ success: false, error: "ITEM_UNIT_PRICE_UNIT_INVALID" })
+        expect(t.unitRepository.insertCollection).not.toHaveBeenCalled()
+      })
+
+      it("converts an opening stock line entered in another unit to the base unit", async () => {
+        withCollection()
+        const res = await t.service.create("u1", "org-1", {
+          ...noBase,
+          unitCollectionId: "c-9",
+          openingStock: { lines: [{ locationId: "loc-1", quantity: "2", unitId: "u-ton", cost: "900" }] },
+        })
+        expect(res).toMatchObject({ success: true })
+        expect(t.openingStock.stockMovements.post).toHaveBeenCalledWith(
+          "u1",
+          "org-1",
+          expect.objectContaining({ lines: [expect.objectContaining({ quantity: "2000" })] }),
+          expect.anything()
+        )
+        // value = 2 ton x 900 = 1800 (computed from the entered values, not rounded base values)
+        expect(t.openingStock.accounting.postInventoryOpeningBalance).toHaveBeenCalledWith(
+          "u1",
+          "org-1",
+          expect.objectContaining({ amountMinor: "1800" }),
+          expect.anything()
+        )
+      })
+
+      it("refuses an opening stock unit outside the collection", async () => {
+        withCollection()
+        const res = await t.service.create("u1", "org-1", {
+          ...noBase,
+          unitCollectionId: "c-9",
+          openingStock: { lines: [{ locationId: "loc-1", quantity: "2", unitId: "u-other" }] },
+        })
+        expect(res).toMatchObject({ success: false, error: "ITEM_OPENING_STOCK_UNIT_INVALID" })
+        expect(t.repository.insertItem).not.toHaveBeenCalled()
+      })
+
+      it("posts one movement per distinct line date, the item being the source of the first", async () => {
+        const res = await t.service.create("u1", "org-1", {
+          ...createInput,
+          openingStock: {
+            lines: [
+              { locationId: "loc-1", quantity: "1", postedAt: "2026-01-01T00:00:00.000Z" },
+              { locationId: "loc-2", quantity: "2", postedAt: "2026-02-01T00:00:00.000Z" },
+              { locationId: "loc-3", quantity: "3", postedAt: "2026-01-01T00:00:00.000Z" },
+            ],
+          },
+        })
+        expect(res).toMatchObject({ success: true })
+        const calls = t.openingStock.stockMovements.post.mock.calls as unknown as [string, string, any][]
+        expect(calls).toHaveLength(2)
+        expect(calls[0]![2]).toMatchObject({ postedAt: "2026-01-01T00:00:00.000Z", sourceId: "item-1" })
+        expect(calls[0]![2].lines.map((l: any) => l.quantity)).toEqual(["1", "3"])
+        expect(calls[1]![2]).toMatchObject({ postedAt: "2026-02-01T00:00:00.000Z" })
+        expect(calls[1]![2].sourceId).not.toBe("item-1")
+      })
+
+      it("update replaces the per-unit prices when provided", async () => {
+        t.repository.findById.mockResolvedValue(item({ unitCollectionId: "c-9" }))
+        t.unitRepository.listCollectionUnits.mockResolvedValue(collectionUnits as never)
+        const res = await t.service.update("u1", "org-1", "item-1", {
+          unitPrices: [{ unitId: "u-ton", sellingPrice: "1100" }],
+        })
+        expect(res).toMatchObject({ success: true })
+        expect(t.repository.replaceUnitPrices).toHaveBeenCalledWith(
+          "org-1",
+          "item-1",
+          [{ unitId: "u-ton", costPrice: null, sellingPrice: "1100" }],
+          expect.anything()
+        )
+      })
     })
 
     it("posts opening stock when provided", async () => {

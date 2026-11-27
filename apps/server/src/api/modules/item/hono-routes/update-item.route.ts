@@ -23,6 +23,7 @@ const rawErrorMap = {
   ITEM_NOT_FOUND: errors.ITEM_NOT_FOUND,
   ITEM_UNIT_COLLECTION_INVALID: errors.ITEM_UNIT_COLLECTION_INVALID,
   ITEM_UNIT_INVALID: errors.ITEM_UNIT_INVALID,
+  ITEM_UNIT_PRICE_UNIT_INVALID: errors.ITEM_UNIT_PRICE_UNIT_INVALID,
 } as const
 
 const errorMap = rawErrorMap as Record<Code, (typeof rawErrorMap)[keyof typeof rawErrorMap]>
@@ -54,6 +55,7 @@ export const updateItemRoute = ({
         Code.ITEM_CATEGORY_INVALID,
         Code.ITEM_UNIT_INVALID,
         Code.ITEM_UNIT_COLLECTION_INVALID,
+        Code.ITEM_UNIT_PRICE_UNIT_INVALID,
         Code.ITEM_BATCH_REQUIRES_TRACKING,
         Code.ITEM_EXPIRY_REQUIRES_BATCH_AND_TRACKING,
       ]),

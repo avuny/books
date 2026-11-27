@@ -8,6 +8,7 @@ import {
   ITEM_NAME_MAX_LENGTH,
   ITEM_NAME_MIN_LENGTH,
   ITEM_SEARCH_MAX_LENGTH,
+  ITEM_UNIT_PRICES_MAX,
 } from "./constants.js"
 import { UNIT_QUANTITY_PATTERN } from "../unit/constants.js"
 import { UnitDtoSchema } from "../unit/schemas.js"
@@ -50,26 +51,65 @@ export const ItemExpirySettingsDtoSchema = z.object({
 })
 export type ItemExpirySettingsDto = z.infer<typeof ItemExpirySettingsDtoSchema>
 
+/** A date (YYYY-MM-DD) or full ISO datetime; a plain date means midnight UTC. */
+const postedAtSchema = z
+  .string()
+  .datetime()
+  .or(
+    z
+      .string()
+      .regex(/^\d{4}-\d{2}-\d{2}$/, "Use YYYY-MM-DD")
+      .transform((d) => new Date(`${d}T00:00:00.000Z`).toISOString())
+  )
+
+/**
+ * Optional prices of ONE non-base unit of the item's collection, per 1 of that unit
+ * (e.g. a ton can cost less than 1000 x 1 kg). Base-unit prices stay in costPrice/sellingPrice.
+ */
+export const ItemUnitPriceInputSchema = z
+  .object({
+    unitId: id,
+    costPrice: quantity.nullish(),
+    sellingPrice: quantity.nullish(),
+  })
+  .refine((v) => v.costPrice != null || v.sellingPrice != null, {
+    message: "Provide a cost price, a selling price or both",
+    path: ["costPrice"],
+  })
+export type ItemUnitPriceInput = z.infer<typeof ItemUnitPriceInputSchema>
+
+const unitPricesInput = z
+  .array(ItemUnitPriceInputSchema)
+  .max(ITEM_UNIT_PRICES_MAX)
+  .refine((rows) => new Set(rows.map((r) => r.unitId)).size === rows.length, {
+    message: "Each unit can appear only once",
+  })
+
+export const ItemUnitPriceDtoSchema = z.object({
+  unit: UnitDtoSchema,
+  costPrice: z.string().nullable(),
+  sellingPrice: z.string().nullable(),
+})
+export type ItemUnitPriceDto = z.infer<typeof ItemUnitPriceDtoSchema>
+
 export const ItemOpeningStockLineSchema = z.object({
   locationId: id,
+  /** In `unitId` when given, otherwise in the item's base unit. The server stores base-unit quantities. */
   quantity,
+  /** Optional unit of the item's collection that `quantity` and `cost` are entered in. Defaults to the base unit. */
+  unitId: id.nullish(),
+  /** Unit cost per 1 of `unitId` (per base unit when `unitId` is empty). */
   cost: quantity.nullish(),
+  /** Posting date of this line. Falls back to the opening stock postedAt, then to now. */
+  postedAt: postedAtSchema.nullish(),
   manufacturedOn: z.string().trim().regex(BATCH_DATE_REGEX, "Use YYYY-MM-DD").nullish(),
   batch: BatchInputSchema.nullish(),
 })
 export type ItemOpeningStockLine = z.infer<typeof ItemOpeningStockLineSchema>
 
 export const ItemOpeningStockSchema = z.object({
-  postedAt: z
-    .string()
-    .datetime()
-    .or(
-      z
-        .string()
-        .regex(/^\d{4}-\d{2}-\d{2}$/, "Use YYYY-MM-DD")
-        .transform((d) => new Date(`${d}T00:00:00.000Z`).toISOString())
-    )
-    .optional(),
+  /** Default posting date for lines that have none of their own. */
+  postedAt: postedAtSchema.optional(),
   lines: z.array(ItemOpeningStockLineSchema).min(1),
 })
 export type ItemOpeningStock = z.infer<typeof ItemOpeningStockSchema>
@@ -103,6 +143,8 @@ export const CreateItemSchema = z
     /** Default prices per base unit, decimals in major units. */
     costPrice: quantity.nullish(),
     sellingPrice: quantity.nullish(),
+    /** Optional per-unit prices for non-base units of the collection. */
+    unitPrices: unitPricesInput.optional(),
   })
   .refine((v) => (v.baseUnitId === undefined) !== (v.unitCollectionId === undefined), {
     message: "Provide exactly one of baseUnitId or unitCollectionId",
@@ -138,6 +180,8 @@ export const UpdateItemSchema = z
     reorderPoint: quantity.nullable().optional(),
     costPrice: quantity.nullable().optional(),
     sellingPrice: quantity.nullable().optional(),
+    /** When provided, REPLACES the item's per-unit prices (send [] to clear them). */
+    unitPrices: unitPricesInput.optional(),
   })
   .refine((v) => Object.values(v).some((x) => x !== undefined), {
     message: "Provide at least one field to update",
@@ -171,6 +215,8 @@ export const ItemDtoSchema = z.object({
   reorderPoint: z.string().nullable(),
   costPrice: z.string().nullable(),
   sellingPrice: z.string().nullable(),
+  /** Prices of non-base units (per 1 of that unit). Empty when none are set. */
+  unitPrices: z.array(ItemUnitPriceDtoSchema),
   createdAt: timestamp,
   updatedAt: timestamp,
 })
