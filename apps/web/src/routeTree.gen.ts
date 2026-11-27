@@ -44,6 +44,8 @@ import { Route as OrganizationOrgIdPurchaseOrdersOrderIdRouteImport } from './ro
 import { Route as OrganizationOrgIdPurchaseOrdersNewRouteImport } from './routes/organization/$orgId/purchase-orders/new'
 import { Route as OrganizationOrgIdRolesIndexRouteImport } from './routes/organization/$orgId/roles/index'
 import { Route as OrganizationOrgIdRolesRoleIdRouteImport } from './routes/organization/$orgId/roles/$roleId'
+import { Route as OrganizationOrgIdSalesInvoicesIndexRouteImport } from './routes/organization/$orgId/sales-invoices/index'
+import { Route as OrganizationOrgIdSalesInvoicesInvoiceIdRouteImport } from './routes/organization/$orgId/sales-invoices/$invoiceId'
 import { Route as OrganizationOrgIdSalesOrdersIndexRouteImport } from './routes/organization/$orgId/sales-orders/index'
 import { Route as OrganizationOrgIdSalesOrdersOrderIdRouteImport } from './routes/organization/$orgId/sales-orders/$orderId'
 import { Route as OrganizationOrgIdSalesOrdersNewRouteImport } from './routes/organization/$orgId/sales-orders/new'
@@ -259,6 +261,18 @@ const OrganizationOrgIdRolesRoleIdRoute =
     path: '/roles/$roleId',
     getParentRoute: () => OrganizationOrgIdRouteRoute,
   } as any)
+const OrganizationOrgIdSalesInvoicesIndexRoute =
+  OrganizationOrgIdSalesInvoicesIndexRouteImport.update({
+    id: '/sales-invoices/',
+    path: '/sales-invoices/',
+    getParentRoute: () => OrganizationOrgIdRouteRoute,
+  } as any)
+const OrganizationOrgIdSalesInvoicesInvoiceIdRoute =
+  OrganizationOrgIdSalesInvoicesInvoiceIdRouteImport.update({
+    id: '/sales-invoices/$invoiceId',
+    path: '/sales-invoices/$invoiceId',
+    getParentRoute: () => OrganizationOrgIdRouteRoute,
+  } as any)
 const OrganizationOrgIdSalesOrdersIndexRoute =
   OrganizationOrgIdSalesOrdersIndexRouteImport.update({
     id: '/sales-orders/',
@@ -421,6 +435,7 @@ export interface FileRoutesByFullPath {
   '/organization/$orgId/purchase-orders/$orderId': typeof OrganizationOrgIdPurchaseOrdersOrderIdRoute
   '/organization/$orgId/purchase-orders/new': typeof OrganizationOrgIdPurchaseOrdersNewRoute
   '/organization/$orgId/roles/$roleId': typeof OrganizationOrgIdRolesRoleIdRoute
+  '/organization/$orgId/sales-invoices/$invoiceId': typeof OrganizationOrgIdSalesInvoicesInvoiceIdRoute
   '/organization/$orgId/sales-orders/$orderId': typeof OrganizationOrgIdSalesOrdersOrderIdRoute
   '/organization/$orgId/sales-orders/new': typeof OrganizationOrgIdSalesOrdersNewRoute
   '/organization/$orgId/unit-collections/$collectionId': typeof OrganizationOrgIdUnitCollectionsCollectionIdRoute
@@ -435,6 +450,7 @@ export interface FileRoutesByFullPath {
   '/organization/$orgId/items/': typeof OrganizationOrgIdItemsIndexRoute
   '/organization/$orgId/purchase-orders/': typeof OrganizationOrgIdPurchaseOrdersIndexRoute
   '/organization/$orgId/roles/': typeof OrganizationOrgIdRolesIndexRoute
+  '/organization/$orgId/sales-invoices/': typeof OrganizationOrgIdSalesInvoicesIndexRoute
   '/organization/$orgId/sales-orders/': typeof OrganizationOrgIdSalesOrdersIndexRoute
   '/organization/$orgId/settings/': typeof OrganizationOrgIdSettingsIndexRoute
   '/organization/$orgId/stock-movements/': typeof OrganizationOrgIdStockMovementsIndexRoute
@@ -474,6 +490,7 @@ export interface FileRoutesByTo {
   '/organization/$orgId/purchase-orders/$orderId': typeof OrganizationOrgIdPurchaseOrdersOrderIdRoute
   '/organization/$orgId/purchase-orders/new': typeof OrganizationOrgIdPurchaseOrdersNewRoute
   '/organization/$orgId/roles/$roleId': typeof OrganizationOrgIdRolesRoleIdRoute
+  '/organization/$orgId/sales-invoices/$invoiceId': typeof OrganizationOrgIdSalesInvoicesInvoiceIdRoute
   '/organization/$orgId/sales-orders/$orderId': typeof OrganizationOrgIdSalesOrdersOrderIdRoute
   '/organization/$orgId/sales-orders/new': typeof OrganizationOrgIdSalesOrdersNewRoute
   '/organization/$orgId/unit-collections/$collectionId': typeof OrganizationOrgIdUnitCollectionsCollectionIdRoute
@@ -488,6 +505,7 @@ export interface FileRoutesByTo {
   '/organization/$orgId/items': typeof OrganizationOrgIdItemsIndexRoute
   '/organization/$orgId/purchase-orders': typeof OrganizationOrgIdPurchaseOrdersIndexRoute
   '/organization/$orgId/roles': typeof OrganizationOrgIdRolesIndexRoute
+  '/organization/$orgId/sales-invoices': typeof OrganizationOrgIdSalesInvoicesIndexRoute
   '/organization/$orgId/sales-orders': typeof OrganizationOrgIdSalesOrdersIndexRoute
   '/organization/$orgId/settings': typeof OrganizationOrgIdSettingsIndexRoute
   '/organization/$orgId/stock-movements': typeof OrganizationOrgIdStockMovementsIndexRoute
@@ -534,6 +552,7 @@ export interface FileRoutesById {
   '/organization/$orgId/purchase-orders/$orderId': typeof OrganizationOrgIdPurchaseOrdersOrderIdRoute
   '/organization/$orgId/purchase-orders/new': typeof OrganizationOrgIdPurchaseOrdersNewRoute
   '/organization/$orgId/roles/$roleId': typeof OrganizationOrgIdRolesRoleIdRoute
+  '/organization/$orgId/sales-invoices/$invoiceId': typeof OrganizationOrgIdSalesInvoicesInvoiceIdRoute
   '/organization/$orgId/sales-orders/$orderId': typeof OrganizationOrgIdSalesOrdersOrderIdRoute
   '/organization/$orgId/sales-orders/new': typeof OrganizationOrgIdSalesOrdersNewRoute
   '/organization/$orgId/unit-collections/$collectionId': typeof OrganizationOrgIdUnitCollectionsCollectionIdRoute
@@ -548,6 +567,7 @@ export interface FileRoutesById {
   '/organization/$orgId/items/': typeof OrganizationOrgIdItemsIndexRoute
   '/organization/$orgId/purchase-orders/': typeof OrganizationOrgIdPurchaseOrdersIndexRoute
   '/organization/$orgId/roles/': typeof OrganizationOrgIdRolesIndexRoute
+  '/organization/$orgId/sales-invoices/': typeof OrganizationOrgIdSalesInvoicesIndexRoute
   '/organization/$orgId/sales-orders/': typeof OrganizationOrgIdSalesOrdersIndexRoute
   '/organization/$orgId/settings/': typeof OrganizationOrgIdSettingsIndexRoute
   '/organization/$orgId/stock-movements/': typeof OrganizationOrgIdStockMovementsIndexRoute
@@ -595,6 +615,7 @@ export interface FileRouteTypes {
     | '/organization/$orgId/purchase-orders/$orderId'
     | '/organization/$orgId/purchase-orders/new'
     | '/organization/$orgId/roles/$roleId'
+    | '/organization/$orgId/sales-invoices/$invoiceId'
     | '/organization/$orgId/sales-orders/$orderId'
     | '/organization/$orgId/sales-orders/new'
     | '/organization/$orgId/unit-collections/$collectionId'
@@ -609,6 +630,7 @@ export interface FileRouteTypes {
     | '/organization/$orgId/items/'
     | '/organization/$orgId/purchase-orders/'
     | '/organization/$orgId/roles/'
+    | '/organization/$orgId/sales-invoices/'
     | '/organization/$orgId/sales-orders/'
     | '/organization/$orgId/settings/'
     | '/organization/$orgId/stock-movements/'
@@ -648,6 +670,7 @@ export interface FileRouteTypes {
     | '/organization/$orgId/purchase-orders/$orderId'
     | '/organization/$orgId/purchase-orders/new'
     | '/organization/$orgId/roles/$roleId'
+    | '/organization/$orgId/sales-invoices/$invoiceId'
     | '/organization/$orgId/sales-orders/$orderId'
     | '/organization/$orgId/sales-orders/new'
     | '/organization/$orgId/unit-collections/$collectionId'
@@ -662,6 +685,7 @@ export interface FileRouteTypes {
     | '/organization/$orgId/items'
     | '/organization/$orgId/purchase-orders'
     | '/organization/$orgId/roles'
+    | '/organization/$orgId/sales-invoices'
     | '/organization/$orgId/sales-orders'
     | '/organization/$orgId/settings'
     | '/organization/$orgId/stock-movements'
@@ -707,6 +731,7 @@ export interface FileRouteTypes {
     | '/organization/$orgId/purchase-orders/$orderId'
     | '/organization/$orgId/purchase-orders/new'
     | '/organization/$orgId/roles/$roleId'
+    | '/organization/$orgId/sales-invoices/$invoiceId'
     | '/organization/$orgId/sales-orders/$orderId'
     | '/organization/$orgId/sales-orders/new'
     | '/organization/$orgId/unit-collections/$collectionId'
@@ -721,6 +746,7 @@ export interface FileRouteTypes {
     | '/organization/$orgId/items/'
     | '/organization/$orgId/purchase-orders/'
     | '/organization/$orgId/roles/'
+    | '/organization/$orgId/sales-invoices/'
     | '/organization/$orgId/sales-orders/'
     | '/organization/$orgId/settings/'
     | '/organization/$orgId/stock-movements/'
@@ -993,6 +1019,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OrganizationOrgIdRolesRoleIdRouteImport
       parentRoute: typeof OrganizationOrgIdRouteRoute
     }
+    '/organization/$orgId/sales-invoices/': {
+      id: '/organization/$orgId/sales-invoices/'
+      path: '/sales-invoices'
+      fullPath: '/organization/$orgId/sales-invoices/'
+      preLoaderRoute: typeof OrganizationOrgIdSalesInvoicesIndexRouteImport
+      parentRoute: typeof OrganizationOrgIdRouteRoute
+    }
+    '/organization/$orgId/sales-invoices/$invoiceId': {
+      id: '/organization/$orgId/sales-invoices/$invoiceId'
+      path: '/sales-invoices/$invoiceId'
+      fullPath: '/organization/$orgId/sales-invoices/$invoiceId'
+      preLoaderRoute: typeof OrganizationOrgIdSalesInvoicesInvoiceIdRouteImport
+      parentRoute: typeof OrganizationOrgIdRouteRoute
+    }
     '/organization/$orgId/sales-orders/': {
       id: '/organization/$orgId/sales-orders/'
       path: '/sales-orders'
@@ -1208,6 +1248,7 @@ interface OrganizationOrgIdRouteRouteChildren {
   OrganizationOrgIdPurchaseOrdersOrderIdRoute: typeof OrganizationOrgIdPurchaseOrdersOrderIdRoute
   OrganizationOrgIdPurchaseOrdersNewRoute: typeof OrganizationOrgIdPurchaseOrdersNewRoute
   OrganizationOrgIdRolesRoleIdRoute: typeof OrganizationOrgIdRolesRoleIdRoute
+  OrganizationOrgIdSalesInvoicesInvoiceIdRoute: typeof OrganizationOrgIdSalesInvoicesInvoiceIdRoute
   OrganizationOrgIdSalesOrdersOrderIdRoute: typeof OrganizationOrgIdSalesOrdersOrderIdRoute
   OrganizationOrgIdSalesOrdersNewRoute: typeof OrganizationOrgIdSalesOrdersNewRoute
   OrganizationOrgIdUnitCollectionsCollectionIdRoute: typeof OrganizationOrgIdUnitCollectionsCollectionIdRoute
@@ -1222,6 +1263,7 @@ interface OrganizationOrgIdRouteRouteChildren {
   OrganizationOrgIdItemsIndexRoute: typeof OrganizationOrgIdItemsIndexRoute
   OrganizationOrgIdPurchaseOrdersIndexRoute: typeof OrganizationOrgIdPurchaseOrdersIndexRoute
   OrganizationOrgIdRolesIndexRoute: typeof OrganizationOrgIdRolesIndexRoute
+  OrganizationOrgIdSalesInvoicesIndexRoute: typeof OrganizationOrgIdSalesInvoicesIndexRoute
   OrganizationOrgIdSalesOrdersIndexRoute: typeof OrganizationOrgIdSalesOrdersIndexRoute
   OrganizationOrgIdStockMovementsIndexRoute: typeof OrganizationOrgIdStockMovementsIndexRoute
   OrganizationOrgIdUnitCollectionsIndexRoute: typeof OrganizationOrgIdUnitCollectionsIndexRoute
@@ -1258,6 +1300,8 @@ const OrganizationOrgIdRouteRouteChildren: OrganizationOrgIdRouteRouteChildren =
     OrganizationOrgIdPurchaseOrdersNewRoute:
       OrganizationOrgIdPurchaseOrdersNewRoute,
     OrganizationOrgIdRolesRoleIdRoute: OrganizationOrgIdRolesRoleIdRoute,
+    OrganizationOrgIdSalesInvoicesInvoiceIdRoute:
+      OrganizationOrgIdSalesInvoicesInvoiceIdRoute,
     OrganizationOrgIdSalesOrdersOrderIdRoute:
       OrganizationOrgIdSalesOrdersOrderIdRoute,
     OrganizationOrgIdSalesOrdersNewRoute: OrganizationOrgIdSalesOrdersNewRoute,
@@ -1280,6 +1324,8 @@ const OrganizationOrgIdRouteRouteChildren: OrganizationOrgIdRouteRouteChildren =
     OrganizationOrgIdPurchaseOrdersIndexRoute:
       OrganizationOrgIdPurchaseOrdersIndexRoute,
     OrganizationOrgIdRolesIndexRoute: OrganizationOrgIdRolesIndexRoute,
+    OrganizationOrgIdSalesInvoicesIndexRoute:
+      OrganizationOrgIdSalesInvoicesIndexRoute,
     OrganizationOrgIdSalesOrdersIndexRoute:
       OrganizationOrgIdSalesOrdersIndexRoute,
     OrganizationOrgIdStockMovementsIndexRoute:
