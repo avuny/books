@@ -63,5 +63,84 @@
     "INVENTORY_TRANSFER_CLOSED_SHORT": "Remaining goods written off",
     "INVENTORY_TRANSFER_CANCELLED": "Inventory transfer cancelled successfully",
     "INVENTORY_TRANSFER_REVERSED": "Inventory transfer step reversed successfully"
+  },
+  "ui": {
+    "title": "Inventory transfers",
+    "description": "Move stock between locations and warehouses, with a step in transit.",
+    "new": "New transfer",
+    "empty": "No transfers yet",
+    "emptyHint": "Create a transfer to move stock between warehouses.",
+    "search": "Search by number",
+    "all": "All",
+    "cols": {
+      "number": "Number",
+      "date": "Date",
+      "route": "From / To",
+      "lines": "Lines",
+      "status": "Status"
+    },
+    "fields": {
+      "date": "Date",
+      "reference": "Reference",
+      "description": "Description",
+      "source": "Source warehouse",
+      "destination": "Destination warehouse",
+      "item": "Item",
+      "sourceLocation": "Source location",
+      "destinationLocation": "Destination location",
+      "quantity": "Quantity",
+      "unit": "Unit",
+      "select": "Select..."
+    },
+    "actions": {
+      "view": "View",
+      "dispatch": "Dispatch",
+      "cancel": "Cancel transfer",
+      "delete": "Delete",
+      "receive": "Receive",
+      "returnRest": "Return the rest to source",
+      "closeShort": "Write off the rest as lost",
+      "reverseDispatch": "Reverse dispatch",
+      "reverseReceipt": "Reverse receipt",
+      "addLine": "Add line",
+      "removeLine": "Remove",
+      "save": "Create draft",
+      "back": "Back",
+      "confirm": "Confirm",
+      "close": "Close"
+    },
+    "details": {
+      "lines": "Lines",
+      "history": "History",
+      "requested": "Requested",
+      "dispatched": "Dispatched",
+      "received": "Received",
+      "returned": "Returned",
+      "lost": "Lost",
+      "pending": "Pending",
+      "batch": "Batch",
+      "noHistory": "Nothing has happened yet.",
+      "from": "From",
+      "to": "To",
+      "receiveTitle": "Receive goods",
+      "receiveHint": "Enter what arrived. Anything not received stays in transit.",
+      "receiveNow": "Receive now",
+      "note": "Note"
+    },
+    "confirms": {
+      "dispatch": "Dispatch this transfer? Stock moves out of the source into transit.",
+      "cancel": "Cancel this draft? No stock is affected.",
+      "delete": "Delete this draft?",
+      "returnRest": "Send everything still in transit back to the source locations?",
+      "closeShort": "Write off everything still in transit as lost? This removes it from stock.",
+      "reverseDispatch": "Reverse the dispatch? Stock goes back to the source and the transfer is cancelled.",
+      "reverseReceipt": "Reverse this receipt? The goods go back into transit."
+    },
+    "validation": {
+      "noLines": "Add at least one line with an item and a quantity.",
+      "warehouses": "Choose both warehouses.",
+      "quantity": "Enter a quantity greater than zero.",
+      "locations": "Choose both locations."
+    }
   }
 }

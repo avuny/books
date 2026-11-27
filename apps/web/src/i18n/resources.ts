@@ -3,6 +3,10 @@ import {
   accountingTranslationsEn,
 } from "@avuny/contracts/accounting"
 import {
+  inventoryTransferTranslationsAr,
+  inventoryTransferTranslationsEn,
+} from "@avuny/contracts/inventory-transfer"
+import {
   batchTranslationsAr,
   batchTranslationsEn,
 } from "@avuny/contracts/batch"
@@ -85,6 +89,7 @@ export const resources = {
     batch: batchTranslationsEn,
     common: commonTranslationsEn,
     "inventory-adjustment": inventoryAdjustmentTranslationsEn,
+    "inventory-transfer": inventoryTransferTranslationsEn,
     item: itemTranslationsEn,
     "item-category": itemCategoryTranslationsEn,
     organization: organizationTranslationsEn,
@@ -110,6 +115,7 @@ export const resources = {
     batch: batchTranslationsAr,
     common: commonTranslationsAr,
     "inventory-adjustment": inventoryAdjustmentTranslationsAr,
+    "inventory-transfer": inventoryTransferTranslationsAr,
     item: itemTranslationsAr,
     "item-category": itemCategoryTranslationsAr,
     organization: organizationTranslationsAr,

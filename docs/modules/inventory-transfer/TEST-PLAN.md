@@ -61,3 +61,6 @@ Not yet covered: integration tests, deadlock test for opposite concurrent transf
 ## Phase 5 coverage
 Unit: FIFO order and value split, uncovered quantity, derived layer origin and age, exact value over repeated takes, restore of allocations, service calls to costing on every step and reversal.
 Integration: auth, tenancy, 404 and 422 for all routes. Open: end-to-end layer conservation against a seeded database.
+
+## Phase 7 (web UI) manual checks
+Run against production with ZZ-TEST data: create draft, validation errors, dispatch, partial receive, return rest, close short, cancel, delete draft, reverse dispatch, reverse receipt, history list, sidebar entry.

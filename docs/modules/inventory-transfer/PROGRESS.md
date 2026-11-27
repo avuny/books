@@ -47,9 +47,9 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done · `[!]` blocked · `[-]` 
 | P5-01 | consumeFifo, deriveLayer, consumeLayersOfSourceLine | Phase 5 acceptance in SPEC section 12 | [x] |
 | P5-02 | Wire costing into dispatch, receive, return, reversal | Phase 5 acceptance in SPEC section 12 | [x] |
 | P6-01 | Shortage journal on close short | Phase 6 acceptance in SPEC section 12 | [ ] |
-| P7-01 | List, form, details | Phase 7 acceptance in SPEC section 12 | [ ] |
-| P7-02 | Receive dialog, status actions | Phase 7 acceptance in SPEC section 12 | [ ] |
-| P7-03 | Stock movement list labels and From/To | Phase 7 acceptance in SPEC section 12 | [ ] |
+| P7-01 | List, form, details | Phase 7 acceptance in SPEC section 12 | [x] |
+| P7-02 | Receive dialog, status actions | Phase 7 acceptance in SPEC section 12 | [x] |
+| P7-03 | Stock movement list labels and From/To | Phase 7 acceptance in SPEC section 12 | [ ] (not done: optional) |
 | P8-01 | FEATURE-TRACKING, REGISTRY, TESTING-PLAN, PROGRESS updates | Phase 8 acceptance in SPEC section 12 | [ ] |
 | P8-02 | Reconciliation test | Phase 8 acceptance in SPEC section 12 | [ ] |
 
