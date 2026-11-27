@@ -147,7 +147,7 @@ export interface InventoryTransferRepository {
     kind: "RECEIPT" | "RETURN" | "LOSS"
     status: "POSTED" | "REVERSED"
     stockMovementId: string | null
-    lines: Array<{ allocationId: string; baseQuantity: string }>
+    lines: Array<{ allocationId: string; baseQuantity: string; stockMovementLineId: string | null }>
   } | null>
   setEventStatus(orgId: string, eventId: string, status: "POSTED" | "REVERSED", tx: Tx): Promise<void>
   insertEvent(
@@ -208,6 +208,23 @@ export interface TransferLocationPort {
   ): Promise<{ ok: true } | { ok: false; reason: "not_pickable" | "not_receivable" | "blocked" }>
 }
 
+/** Valuation follows the stock: FIFO layers move with each stock movement line. */
+export interface TransferCostingPort {
+  dispatch(
+    orgId: string,
+    p: { itemId: string; batchId: string | null; fromLocationId: string; toLocationId: string; qty: string; movementLineId: string },
+    tx: Tx
+  ): Promise<void>
+  /** Receive (toLocationId set), return (toLocationId set) or loss (null) of what one dispatch line sent. */
+  settle(
+    orgId: string,
+    p: { dispatchMovementLineId: string; itemId: string; batchId: string | null; toLocationId: string | null; qty: string; movementLineId: string },
+    tx: Tx
+  ): Promise<void>
+  undoDispatch(orgId: string, p: { dispatchMovementLineId: string; qty: string }, tx: Tx): Promise<void>
+  undoSettle(orgId: string, p: { movementLineId: string; qty: string }, tx: Tx): Promise<void>
+}
+
 export interface TransferStockPort {
   post(actorId: string, orgId: string, input: PostStockMovementInput, tx: Tx): Promise<Result<StockMovementDto, any>>
   reverse(
@@ -236,6 +253,7 @@ export interface InventoryTransferServiceDeps {
   items: TransferItemPort
   locations: TransferLocationPort
   stock: TransferStockPort
+  costing: TransferCostingPort
   permissions: {
     check(
       actor: { userId: string },

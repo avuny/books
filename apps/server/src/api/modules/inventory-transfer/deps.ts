@@ -1,9 +1,18 @@
 import { and, eq } from "drizzle-orm"
 import { WAREHOUSE_TYPE_PHYSICAL } from "@avuny/contracts/warehouse"
-import { items, unitCollectionUnits, warehouses, warehouseLocations, type Tx } from "@avuny/db"
+import {
+  inventoryItemBatches,
+  inventoryItems,
+  items,
+  unitCollectionUnits,
+  warehouses,
+  warehouseLocations,
+  type Tx,
+} from "@avuny/db"
 import { db } from "../../db.js"
 import { activityLogService } from "../activity-log/index.js"
 import { batchService } from "../batch/index.js"
+import { inventoryCostingService } from "../inventory-costing/index.js"
 import { permissionChecker } from "../role/index.js"
 import { getStockMovementRepository, stockMovementService } from "../stock-movement/index.js"
 import { warehouseLocationService } from "../warehouse-location/index.js"
@@ -11,6 +20,7 @@ import { createInventoryTransferRepository } from "./inventory-transfer.reposito
 import { createInventoryTransferService, type InventoryTransferService } from "./inventory-transfer.service.js"
 import type {
   InventoryTransferRepository,
+  TransferCostingPort,
   TransferItemPort,
   TransferLocationPort,
   TransferStockPort,
@@ -21,6 +31,95 @@ let _service: InventoryTransferService | undefined
 
 export function getInventoryTransferRepository(): InventoryTransferRepository {
   return (_repo ??= createInventoryTransferRepository({ db }))
+}
+
+/** The balance row (and batch row) the cost layers hang on. The stock engine creates them when it posts. */
+async function inventoryRow(orgId: string, itemId: string, locationId: string, batchId: string | null, tx: Tx) {
+  const [inv] = await tx
+    .select({ id: inventoryItems.id })
+    .from(inventoryItems)
+    .where(and(eq(inventoryItems.orgId, orgId), eq(inventoryItems.itemId, itemId), eq(inventoryItems.locationId, locationId)))
+    .limit(1)
+  if (!inv) throw new Error("Inventory item row missing after stock movement")
+  let batchRowId: string | null = null
+  if (batchId) {
+    const [b] = await tx
+      .select({ id: inventoryItemBatches.id })
+      .from(inventoryItemBatches)
+      .where(
+        and(
+          eq(inventoryItemBatches.orgId, orgId),
+          eq(inventoryItemBatches.inventoryItemId, inv.id),
+          eq(inventoryItemBatches.batchId, batchId)
+        )
+      )
+      .limit(1)
+    batchRowId = b?.id ?? null
+  }
+  return { inventoryItemId: inv.id, inventoryItemBatchId: batchRowId }
+}
+
+const costingAdapter: TransferCostingPort = {
+  async dispatch(orgId, p, tx) {
+    const src = await inventoryRow(orgId, p.itemId, p.fromLocationId, p.batchId, tx)
+    const dst = await inventoryRow(orgId, p.itemId, p.toLocationId, p.batchId, tx)
+    const { taken } = await inventoryCostingService.consumeFifo(
+      { orgId, ...src, qty: p.qty, outgoingMovementLineId: p.movementLineId },
+      tx
+    )
+    for (const t of taken) {
+      await inventoryCostingService.deriveLayer(
+        {
+          orgId,
+          fromLayer: t.layer,
+          toInventoryItemId: dst.inventoryItemId,
+          toInventoryItemBatchId: dst.inventoryItemBatchId,
+          qty: t.qty,
+          value: t.value,
+          sourceMovementLineId: p.movementLineId,
+        },
+        tx
+      )
+    }
+  },
+  async settle(orgId, p, tx) {
+    const { taken } = await inventoryCostingService.consumeLayersOfSourceLine(
+      { orgId, sourceMovementLineId: p.dispatchMovementLineId, qty: p.qty, outgoingMovementLineId: p.movementLineId },
+      tx
+    )
+    if (!p.toLocationId) return
+    const dst = await inventoryRow(orgId, p.itemId, p.toLocationId, p.batchId, tx)
+    for (const t of taken) {
+      await inventoryCostingService.deriveLayer(
+        {
+          orgId,
+          fromLayer: t.layer,
+          toInventoryItemId: dst.inventoryItemId,
+          toInventoryItemBatchId: dst.inventoryItemBatchId,
+          qty: t.qty,
+          value: t.value,
+          sourceMovementLineId: p.movementLineId,
+        },
+        tx
+      )
+    }
+  },
+  async undoDispatch(orgId, p, tx) {
+    // source layers get back what the dispatch took, the transit layers are used up
+    await inventoryCostingService.restoreAllocationsOfLine(orgId, p.dispatchMovementLineId, tx)
+    await inventoryCostingService.consumeLayersOfSourceLine(
+      { orgId, sourceMovementLineId: p.dispatchMovementLineId, qty: p.qty, outgoingMovementLineId: p.dispatchMovementLineId },
+      tx
+    )
+  },
+  async undoSettle(orgId, p, tx) {
+    // transit layers get back what the receipt took, the destination layers it made are used up
+    await inventoryCostingService.restoreAllocationsOfLine(orgId, p.movementLineId, tx)
+    await inventoryCostingService.consumeLayersOfSourceLine(
+      { orgId, sourceMovementLineId: p.movementLineId, qty: p.qty, outgoingMovementLineId: p.movementLineId },
+      tx
+    )
+  },
 }
 
 const itemAdapter: TransferItemPort = {
@@ -112,6 +211,7 @@ export function getInventoryTransferService(): InventoryTransferService {
     items: itemAdapter,
     locations: locationAdapter,
     stock: stockAdapter,
+    costing: costingAdapter,
     permissions: permissionChecker,
     activityLog: { record: (entry) => activityLogService.log(entry as any) },
   }))

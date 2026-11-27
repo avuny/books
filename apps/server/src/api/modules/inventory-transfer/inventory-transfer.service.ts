@@ -396,6 +396,14 @@ export function createInventoryTransferService(deps: InventoryTransferServiceDep
           const posted = [...moved.data.lines].sort((a, b) => a.lineNo - b.lineNo)
           if (posted.length !== parts.length) throw new PostingAbort(Err.INVENTORY_TRANSFER_POSTING_FAILED)
 
+          for (const [i, p] of parts.entries()) {
+            await deps.costing.dispatch(
+              orgId,
+              { itemId: p.itemId, batchId: p.batchId, fromLocationId: p.fromLocationId, toLocationId: transitId, qty: p.quantity, movementLineId: posted[i]!.id },
+              tx
+            )
+          }
+
           // 5. document: allocations, dispatched quantities, dropped lines, status
           await repo.insertAllocations(
             orgId,
@@ -503,6 +511,13 @@ export function createInventoryTransferService(deps: InventoryTransferServiceDep
           const posted = [...moved.data.lines].sort((a, b) => a.lineNo - b.lineNo)
           if (posted.length !== parts.length) throw new PostingAbort(Err.INVENTORY_TRANSFER_POSTING_FAILED)
 
+          for (const [i, p] of parts.entries()) {
+            await deps.costing.settle(
+              orgId,
+              { dispatchMovementLineId: p.a.dispatchMovementLineId!, itemId: p.a.itemId, batchId: p.a.batchId, toLocationId: p.toLocationId, qty: p.qty, movementLineId: posted[i]!.id },
+              tx
+            )
+          }
           const eventNo = await repo.nextEventNo(orgId, id, tx)
           await repo.insertEvent(
             orgId,
@@ -614,6 +629,13 @@ export function createInventoryTransferService(deps: InventoryTransferServiceDep
           const posted = [...moved.data.lines].sort((a, b) => a.lineNo - b.lineNo)
           if (posted.length !== parts.length) throw new PostingAbort(Err.INVENTORY_TRANSFER_POSTING_FAILED)
 
+          for (const [i, p] of parts.entries()) {
+            await deps.costing.settle(
+              orgId,
+              { dispatchMovementLineId: p.a.dispatchMovementLineId!, itemId: p.a.itemId, batchId: p.a.batchId, toLocationId: p.toLocationId, qty: p.qty, movementLineId: posted[i]!.id },
+              tx
+            )
+          }
           const eventNo = await repo.nextEventNo(orgId, id, tx)
           await repo.insertEvent(
             orgId,
@@ -719,6 +741,13 @@ export function createInventoryTransferService(deps: InventoryTransferServiceDep
           const posted = [...moved.data.lines].sort((a, b) => a.lineNo - b.lineNo)
           if (posted.length !== parts.length) throw new PostingAbort(Err.INVENTORY_TRANSFER_POSTING_FAILED)
 
+          for (const [i, p] of parts.entries()) {
+            await deps.costing.settle(
+              orgId,
+              { dispatchMovementLineId: p.a.dispatchMovementLineId!, itemId: p.a.itemId, batchId: p.a.batchId, toLocationId: null, qty: p.qty, movementLineId: posted[i]!.id },
+              tx
+            )
+          }
           const eventNo = await repo.nextEventNo(orgId, id, tx)
           await repo.insertEvent(
             orgId,
@@ -794,6 +823,11 @@ export function createInventoryTransferService(deps: InventoryTransferServiceDep
           )
           if (!reversed.success) throw new PostingAbort(postingFailure((reversed as any).error))
 
+          for (const l of event.lines) {
+            if (l.stockMovementLineId) {
+              await deps.costing.undoSettle(orgId, { movementLineId: l.stockMovementLineId, qty: l.baseQuantity }, tx)
+            }
+          }
           const updated = allocations.map((a) => ({ ...a }))
           for (const l of event.lines) {
             const a = updated.find((x) => x.id === l.allocationId)
@@ -853,6 +887,9 @@ export function createInventoryTransferService(deps: InventoryTransferServiceDep
             tx
           )
           if (!reversed.success) throw new PostingAbort(postingFailure((reversed as any).error))
+          for (const a of allocations) {
+            await deps.costing.undoDispatch(orgId, { dispatchMovementLineId: a.dispatchMovementLineId!, qty: a.dispatchedBaseQty }, tx)
+          }
           // Everything went back to the source: record it in the counters so they still add up.
           for (const a of allocations) {
             await repo.updateAllocationCounters(orgId, a.id, { returnedBaseQty: a.dispatchedBaseQty }, tx)

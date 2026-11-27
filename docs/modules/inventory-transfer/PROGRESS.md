@@ -44,8 +44,8 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done · `[!]` blocked · `[-]` 
 | P4-01 | Receive and partial receive | Phase 4 acceptance in SPEC section 12 | [x] |
 | P4-02 | Close short | Phase 4 acceptance in SPEC section 12 | [x] |
 | P4-03 | Reverse receipt | Phase 4 acceptance in SPEC section 12 | [x] |
-| P5-01 | consumeFifo, deriveLayer, consumeLayersOfSourceLine | Phase 5 acceptance in SPEC section 12 | [ ] |
-| P5-02 | Wire costing into dispatch, receive, return, reversal | Phase 5 acceptance in SPEC section 12 | [ ] |
+| P5-01 | consumeFifo, deriveLayer, consumeLayersOfSourceLine | Phase 5 acceptance in SPEC section 12 | [x] |
+| P5-02 | Wire costing into dispatch, receive, return, reversal | Phase 5 acceptance in SPEC section 12 | [x] |
 | P6-01 | Shortage journal on close short | Phase 6 acceptance in SPEC section 12 | [ ] |
 | P7-01 | List, form, details | Phase 7 acceptance in SPEC section 12 | [ ] |
 | P7-02 | Receive dialog, status actions | Phase 7 acceptance in SPEC section 12 | [ ] |
@@ -101,3 +101,10 @@ None yet.
 - Dispatch-and-receive in one step (Q1) is not implemented as a single call; dispatch then receive.
 - Concurrency: the transfer and allocation rows are locked in a stable order; a two-transfer deadlock test needs the integration suite and is not yet written.
 - Verification: tsc clean, 21 unit tests pass.
+
+## Phase 5 notes (costing)
+- New costing service methods: `consumeFifo`, `consumeLayersOfSourceLine`, `deriveLayer`, `restoreAllocationsOfLine`. Money math in bigint; the whole remainder of a layer takes its exact remaining value.
+- Dispatch consumes source layers FIFO and derives transit layers (origin set, age kept). Receive and return consume only the transit layers of that allocation's dispatch line and derive layers at the destination or source. Loss consumes only.
+- Decision (mine): reversals restore the original layer in place (quantity and value added back, the allocation rows of that line deleted) instead of deriving a new layer. This keeps the transit layers findable by dispatch line for later receives. The spec text suggested a new derived layer; revisit if a sales consumer needs the history.
+- Uncovered stock (Q5 default): moves without layers. The uncovered quantity is not yet returned in the API response (gap).
+- Verification: tsc clean, 33 unit tests (transfer and costing). New route-level integration test file added. Layer SQL has not run against a real database yet; production UI test will confirm.
