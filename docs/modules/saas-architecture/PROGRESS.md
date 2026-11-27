@@ -4,8 +4,8 @@
 |---|---|
 | Spec | [`SPEC.md`](./SPEC.md) v1.0 · 2026-11-27 |
 | Last updated | 2026-11-27 |
-| Current phase | S0 |
-| Tasks done | 0 / 75 |
+| Current phase | A1 (admin track, running ahead of S0 spikes) |
+| Tasks done | 1 / 75 |
 | Gates passed | 0 / 22 |
 
 ## How to use this file
@@ -14,7 +14,7 @@ Tick a task only when its "done when" is true and evidence is in the Verificatio
 Legend: `[ ]` todo · `[~]` in progress · `[x]` done · `[!]` blocked · `[-]` not applicable (say why)
 
 ## Next action
-> **S0-01**: get the owner's answers on the open decisions below (Q1 to Q14 for the SaaS core, Q15 to Q24 for the admin panel, see `PLATFORM-ADMIN-SPEC.md`). Blocking ones: Q1, Q2, Q4, Q5, Q10, and for the admin panel Q15 and Q20. The rest have defaults that may be used if the owner says "use defaults". Landing decisions Q25 to Q30 are proposed with defaults and still need his answer. Also record fixes-plan decisions D1 to D8 (`../SAAS-SPEC-FIXES-PLAN.md`), which are still open.
+> **A1-03**: `PLATFORM_MODULES` registry, permission catalog, seed of built-in roles, bootstrap CLI that issues the first invite. A1-02 is done (platform identity schema, migration, append-only audit, integration test infra). In parallel: S0-02 repo checks, S0-03 provider spike, and the open fixes-plan decisions D1 to D8.
 
 ## Status board
 | Phase | Title | Tasks | Gate | Status |
@@ -28,7 +28,7 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done · `[!]` blocked · `[-]` 
 | S6 | Payments | 4 | gate S6 | [ ] |
 | S7 | Billing UI, pricing page, jobs | 3 | gate S7 | [ ] |
 | S8 | Hardening and launch | 1 | gate S8 | [ ] |
-| A1 | Platform apps, admin identity, roles | 6 | gate A1 | [ ] |
+| A1 | Platform apps, admin identity, roles | 6 | gate A1 | [~] |
 | A2 | Plan and catalog configurator | 5 | gate A2 | [ ] |
 | A3 | Sidebar, permissions, catalog viewer and overrides | 3 | gate A3 | [ ] |
 | A4 | Organizations, users, subscriptions | 4 | gate A4 | [ ] |
@@ -178,7 +178,7 @@ Spec: `PLATFORM-ADMIN-SPEC.md`. A1 needs Q15, Q16, Q18, Q23. Docs only so far.
 
 #### Phase A1: Platform apps, admin identity, roles
 - [ ] **A1-01** Extract shared code into `packages/entitlements` and shared Hono middleware; scaffold `apps/platform-server` and `apps/platform-web` with their own wrangler configs and CI deploy jobs (extend the vars check). Done when: both deploy a health page to staging.
-- [ ] **A1-02** Schema and migration: platform_admins, sessions, roles, role_permissions, admin_roles, invites, platform_audit_events (append-only enforced in the database). Done when: migration applies; update and delete on audit table are rejected.
+- [x] **A1-02** Schema and migration: platform_admins, sessions, roles, role_permissions, admin_roles, invites, platform_audit_events (append-only enforced in the database). Done when: migration applies; update and delete on audit table are rejected. Done 2026-11-27: migration `0030_platform_identity` (7 tables, `platform_admin_status` enum, append-only trigger on `platform_audit_events`), platform-server integration suite verifies application and UPDATE/DELETE rejection in CI.
 - [ ] **A1-03** `PLATFORM_MODULES` registry, permission catalog, seed of built-in roles, bootstrap CLI that issues the first invite. Done when: running it twice creates one invite.
 - [ ] **A1-04** Login, TOTP enrollment, lockout, sessions, logout, invite acceptance; no register route (PAC1, PAC2).
 - [ ] **A1-05** Admin users and roles screens and routes: list, invite, disable, role editor with anti-escalation, last super admin, self-edit rules (PA-R2 to PA-R5, PAC3).
@@ -280,6 +280,9 @@ Spec: `PLATFORM-ADMIN-SPEC.md`. A1 needs Q15, Q16, Q18, Q23. Docs only so far.
 - Not decided: fixes-plan D1 to D8 (still open; D1 database driver matters before S5), prices, the real domain name.
 
 ## Deviations
+- 2026-11-27: the admin track (A1) starts before the S0 spikes finish, per the owner's "start implementing the admin server and web apps". S0-02 to S0-04 stay open and still gate S1/S5.
+
 ## Verification log
 | Date | Task | Command | Result |
 |---|---|---|---|
+| 2026-11-27 | A1-02 | `pnpm --filter @avuny/platform-server test:int` (CI job "Platform API integration tests") | migration applies on a fresh database; UPDATE and DELETE on platform_audit_events raise "append-only"; status/TOTP, permission-key, email and invite check constraints hold |

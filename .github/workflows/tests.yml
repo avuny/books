@@ -43,6 +43,30 @@ jobs:
         if: failure()
         run: docker compose -f apps/server/docker-compose.test.yml logs
 
+  platform-integration:
+    name: Platform API integration tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+
+      - name: Start the test database
+        run: docker compose -f apps/server/docker-compose.test.yml up -d --wait
+
+      # The platform server imports the built workspace packages (contracts, db, utils, ...).
+      - run: pnpm --filter "@avuny/platform-server^..." build
+      - run: pnpm --filter @avuny/platform-server test:int:raw
+
+      - name: Database logs
+        if: failure()
+        run: docker compose -f apps/server/docker-compose.test.yml logs
+
   e2e:
     name: Web e2e tests
     runs-on: ubuntu-latest
