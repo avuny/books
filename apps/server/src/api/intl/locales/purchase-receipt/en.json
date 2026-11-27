@@ -21,7 +21,8 @@
     "PURCHASE_RECEIPT_POSTING_FAILED": "Posting the receipt failed. Nothing was changed. Please try again",
     "PURCHASE_RECEIPT_PROJECTION_CONFLICT": "Stock quantities changed while posting. Please try again",
     "PURCHASE_RECEIPT_ALREADY_BILLED": "The receipt has a posted supplier bill. Reverse the bill first",
-    "PURCHASE_RECEIPT_NUMBER_TAKEN": "Could not allocate a receipt number. Please try again"
+    "PURCHASE_RECEIPT_NUMBER_TAKEN": "Could not allocate a receipt number. Please try again",
+    "PURCHASE_RECEIPT_QUICK_STEP_FAILED": "A step of the quick receipt failed. Everything done before it was reversed"
   },
   "labels": {
     "status": {
@@ -72,6 +73,18 @@
     "expiryDate": "Expiry date (expiry-tracked items)",
     "direct": "Not shipped yet (direct receipt)",
     "invalidQty": "Check the quantities: received must be above zero and rejected cannot exceed received.",
-    "reasonRequired": "Enter a reason for rejected goods."
+    "reasonRequired": "Enter a reason for rejected goods.",
+    "quick": {
+      "open": "Receive and pay",
+      "title": "Quick receipt for {number}",
+      "description": "Receives the lines below, posts the receipt, bills it, posts the bill and records the full payment in one step.",
+      "confirm": "Receive and pay",
+      "creating": "Working...",
+      "method": "Paid from",
+      "cash": "Cash",
+      "bank": "Bank",
+      "invoiceDate": "Bill date",
+      "supplierInvoiceNumber": "Supplier invoice number"
+    }
   }
 }

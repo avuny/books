@@ -7,6 +7,8 @@ import authEn from "./locales/auth/en.json" with { type: "json" }
 import authAr from "./locales/auth/ar.json" with { type: "json" }
 import batchEn from "./locales/batch/en.json" with { type: "json" }
 import batchAr from "./locales/batch/ar.json" with { type: "json" }
+import customerPaymentEn from "./locales/customer-payment/en.json" with { type: "json" }
+import customerPaymentAr from "./locales/customer-payment/ar.json" with { type: "json" }
 import geoEn from "./locales/geo/en.json" with { type: "json" }
 import geoAr from "./locales/geo/ar.json" with { type: "json" }
 import inventoryAdjustmentEn from "./locales/inventory-adjustment/en.json" with { type: "json" }
@@ -37,6 +39,14 @@ import purchaseShipmentEn from "./locales/purchase-shipment/en.json" with { type
 import purchaseShipmentAr from "./locales/purchase-shipment/ar.json" with { type: "json" }
 import roleEn from "./locales/role/en.json" with { type: "json" }
 import roleAr from "./locales/role/ar.json" with { type: "json" }
+import salesCreditNoteEn from "./locales/sales-credit-note/en.json" with { type: "json" }
+import salesCreditNoteAr from "./locales/sales-credit-note/ar.json" with { type: "json" }
+import salesDeliveryEn from "./locales/sales-delivery/en.json" with { type: "json" }
+import salesDeliveryAr from "./locales/sales-delivery/ar.json" with { type: "json" }
+import salesInvoiceEn from "./locales/sales-invoice/en.json" with { type: "json" }
+import salesInvoiceAr from "./locales/sales-invoice/ar.json" with { type: "json" }
+import salesOrderEn from "./locales/sales-order/en.json" with { type: "json" }
+import salesOrderAr from "./locales/sales-order/ar.json" with { type: "json" }
 import sidebarEn from "./locales/sidebar/en.json" with { type: "json" }
 import sidebarAr from "./locales/sidebar/ar.json" with { type: "json" }
 import unitEn from "./locales/unit/en.json" with { type: "json" }
@@ -61,6 +71,8 @@ export const resources = {
         admin: adminEn,
         auth: authEn,
         batch: batchEn,
+        "customer-payment": customerPaymentEn,
+        customerPayment: customerPaymentEn,
         geo: geoEn,
         "inventory-adjustment": inventoryAdjustmentEn,
         inventoryAdjustment: inventoryAdjustmentEn,
@@ -85,6 +97,14 @@ export const resources = {
         "purchase-shipment": purchaseShipmentEn,
         purchaseShipment: purchaseShipmentEn,
         role: roleEn,
+        "sales-credit-note": salesCreditNoteEn,
+        salesCreditNote: salesCreditNoteEn,
+        "sales-delivery": salesDeliveryEn,
+        salesDelivery: salesDeliveryEn,
+        "sales-invoice": salesInvoiceEn,
+        salesInvoice: salesInvoiceEn,
+        "sales-order": salesOrderEn,
+        salesOrder: salesOrderEn,
         sidebar: sidebarEn,
         unit: unitEn,
         "unit-collection": unitCollectionEn,
@@ -103,6 +123,8 @@ export const resources = {
         admin: adminAr,
         auth: authAr,
         batch: batchAr,
+        "customer-payment": customerPaymentAr,
+        customerPayment: customerPaymentAr,
         geo: geoAr,
         "inventory-adjustment": inventoryAdjustmentAr,
         inventoryAdjustment: inventoryAdjustmentAr,
@@ -127,6 +149,14 @@ export const resources = {
         "purchase-shipment": purchaseShipmentAr,
         purchaseShipment: purchaseShipmentAr,
         role: roleAr,
+        "sales-credit-note": salesCreditNoteAr,
+        salesCreditNote: salesCreditNoteAr,
+        "sales-delivery": salesDeliveryAr,
+        salesDelivery: salesDeliveryAr,
+        "sales-invoice": salesInvoiceAr,
+        salesInvoice: salesInvoiceAr,
+        "sales-order": salesOrderAr,
+        salesOrder: salesOrderAr,
         sidebar: sidebarAr,
         unit: unitAr,
         "unit-collection": unitCollectionAr,
@@ -152,7 +182,7 @@ export function installRequestLanguage(): void {
   i18next.init({
     lng: "en",
     fallbackLng: "en",
-    ns: ["accounting", "admin", "auth", "batch", "geo", "inventory-adjustment", "inventoryAdjustment", "inventory-transfer", "inventoryTransfer", "item", "item-category", "itemCategory", "organization", "organization-invitation", "organizationInvitation", "organization-user", "organizationUser", "otp", "party", "payment-term", "paymentTerm", "purchase-order", "purchaseOrder", "purchase-receipt", "purchaseReceipt", "purchase-shipment", "purchaseShipment", "role", "sidebar", "unit", "unit-collection", "unitCollection", "users", "vendor-bill", "vendorBill", "vendor-payment", "vendorPayment", "warehouse", "warehouse-location", "warehouseLocation"],
+    ns: ["accounting", "admin", "auth", "batch", "customer-payment", "customerPayment", "geo", "inventory-adjustment", "inventoryAdjustment", "inventory-transfer", "inventoryTransfer", "item", "item-category", "itemCategory", "organization", "organization-invitation", "organizationInvitation", "organization-user", "organizationUser", "otp", "party", "payment-term", "paymentTerm", "purchase-order", "purchaseOrder", "purchase-receipt", "purchaseReceipt", "purchase-shipment", "purchaseShipment", "role", "sales-credit-note", "salesCreditNote", "sales-delivery", "salesDelivery", "sales-invoice", "salesInvoice", "sales-order", "salesOrder", "sidebar", "unit", "unit-collection", "unitCollection", "users", "vendor-bill", "vendorBill", "vendor-payment", "vendorPayment", "warehouse", "warehouse-location", "warehouseLocation"],
     defaultNS: "otp",
     resources,
     interpolation: { escapeValue: false },

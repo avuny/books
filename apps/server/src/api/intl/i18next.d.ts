@@ -2,6 +2,7 @@ import type accountingEn from "./locales/accounting/en.json"
 import type adminEn from "./locales/admin/en.json"
 import type authEn from "./locales/auth/en.json"
 import type batchEn from "./locales/batch/en.json"
+import type customerPaymentEn from "./locales/customer-payment/en.json"
 import type geoEn from "./locales/geo/en.json"
 import type inventoryAdjustmentEn from "./locales/inventory-adjustment/en.json"
 import type inventoryTransferEn from "./locales/inventory-transfer/en.json"
@@ -17,6 +18,10 @@ import type purchaseOrderEn from "./locales/purchase-order/en.json"
 import type purchaseReceiptEn from "./locales/purchase-receipt/en.json"
 import type purchaseShipmentEn from "./locales/purchase-shipment/en.json"
 import type roleEn from "./locales/role/en.json"
+import type salesCreditNoteEn from "./locales/sales-credit-note/en.json"
+import type salesDeliveryEn from "./locales/sales-delivery/en.json"
+import type salesInvoiceEn from "./locales/sales-invoice/en.json"
+import type salesOrderEn from "./locales/sales-order/en.json"
 import type sidebarEn from "./locales/sidebar/en.json"
 import type unitEn from "./locales/unit/en.json"
 import type unitCollectionEn from "./locales/unit-collection/en.json"
@@ -30,6 +35,7 @@ type AccountingMessages = typeof accountingEn
 type AdminMessages = typeof adminEn
 type AuthMessages = typeof authEn
 type BatchMessages = typeof batchEn
+type CustomerPaymentMessages = typeof customerPaymentEn
 type GeoMessages = typeof geoEn
 type InventoryAdjustmentMessages = typeof inventoryAdjustmentEn
 type InventoryTransferMessages = typeof inventoryTransferEn
@@ -45,6 +51,10 @@ type PurchaseOrderMessages = typeof purchaseOrderEn
 type PurchaseReceiptMessages = typeof purchaseReceiptEn
 type PurchaseShipmentMessages = typeof purchaseShipmentEn
 type RoleMessages = typeof roleEn
+type SalesCreditNoteMessages = typeof salesCreditNoteEn
+type SalesDeliveryMessages = typeof salesDeliveryEn
+type SalesInvoiceMessages = typeof salesInvoiceEn
+type SalesOrderMessages = typeof salesOrderEn
 type SidebarMessages = typeof sidebarEn
 type UnitMessages = typeof unitEn
 type UnitCollectionMessages = typeof unitCollectionEn
@@ -62,6 +72,8 @@ declare module "i18next" {
       admin: AdminMessages
       auth: AuthMessages
       batch: BatchMessages
+      "customer-payment": CustomerPaymentMessages
+      customerPayment: CustomerPaymentMessages
       geo: GeoMessages
       "inventory-adjustment": InventoryAdjustmentMessages
       inventoryAdjustment: InventoryAdjustmentMessages
@@ -86,6 +98,14 @@ declare module "i18next" {
       "purchase-shipment": PurchaseShipmentMessages
       purchaseShipment: PurchaseShipmentMessages
       role: RoleMessages
+      "sales-credit-note": SalesCreditNoteMessages
+      salesCreditNote: SalesCreditNoteMessages
+      "sales-delivery": SalesDeliveryMessages
+      salesDelivery: SalesDeliveryMessages
+      "sales-invoice": SalesInvoiceMessages
+      salesInvoice: SalesInvoiceMessages
+      "sales-order": SalesOrderMessages
+      salesOrder: SalesOrderMessages
       sidebar: SidebarMessages
       unit: UnitMessages
       "unit-collection": UnitCollectionMessages

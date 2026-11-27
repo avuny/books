@@ -182,6 +182,7 @@ import {
   useCreatePaymentTerm,
   useCreatePurchaseOrder,
   useCreatePurchaseReceipt,
+  useQuickReceivePurchaseOrder,
   useCreatePurchaseShipment,
   useListPaymentTerms,
   useListPurchaseReceipts,
@@ -378,6 +379,11 @@ function useInvalidateReceipts(orgId: string, orderId: string) {
 export function useCreateReceiptMutation(orgId: string, orderId: string) {
   const invalidate = useInvalidateReceipts(orgId, orderId)
   return useCreatePurchaseReceipt({ mutation: { onSuccess: () => invalidate() } })
+}
+
+export function useQuickReceiveMutation(orgId: string, orderId: string) {
+  const invalidate = useInvalidateReceipts(orgId, orderId)
+  return useQuickReceivePurchaseOrder({ mutation: { onSuccess: () => invalidate() } })
 }
 
 export function usePostReceiptMutation(orgId: string, orderId: string) {

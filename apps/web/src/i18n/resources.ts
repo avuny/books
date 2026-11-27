@@ -3,10 +3,6 @@ import {
   accountingTranslationsEn,
 } from "@avuny/contracts/accounting"
 import {
-  inventoryTransferTranslationsAr,
-  inventoryTransferTranslationsEn,
-} from "@avuny/contracts/inventory-transfer"
-import {
   batchTranslationsAr,
   batchTranslationsEn,
 } from "@avuny/contracts/batch"
@@ -15,9 +11,17 @@ import {
   commonTranslationsEn,
 } from "@avuny/contracts/common"
 import {
+  customerPaymentTranslationsAr,
+  customerPaymentTranslationsEn,
+} from "@avuny/contracts/customer-payment"
+import {
   inventoryAdjustmentTranslationsAr,
   inventoryAdjustmentTranslationsEn,
 } from "@avuny/contracts/inventory-adjustment"
+import {
+  inventoryTransferTranslationsAr,
+  inventoryTransferTranslationsEn,
+} from "@avuny/contracts/inventory-transfer"
 import { itemTranslationsAr, itemTranslationsEn } from "@avuny/contracts/item"
 import {
   itemCategoryTranslationsAr,
@@ -57,6 +61,22 @@ import {
 } from "@avuny/contracts/purchase-shipment"
 import { roleTranslationsAr, roleTranslationsEn } from "@avuny/contracts/role"
 import {
+  salesCreditNoteTranslationsAr,
+  salesCreditNoteTranslationsEn,
+} from "@avuny/contracts/sales-credit-note"
+import {
+  salesDeliveryTranslationsAr,
+  salesDeliveryTranslationsEn,
+} from "@avuny/contracts/sales-delivery"
+import {
+  salesInvoiceTranslationsAr,
+  salesInvoiceTranslationsEn,
+} from "@avuny/contracts/sales-invoice"
+import {
+  salesOrderTranslationsAr,
+  salesOrderTranslationsEn,
+} from "@avuny/contracts/sales-order"
+import {
   stockMovementTranslationsAr,
   stockMovementTranslationsEn,
 } from "@avuny/contracts/stock-movement"
@@ -88,6 +108,7 @@ export const resources = {
     accounting: accountingTranslationsEn,
     batch: batchTranslationsEn,
     common: commonTranslationsEn,
+    "customer-payment": customerPaymentTranslationsEn,
     "inventory-adjustment": inventoryAdjustmentTranslationsEn,
     "inventory-transfer": inventoryTransferTranslationsEn,
     item: itemTranslationsEn,
@@ -101,6 +122,10 @@ export const resources = {
     "purchase-receipt": purchaseReceiptTranslationsEn,
     "purchase-shipment": purchaseShipmentTranslationsEn,
     role: roleTranslationsEn,
+    "sales-credit-note": salesCreditNoteTranslationsEn,
+    "sales-delivery": salesDeliveryTranslationsEn,
+    "sales-invoice": salesInvoiceTranslationsEn,
+    "sales-order": salesOrderTranslationsEn,
     "stock-movement": stockMovementTranslationsEn,
     unit: unitTranslationsEn,
     "unit-collection": unitCollectionTranslationsEn,
@@ -114,6 +139,7 @@ export const resources = {
     accounting: accountingTranslationsAr,
     batch: batchTranslationsAr,
     common: commonTranslationsAr,
+    "customer-payment": customerPaymentTranslationsAr,
     "inventory-adjustment": inventoryAdjustmentTranslationsAr,
     "inventory-transfer": inventoryTransferTranslationsAr,
     item: itemTranslationsAr,
@@ -127,6 +153,10 @@ export const resources = {
     "purchase-receipt": purchaseReceiptTranslationsAr,
     "purchase-shipment": purchaseShipmentTranslationsAr,
     role: roleTranslationsAr,
+    "sales-credit-note": salesCreditNoteTranslationsAr,
+    "sales-delivery": salesDeliveryTranslationsAr,
+    "sales-invoice": salesInvoiceTranslationsAr,
+    "sales-order": salesOrderTranslationsAr,
     "stock-movement": stockMovementTranslationsAr,
     unit: unitTranslationsAr,
     "unit-collection": unitCollectionTranslationsAr,

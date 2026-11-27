@@ -54,6 +54,7 @@ None.
 | D11 | A payment's amount is the sum of its allocations to posted bills; no unapplied advance or supplier credit in M2 | closed (scope cut) | Keeps AP subledger = sum of bill outstanding. Advances need a supplier-credit concept. Follow-up. |
 | D12 | Overpaying a bill is blocked per bill under a row lock on the bills (FOR UPDATE) at post time | closed | Outstanding = bill total - posted allocations, derived. Bill DTO exposes paidAmount, outstandingAmount, paymentStatus. |
 | D13 | A bill with a posted payment cannot be reversed (VENDOR_BILL_HAS_PAYMENTS); reverse the payment first | closed | |
+| D14 | Quick purchase receipt: `POST /organizations/{orgId}/purchase-orders/{id}/quick-receipt` receives the given lines, posts the receipt, bills it (due on the receipt date), posts the bill and records a posted vendor payment (cash or bank) for the full total. It composes the existing services; each step is its own transaction, so a failed step reverses or deletes the earlier ones (`PURCHASE_RECEIPT_QUICK_STEP_FAILED`). No costing engine code touched | closed | Mirrors the sales receipt (D15 in sales-invoice-payment). Web: "Receive and pay" button in the receive dialog. |
 
 ### M1 log (2026-11-26)
 

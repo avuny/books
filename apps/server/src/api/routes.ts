@@ -16,6 +16,7 @@ import { accountingRoutes } from "./modules/accounting/index.js"
 import { adminRoutes } from "./modules/admin/index.js"
 import { authRoutes } from "./modules/auth/index.js"
 import { batchRoutes } from "./modules/batch/index.js"
+import { customerPaymentRoutes } from "./modules/customer-payment/index.js"
 import { geoRoutes } from "./modules/geo/index.js"
 import { inventoryAdjustmentRoutes } from "./modules/inventory-adjustment/index.js"
 import { inventoryTransferRoutes } from "./modules/inventory-transfer/index.js"
@@ -31,6 +32,10 @@ import { purchaseOrderRoutes } from "./modules/purchase-order/index.js"
 import { purchaseReceiptRoutes } from "./modules/purchase-receipt/index.js"
 import { purchaseShipmentRoutes } from "./modules/purchase-shipment/index.js"
 import { roleRoutes } from "./modules/role/index.js"
+import { salesCreditNoteRoutes } from "./modules/sales-credit-note/index.js"
+import { salesDeliveryRoutes } from "./modules/sales-delivery/index.js"
+import { salesInvoiceRoutes } from "./modules/sales-invoice/index.js"
+import { salesOrderRoutes } from "./modules/sales-order/index.js"
 import { sidebarRoutes } from "./modules/sidebar/index.js"
 import { stockMovementRoutes } from "./modules/stock-movement/index.js"
 import { unitRoutes } from "./modules/unit/index.js"
@@ -103,6 +108,7 @@ app.route("/accounting", accountingRoutes)
 app.route("/admin", adminRoutes)
 app.route("/auth", authRoutes)
 app.route("/batch", batchRoutes)
+app.route("/customerPayment", customerPaymentRoutes)
 app.route("/geo", geoRoutes)
 app.route("/inventoryAdjustment", inventoryAdjustmentRoutes)
 app.route("/inventoryTransfer", inventoryTransferRoutes)
@@ -118,6 +124,10 @@ app.route("/purchaseOrder", purchaseOrderRoutes)
 app.route("/purchaseReceipt", purchaseReceiptRoutes)
 app.route("/purchaseShipment", purchaseShipmentRoutes)
 app.route("/roles", roleRoutes)
+app.route("/salesCreditNote", salesCreditNoteRoutes)
+app.route("/salesDelivery", salesDeliveryRoutes)
+app.route("/salesInvoice", salesInvoiceRoutes)
+app.route("/salesOrder", salesOrderRoutes)
 app.route("/sidebar", sidebarRoutes)
 app.route("/stockMovement", stockMovementRoutes)
 app.route("/unit", unitRoutes)

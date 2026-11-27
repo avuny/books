@@ -116,7 +116,20 @@ export interface AccountingPort {
   ): Promise<Result<JournalEntryDto, any>>
 }
 
+/** What the quick receipt flow needs from the vendor bill and vendor payment services. */
+export interface QuickFlowPort {
+  create?(actorId: string, orgId: string, input: any): Promise<Result<any, any>>
+  createFromReceipt?(actorId: string, orgId: string, input: any): Promise<Result<any, any>>
+  post(actorId: string, orgId: string, id: string): Promise<Result<any, any>>
+  reverse?(actorId: string, orgId: string, id: string, input: { reason: string }): Promise<Result<any, any>>
+  get?(actorId: string, orgId: string, id: string): Promise<Result<any, any>>
+  delete(actorId: string, orgId: string, id: string): Promise<Result<any, any>>
+}
+
 export interface PurchaseReceiptServiceDeps {
+  /** Optional: only the quick receipt flow uses these. */
+  bills?: QuickFlowPort
+  payments?: QuickFlowPort
   repository: PurchaseReceiptRepository
   orders: OrderRepositoryPort
   items: ItemUnitPort

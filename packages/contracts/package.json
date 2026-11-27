@@ -35,6 +35,11 @@
       "import": "./dist/common/index.js",
       "default": "./dist/common/index.js"
     },
+    "./customer-payment": {
+      "types": "./dist/customer-payment/index.d.ts",
+      "import": "./dist/customer-payment/index.js",
+      "default": "./dist/customer-payment/index.js"
+    },
     "./errors": {
       "types": "./dist/errors/index.d.ts",
       "import": "./dist/errors/index.js",
@@ -119,6 +124,26 @@
       "types": "./dist/role/index.d.ts",
       "import": "./dist/role/index.js",
       "default": "./dist/role/index.js"
+    },
+    "./sales-credit-note": {
+      "types": "./dist/sales-credit-note/index.d.ts",
+      "import": "./dist/sales-credit-note/index.js",
+      "default": "./dist/sales-credit-note/index.js"
+    },
+    "./sales-delivery": {
+      "types": "./dist/sales-delivery/index.d.ts",
+      "import": "./dist/sales-delivery/index.js",
+      "default": "./dist/sales-delivery/index.js"
+    },
+    "./sales-invoice": {
+      "types": "./dist/sales-invoice/index.d.ts",
+      "import": "./dist/sales-invoice/index.js",
+      "default": "./dist/sales-invoice/index.js"
+    },
+    "./sales-order": {
+      "types": "./dist/sales-order/index.d.ts",
+      "import": "./dist/sales-order/index.js",
+      "default": "./dist/sales-order/index.js"
     },
     "./sidebar": {
       "types": "./dist/sidebar/index.d.ts",

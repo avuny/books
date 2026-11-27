@@ -14,3 +14,7 @@ When asked to review Git changes or suggest a commit message:
 10. When the user says **"commit"** (without asking to "review" or "suggest"), execute the full commit process: run `git add` and `git commit` for each atomic commit — do not just propose commands. Only suggest (without executing) when the user explicitly asks to review or preview commit messages.
 
 Output each proposed commit with its staging `git add` command and commit message in a Markdown code block, ready to copy and run in Git.
+
+## Author identity for AI agents
+
+Agents set the git author and committer name to `Avuny-Bot-001` before committing (`git config user.name "Avuny-Bot-001"` in the clone). Keep the configured email unless the owner says otherwise. Do not rewrite commits that are already pushed.

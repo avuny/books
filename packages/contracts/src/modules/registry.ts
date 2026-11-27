@@ -177,6 +177,20 @@ export const MODULES = {
       cancel: { permission: true, event: "cancelled" },
     },
   },
+  sales_order: {
+    sidebar: {
+      group: "sales",
+      icon: "clipboard-check",
+      path: "/sales-orders",
+      label: { en: "Sales orders", ar: "أوامر البيع" },
+    },
+    actions: {
+      ...CRUD,
+      confirm: { permission: true, event: "confirmed" },
+      close: { permission: true, event: "closed" },
+      cancel: { permission: true, event: "cancelled" },
+    },
+  },
   purchase_shipment: {
     actions: {
       ...CRUD,
@@ -185,6 +199,52 @@ export const MODULES = {
     },
   },
   purchase_receipt: {
+    actions: {
+      ...CRUD,
+      post: { permission: true, event: "posted" },
+      reverse: { permission: true, event: "reversed" },
+    },
+  },
+  sales_delivery: {
+    actions: {
+      ...CRUD,
+      post: { permission: true, event: "posted" },
+      reverse: { permission: true, event: "reversed" },
+    },
+  },
+  sales_invoice: {
+    sidebar: {
+      group: "sales",
+      icon: "file-text",
+      path: "/sales-invoices",
+      label: { en: "Sales invoices", ar: "فواتير المبيعات" },
+    },
+    actions: {
+      ...CRUD,
+      post: { permission: true, event: "posted" },
+      reverse: { permission: true, event: "reversed" },
+    },
+  },
+  sales_credit_note: {
+    sidebar: {
+      group: "sales",
+      icon: "file-text",
+      path: "/sales-credit-notes",
+      label: { en: "Credit notes", ar: "إشعارات الدائن" },
+    },
+    actions: {
+      ...CRUD,
+      post: { permission: true, event: "posted" },
+      reverse: { permission: true, event: "reversed" },
+    },
+  },
+  customer_payment: {
+    sidebar: {
+      group: "sales",
+      icon: "badge-dollar-sign",
+      path: "/customer-payments",
+      label: { en: "Customer payments", ar: "مدفوعات العملاء" },
+    },
     actions: {
       ...CRUD,
       post: { permission: true, event: "posted" },

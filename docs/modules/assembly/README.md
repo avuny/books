@@ -10,6 +10,8 @@
 
 Legend: **[CURRENT]** exists in code today, **[PROPOSED]** recommended, **[OPEN]** needs the owner's answer (section 5).
 
+> **Owner decisions, Batch 1 (2026-11-27).** Q2, Q3, Q4 and Q9 are decided (section 5). Q3 changes the build order: weighted average costing and the cost integrity rule are built and tested first, see [`../inventory-costing/SPEC.md`](../inventory-costing/SPEC.md) and [`../inventory-costing/ANALYSIS.md`](../inventory-costing/ANALYSIS.md). Manufacturing starts only after that work passes its gate 6. Assembly never implements its own costing math.
+
 ## 1. The ask
 
 Let a user create an item from existing items. The range is wide: put item A in a bag (item B) and sell the result, up to building a complex product from many parts. The user can also add cost that is not stock: labor, machine time, overhead, a service. Stock, batches, stock movements, inventory projections, costing and accounting must all stay correct.
@@ -30,8 +32,8 @@ Let a user create an item from existing items. The range is wide: put item A in 
 
 ## 3. Findings that shape the design
 
-1. **Weighted average is not implemented.** `weighted_average` is in the valuation enum but every costing path uses FIFO layers. Assembly must pick one behaviour (Q3).
-2. **Stock without a cost layer exists.** Adjustment gains create no layer. Assembling from such stock would understate the product cost (Q2).
+1. **Weighted average is not implemented.** `weighted_average` is in the valuation enum but every costing path uses FIFO layers. Decided (Q3): build it first, see the inventory-costing spec.
+2. **Stock without a cost record exists.** Adjustment gains create no layer. Decided (Q2): every stock-in must carry a valid cost, enforced centrally. Assembly blocks if a cost cannot be determined.
 3. **The adjustment journal never posts** (always amount 0, failure ignored, transfer spec 13.5). Assembly must treat a failed journal as a rollback, never ignore it.
 4. **The GL effect of a pure assembly is zero** with one inventory account. Only the additional costs (labor, overhead, service) need a journal. The design keeps a hook for per-category inventory accounts later.
 5. **Engine batch auto-allocation loses the mapping** between a request line and the batch lines it expands to. The transfer module solved this by allocating batches in its own service. Assembly must do the same, because it must record which component batch went into which output batch (recall and traceability).
@@ -51,14 +53,14 @@ Let a user create an item from existing items. The range is wide: put item A in 
 | # | Question | Default used in the specs |
 |---|---|---|
 | Q1 | v1 scope: single-step assembly (no WIP) or full production orders with WIP, partial completion and scrap? | Both, in phases. v1 is single-step. The same order grows into staged production later, see [STAGED-PRODUCTION.md](./STAGED-PRODUCTION.md). v1 only adds small hooks (a `mode` column and a `posting_seq` column). |
-| Q2 | Component stock that has no cost layer (for example adjustment gains): block, or fall back to the item's default cost price? | Block with a clear error. A later flag can allow the fallback, marked "estimated". |
-| Q3 | Weighted average items: consume FIFO layers anyway until weighted average exists, or block assembly for them? | Consume FIFO layers and document the gap. The first weighted average implementation must go into the costing service so assembly and sales share it. |
-| Q4 | Labor, machine and overhead: credit a new "Manufacturing cost absorbed" account (standard absorption costing), or credit accounts payable or cash directly? | New mapping key `ASSEMBLY_COST_ABSORBED`, default account 5600. Real wages stay in Salaries. The difference shows as under or over absorbed. |
+| Q2 | Component stock that has no cost record | **DECIDED.** Block assembly, and enforce cost integrity for the whole inventory system. Every stock-in needs a valid cost (inherited from its source, or typed or confirmed by the user for opening stock and positive adjustments). Never fall back to the item's default cost. A real zero cost must be stated with a reason, a missing cost is an error. Enforced in the stock engine, not only in forms. Detail: inventory-costing SPEC R1 to R9. |
+| Q3 | Weighted average items | **DECIDED.** Implement weighted average costing first, centrally, for all inventory workflows. No FIFO fallback for weighted average items. Write the analysis and spec, then implement. Manufacturing waits and reuses the central engine. Detail: inventory-costing SPEC. |
+| Q4 | Labor, machine and overhead accounting | **DECIDED.** Credit a Manufacturing Cost Absorbed account (5600), never cash or payables. Components are credited from their inventory accounts, the output is debited with the full cost, allocated labor, machine and overhead are credited to 5600. Actual wages and expenses stay in their normal workflows, so nothing is counted twice. Under and over absorption is tracked and has a period end treatment. The account is a contra expense, not revenue. Detail: assembly-order SPEC section 9.5 and 9.6. |
 | Q5 | One warehouse per assembly order, or components from several warehouses? | One warehouse per order. Move stock with a transfer first. |
 | Q6 | Output expiry for expiry-tracked products: shelf life from the item, capped by the earliest component expiry? | Yes. The user may shorten it, not lengthen it. |
 | Q7 | Service items (not stock tracked) as BOM lines? | No. Use cost types for non-stock cost. |
 | Q8 | Can the produced batch start as `quarantined` (pending QC)? The engine allows receive into quarantine. | Default `available`; the order has a "produce as quarantined" switch (phase 2 UI). |
-| Q9 | Reversal after the output was sold or used? | Blocked. The fix is a disassembly document (phase 2) or an adjustment. |
+| Q9 | Undo after output was used | **DECIDED.** Block the undo if any output was sold, consumed in another process, transferred or otherwise used. Undo only when the whole output is untouched and available and the components and their valuation can be restored consistently. Disassembly is a separate future document with its own rules, never an unrestricted reversal. Detail: assembly-order SPEC R28 to R30 and R36. |
 | Q10 | Business date: may a user backdate an assembly? | Date must be today or earlier and inside an open period. Stock movement time is the posting time. |
 | Q11 | BOM versioning? | No versions. An order snapshots the BOM lines at draft time, so editing a BOM never changes history. Several BOMs per output item are allowed, one default. |
 | Q12 | Default cost types seeded per organization (Labor, Overhead)? | Yes, plus the user can add more. |
@@ -84,7 +86,7 @@ Stock at the moment of posting (FIFO layers): candles layer 20.00 each, box 8.00
 | Module | Change | Needed by |
 |---|---|---|
 | accounting | Append mapping key `ASSEMBLY_COST_ABSORBED` (DB enum migration, allowed type EXPENSE), default chart account 5600, backfill for existing organizations, new event `assembly_cost` and source type `assembly_cost`, locale labels. | assembly-order post |
-| inventory-costing | New helper to find the `inventory_items` row and `inventory_item_batches` row for a movement line (the same lookup `costLayerAdapter` does for receipts). Optional `weighted_average` support decision (Q3). No change to existing methods. | assembly-order post |
+| inventory-costing | Replaced by the inventory-costing work: central valuation engine, weighted average costing, cost integrity rule (see [`../inventory-costing/SPEC.md`](../inventory-costing/SPEC.md)). Assembly uses the engine API only: consume lines return their cost, produce passes an inherited cost. | all assembly phases |
 | item | Use `can_assembled`: output items need it. Block turning it off while an active BOM or a posted assembly uses the item. Item details gets "Bills of materials" and "Used in" panels. | BOM, UI |
 | batch | Reuse `ensureBatches`. New read for forward and backward trace (which component batches went into which output batch). | assembly-order trace |
 | warehouse | Verify every organization (old ones too) has the PRODUCTION system location. Add a backfill if not. | assembly-order post |
@@ -97,7 +99,8 @@ Stock at the moment of posting (FIFO layers): candles layer 20.00 each, box 8.00
 | Phase | Content | Gate |
 |---|---|---|
 | 0 | Owner answers Q1 to Q14. Run the repository checks of each SPEC section 13. | Answers logged in each PROGRESS decision log. |
-| 1 | Accounting and costing groundwork: mapping key, chart account, backfill, `assembly_cost` event, costing lookup helper. | Existing tests pass. New tests for the event and the backfill. Journal fails loudly. |
+| A | **Prerequisite, not part of assembly:** inventory costing phases 0 to 6 (cost integrity, weighted average, adjustments, conversion, reconciliation). | Inventory-costing gate 6. |
+| 1 | Accounting groundwork: mapping key, chart account (contra expense), backfill, `assembly_cost` event, per account journal builder. | Existing tests pass. New tests for the event and the backfill. Journal fails loudly. |
 | 2 | `assembly-cost-type` backend and UI. | Module gate in its TEST-PLAN. |
 | 3 | `bill-of-materials` backend, then UI (cycle check, estimate, availability). | Module gate. |
 | 4 | `assembly-order` drafts (create, scale from BOM, preview, update, cancel). | No stock, cost or journal effect from drafts, tested. |
@@ -109,6 +112,8 @@ Stock at the moment of posting (FIFO layers): candles layer 20.00 each, box 8.00
 Each phase ships as its own PR. Phases 1 to 3 do not change stock behaviour, so they are safe to merge early.
 
 ## 9. Phase 2 (not in v1, but v1 must not block it)
+
+Disassembly rules decided by the owner (Q9): it is its own document and process, not an unrestricted reversal. It needs its own stock movements, costing (components come back at a defined cost basis from the output's value, through the central engine), accounting, traceability (which batches it came from) and validation (only available finished goods, no use of reserved stock).
 
 The design for staged production with WIP (statuses, movements, WIP account, costing, what v1 adds now) is in [STAGED-PRODUCTION.md](./STAGED-PRODUCTION.md).
 
