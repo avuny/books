@@ -1,4 +1,5 @@
-import { useFieldArray, type Control } from "react-hook-form"
+import { useEffect, useRef } from "react"
+import { useFieldArray, useWatch, type Control, type UseFormSetValue } from "react-hook-form"
 import { PlusIcon, Trash2Icon } from "lucide-react"
 
 import {
@@ -18,6 +19,7 @@ type OpeningStockCopy = ItemFormCopy["openingStock"]
 
 type OpeningStockFieldsProps = {
   control: Control<CreateItemFormInput, any, any>
+  setValue: UseFormSetValue<CreateItemFormInput>
   copy: OpeningStockCopy
   locationSource: AsyncOptionsSource
   comboboxCopy: AsyncComboboxCopy
@@ -30,6 +32,7 @@ type OpeningStockFieldsProps = {
 /** Pure: no i18n, no API calls. Everything injected via props. */
 export function OpeningStockFields({
   control,
+  setValue,
   copy,
   locationSource,
   comboboxCopy,
@@ -76,6 +79,7 @@ export function OpeningStockFields({
                 key={field.id}
                 index={index}
                 control={control}
+                setValue={setValue}
                 copy={copy}
                 locationSource={locationSource}
                 comboboxCopy={comboboxCopy}
@@ -107,6 +111,7 @@ export function OpeningStockFields({
 type LineCardProps = {
   index: number
   control: Control<CreateItemFormInput, any, any>
+  setValue: UseFormSetValue<CreateItemFormInput>
   copy: OpeningStockCopy
   locationSource: AsyncOptionsSource
   comboboxCopy: AsyncComboboxCopy
@@ -120,6 +125,7 @@ type LineCardProps = {
 function LineCard({
   index,
   control,
+  setValue,
   copy,
   locationSource,
   comboboxCopy,
@@ -133,6 +139,38 @@ function LineCard({
     label: u.symbol ? `${u.name} (${u.symbol})` : u.name,
   }))
   const hasUnits = units.length > 1
+  const base = units.find((u) => u.isBase)
+
+  const unitId = useWatch({ control, name: `openingStockLines.${index}.unitId` })
+  const cost = useWatch({ control, name: `openingStockLines.${index}.cost` })
+  const baseCostPrice = useWatch({ control, name: "costPrice" })
+  const unitPrices = useWatch({ control, name: "unitPrices" })
+
+  /** The picked unit's cost price from step 2 (base unit = the item's cost price). */
+  const defaultCost =
+    !unitId || unitId === base?.id
+      ? (baseCostPrice ?? "").trim()
+      : ((unitPrices ?? [])
+          .find((p) => p.unitId === unitId)
+          ?.costPrice?.trim() ?? "")
+
+  // Visible prefill: a blank cost, or one still holding the previous unit's default, follows
+  // the picked unit's cost price. A cost the user typed is kept. The submit mapper
+  // (toCreateItemInput) repeats this default as a safety net.
+  const prevDefault = useRef(defaultCost)
+  useEffect(() => {
+    const current = (cost ?? "").trim()
+    if (
+      (current === "" || current === prevDefault.current) &&
+      current !== defaultCost
+    ) {
+      setValue(`openingStockLines.${index}.cost`, defaultCost, {
+        shouldDirty: true,
+      })
+    }
+    prevDefault.current = defaultCost
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [defaultCost])
 
   return (
     <div className="rounded-md border border-border bg-card p-3 shadow-xs">

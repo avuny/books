@@ -181,6 +181,7 @@ export function CreateItemForm({
             stock: () => (
               <OpeningStockFields
                 control={control}
+                setValue={form.setValue}
                 copy={copy.openingStock}
                 locationSource={locationSource}
                 comboboxCopy={comboboxCopy}
