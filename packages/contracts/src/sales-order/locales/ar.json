@@ -1,4 +1,49 @@
 {
+  "actions": {
+    "view": "عرض التفاصيل",
+    "delete": "حذف المسودة",
+    "confirm": "تأكيد",
+    "confirmTitle": "تأكيد أمر البيع",
+    "confirmDescription": "التأكيد يحجز المخزون للأمر. اختر ما يحدث عند نقص المخزون. لا يمكن تعديل الأمر المؤكد.",
+    "close": "إغلاق الأمر",
+    "closeTitle": "إغلاق أمر البيع",
+    "closeDescription": "الإغلاق يوقف حجز الكمية المتبقية غير المسلّمة. اذكر السبب.",
+    "cancel": "إلغاء الأمر",
+    "cancelTitle": "إلغاء أمر البيع",
+    "cancelDescription": "الإلغاء يحرر المخزون المحجوز. ينجح فقط قبل تسليم أي كمية.",
+    "deleteTitle": "حذف المسودة",
+    "deleteDescription": "سيتم حذف مسودة أمر البيع نهائيًا.",
+    "reason": "السبب",
+    "dismiss": "إبقاء",
+    "back": "العودة إلى أوامر البيع",
+    "edit": "تعديل",
+    "reservationPolicy": "عند نقص المخزون"
+  },
+  "details": {
+    "title": "أمر البيع",
+    "customer": "العميل",
+    "orderDate": "تاريخ الأمر",
+    "expectedDelivery": "التسليم المتوقع",
+    "paymentTerm": "شرط الدفع",
+    "warehouse": "المستودع",
+    "customerReference": "مرجع العميل",
+    "notes": "ملاحظات",
+    "closeReason": "سبب الإغلاق",
+    "lines": "بنود الأمر",
+    "subtotal": "المجموع الفرعي",
+    "discount": "الخصم",
+    "total": "الإجمالي",
+    "none": "لا يوجد",
+    "notFound": "أمر البيع غير موجود",
+    "tax": "الضريبة",
+    "taxRate": "نسبة الضريبة",
+    "discountRate": "نسبة الخصم",
+    "lineTotal": "الإجمالي"
+  },
+  "empty": {
+    "title": "لا توجد أوامر شراء",
+    "description": "أنشئ أمر بيع لطلب مخزون من مورد."
+  },
   "errors": {
     "SALES_ORDER_NOT_FOUND": "أمر الشراء غير موجود",
     "SALES_ORDER_NOT_EDITABLE": "يمكن تعديل أوامر الشراء المسودة فقط",
@@ -34,6 +79,45 @@
     "SALES_ORDER_NUMBER_TAKEN": "تعذر تخصيص رقم لأمر الشراء. حاول مرة أخرى",
     "SALES_ORDER_INSUFFICIENT_STOCK": "المخزون المتاح لا يكفي لحجز كامل الكمية"
   },
+  "form": {
+    "title": "أمر بيع جديد",
+    "description": "اطلب مخزونًا من مورد. احفظه كمسودة ثم أكده عند الانتهاء.",
+    "customer": "العميل",
+    "customerPlaceholder": "اختر مورد",
+    "orderDate": "تاريخ الأمر",
+    "expectedDelivery": "التسليم المتوقع",
+    "paymentTerm": "شرط الدفع",
+    "paymentTermPlaceholder": "مستحق عند الاستلام",
+    "warehouse": "المستودع",
+    "customerReference": "مرجع العميل",
+    "notes": "ملاحظات",
+    "linesTitle": "بنود الأمر",
+    "addLine": "إضافة بند",
+    "removeLine": "حذف البند",
+    "noLines": "أضف صنفًا واحدًا على الأقل",
+    "itemPlaceholder": "اختر صنفًا",
+    "quantity": "الكمية",
+    "unitPrice": "سعر الوحدة",
+    "discount": "الخصم",
+    "lineNotes": "ملاحظات البند",
+    "save": "حفظ كمسودة",
+    "saving": "جارٍ الحفظ...",
+    "saveConfirm": "حفظ وتأكيد",
+    "cancel": "إلغاء",
+    "invalidMoney": "يجب أن تكون الأسعار أرقامًا عادية بخانات عملة صحيحة",
+    "currencyNote": "المبالغ بعملة {currency}",
+    "taxRate": "الضريبة %",
+    "discountRate": "الخصم %",
+    "invalidRate": "النسب بين 0 و100 بحد أقصى خانتين عشريتين",
+    "locationPlaceholder": "اختر الموقع",
+    "discountMode": "نوع الخصم",
+    "discountModePercent": "نسبة مئوية",
+    "discountModeAmount": "مبلغ ثابت",
+    "rateConflict": "استخدم نسبة خصم أو مبلغ خصم في السطر، وليس الاثنين",
+    "editTitle": "تعديل أمر البيع",
+    "update": "حفظ التعديلات",
+    "updating": "جارٍ الحفظ…"
+  },
   "labels": {
     "status": {
       "DRAFT": "مسودة",
@@ -47,6 +131,23 @@
       "ALLOW_BACKORDER_WITHOUT_RESERVATION": "السماح بالطلب المتأخر دون حجز"
     }
   },
+  "lineFields": {
+    "item": "الصنف",
+    "location": "الموقع",
+    "unit": "الوحدة",
+    "ordered": "المطلوب",
+    "unitPrice": "سعر الوحدة",
+    "net": "الصافي",
+    "reserved": "محجوز",
+    "delivered": "مسلّم",
+    "unreserved": "غير محجوز"
+  },
+  "list": {
+    "title": "أوامر البيع",
+    "description": "الأوامر المقدمة للعملاء وما تبقى قيد الطلب.",
+    "newButton": "أمر بيع جديد",
+    "searchPlaceholder": "ابحث بالرقم أو العميل"
+  },
   "msgs": {
     "SALES_ORDER_CREATED": "تم إنشاء أمر البيع بنجاح",
     "SALES_ORDER_UPDATED": "تم تحديث أمر البيع بنجاح",
@@ -54,5 +155,26 @@
     "SALES_ORDER_CONFIRMED": "تم تأكيد أمر البيع. تم حجز المخزون",
     "SALES_ORDER_CLOSED": "تم إغلاق أمر البيع",
     "SALES_ORDER_CANCELLED": "تم إلغاء أمر البيع"
+  },
+  "pagination": {
+    "showing": "عرض {from} إلى {to} من {total} أمر بيع"
+  },
+  "scopes": {
+    "all": "الكل",
+    "DRAFT": "مسودة",
+    "CONFIRMED": "مؤكد",
+    "CLOSED": "مغلق",
+    "CANCELLED": "ملغي"
+  },
+  "table": {
+    "number": "الرقم",
+    "customer": "العميل",
+    "orderDate": "تاريخ الأمر",
+    "expectedDelivery": "التسليم المتوقع",
+    "total": "الإجمالي",
+    "lines": "البنود",
+    "status": "الحالة",
+    "actions": "الإجراءات",
+    "actionsFor": "إجراءات {number}"
   }
 }
