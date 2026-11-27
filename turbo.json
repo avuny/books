@@ -6,6 +6,7 @@
     "CLOUDFLARE_ACCOUNT_ID",
     "VITE_API_URL",
     "VITE_PLATFORM_API_URL",
+    "PLATFORM_API_URL",
     "NODE_ENV",
     "DATABASE_URL",
     "ACCESS_TOKEN_SECRET",
@@ -61,6 +62,11 @@
       "dependsOn": ["^build", "@avuny/platform-web#api:generate"],
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
       "outputs": ["dist/**"]
+    },
+    "@avuny/landing#build": {
+      "dependsOn": ["^build"],
+      "inputs": ["$TURBO_DEFAULT$", ".env*"],
+      "outputs": ["out/**", ".next/**"]
     },
     "deploy": {
       "dependsOn": ["^build"],

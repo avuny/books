@@ -23,6 +23,7 @@ Repository guide for AI agents working in this monorepo.
 | `apps/web`    | `@avuny/books-web`    | Client SPA. Uses TanStack file-based routing (`src/routes`), feature modules (`src/features/*`), and Orval-generated queries (`src/api/*`). |
 | `apps/platform-server` | `@avuny/platform-server` | Platform (SaaS back office) API: admin identity, plans, subscriptions, payments, webhooks, jobs, landing content. Separate Worker. Scaffold only; see its AGENTS.md. |
 | `apps/platform-web` | `@avuny/platform-web` | Platform admin web app (SaaS back office), talks to `apps/platform-server`. Vite, React 19, TanStack Router and Query, Orval client. Scaffold only; see its AGENTS.md. |
+| `apps/landing` | `@avuny/landing` | Public marketing site (Next.js static export) rendered from the admin-published site snapshot. Scaffold only; see its AGENTS.md. |
 
 ### Shared Packages (`packages/`)
 
