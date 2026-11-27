@@ -111,10 +111,10 @@ Tests reference these ids.
 
 **Cost**
 
-- R16. Component cost is the real value taken from cost layers (`consumeFifo`), never the item's default cost price. Both valuation methods use the layers in v1 (Q3).
-- R17. If the layers do not cover the full required quantity of any component, the post fails with `ASSEMBLY_COMPONENT_UNCOSTED` before any write. Nothing is estimated. (Q2)
-- R18. All consumed layers and the order use one currency (the organization currency). Otherwise `ASSEMBLY_CURRENCY_MISMATCH`.
-- R19. Total cost = sum of consumed allocation values + sum of cost line amounts (integer minor units). The output layer receives exactly this total as `received_value`. No value is lost or created by rounding. Cost per unit is a derived display value only.
+- R16. Component cost is the real value the central costing engine returns for each consume line (FIFO layers or weighted average pool, by the item's method), never the item's default cost price. Assembly contains no costing math of its own (Q3, inventory-costing SPEC section 2).
+- R17. If the engine cannot determine the cost of any component line (`COST_UNDETERMINED`, `COST_NEGATIVE_STOCK_NOT_SUPPORTED`, `COST_METHOD_NOT_READY`), the post fails with `ASSEMBLY_COMPONENT_UNCOSTED` and the engine's reason. Nothing is estimated. With the cost integrity rule (inventory-costing R1 to R9) this should only happen for legacy stock. (Q2)
+- R18. All consumed cost and the order use one currency (the organization currency). Otherwise `ASSEMBLY_CURRENCY_MISMATCH` (the engine reports `COST_CURRENCY_MISMATCH`).
+- R19. Total cost = sum of consumed allocation values + sum of cost line amounts (integer minor units). The produce line is posted with cost source `INHERITED` from the consume movement plus the additional cost, and the engine records exactly this total as its value (FIFO layer or WAC pool receipt). No value is lost or created by rounding. Cost per unit is a derived display value only.
 - R20. A zero total cost is allowed and shows a warning in the UI.
 - R21. Cost lines: the cost type must be active; `amount_minor >= 0`; optional `quantity` and `rate_minor` are informational (for example 3 hours x 5.00) and, when both are present, `amount_minor` must equal their product rounded half up. At most `ASSEMBLY_MAX_COST_LINES` (20).
 
@@ -129,8 +129,14 @@ Tests reference these ids.
 **Reversal and cancel**
 
 - R27. Only POSTED orders can be reversed, once.
-- R28. Reversal is allowed only if the full produced quantity is still on hand at the output location and batch and the output cost layer has `remaining_qty = received_qty` (`ASSEMBLY_OUTPUT_ALREADY_USED` otherwise). (Q9)
-- R29. Reversal order: reverse the produce movement, consume the output layer, reverse the consume movement, restore the component allocations on their original layers (`restoreAllocationsOfLine`), reverse the journal with `reverseJournalEntry`. One transaction.
+- R28. **Reversal is allowed only when the whole output is untouched.** The backend checks all of these in the reverse transaction, after locking the order, and the UI only displays the result:
+  1. the full produced quantity is still on hand at the output location and batch, and not reserved (`on_hand - reserved >= produced`);
+  2. no movement line after the produce movement takes the output item out of the output location (and batch, when tracked). This covers sales, use as a component in another assembly, transfers and loss adjustments;
+  3. the costing engine allows reversing the produce entry (inventory-costing R27: no later value-out on the item pool, or for FIFO the output layer is untouched);
+  4. the consume movement can be reversed and the engine restores the consumed cost at its original value (inventory-costing R28);
+  5. the journal can be reversed (open accounting period).
+  If any check fails the reverse is blocked with `ASSEMBLY_OUTPUT_ALREADY_USED` and a plain explanation that names the documents that used the output. Partial reversal does not exist. (Q9)
+- R29. Reversal order: reverse the produce movement (engine reverses the produce cost entry), reverse the consume movement (engine restores the consumed cost), reverse the journal with `reverseJournalEntry`. One transaction. No assembly code touches layers or pools directly.
 - R30. Cancel and edit and delete are DRAFT only.
 
 **General**
@@ -138,6 +144,7 @@ Tests reference these ids.
 - R31. Every table row carries `org_id`; composite FKs keep item, location, batch and warehouse in the same organization.
 - R32. Order numbers are `ASM-` plus six digits, unique per organization, allocated under an advisory lock as the transfer module does. Do not copy the `count + 1` pattern.
 - R33. Audit events are written after commit (section 8).
+- R36. **Disassembly is not a reversal.** Unpacking finished goods back into parts is a separate document and process in a later phase, with its own stock movements, costing rules, journal, trace and validation. The reverse action never serves as disassembly, and the output of a posted assembly that has been used can only be handled by that document or by an adjustment. (Q9)
 - R35. Extensibility hooks (staged production, see [`../assembly/STAGED-PRODUCTION.md`](../assembly/STAGED-PRODUCTION.md) section 7): the service is built from internal `issue`, `addCost` and `finish` operations that `post` composes in one transaction; the PRODUCTION location is resolved in one function; status transitions live in one table driven function; reports and trace read consumption and output rows, not movements by order id. Only `SINGLE_STEP` is accepted in v1.
 - R34. An item that has a POSTED assembly keeps the existing lock on base unit, tracking flags and valuation method (already enforced once a movement exists). `can_assembled` cannot be turned off while an active BOM or a non-cancelled order references the item.
 
@@ -289,11 +296,11 @@ All inside `db.transaction`. Validate everything first, write second.
 3. Resolve component batches (R12) and check availability (R11). Check the number of movement lines (R6).
 4. Resolve or create the output batch only after step 6 (needs consumed batch expiry), but verify the inputs now.
 5. Post the **consume** movement: `stockMovement.post({ type: "assembly_consume", sourceType: "assembly_order_consume", sourceId: order.id, sourceRef: number, lines })`. Lines carry explicit batch ids. The engine locks balances in key order. A failure returns before writing.
-6. For each consume line (by returned line id): find the `inventory_items` row and, for batches, the `inventory_item_batches` row; call `consumeFifo`. If `uncoveredQty > 0` fail with `ASSEMBLY_COMPONENT_UNCOSTED` (this check also runs as a dry check in step 3 against the layers so the common case fails before any write). Sum the allocation values per line into `assembly_order_consumptions`.
+6. The engine returns the cost of every consume line with the posting result (cost entries or allocations per line). If the cost cannot be determined it fails and nothing is written (R17). Sum the values per line into `assembly_order_consumptions`.
 7. Compute material cost, add cost lines, get total (R19).
 8. Resolve or create the output batch through `ensureBatches` (R13, R14).
 9. Post the **produce** movement (`assembly_produce`, `assembly_order_produce`).
-10. Create the output cost layer through the costing service with `received_value = total`, `received_qty = output base qty`, source line = the produce line.
+10. Post the produce line with cost source `INHERITED` (consume movement id) plus the additional cost total, so the engine records the output cost exactly (FIFO layer or WAC pool receipt). Steps 9 and 10 are one engine call.
 11. If additional cost is above zero, call `postBusinessEvent({ event: "assembly_cost", sourceId: order.id, date, amountMinor, ... }, tx)`. On failure throw so the transaction rolls back.
 12. Update the order: status POSTED, movement ids, journal id, totals, currency, posted_at, posted_by; update the output row result columns.
 13. After commit: audit event.
@@ -302,10 +309,13 @@ Idempotency and ordering notes: steps 5 and 9 use unique sources, so a repeated 
 
 ### 9.3 Costing detail
 
+In this section "layer" describes the FIFO strategy. For weighted average items the engine records the same facts as pool entries (inventory-costing SPEC). Assembly code sees only the engine API: consume lines return cost, the produce line takes an inherited cost.
+
 - Per component line: `value = sum(allocated_value)`. The costing service already keeps integer math with exact remainder (`valueOfTake`), so the sum of takes equals the layer value.
 - The output layer is one layer per output batch. With one output row, one layer. Its age (`received_at`) is the produce movement time, so FIFO for later sales treats it as new stock.
 - Layer reads for later sales: sales delivery consumes this layer like any receipt layer. The output layer has `origin_cost_layer_id = null` (it is a new base layer, not derived), which satisfies `ux_inventory_cost_layer_org_base_*`.
-- Valuation method: see Q3. If the owner chooses to block weighted average items, add `ASSEMBLY_VALUATION_METHOD_UNSUPPORTED`.
+- Valuation method (Q3, decided): both FIFO and weighted average items work, through the central engine only. An item on weighted average whose pool is not ready (inventory-costing `COST_METHOD_NOT_READY`) blocks the post. There is no FIFO fallback.
+- Weighted average: consume values come from the pool average at the time of posting, the output joins its own item's pool as one receipt at the total cost.
 
 ### 9.4 Reversal algorithm
 
@@ -313,12 +323,19 @@ All inside one transaction, section 4 R27 to R29. Steps: lock order, check POSTE
 
 ### 9.5 Accounting
 
-- **Why only additional cost posts:** the chart has one `INVENTORY_ASSET` account for all stock items. Components leaving and the output arriving both sit inside it, so materials need no line. If per-category inventory accounts are added later, add component credit and output debit lines here behind that change.
+- **Journal built per inventory account (Q4, decided).** Components are credited from their own inventory account, the output is debited to its inventory account with the full cost (materials plus additional cost), and additional cost is credited to Manufacturing Cost Absorbed. The builder nets lines per account and skips zero lines. Today the chart has one `INVENTORY_ASSET` account, so the material lines net to zero and only the additional cost lines remain. When per category inventory accounts exist (inventory-costing question W6), the same builder produces the raw material credit and the finished goods debit with no assembly change. Account lookup goes through one function that returns `INVENTORY_ASSET` today.
 - **Template `assembly_cost`:** Dr `INVENTORY_ASSET` amount, Cr `ASSEMBLY_COST_ABSORBED` amount. Source type `assembly_cost` (append to `ACCOUNTING_SOURCE_TYPES`), source id = order id. Zero amount is never posted (the template drops zero lines and the service rejects an empty entry), so the caller skips the call.
 - **Absorption:** labor and overhead are real expenses booked elsewhere (salaries, rent). The credit to the absorbed account offsets them, so the cost moves into inventory without changing profit at the time of assembly. It reaches cost of goods sold when the output is sold. The balance left on the absorbed account is under or over absorption.
-- **Presentation check (phase 0):** the account has type EXPENSE with a credit balance. Verify that the profit and loss report shows it correctly.
+- **Classification (Q4, decided):** 5600 is an EXPENSE account with a credit normal balance (a contra expense). The chart already supports a normal balance that differs from the type default. It is never revenue and never in revenue totals. Placement: put it in the same report section as the actual production costs it offsets (operating expenses) so gross profit is not overstated before the goods are sold. If it sits in cost of sales the credit lifts gross profit at assembly time while the wages stay in operating expenses. Verify the parent account and the profit and loss presentation in phase 0 (accountant to confirm).
 - **Backfill:** `syncAccountingDefaults` adds the mapping and account for existing organizations. If an organization already uses code 5600 for a custom account, the initializer rolls that organization back today. Handle by choosing the next free code, or leaving the key unmapped so the post fails with `ASSEMBLY_MAPPING_MISSING` and a clear message.
 - **Currency and period:** organization currency only. Posting date must be in an open period (the accounting service checks it).
+
+### 9.6 Double counting, under and over absorption, period end (Q4)
+
+- **No double counting.** Assembly cost lines are allocations, not bills or payments. They never credit cash, accounts payable or a salary payable, and never create a vendor bill or a payment. Actual wages, supplier invoices for services and overhead stay in their normal workflows and hit their own expense accounts. The absorption credit moves part of that expense into inventory (Dr Inventory, Cr 5600), so profit is not changed at assembly time. The cost type form and the order form say this in plain words.
+- **Tracking.** Cost types can name the expense accounts that hold the actual cost (reporting only, no posting). The absorption report per period shows: absorbed (credits to 5600 from posted orders), actual (debits on the named expense accounts), and the difference. Actual above absorbed is under absorbed, actual below absorbed is over absorbed.
+- **Period end treatment (default, accountant to confirm):** under absorption needs no entry, the unabsorbed part simply stays as period expense. Over absorption leaves a credit in 5600 that exceeds the actual cost, so it is closed with a journal Dr 5600, Cr Cost of Goods Sold, dated the last day of the period. An optional close action in phase 8 builds this journal from the report and needs the post permission and an open period. Material variances (prorating over inventory and cost of goods sold) are out of v1.
+- **Audit.** Every absorption line keeps its order, cost type and amount, so any period balance of 5600 can be traced to documents.
 
 ## 10. Reporting and reconciliation
 
@@ -394,7 +411,10 @@ Phases and task ids live in [`PROGRESS.md`](./PROGRESS.md). Order: 0 decisions, 
 ## 14. Decisions to preserve
 
 - Single-step post with two movements and one transaction in v1. WIP is a later phase with its own location role.
-- Real cost from layers, never default prices. Uncosted stock blocks the post (Q2).
+- Real cost from the central costing engine, never default prices and never an own calculation. Stock whose cost cannot be determined blocks the post (Q2, Q3).
+- Manufacturing waits for the inventory-costing work (weighted average and cost integrity).
+- Reversal only when the whole output is untouched, disassembly is its own document (Q9).
+- Additional cost credits Manufacturing Cost Absorbed (5600, contra expense), never cash or payables (Q4).
 - Batches are picked by the assembly service so the genealogy is exact.
 - Only additional cost posts a journal, through a new absorbed mapping key (Q4).
 - The order snapshots BOM data. BOM edits never rewrite history.

@@ -13,6 +13,9 @@ Resume protocol: 1) read AGENTS.md files and SPEC sections 0 to 3 and the curren
 Tick a task only when its "done when" is true and evidence is in the Verification log. Log decisions and deviations; never silently edit SPEC.
 Legend: `[ ]` todo · `[~]` in progress · `[x]` done · `[!]` blocked · `[-]` not applicable
 
+## Blocked by
+Inventory costing (weighted average and cost integrity): [`../inventory-costing/PROGRESS.md`](../inventory-costing/PROGRESS.md). Assembly implementation starts after its gate 6. Documentation and decisions can continue.
+
 ## Next action
 > **P0-01**: owner answers Q7, Q11, Q12, Q13, Q14 in [`../assembly/README.md`](../assembly/README.md) section 5.
 
