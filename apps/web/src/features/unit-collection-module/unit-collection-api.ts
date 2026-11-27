@@ -15,12 +15,14 @@ import {
   listUnitOptions,
   useCreateUnitCollection,
   useDeleteUnitCollection,
+  useGetUnit,
   useGetUnitCollection,
   useListUnitCollections,
   useUpdateUnitCollection,
 } from "@/api"
 
 import { useCursorOptions } from "../lib/options/use-cursor-options"
+import { normalizeUnit } from "../unit-module/unit-api"
 import { useResourceAbilities } from "../lib/permissions/use-resource-abilities"
 import type {
   UnitCollectionDto,
@@ -92,6 +94,22 @@ export function useUnitCollectionList(
     total: query.data?.data.total ?? 0,
     isLoading: query.isLoading,
   }
+}
+
+/**
+ * One unit by id, for conversion previews in the collection form ("1 bag = 50 kg").
+ * Idle until a unit is picked; each id is cached by react-query.
+ */
+export function useUnitDetails(orgId: string, unitId: string | null | undefined) {
+  const query = useGetUnit(orgId, unitId ?? "", {
+    query: { enabled: Boolean(orgId && unitId) },
+  })
+  const data = query.data?.data
+  const unit = useMemo<UnitDto | null>(
+    () => (data ? normalizeUnit(data) : null),
+    [data]
+  )
+  return { unit, isLoading: query.isLoading }
 }
 
 export function useUnitCollection(orgId: string, collectionId: string) {
