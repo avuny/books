@@ -9,8 +9,13 @@ import { PASSWORD_MAX_BYTES, PASSWORD_MIN_LENGTH } from "../user/constants.js"
 
 /** Session cookie: __Host- prefix, separate from every tenant cookie (spec 2.4). */
 export const PLATFORM_AUTH_COOKIE_NAME = "__Host-platform_session"
-/** Path the session cookie is scoped to. */
-export const PLATFORM_AUTH_COOKIE_PATH = "/api/platform-auth"
+/**
+ * Path the session cookie is scoped to. The __Host- prefix (required hardening,
+ * PLATFORM-ADMIN-SPEC 2.4) mandates Path=/ and no Domain attribute, so the path
+ * cannot be narrowed further; the separate cookie name and SameSite=Strict carry
+ * the isolation instead.
+ */
+export const PLATFORM_AUTH_COOKIE_PATH = "/"
 
 /** Single-purpose signed tickets between the two login/enrollment steps. */
 export const PLATFORM_TICKET_TTL_MINUTES = 10
