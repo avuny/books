@@ -3,6 +3,7 @@ import { useFieldArray, useWatch, type Control } from "react-hook-form"
 
 import { InputField } from "@workspace/ui/blocks/form"
 
+import { trimDecimal } from "../../unit-collection-module/lib"
 import type { CreateItemFormInput } from "./item-form-schema"
 import type { CollectionUnitOption, ItemFormCopy } from "./item-form-types"
 
@@ -103,7 +104,7 @@ export function UnitPricesFields({
           <PriceRow
             key={field.id}
             title={fill(copy.unitTitle, { unit: unitLabel(unit) })}
-            hint={`1 ${unit.symbol || unit.name} = ${unit.factor} ${base?.symbol || base?.name || ""}`.trim()}
+            hint={`1 ${unit.symbol || unit.name} = ${trimDecimal(unit.factor)} ${base?.symbol || base?.name || ""}`.trim()}
           >
             <InputField
               control={control}

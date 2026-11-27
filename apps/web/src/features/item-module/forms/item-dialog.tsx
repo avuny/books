@@ -45,7 +45,10 @@ export function ItemDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[90dvh] overflow-y-auto sm:max-w-xl">
+      {/* Create is a 3-step form with wide opening stock lines; the edit form fits the narrow dialog. */}
+      <DialogContent
+        className={`max-h-[90dvh] overflow-y-auto ${itemId ? "sm:max-w-xl" : "sm:max-w-3xl"}`}
+      >
         {/* The form's own heading is visible; this one names the dialog for screen readers. */}
         <DialogHeader className="sr-only">
           <DialogTitle>{t(`${mode}.title`)}</DialogTitle>

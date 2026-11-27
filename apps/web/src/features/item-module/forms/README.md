@@ -6,8 +6,10 @@ Notes for AI agents working on the item forms. Backend rules live in `apps/serve
 `create-item-form.tsx` uses `MultiStepFlow` (`@workspace/ui/blocks/multi-step`).
 
 1. **Details**: name, category, unit or unit collection, tracking flags, reorder point.
-2. **Prices** (optional): cost and selling price of the base unit, plus one optional cost/selling price per other unit of the picked collection (`unit-prices-fields.tsx`). Example: a ton can be cheaper per kg than a kg.
+2. **Prices** (optional): cost and selling price of the base unit, plus one optional cost/selling price per other unit of the picked collection (`unit-prices-fields.tsx`). Example: a ton can be cheaper per kg than a kg. The per-unit equivalence hint ("1 t = 1000 kg") renders the API's padded factor through `trimDecimal`.
 3. **Opening stock** (optional): only shown when the item is inventory tracked.
+
+The create dialog is wider than the edit dialog (`sm:max-w-3xl` vs `sm:max-w-xl` in `item-dialog.tsx`) so a 4-column opening stock line does not truncate its fields.
 
 Next validates only the fields of the current step (`STEP_FIELDS`). Enter does not submit before the last step.
 
@@ -21,7 +23,7 @@ Next validates only the fields of the current step (`STEP_FIELDS`). Enter does n
 - A line starts empty: the form defaults carry one blank line (`BLANK_OPENING_LINE`).
 - Each line takes two rows: location, unit, quantity, cost on row 1; manufactured date and **posting date** on row 2. There is no form-level posting date any more.
 - Each line has a unit (blank = base unit). Quantity and cost are entered in that unit and converted to the base unit by the server.
-- A blank line cost falls back to the cost price set for that line's unit (`toCreateItemInput`).
+- A blank line cost falls back to the cost price set for that line's unit. The fallback is a visible prefill (`LineCard` in `opening-stock-fields.tsx` sets the cost field when the picked unit changes, keeping a value the user typed) and `toCreateItemInput` repeats it at submit as a safety net.
 - `unitId` is only sent when it differs from the base unit.
 
 ## Files
