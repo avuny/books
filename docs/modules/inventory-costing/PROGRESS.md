@@ -40,7 +40,7 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done · `[!]` blocked · `[-]` 
 | P1-02 | Error codes and locales en and ar | Locale parity test | [x] |
 | P1-03 | Schema: pools, entries, layer, allocation and adjustment line columns | Section 5 matches code | [x] |
 | P1-04 | Migration with backfill flags, tested on a copy of data | AC17 | [~] |
-| P2-01 | Valuation engine port and FIFO strategy | Existing FIFO tests pass unchanged | [ ] |
+| P2-01 | Valuation engine port and FIFO strategy | Existing FIFO tests pass unchanged | [~] 2a done: engine and FIFO strategy behind the costing service, no caller uses it yet. 2b to 2d move callers over. Sales delivery keeps its own FIFO adapter until a later phase. |
 | P2-02 | Stock movement post and reverse call the engine, cost input required for value-in | AC1 | [ ] |
 | P2-03 | Opening stock and purchase receipt pass cost inputs, opening cost required | AC1, AC2 | [ ] |
 | P2-04 | Transfer uses the engine, uncovered quantity fails | AC6, AC7 | [ ] |
