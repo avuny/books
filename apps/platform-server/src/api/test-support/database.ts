@@ -1,6 +1,15 @@
 import { readFileSync } from "node:fs"
 import { join } from "node:path"
-import { sql, type Database } from "@avuny/db"
+import {
+  platformAdminRoles,
+  platformAdminSessions,
+  platformAdmins,
+  platformInvites,
+  platformRolePermissions,
+  platformRoles,
+  sql,
+  type Database,
+} from "@avuny/db"
 import { MIGRATIONS_DIR } from "./env.js"
 
 /** Drops everything: tables, enums, data. The test database holds nothing worth keeping. */
@@ -29,10 +38,27 @@ export async function applyMigrations(db: Database): Promise<void> {
 }
 
 /**
- * Empty schema -> migrated. No reference seeds here: the platform seeds (built-in roles,
- * permission catalog) arrive with A1-03 and get their own seed step then.
+ * Empty schema -> migrated. Reference seeds (built-in roles) are NOT applied here:
+ * each test seeds what it needs, so a test can also prove the seeded and unseeded states.
  */
 export async function bootstrapDatabase(db: Database): Promise<void> {
   await resetSchema(db)
   await applyMigrations(db)
+}
+
+/**
+ * Deletes every platform_* row in FK-safe order, except platform_audit_events:
+ * audit is append-only (UPDATE, DELETE and TRUNCATE all raise), so it accumulates
+ * for the whole run and tests must find their rows by id, never by position.
+ * Integration tests call this in beforeEach: platform roles and admins are global
+ * singletons, so tests must own the whole table, and files run sequentially
+ * (fileParallelism is off for the integration project).
+ */
+export async function resetPlatformTables(db: Database): Promise<void> {
+  await db.delete(platformAdminSessions)
+  await db.delete(platformInvites)
+  await db.delete(platformAdminRoles)
+  await db.delete(platformRolePermissions)
+  await db.delete(platformAdmins)
+  await db.delete(platformRoles)
 }

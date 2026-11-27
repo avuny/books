@@ -18,6 +18,8 @@
     "test:int": "docker compose -f ../server/docker-compose.test.yml up -d --wait && vitest run --project integration",
     "test:int:raw": "vitest run --project integration",
     "openapi:generate": "tsx ./scripts/generate-openapi.ts",
+    "seed:platform-roles": "tsx src/cli/seed-platform-roles.ts",
+    "bootstrap:admin": "tsx src/cli/bootstrap-admin.ts",
     "clean:build": "rm -rf dist tsconfig.build.tsbuildinfo .turbo"
   },
   "dependencies": {

@@ -8,7 +8,7 @@ import { matchesRegex, pk, timestamptz } from "../_helpers.js"
  * outlive admins, sessions and invites, and the ids are opaque references.
  *
  * Append-only is enforced in the database by the `platform_audit_events_append_only`
- * trigger installed by the platform identity migration: UPDATE and DELETE raise.
+ * triggers installed by the platform identity migrations: UPDATE, DELETE and TRUNCATE raise.
  * The spec's `at` column is named `occurred_at` here, matching tenant `audit_events`.
  * No secrets, tokens or password hashes are ever stored (PA-R11).
  */

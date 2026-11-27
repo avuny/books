@@ -1,6 +1,7 @@
-import { describe, expect, it } from "vitest"
+import { beforeEach, describe, expect, it } from "vitest"
 import {
   eq,
+  sql,
   platformAdminRoles,
   platformAdminSessions,
   platformAdmins,
@@ -10,6 +11,11 @@ import {
   platformRoles,
 } from "@avuny/db"
 import { db } from "../db.js"
+import { resetPlatformTables } from "./database.js"
+
+beforeEach(async () => {
+  await resetPlatformTables(db)
+})
 
 /**
  * A1-02 verification: the platform identity migration applied on a fresh database
@@ -19,7 +25,7 @@ import { db } from "../db.js"
 
 const inHours = (h: number) => new Date(Date.now() + h * 3_600_000)
 
-async function makeRole(key = "viewer") {
+async function makeRole(key = "schema_viewer") {
   const [role] = await db
     .insert(platformRoles)
     .values({ key, name: "Viewer", isBuiltin: true })
@@ -95,6 +101,12 @@ describe("platform identity schema (A1-02)", () => {
     expect(rows[0]?.action).toBe("login_failed")
   })
 
+  it("rejects TRUNCATE on platform_audit_events (append-only trigger)", async () => {
+    await expect(
+      db.execute(sql`TRUNCATE TABLE "platform_audit_events"`)
+    ).rejects.toThrow(/append-only/i)
+  })
+
   it("rejects DELETE on platform_audit_events (append-only trigger)", async () => {
     const [event] = await db
       .insert(platformAuditEvents)
@@ -119,7 +131,7 @@ describe("platform identity schema (A1-02)", () => {
   })
 
   it("enforces the permission key format", async () => {
-    const role = await makeRole("catalog_manager")
+    const role = await makeRole("schema_catalog_manager")
     await expect(
       db.insert(platformRolePermissions).values({
         roleId: role.id,

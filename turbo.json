@@ -51,7 +51,9 @@
     "TEST_DB_ALLOW_REMOTE",
     "KEEP_TEST_DB",
     "DOTENV_CONFIG_PATH",
-    "DOTENV_CONFIG_QUIET"
+    "DOTENV_CONFIG_QUIET",
+    "WEB_APP_URL",
+    "PLATFORM_BOOTSTRAP_EMAIL"
   ],
   "tasks": {
     "build": {
