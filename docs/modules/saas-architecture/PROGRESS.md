@@ -5,8 +5,8 @@
 | Spec | [`SPEC.md`](./SPEC.md) v1.0 · 2026-11-27 |
 | Last updated | 2026-11-27 |
 | Current phase | S0 |
-| Tasks done | 0 / 33 |
-| Gates passed | 0 / 9 |
+| Tasks done | 0 / 62 |
+| Gates passed | 0 / 16 |
 
 ## How to use this file
 Resume protocol: 1) read AGENTS.md files and SPEC sections 0 to 4 and the current phase. 2) read this file. 3) continue at Next action.
@@ -14,7 +14,7 @@ Tick a task only when its "done when" is true and evidence is in the Verificatio
 Legend: `[ ]` todo · `[~]` in progress · `[x]` done · `[!]` blocked · `[-]` not applicable (say why)
 
 ## Next action
-> **S0-01**: get the owner's answers on the open decisions below. Blocking ones: Q1, Q2, Q4, Q5, Q10. The rest have defaults that may be used if the owner says "use defaults". Also record fixes-plan decisions D1 to D8 (`../SAAS-SPEC-FIXES-PLAN.md`), which are still open.
+> **S0-01**: get the owner's answers on the open decisions below (Q1 to Q14 for the SaaS core, Q15 to Q24 for the admin panel, see `PLATFORM-ADMIN-SPEC.md`). Blocking ones: Q1, Q2, Q4, Q5, Q10, and for the admin panel Q15 and Q20. The rest have defaults that may be used if the owner says "use defaults". Also record fixes-plan decisions D1 to D8 (`../SAAS-SPEC-FIXES-PLAN.md`), which are still open.
 
 ## Status board
 | Phase | Title | Tasks | Gate | Status |
@@ -28,6 +28,13 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done · `[!]` blocked · `[-]` 
 | S6 | Payments | 4 | gate S6 | [ ] |
 | S7 | Billing UI, pricing page, jobs | 3 | gate S7 | [ ] |
 | S8 | Hardening and launch | 1 | gate S8 | [ ] |
+| A1 | Platform apps, admin identity, roles | 6 | gate A1 | [ ] |
+| A2 | Plan and catalog configurator | 5 | gate A2 | [ ] |
+| A3 | Sidebar, permissions, catalog viewer and overrides | 3 | gate A3 | [ ] |
+| A4 | Organizations, users, subscriptions | 4 | gate A4 | [ ] |
+| A5 | Payments and provider events | 3 | gate A5 | [ ] |
+| A6 | Jobs and reminders | 4 | gate A6 | [ ] |
+| A7 | Hardening, old admin migration | 4 | gate A7 | [ ] |
 
 ## Open decisions for the owner
 Each has a proposed default. "Blocks" says which phase cannot start without the answer. Answer with the number and a letter, or "defaults".
@@ -48,6 +55,21 @@ Each has a proposed default. "Blocks" says which phase cannot start without the 
 | Q12 | Invoice numbering | (a) Provider-generated numbers; (b) our own per-organization sequence | (b) if the local processor is used (Egyptian tax invoices may need our own sequence, verify in S0-03), otherwise (a). | S6 |
 | Q13 | Cap on organizations one user may own | Highest cap among the user's organizations, Free default when none | As proposed in SPEC 2.5. | S3 |
 | Q14 | Backfill accounting when Accounting is turned on after Purchasing already ran | (a) Offer a one-time backfill; (b) never, start from the date it is enabled | (b) for v1. Backfill is a separate feature with its own risk. | S3 |
+
+### Admin panel decisions (see `PLATFORM-ADMIN-SPEC.md`)
+| # | Decision | Options | Proposed default | Blocks |
+|---|---|---|---|---|
+| Q15 | Server shape for the admin panel | (a) Separate Worker `apps/platform-server` with admin API, webhooks and cron; (b) a module in the tenant API; (c) separate admin API only | (a). Hard security boundary, separate secrets and database role, separate deploys, customers unaffected by admin or webhook load. Costs about one extra phase. Fallback (b) if effort must be minimal. Tradeoff table in PLATFORM-ADMIN-SPEC 2.2. | A1 |
+| Q16 | Admin sign-in | (a) Email + password + mandatory TOTP, invite only, admin-triggered password reset; (b) password only; (c) Cloudflare Access login only | (a) | A1 |
+| Q17 | Network guard in front of the admin hostname | (a) None at first; (b) Cloudflare Access or IP allowlist now | (a) now, (b) as soon as you have a fixed way to reach it. | A7 |
+| Q18 | Built-in admin roles | super_admin, catalog_manager, billing_admin, support, viewer, plus custom roles | As listed. | A1 |
+| Q19 | Existing `/admin` routes and `users.platform_role` | (a) Rebuild in the new panel, run both, then remove; (b) keep as is | (a) | A4, A7 |
+| Q19b | Editing default role grants and sidebar from the panel | (a) Overrides for labels, icons, order, hidden; grant changes only as a reviewed change request that exports a seed patch; (b) full live edit of grants | (a). Live grant edits would conflict with seeds that delete grants. | A3 |
+| Q20 | Published plan changes vs existing subscribers | (a) Versioned plans; additions apply now, removals at renewal, admin may "apply now"; (b) no versioning, changes apply to everyone at once | (a). This overrides fixes plan D8. | A2, S2 schema |
+| Q21 | "View as customer" (impersonation) | (a) Not in v1; (b) read-only view-as with audit | (a) | none |
+| Q22 | Admin app language | (a) English; (b) English and Arabic | (a) | none |
+| Q23 | Admin hostname | `admin.<your domain>` if you have a domain; otherwise a workers.dev subdomain for now | What domain should the product use? Needed for cookies, email links, provider webhooks. | A1 |
+| Q24 | Reminder channels | (a) Email through the existing messaging module; (b) also WhatsApp or SMS | (a) | A6 |
 
 ### Draft plan matrix (for Q3)
 Numbers reuse the existing plan spec where it had them, shifted onto Free, Pro, Max. Modules marked "future" are not seeded until they exist.
@@ -135,6 +157,59 @@ Every task: "done when" is checkable. Every phase ends with a gate. Run `pnpm ty
 - [ ] **S8-01** Tenant isolation tests (AC9), load check on the resolver, failure drills for webhooks, reconciliation job, runbook, tax and legal pages checked, Legacy migration executed per Q10, production launch with a staged rollout.
 - **Gate S8**: launch checklist signed by the owner.
 
+### Admin track (platform admin panel)
+Spec: `PLATFORM-ADMIN-SPEC.md`. A1 needs Q15, Q16, Q18, Q23. Docs only so far.
+
+#### Phase A1: Platform apps, admin identity, roles
+- [ ] **A1-01** Extract shared code into `packages/entitlements` and shared Hono middleware; scaffold `apps/platform-server` and `apps/platform-web` with their own wrangler configs and CI deploy jobs (extend the vars check). Done when: both deploy a health page to staging.
+- [ ] **A1-02** Schema and migration: platform_admins, sessions, roles, role_permissions, admin_roles, invites, platform_audit_events (append-only enforced in the database). Done when: migration applies; update and delete on audit table are rejected.
+- [ ] **A1-03** `PLATFORM_MODULES` registry, permission catalog, seed of built-in roles, bootstrap CLI that issues the first invite. Done when: running it twice creates one invite.
+- [ ] **A1-04** Login, TOTP enrollment, lockout, sessions, logout, invite acceptance; no register route (PAC1, PAC2).
+- [ ] **A1-05** Admin users and roles screens and routes: list, invite, disable, role editor with anti-escalation, last super admin, self-edit rules (PA-R2 to PA-R5, PAC3).
+- [ ] **A1-06** Route permission guard and generated 403 test (PA-R7, PAC4); audit writes on every mutation (PAC11).
+- **Gate A1**: the owner logs into the admin web, invites a second admin, who enrolls and logs in; every denial case tested.
+
+#### Phase A2: Plan and catalog configurator (needs S2 and Q20)
+- [ ] **A2-01** Catalog sync from code into `catalog_*` tables by seed, with display-field overrides kept (PAC7).
+- [ ] **A2-02** Plans CRUD, versions, drafts, publish with validation and dependency closure (PA-R8 to PA-R10, PAC5).
+- [ ] **A2-03** Matrix editor UI and per-plan prices and add-ons.
+- [ ] **A2-04** Impact preview, history, diff, rollback; propagation rules from Q20 (additions now, removals at renewal).
+- [ ] **A2-05** Public pricing preview; end-to-end check that a published plan changes a test organization's entitlements (PAC6).
+- **Gate A2**: the owner builds Free, Pro, Max in the panel, publishes, and a staging organization shows the right modules and limits.
+
+#### Phase A3: Sidebar, permissions, catalog viewer and overrides (after S1)
+- [ ] **A3-01** Read-only viewer for tenant modules, actions, sidebar tree and platform permissions, derived from the registry and seed.
+- [ ] **A3-02** Override storage and resolution order (override then registry) for labels, icons, order, hidden; tenant web reads them (PAC8, PA-R15).
+- [ ] **A3-03** Change request flow for default grants: diff view and exported seed patch, nothing applied silently.
+- **Gate A3**: an override shows up in the tenant sidebar and is reversible; no permission was removed by any UI action.
+
+#### Phase A4: Organizations, users, subscriptions (needs S5)
+- [ ] **A4-01** Organization list and detail: plan, usage vs limits, module states, subscription timeline (PA-R13, PA-R14).
+- [ ] **A4-02** Organization actions: assign plan, overrides with reason and expiry, extend trial, suspend (audited).
+- [ ] **A4-03** Tenant users screens, migrated from the old `/admin` routes (suspend, reactivate, revoke sessions).
+- [ ] **A4-04** Subscriptions list and detail with cancel, resume, change.
+- **Gate A4**: support can look up a customer and fix a plan issue without database access.
+
+#### Phase A5: Payments and provider events (needs S6)
+- [ ] **A5-01** Payments, invoices, refunds with reasons and idempotency (PA-R12).
+- [ ] **A5-02** Manual bank transfer confirmation flow.
+- [ ] **A5-03** Provider event ledger viewer with safe replay and secret redaction (PA-R11, PAC12).
+- **Gate A5**: a failed payment and a refund are handled entirely from the panel in staging.
+
+#### Phase A6: Jobs and reminders (dispatcher can start after A1)
+- [ ] **A6-01** Tick dispatcher, `scheduled_jobs`, runs, locks, parameter validation (PAC9).
+- [ ] **A6-02** Built-in jobs from PLATFORM-ADMIN-SPEC 7.2 (those whose dependencies exist), each idempotent.
+- [ ] **A6-03** Templates with variables, preview, test send, locale choice, notification log (PAC10).
+- [ ] **A6-04** Jobs screens: list, enable, schedule, parameters, run now, history, failures on the dashboard.
+- **Gate A6**: a trial-ending reminder reaches a staging owner exactly once, in the right language.
+
+#### Phase A7: Hardening and migration
+- [ ] **A7-01** Dashboard metrics, CSV exports, audit viewer.
+- [ ] **A7-02** Separate Postgres role for the platform Worker and read-only grants for the tenant Worker on plan and catalog tables (PAC13), if Q15 is option (a).
+- [ ] **A7-03** Remove the old `/admin` routes and `platform_role` usage after a parallel-run period (Q19).
+- [ ] **A7-04** Optional network guard (Q17), runbook, secret rotation procedure, backup admin recovery procedure.
+- **Gate A7**: old admin removed, security checklist signed by the owner.
+
 ## Risks
 | Risk | Mitigation |
 |---|---|
@@ -143,6 +218,9 @@ Every task: "done when" is checkable. Every phase ends with a gate. Run `pnpm ty
 | Payment edge cases (retries, out-of-order events) | Event ledger and ordering guard, reconciliation job, fake provider tests |
 | Provider not available for Egypt | S0-03 spike before any payment code; manual transfer adapter as fallback |
 | Over-engineering before revenue | Phases S1 to S5 are useful without a provider; Q2 option (c) and Q5 option (c) are valid minimal launches |
+| Admin panel is a powerful target | Separate Worker, hostname, identity, mandatory TOTP, least-privilege database role, append-only audit, anti-escalation rules |
+| Admin edits a plan and silently changes existing customers | Versioned plans, impact preview, removals at renewal (Q20) |
+| Admin overrides fight code seeds | Code owns keys, admin owns display fields and data; grant changes only via reviewed seed patch (Q19b) |
 | Real transactions missing in the db driver | S0-04 and fixes plan Phase 2 gate S5 |
 
 ## Decisions log

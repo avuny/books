@@ -19,8 +19,10 @@ Standard: docs/TESTING-PLAN.md section 4. Tick when written and passing; record 
 | AC12 | Staging e2e | provider test-mode checkout per launched adapter | [ ] |
 | R2 to R4 | Unit | dependency enable and disable rules, `MODULE_DEPENDENCY_LOCKED`, `MODULE_REQUIRED_BY` | [ ] |
 | R19, R21 | Unit | per-currency prices, trial eligibility | [ ] |
+| PAC1 to PAC13, PA-R1 to PA-R15 | Unit, integration, e2e | see `PLATFORM-ADMIN-SPEC.md` section 11; files under `apps/platform-server` and `apps/platform-web/e2e`. Route inventory test (no register, every route has a permission), anti-escalation concurrency test, plan publish impact test, job dispatcher overlap test, response secret scan | [ ] |
 
 ## Checklist
+- [ ] Platform admin: separate session isolation test both directions, TOTP and lockout, invite flow, generated 403 per route
 - [ ] Unit: each service rule and state transition (by SPEC rule id)
 - [ ] Integration per endpoint: 401, 403 (non-owner), tenant isolation, 422, domain errors, happy path, audit entry
 - [ ] Concurrency: simultaneous module switch and plan change, racing limit checks, duplicate webhooks

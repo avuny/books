@@ -3,10 +3,10 @@
 | | |
 |---|---|
 | Version | 1.0 · 2026-11-27 |
-| Status | proposed (waiting for owner decisions Q1 to Q14 in PROGRESS.md) |
+| Status | proposed (waiting for owner decisions Q1 to Q24 in PROGRESS.md) |
 | Owner | Khalid (avuny) |
 | Depends on | organization, organization-user, role, sidebar, activity-log, admin, the module registry (`packages/contracts/src/modules/registry.ts`) |
-| Related | `../SAAS-OVERVIEW.md`, `../plan`, `../subscription`, `../payment`, `../billing`, `../feature-gate`, `../SAAS-SPEC-REVIEW.md`, `../SAAS-SPEC-FIXES-PLAN.md` |
+| Related | [`PLATFORM-ADMIN-SPEC.md`](./PLATFORM-ADMIN-SPEC.md), `../SAAS-OVERVIEW.md`, `../plan`, `../subscription`, `../payment`, `../billing`, `../feature-gate`, `../SAAS-SPEC-REVIEW.md`, `../SAAS-SPEC-FIXES-PLAN.md` |
 
 ## 0. Reading order for agents
 AGENTS.md, then sections 1 to 4 of this file, then the section for the current phase. Then read the five existing SaaS specs listed above, with section 2.3 of this file telling you which parts still stand. Do not write code before the owner has answered the decisions marked "blocks" in PROGRESS.md.
@@ -31,6 +31,7 @@ This spec adds the missing layer, the **module catalog and entitlement model**, 
 ### 1.3 Non-goals (v1)
 - Per-seat metered usage billing, usage-based pricing, marketplace or reseller billing.
 - Custom per-customer price negotiation in self-serve (admin grants cover enterprise, see Q8).
+- The platform admin back office is specified separately in `PLATFORM-ADMIN-SPEC.md`; this document defines the data and rules it edits.
 - Multi-product platform (a second product besides Books). The catalog is designed so it could grow, not built for it.
 - Changing the accounting, inventory or purchasing behavior of any module.
 
@@ -85,7 +86,7 @@ Rules of the layering:
 | `payment/SPEC.md` | Stands for payment methods, charges, refunds, webhook safety (event ledger, raw body, fetch HTTP client). Changes: wrapped behind the `BillingProvider` port (section 6.1) so Stripe is one adapter; local processor and manual transfer are further adapters. |
 | `billing/SPEC.md` | Stands for invoices, credits, proration. Changes: invoice numbering per organization decision Q12. |
 | `feature-gate/SPEC.md` | Superseded in part. Its `hasFeature`, `checkLimit(scope, key)` and `getFeatureValue` stay as the public API, but they now read the snapshot, not the plan directly, and add `isModuleEnabled`. The 5 minute in-memory cache is removed (fixes plan 4.2). |
-| `SAAS-SPEC-FIXES-PLAN.md` | Stands. Its Phase 0 decisions D1 to D8 are still open; this spec adds Q1 to Q14. Its Phase 2 (real database transactions) is a hard prerequisite for phase S5. |
+| `SAAS-SPEC-FIXES-PLAN.md` | Stands. Its Phase 0 decisions D1 to D8 are still open; this spec adds Q1 to Q14, and the admin panel spec adds Q15 to Q24. D8 is overridden by Q20. Its Phase 2 (real database transactions) is a hard prerequisite for phase S5. |
 
 ### 2.4 Module catalog (proposed first cut)
 Grouped from the current registry. "Core" modules are always on and not switchable. Dependencies are proposed from the registry and the domain; phase S1 verifies each one by scanning real imports and writes the result into the catalog, so treat this table as a draft to correct.
@@ -186,10 +187,11 @@ All money columns are `bigint` minor units with `currency char(3)` via `money()`
 | `organization_modules` | Owner switches | `org_id`, `module_key`, `enabled`, `changed_by`, `changed_at`, unique `(org_id, module_key)` |
 | `organization_entitlement_overrides` | Admin grants | `org_id`, `key`, `value`, `reason`, `granted_by`, `expires_at` |
 | `organization_entitlements` | Snapshot | `org_id` unique, `version` int, `resolved` jsonb, `computed_at`, `access_state` |
+| `plan_versions`, `catalog_modules`, `catalog_features`, `catalog_limits`, `scheduled_jobs`, `notification_templates` | Added for the admin panel: versioned plans (`subscriptions.plan_version_id`), editable catalog display fields, jobs, reminder texts. See `PLATFORM-ADMIN-SPEC.md` sections 4 and 7. |
 | `provider_events` | Event ledger | `provider`, `event_id`, `type`, `received_at`, `processed_at`, `payload` jsonb, unique `(provider, event_id)` |
 | `invoices`, `invoice_lines`, `payments`, `refunds`, `credits` | As in `../billing` and `../payment`, with minor units | see those specs |
 
-Added to `organizations`: `trial_used_at`, `limits_grace_until` (fixes plan 3.1). Plan versioning stays out of v1 (fixes plan D8).
+Added to `organizations`: `trial_used_at`, `limits_grace_until` (fixes plan 3.1). Plan versioning is now IN scope because admins edit plans live (`PLATFORM-ADMIN-SPEC.md` 4.3, decision Q20); this overrides fixes plan D8.
 
 Index and consistency notes:
 - Subscription row, subscription event and invoice writes are atomic (needs real transactions, fixes plan Phase 2).
@@ -218,7 +220,7 @@ BillingProvider       createCustomer, createCheckout, changePlan, cancel, listPa
 | `POST /organizations/:orgId/subscription/preview` | What a plan or add-on change would do (R17) |
 | subscription, payment and billing routes | As in their specs, behind the provider port |
 | `POST /webhooks/:provider` | Signature-verified raw-body webhook, mounted outside auth and JSON parsing |
-| `/admin/plans`, `/admin/organizations/:id/overrides`, `/admin/organizations/:id/plan` | Platform admin back office (section 8) |
+| Platform admin routes (plans, overrides, organizations, jobs) | Not in the tenant API. They live in the platform API, see `PLATFORM-ADMIN-SPEC.md`. The tenant API only reads the catalog, plans and snapshots. |
 
 Error codes (UPPER_SNAKE): `MODULE_NOT_ENABLED`, `MODULE_DEPENDENCY_LOCKED`, `MODULE_REQUIRED_BY`, `FEATURE_NOT_IN_PLAN`, `LIMIT_REACHED`, `ENTITLEMENT_KEY_UNKNOWN`, `PLAN_NOT_PURCHASABLE`, `SUBSCRIPTION_ACCESS_RESTRICTED`.
 
@@ -234,7 +236,7 @@ Webhooks by `(provider, event_id)`. Checkout creation by a client idempotency ke
 - All strings in `en.json` and `ar.json`, RTL checked. Copy never says "plan" where it means "module".
 
 ## 8. Permissions
-New registry modules: `subscription` (read, manage), `billing` (read, manage), `entitlement` (read), `organization_module` (read, update). Default grants: owner role gets all; other built-in roles get `read:entitlement` only. Platform admin back office uses the existing admin module's authorization, not tenant roles, and needs its own audit events.
+New registry modules: `subscription` (read, manage), `billing` (read, manage), `entitlement` (read), `organization_module` (read, update). Default grants: owner role gets all; other built-in roles get `read:entitlement` only. The platform admin back office has its own identity, roles and audit trail (`PLATFORM-ADMIN-SPEC.md`), not tenant roles.
 
 ## 9. Accounting and inventory effects
 None for tenants' books. The platform's own invoices live in the billing tables, not in a tenant's chart of accounts. Module switching never alters posted data. Disabling `accounting` while `purchasing` posts journals is handled by the soft dependency rule: posting is skipped with a clear `JOURNAL_NOT_POSTED_MODULE_OFF` marker, and enabling accounting later offers a backfill (only if Q14 is yes).
@@ -272,6 +274,8 @@ Phases and tasks are tracked in PROGRESS.md. Summary:
 | S6 | Payments: provider port, first adapter, webhooks, invoices | revenue starts |
 | S7 | Billing UI, pricing page, dunning, scheduled jobs | self-serve complete |
 | S8 | Hardening and launch | |
+
+The platform admin track (A1 to A7) runs alongside S1 to S7; see `PLATFORM-ADMIN-SPEC.md` section 12 and PROGRESS.md.
 
 Rough order of effort, to plan around (not a promise): S1 small, S2 medium, S3 large (touches many modules), S4 medium, S5 medium, S6 large (provider specifics), S7 medium, S8 medium.
 
