@@ -1,5 +1,5 @@
-import type { SalesInvoiceDto, SalesInvoiceLineDto } from "@avuny/contracts"
+import type { ArAgingResponse, ArReconciliationResponse, CustomerStatementResponse, SalesInvoiceDto, SalesInvoiceLineDto } from "@avuny/contracts"
 
-export type { SalesInvoiceDto, SalesInvoiceLineDto }
+export type { ArAgingResponse, ArReconciliationResponse, CustomerStatementResponse, SalesInvoiceDto, SalesInvoiceLineDto }
 
 export type InvoiceScope = "all" | "DRAFT" | "POSTED" | "REVERSED"

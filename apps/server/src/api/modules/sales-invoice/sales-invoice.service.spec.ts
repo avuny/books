@@ -26,7 +26,7 @@ const deliveryLine = (over: Partial<InvoiceableDeliveryLine> = {}): InvoiceableD
     ...over,
   }) as unknown as InvoiceableDeliveryLine
 
-function setup(opts: { allowed?: boolean; lines?: InvoiceableDeliveryLine[]; orderStatus?: string; paid?: boolean } = {}) {
+function setup(opts: { allowed?: boolean; arInvoices?: any[]; statement?: any; ledger?: string; lines?: InvoiceableDeliveryLine[]; orderStatus?: string; paid?: boolean } = {}) {
   const invoices = new Map<string, any>()
   const lines = opts.lines ?? [deliveryLine()]
   const counters: Record<string, string> = { "sol-1": "0" }
@@ -46,6 +46,9 @@ function setup(opts: { allowed?: boolean; lines?: InvoiceableDeliveryLine[]; ord
       invoices.get(id).lines = ls.map((l, i) => ({ id: `il-${i}`, salesInvoiceId: id, ...l }))
     },
     hasPostedPayments: async () => opts.paid ?? false,
+    postedInvoicesWithPaid: async () => opts.arInvoices ?? [],
+    statementSource: async () => (opts.statement === undefined ? null : opts.statement),
+    ledgerDebitBalance: async () => opts.ledger ?? "0",
     deleteById: async (_o: string, id: string) => void invoices.delete(id),
     loadDeliveryLines: async (_o: string, ids: string[]) => lines.filter((l) => ids.includes(l.line.id)),
     loadDeliveryForInvoicing: async () => lines,
@@ -211,5 +214,60 @@ describe("sales invoice service", () => {
     await service.post(ACTOR, ORG, created.data.id)
     const res = await service.delete(ACTOR, ORG, created.data.id)
     expect(res.success).toBe(false)
+  })
+
+  describe("AR reports", () => {
+    const inv = (id: string, due: string, total: string, paid: string) => ({ id, number: id, partyId: "11111111-1111-1111-1111-111111111111", partyName: "Acme", currency: "EGP", invoiceDate: "2026-01-01", dueDate: due, total, paid })
+
+    it("ages what is still owed and skips paid invoices", async () => {
+      const { service } = setup({ arInvoices: [inv("A", "2000-01-01", "1000", "400"), inv("B", "2000-01-01", "500", "500")] })
+      const res = await service.arAging(ACTOR, ORG)
+      expect(res.success).toBe(true)
+      if (res.success) {
+        expect(res.data.rows).toHaveLength(1)
+        expect(res.data.rows[0]!.total).toBe("600")
+        expect(res.data.rows[0]!.buckets.OVER_90).toBe("600")
+      }
+    })
+
+    it("builds a statement with an opening balance and a running balance", async () => {
+      const statement = {
+        partyName: "Acme",
+        currency: "EGP",
+        rows: [
+          { kind: "INVOICE", date: "2026-10-01", number: "INV-000001", reference: null, amount: "1000" },
+          { kind: "PAYMENT", date: "2026-10-15", number: "CP-000001", reference: null, amount: "400" },
+          { kind: "INVOICE", date: "2026-11-02", number: "INV-000002", reference: null, amount: "250" },
+        ],
+      }
+      const { service } = setup({ statement })
+      const res = await service.customerStatement(ACTOR, ORG, { partyId: "11111111-1111-1111-1111-111111111111", from: "2026-11-01" })
+      expect(res.success).toBe(true)
+      if (res.success) {
+        expect(res.data.openingBalance).toBe("600")
+        expect(res.data.lines.map((l) => l.balance)).toEqual(["850"])
+        expect(res.data.closingBalance).toBe("850")
+      }
+    })
+
+    it("fails the statement for an unknown customer", async () => {
+      const { service } = setup()
+      const res = await service.customerStatement(ACTOR, ORG, { partyId: "11111111-1111-1111-1111-111111111111" })
+      expect(res.success).toBe(false)
+    })
+
+    it("reconciles the AR ledger with open invoices", async () => {
+      const ok = setup({ arInvoices: [inv("A", "2026-12-01", "1000", "400")], ledger: "600" })
+      const good = await ok.service.arReconciliation(ACTOR, ORG)
+      if (good.success) expect(good.data.accountsReceivable.balanced).toBe(true)
+      const bad = setup({ arInvoices: [inv("A", "2026-12-01", "1000", "400")], ledger: "700" })
+      const res = await bad.service.arReconciliation(ACTOR, ORG)
+      if (res.success) expect(res.data.accountsReceivable.difference).toBe("100")
+    })
+
+    it("needs read permission", async () => {
+      const { service } = setup({ allowed: false })
+      expect((await service.arAging(ACTOR, ORG)).success).toBe(false)
+    })
   })
 })

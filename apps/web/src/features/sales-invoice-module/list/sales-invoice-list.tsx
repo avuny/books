@@ -6,11 +6,11 @@ import { formatMinorAmount } from "../../purchase-order-module/lib/format-money"
 import { useSalesInvoices } from "../sales-invoice-api"
 import type { InvoiceScope } from "../types"
 
-type Props = { orgId: string; onViewInvoice: (id: string) => void }
+type Props = { orgId: string; onViewInvoice: (id: string) => void; headerAction?: React.ReactNode }
 
 const SCOPES: InvoiceScope[] = ["all", "DRAFT", "POSTED", "REVERSED"]
 
-export function SalesInvoiceList({ orgId, onViewInvoice }: Props) {
+export function SalesInvoiceList({ orgId, onViewInvoice, headerAction }: Props) {
   const { t, i18n } = useTranslation("sales-invoice")
   const { invoices, isLoading } = useSalesInvoices(orgId)
   const [scope, setScope] = useState<InvoiceScope>("all")
@@ -18,9 +18,12 @@ export function SalesInvoiceList({ orgId, onViewInvoice }: Props) {
 
   return (
     <div className="flex flex-col gap-4 p-6">
-      <div>
-        <h1 className="text-xl font-semibold">{t("ui.title")}</h1>
-        <p className="text-sm text-muted-foreground">{t("ui.description")}</p>
+      <div className="flex items-start justify-between gap-2">
+        <div>
+          <h1 className="text-xl font-semibold">{t("ui.title")}</h1>
+          <p className="text-sm text-muted-foreground">{t("ui.description")}</p>
+        </div>
+        {headerAction}
       </div>
       <div className="flex gap-2" role="tablist">
         {SCOPES.map((s) => (
