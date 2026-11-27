@@ -1,0 +1,25 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "avuny-platform-api",
+  "main": "src/index.ts",
+  "compatibility_date": "2025-09-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "observability": {
+    "enabled": true
+  },
+  // SCAFFOLD: not deployed yet and not wired into .github/workflows/deploy.yml.
+  // Non-secret production values live here, in git (same rule as apps/server/wrangler.jsonc:
+  // a deploy replaces dashboard-set plain variables). Secrets are set with `wrangler secret put`.
+  // Added when their phase starts (docs/modules/saas-architecture/PROGRESS.md):
+  //   - hyperdrive/Neon database binding or DATABASE_URL secret, and a separate Postgres role (A7-02)
+  //   - cron trigger "*/5 * * * *" for the job dispatcher (A6-01)
+  //   - R2 bucket binding for landing media (A8-01)
+  "vars": {
+    "ENVIRONMENT": "production",
+    "LOG_LEVEL": "info",
+    "NODE_ENV": "production",
+    "COOKIE_SAMESITE": "strict",
+    "WEB_APP_URL": "https://avuny-platform-web.khaledeveloper.workers.dev",
+    "CORS_ORIGINS": "https://avuny-platform-web.khaledeveloper.workers.dev"
+  }
+}
