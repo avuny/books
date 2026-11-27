@@ -53,7 +53,18 @@
     "title": "Create item",
     "description": "Set up the item, its category and how it is measured.",
     "submitLabel": "Create item",
-    "submittingLabel": "Creating…"
+    "submittingLabel": "Creating…",
+    "steps": {
+      "stepLabel": "Step {current} of {total}",
+      "details": "Details",
+      "prices": "Prices",
+      "stock": "Opening stock",
+      "next": "Next",
+      "back": "Back",
+      "descriptionDetails": "Set up the item, its category and how it is measured.",
+      "descriptionPrices": "Optional default prices. A bigger unit can cost less than the same amount of a smaller one.",
+      "descriptionStock": "Optional. Record the stock you already have, per location, in any unit of the item."
+    }
   },
   "update": {
     "title": "Edit item",
@@ -137,11 +148,6 @@
     "openingStock": {
       "sectionTitle": "Opening stock",
       "sectionDescription": "Record initial inventory across locations. Optional.",
-      "postedAt": {
-        "label": "Posted date",
-        "placeholder": "YYYY-MM-DD",
-        "description": "Defaults to today if left blank."
-      },
       "addLine": "Add line",
       "removeLine": "Remove",
       "empty": "No opening stock lines added.",
@@ -156,8 +162,17 @@
           "placeholder": "e.g. 100"
         },
         "cost": {
-          "label": "Cost",
-          "placeholder": "e.g. 10.00"
+          "label": "Cost per unit",
+          "placeholder": "Item cost price if blank"
+        },
+        "unit": {
+          "label": "Unit",
+          "placeholder": "Base unit"
+        },
+        "postedAt": {
+          "label": "Posted date",
+          "placeholder": "YYYY-MM-DD",
+          "description": "Defaults to today if left blank."
         }
       },
       "batch": {
@@ -185,6 +200,21 @@
       "label": "Selling price",
       "placeholder": "e.g. 15.00",
       "description": "Default selling price per base unit. Prefilled on sales orders. Optional."
+    },
+    "unitPrices": {
+      "sectionTitle": "Prices per unit",
+      "sectionDescription": "All optional. Prices are per 1 of each unit, so a ton can cost less than 1000 kg. They prefill purchase and sales lines and can be changed there.",
+      "baseUnitTitle": "{unit} (base unit)",
+      "unitTitle": "{unit}",
+      "noOtherUnits": "This unit collection has no other units. Add units to the collection to price them separately.",
+      "costPrice": {
+        "label": "Cost price",
+        "placeholder": "e.g. 12.50"
+      },
+      "sellingPrice": {
+        "label": "Selling price",
+        "placeholder": "e.g. 15.00"
+      }
     }
   },
   "actions": {
