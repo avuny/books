@@ -1,6 +1,7 @@
 import { createOpenAPIRouter } from "@avuny/hono"
 import { requireAuth } from "../../auth/index.js"
 import { purchaseReceiptService } from "../deps.js"
+import { quickPurchaseReceiptRoute } from "./quick-purchase-receipt.route.js"
 import { createPurchaseReceiptRoute } from "./create-purchase-receipt.route.js"
 import { deletePurchaseReceiptRoute } from "./delete-purchase-receipt.route.js"
 import { getPurchaseReceiptRoute } from "./get-purchase-receipt.route.js"
@@ -14,6 +15,7 @@ export const createPurchaseReceiptRoutes = (deps: RouteDeps) => {
   const router = createOpenAPIRouter()
 
   // Nested under purchase orders
+  router.route("/", quickPurchaseReceiptRoute(deps))
   router.route("/", createPurchaseReceiptRoute(deps))
   router.route("/", listPurchaseReceiptsRoute(deps))
 
