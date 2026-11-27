@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | Version | 1.0 · 2026-11-27 |
-| Status | proposed (waiting for owner decisions Q15 to Q24 in PROGRESS.md) |
+| Status | decisions Q15 to Q24 answered with defaults 2026-11-27 (see PROGRESS.md) |
 | Owner | Khalid (avuny) |
 | Depends on | `SPEC.md` (entitlement model), `packages/db`, `packages/contracts`, `packages/ui`, the module registry, messaging module |
 | Replaces | The `/admin` routes and `platform_role` column used today (see section 12) |

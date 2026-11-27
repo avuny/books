@@ -98,7 +98,7 @@ Prices are not proposed here. They need market and cost input from the owner (Q5
 Every task: "done when" is checkable. Every phase ends with a gate. Run `pnpm typecheck` and the relevant tests after each phase (AGENTS.md).
 
 ### Phase S0: Decisions and spikes
-- [ ] **S0-01** Owner answers Q1 to Q14 and fixes-plan D1 to D8. Done when: answers recorded in the Decisions log below.
+- [~] **S0-01** Owner answers Q1 to Q14 and fixes-plan D1 to D8. Q1 to Q24 answered 2026-11-27 (all defaults); fixes-plan D1 to D8 still open. Done when: answers recorded in the Decisions log below.
 - [ ] **S0-02** Repository checks from SPEC section 13, output pasted in the Verification log. Done when: all 7 checks have a recorded result.
 - [ ] **S0-03** Provider spike: for each candidate in Q5, verify with current official sources: can the business onboard from Egypt, supported currencies and payment methods, subscription support, webhook model, Workers compatibility, fees, tax invoice requirements. Done when: a one-page comparison with source links is added to this folder as `PROVIDER-SPIKE.md`.
 - [ ] **S0-04** Transaction-capable database driver decided and merged (fixes plan Phase 2) or scheduled before S5. Done when: a rollback test passes.
@@ -224,7 +224,10 @@ Spec: `PLATFORM-ADMIN-SPEC.md`. A1 needs Q15, Q16, Q18, Q23. Docs only so far.
 | Real transactions missing in the db driver | S0-04 and fixes plan Phase 2 gate S5 |
 
 ## Decisions log
-(empty; record owner answers here with date and wording)
+- 2026-11-27, owner (WhatsApp, 9:29 PM Cairo): "Yes I agree with all default". Applies to every open decision in this file at that time, taken as the proposed defaults:
+  Q1 Free / Pro / Max + Enterprise by contact. Q2 plan bundles plus add-ons. Q3 draft matrix as written (numbers adjustable before the S2 seed). Q4 14-day Pro trial then Free. Q5 Stripe first, then an Egyptian processor, manual transfer fallback; the S0-03 provider spike must still verify Egypt availability and VAT with sources before payment code. Q6 wind-down. Q7 onboarding module step, Inventory on by default. Q8 enterprise by admin grant. Q9 show locked modules. Q10 existing orgs on the hidden Legacy plan. Q11 one trial per owner. Q12 own sequence if local processor, else provider numbers. Q13, Q14 as proposed.
+  Q15 separate Worker `apps/platform-server`. Q16 email + password + mandatory TOTP, invite only. Q17 no network guard at first. Q18 built-in roles as listed. Q19 rebuild old `/admin`, run both, then remove. Q19b overrides plus reviewed seed patch for grants. Q20 versioned plans (overrides fixes-plan D8). Q21 no view-as. Q22 admin English only. Q23 workers.dev subdomain for now. Q24 reminders by email.
+- Not decided: fixes-plan D1 to D8 (still open; D1 database driver matters before S5), prices, the real domain name.
 
 ## Deviations
 ## Verification log
