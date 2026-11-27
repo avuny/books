@@ -4,12 +4,9 @@ import {
   AsyncComboboxField,
   InputField,
   SelectField,
-  type AsyncComboboxCopy,
-  type AsyncOptionsSource,
 } from "@workspace/ui/blocks/form"
 
 import { CheckboxField } from "../../lib/forms/checkbox-field"
-import { OpeningStockFields } from "./opening-stock-fields"
 import type { CreateItemFormInput } from "./item-form-schema"
 import type {
   ItemFormCopy,
@@ -28,9 +25,11 @@ type ItemFieldsProps = {
   /** Only the update form offers (de)activation. */
   showIsActive?: boolean
   disabled: boolean
-  /** Opening stock location picker source — omit on the update form to hide the section entirely. */
-  locationSource?: AsyncOptionsSource
-  comboboxCopy?: AsyncComboboxCopy
+  /**
+   * Show the base-unit cost and selling price inputs. Both forms set this to false: they show prices
+   * (base unit and every other unit of the collection) in `UnitPricesFields` instead.
+   */
+  showPrices?: boolean
 }
 
 /** The fields shared by the create and update forms. UI only. */
@@ -42,12 +41,10 @@ export function ItemFields({
   shelfLifeUnitOptions,
   showIsActive = false,
   disabled,
-  locationSource,
-  comboboxCopy,
+  showPrices = true,
 }: ItemFieldsProps) {
   const { category, unitCollection } = pickers
   const isExpiryTracked = useWatch({ control, name: "isExpiryTracked" })
-  const isInventoryTracked = useWatch({ control, name: "isInventoryTracked" })
 
   return (
     <>
@@ -172,25 +169,29 @@ export function ItemFields({
         placeholder={copy.valuationMethod.placeholder}
       />
 
-      <InputField
-        control={control}
-        name="costPrice"
-        copy={copy.costPrice}
-        type="text"
-        inputMode="decimal"
-        autoComplete="off"
-        disabled={disabled}
-      />
+      {showPrices ? (
+        <>
+          <InputField
+            control={control}
+            name="costPrice"
+            copy={copy.costPrice}
+            type="text"
+            inputMode="decimal"
+            autoComplete="off"
+            disabled={disabled}
+          />
 
-      <InputField
-        control={control}
-        name="sellingPrice"
-        copy={copy.sellingPrice}
-        type="text"
-        inputMode="decimal"
-        autoComplete="off"
-        disabled={disabled}
-      />
+          <InputField
+            control={control}
+            name="sellingPrice"
+            copy={copy.sellingPrice}
+            type="text"
+            inputMode="decimal"
+            autoComplete="off"
+            disabled={disabled}
+          />
+        </>
+      ) : null}
 
       <InputField
         control={control}
@@ -200,17 +201,6 @@ export function ItemFields({
         autoComplete="off"
         disabled={disabled}
       />
-
-      {isInventoryTracked && locationSource && comboboxCopy ? (
-        <OpeningStockFields
-          control={control}
-          copy={copy.openingStock}
-          locationSource={locationSource}
-          comboboxCopy={comboboxCopy}
-          isExpiryTracked={Boolean(isExpiryTracked)}
-          disabled={disabled}
-        />
-      ) : null}
     </>
   )
 }

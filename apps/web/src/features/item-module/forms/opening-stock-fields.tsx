@@ -5,13 +5,14 @@ import {
   AsyncComboboxField,
   DatePickerField,
   InputField,
+  SelectField,
   type AsyncComboboxCopy,
   type AsyncOptionsSource,
 } from "@workspace/ui/blocks/form"
 import { Button } from "@workspace/ui/components/button"
 
-import type { ItemFormCopy } from "./item-form-types"
-import type { CreateItemFormInput } from "./item-form-schema"
+import { BLANK_OPENING_LINE, type CreateItemFormInput } from "./item-form-schema"
+import type { CollectionUnitOption, ItemFormCopy } from "./item-form-types"
 
 type OpeningStockCopy = ItemFormCopy["openingStock"]
 
@@ -20,15 +21,10 @@ type OpeningStockFieldsProps = {
   copy: OpeningStockCopy
   locationSource: AsyncOptionsSource
   comboboxCopy: AsyncComboboxCopy
+  /** Units of the item's collection, base unit first. Empty: the unit select is hidden. */
+  units: CollectionUnitOption[]
   isExpiryTracked: boolean
   disabled: boolean
-}
-
-const BLANK_LINE = {
-  locationId: "",
-  quantity: "",
-  cost: "",
-  manufacturedOn: "",
 }
 
 /** Pure: no i18n, no API calls. Everything injected via props. */
@@ -37,6 +33,7 @@ export function OpeningStockFields({
   copy,
   locationSource,
   comboboxCopy,
+  units,
   isExpiryTracked,
   disabled,
 }: OpeningStockFieldsProps) {
@@ -47,23 +44,13 @@ export function OpeningStockFields({
 
   return (
     <div className="space-y-4 rounded-lg border border-border bg-card/40 p-4">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-        <div className="space-y-1">
-          <h3 className="text-sm font-semibold text-foreground">
-            {copy.sectionTitle}
-          </h3>
-          <p className="text-xs text-muted-foreground">
-            {copy.sectionDescription}
-          </p>
-        </div>
-        <div className="w-full shrink-0 sm:w-64">
-          <DatePickerField
-            control={control}
-            name="openingStockPostedAt"
-            copy={copy.postedAt}
-            disabled={disabled}
-          />
-        </div>
+      <div className="space-y-1">
+        <h3 className="text-sm font-semibold text-foreground">
+          {copy.sectionTitle}
+        </h3>
+        <p className="text-xs text-muted-foreground">
+          {copy.sectionDescription}
+        </p>
       </div>
 
       <div className="space-y-3">
@@ -92,6 +79,7 @@ export function OpeningStockFields({
                 copy={copy}
                 locationSource={locationSource}
                 comboboxCopy={comboboxCopy}
+                units={units}
                 isExpiryTracked={isExpiryTracked}
                 disabled={disabled}
                 onRemove={() => remove(index)}
@@ -105,7 +93,7 @@ export function OpeningStockFields({
           variant="outline"
           size="sm"
           disabled={disabled}
-          onClick={() => append(BLANK_LINE)}
+          onClick={() => append({ ...BLANK_OPENING_LINE })}
           className="gap-1.5"
         >
           <PlusIcon className="size-4" aria-hidden />
@@ -122,62 +110,91 @@ type LineCardProps = {
   copy: OpeningStockCopy
   locationSource: AsyncOptionsSource
   comboboxCopy: AsyncComboboxCopy
+  units: CollectionUnitOption[]
   isExpiryTracked: boolean
   disabled: boolean
   onRemove: () => void
 }
 
+/** One opening stock line on two rows: where / how much / at what cost, then when. */
 function LineCard({
   index,
   control,
   copy,
   locationSource,
   comboboxCopy,
+  units,
   isExpiryTracked,
   disabled,
   onRemove,
 }: LineCardProps) {
+  const unitOptions = units.map((u) => ({
+    value: u.id,
+    label: u.symbol ? `${u.name} (${u.symbol})` : u.name,
+  }))
+  const hasUnits = units.length > 1
+
   return (
     <div className="rounded-md border border-border bg-card p-3 shadow-xs">
       <div className="flex items-start gap-3">
-        <div
-          className={`grid flex-1 gap-3 ${
-            isExpiryTracked ? "sm:grid-cols-2 md:grid-cols-4" : "sm:grid-cols-3"
-          }`}
-        >
-          <AsyncComboboxField
-            control={control}
-            name={`openingStockLines.${index}.locationId`}
-            copy={copy.line.location}
-            comboboxCopy={comboboxCopy}
-            source={locationSource}
-            disabled={disabled}
-            placeholder={copy.line.location.placeholder}
-          />
-          <InputField
-            control={control}
-            name={`openingStockLines.${index}.quantity`}
-            copy={copy.line.quantity}
-            type="text"
-            autoComplete="off"
-            disabled={disabled}
-          />
-          <InputField
-            control={control}
-            name={`openingStockLines.${index}.cost`}
-            copy={copy.line.cost}
-            type="text"
-            autoComplete="off"
-            disabled={disabled}
-          />
-          {isExpiryTracked ? (
-            <DatePickerField
+        <div className="flex-1 space-y-3">
+          <div
+            className={`grid gap-3 ${hasUnits ? "sm:grid-cols-2 md:grid-cols-4" : "sm:grid-cols-3"}`}
+          >
+            <AsyncComboboxField
               control={control}
-              name={`openingStockLines.${index}.manufacturedOn`}
-              copy={copy.batch.manufacturedOn}
+              name={`openingStockLines.${index}.locationId`}
+              copy={copy.line.location}
+              comboboxCopy={comboboxCopy}
+              source={locationSource}
+              disabled={disabled}
+              placeholder={copy.line.location.placeholder}
+            />
+            {hasUnits ? (
+              <SelectField
+                control={control}
+                name={`openingStockLines.${index}.unitId`}
+                copy={copy.line.unit}
+                options={unitOptions}
+                disabled={disabled}
+                placeholder={copy.line.unit.placeholder}
+              />
+            ) : null}
+            <InputField
+              control={control}
+              name={`openingStockLines.${index}.quantity`}
+              copy={copy.line.quantity}
+              type="text"
+              inputMode="decimal"
+              autoComplete="off"
               disabled={disabled}
             />
-          ) : null}
+            <InputField
+              control={control}
+              name={`openingStockLines.${index}.cost`}
+              copy={copy.line.cost}
+              type="text"
+              inputMode="decimal"
+              autoComplete="off"
+              disabled={disabled}
+            />
+          </div>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <DatePickerField
+              control={control}
+              name={`openingStockLines.${index}.postedAt`}
+              copy={copy.line.postedAt}
+              disabled={disabled}
+            />
+            {isExpiryTracked ? (
+              <DatePickerField
+                control={control}
+                name={`openingStockLines.${index}.manufacturedOn`}
+                copy={copy.batch.manufacturedOn}
+                disabled={disabled}
+              />
+            ) : null}
+          </div>
         </div>
 
         <div className="shrink-0 pt-7">

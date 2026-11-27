@@ -81,14 +81,35 @@ export function useItemFormCopy(mode: "create" | "update"): ItemFormCopy {
     isActive: { label: t("fields.isActive.label") },
     submitLabel: t(`${mode}.submitLabel`),
     submittingLabel: t(`${mode}.submittingLabel`),
+    steps: {
+      stepLabel: t("create.steps.stepLabel"),
+      details: t("create.steps.details"),
+      prices: t("create.steps.prices"),
+      stock: t("create.steps.stock"),
+      next: t("create.steps.next"),
+      back: t("create.steps.back"),
+      descriptionDetails: t("create.steps.descriptionDetails"),
+      descriptionPrices: t("create.steps.descriptionPrices"),
+      descriptionStock: t("create.steps.descriptionStock"),
+    },
+    unitPrices: {
+      sectionTitle: t("fields.unitPrices.sectionTitle"),
+      sectionDescription: t("fields.unitPrices.sectionDescription"),
+      baseUnitTitle: t("fields.unitPrices.baseUnitTitle"),
+      unitTitle: t("fields.unitPrices.unitTitle"),
+      noOtherUnits: t("fields.unitPrices.noOtherUnits"),
+      costPrice: {
+        label: t("fields.unitPrices.costPrice.label"),
+        placeholder: t("fields.unitPrices.costPrice.placeholder"),
+      },
+      sellingPrice: {
+        label: t("fields.unitPrices.sellingPrice.label"),
+        placeholder: t("fields.unitPrices.sellingPrice.placeholder"),
+      },
+    },
     openingStock: {
       sectionTitle: t("fields.openingStock.sectionTitle"),
       sectionDescription: t("fields.openingStock.sectionDescription"),
-      postedAt: {
-        label: t("fields.openingStock.postedAt.label"),
-        placeholder: t("fields.openingStock.postedAt.placeholder"),
-        description: t("fields.openingStock.postedAt.description"),
-      },
       addLine: t("fields.openingStock.addLine"),
       removeLine: t("fields.openingStock.removeLine"),
       empty: t("fields.openingStock.empty"),
@@ -97,6 +118,15 @@ export function useItemFormCopy(mode: "create" | "update"): ItemFormCopy {
         location: {
           label: t("fields.openingStock.line.location.label"),
           placeholder: t("fields.openingStock.line.location.placeholder"),
+        },
+        unit: {
+          label: t("fields.openingStock.line.unit.label"),
+          placeholder: t("fields.openingStock.line.unit.placeholder"),
+        },
+        postedAt: {
+          label: t("fields.openingStock.line.postedAt.label"),
+          placeholder: t("fields.openingStock.line.postedAt.placeholder"),
+          description: t("fields.openingStock.line.postedAt.description"),
         },
         quantity: {
           label: t("fields.openingStock.line.quantity.label"),

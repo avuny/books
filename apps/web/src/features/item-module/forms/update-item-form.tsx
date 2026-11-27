@@ -3,6 +3,7 @@ import { useForm, type Control } from "react-hook-form"
 
 import { FormShell, SubmitButton } from "@workspace/ui/blocks/form"
 
+import { UnitPricesFields } from "./unit-prices-fields"
 import type { ItemDto } from "../types"
 import { ItemFields } from "./item-fields"
 import {
@@ -13,6 +14,7 @@ import {
   type UpdateItemFormValues,
 } from "./item-form-schema"
 import type {
+  CollectionUnitOption,
   ItemFormCopy,
   ItemPickers,
   ShelfLifeUnitOption,
@@ -28,6 +30,8 @@ type UpdateItemFormProps = {
   shelfLifeUnitOptions: ShelfLifeUnitOption[]
   /** The item being edited; its values pre-fill the form. */
   item: ItemDto
+  /** Units of the item's collection (base first); empty while it loads. */
+  collectionUnits: CollectionUnitOption[]
   onSubmit: (values: UpdateItemFormValues) => void
   isPending: boolean
   /** Already localized. Shown in the form-level alert. */
@@ -41,6 +45,7 @@ export function UpdateItemForm({
   valuationOptions,
   shelfLifeUnitOptions,
   item,
+  collectionUnits,
   onSubmit,
   isPending,
   errorMessage,
@@ -71,6 +76,16 @@ export function UpdateItemForm({
           valuationOptions={valuationOptions}
           shelfLifeUnitOptions={shelfLifeUnitOptions}
           showIsActive
+          showPrices={false}
+          disabled={isPending}
+        />
+
+        <UnitPricesFields
+          control={
+            form.control as unknown as Control<CreateItemFormInput, any, any>
+          }
+          copy={copy.unitPrices}
+          units={collectionUnits}
           disabled={isPending}
         />
 
