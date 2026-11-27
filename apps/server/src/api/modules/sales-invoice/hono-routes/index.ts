@@ -5,6 +5,7 @@ import { arAgingRoute } from "./ar-aging.route.js"
 import { arReconciliationRoute } from "./ar-reconciliation.route.js"
 import { customerStatementRoute } from "./customer-statement.route.js"
 import { createFromDeliverySalesInvoiceRoute } from "./create-from-delivery-sales-invoice.route.js"
+import { salesReceiptRoute } from "./sales-receipt.route.js"
 import { createSalesInvoiceRoute } from "./create-sales-invoice.route.js"
 import { deleteSalesInvoiceRoute } from "./delete-sales-invoice.route.js"
 import { getSalesInvoiceRoute } from "./get-sales-invoice.route.js"
@@ -24,6 +25,7 @@ export const createSalesInvoiceRoutes = (deps: RouteDeps) => {
 
   router.route("/", createSalesInvoiceRoute(deps))
   router.route("/", createFromDeliverySalesInvoiceRoute(deps))
+  router.route("/", salesReceiptRoute(deps))
   router.route("/", listSalesInvoicesRoute(deps))
 
   // Action routes on {id}

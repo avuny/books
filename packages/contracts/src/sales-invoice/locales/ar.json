@@ -23,6 +23,7 @@
     "SALES_INVOICE_DUE_DATE_BEFORE_INVOICE": "لا يمكن أن يسبق تاريخ الاستحقاق تاريخ الفاتورة",
     "SALES_INVOICE_HAS_PAYMENTS": "توجد دفعة مطبقة على هذه الفاتورة. اعكس الدفعة أولًا",
     "SALES_INVOICE_HAS_CREDIT_NOTES": "اعكس إشعارات الدائن على هذه الفاتورة أولاً",
+    "SALES_INVOICE_RECEIPT_PAYMENT_FAILED": "تعذر تسجيل دفعة الإيصال. تم عكس الفاتورة. حاول مرة أخرى",
     "SALES_INVOICE_POSTING_FAILED": "تعذر ترحيل الفاتورة",
     "SALES_INVOICE_NUMBER_TAKEN": "تعذر تخصيص رقم للفاتورة، حاول مرة أخرى"
   },
@@ -91,6 +92,17 @@
     "unitPrice": "سعر الوحدة",
     "net": "الصافي",
     "lineTotal": "الإجمالي",
+    "receipt": {
+      "open": "بيع وتحصيل",
+      "title": "إيصال بيع للتسليم {number}",
+      "description": "يفوتر ما لم يُفوتر من هذا التسليم ويرحّل الفاتورة ويسجل الدفعة كاملة في خطوة واحدة.",
+      "confirm": "إنشاء الإيصال",
+      "creating": "جارٍ الإنشاء...",
+      "date": "تاريخ الإيصال",
+      "method": "استلام في",
+      "cash": "نقدًا",
+      "bank": "البنك"
+    },
     "fromDelivery": {
       "open": "إنشاء فاتورة",
       "title": "فاتورة {number}",

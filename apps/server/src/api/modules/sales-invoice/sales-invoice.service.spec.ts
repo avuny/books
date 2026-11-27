@@ -26,7 +26,7 @@ const deliveryLine = (over: Partial<InvoiceableDeliveryLine> = {}): InvoiceableD
     ...over,
   }) as unknown as InvoiceableDeliveryLine
 
-function setup(opts: { allowed?: boolean; credited?: boolean; arInvoices?: any[]; statement?: any; ledger?: string; lines?: InvoiceableDeliveryLine[]; orderStatus?: string; paid?: boolean } = {}) {
+function setup(opts: { allowed?: boolean; credited?: boolean; arInvoices?: any[]; statement?: any; ledger?: string; lines?: InvoiceableDeliveryLine[]; orderStatus?: string; paid?: boolean; payments?: any } = {}) {
   const invoices = new Map<string, any>()
   const lines = opts.lines ?? [deliveryLine()]
   const counters: Record<string, string> = { "sol-1": "0" }
@@ -72,6 +72,7 @@ function setup(opts: { allowed?: boolean; credited?: boolean; arInvoices?: any[]
     accounting: { postBusinessEvent, reverseJournalEntry } as any,
     permissions: { check: async () => opts.allowed ?? true },
     activityLog: { record: async () => undefined },
+    payments: opts.payments as any,
   }
   return { service: createSalesInvoiceService(deps), invoices, counters, postBusinessEvent, reverseJournalEntry }
 }
@@ -216,6 +217,36 @@ describe("sales invoice service", () => {
     const res = await service.reverse(ACTOR, ORG, created.data.id, { reason: "x" })
     expect(res.success).toBe(false)
     if (!res.success) expect(res.error).toBe("SALES_INVOICE_HAS_CREDIT_NOTES")
+  })
+
+  it("sales receipt invoices, posts and collects the full total in one step", async () => {
+    const payments = {
+      create: vi.fn(async (..._a: any[]) => ({ success: true, data: { id: "cp-1" } })),
+      post: vi.fn(async (..._a: any[]) => ({ success: true, data: { id: "cp-1", status: "POSTED" } })),
+      delete: vi.fn(async (..._a: any[]) => ({ success: true, data: { id: "cp-1" } })),
+    }
+    const { service, postBusinessEvent } = setup({ payments })
+    const res = await service.receiptFromDelivery(ACTOR, ORG, "dl-1", { invoiceDate: "2026-11-26", method: "cash" })
+    expect(res.success).toBe(true)
+    expect(postBusinessEvent).toHaveBeenCalledTimes(1)
+    const input = payments.create.mock.calls[0]?.[2]
+    expect(input.allocations).toEqual([{ salesInvoiceId: expect.any(String), amountMinor: "102600" }])
+    expect(input.partyId).toBe(CUSTOMER)
+    expect(payments.post).toHaveBeenCalledTimes(1)
+    if (res.success) expect(res.data.invoice.dueDate).toBe("2026-11-26")
+  })
+
+  it("sales receipt reverses the invoice when the payment cannot be posted", async () => {
+    const payments = {
+      create: vi.fn(async (..._a: any[]) => ({ success: true, data: { id: "cp-1" } })),
+      post: vi.fn(async (..._a: any[]) => ({ success: false, error: "X", msg: "x" })),
+      delete: vi.fn(async (..._a: any[]) => ({ success: true, data: { id: "cp-1" } })),
+    }
+    const { service, reverseJournalEntry } = setup({ payments })
+    const res = await service.receiptFromDelivery(ACTOR, ORG, "dl-1", { invoiceDate: "2026-11-26", method: "cash" })
+    expect(res.success).toBe(false)
+    expect(payments.delete).toHaveBeenCalledTimes(1)
+    expect(reverseJournalEntry).toHaveBeenCalledTimes(1)
   })
 
   it("only drafts can be deleted", async () => {

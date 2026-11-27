@@ -23,6 +23,7 @@
     "SALES_INVOICE_DUE_DATE_BEFORE_INVOICE": "The due date cannot be before the invoice date",
     "SALES_INVOICE_HAS_PAYMENTS": "A payment is applied to this invoice. Reverse the payment first",
     "SALES_INVOICE_HAS_CREDIT_NOTES": "Reverse the credit notes on this invoice first",
+    "SALES_INVOICE_RECEIPT_PAYMENT_FAILED": "The receipt payment could not be recorded. The invoice was reversed. Please try again",
     "SALES_INVOICE_POSTING_FAILED": "The invoice could not be posted",
     "SALES_INVOICE_NUMBER_TAKEN": "Could not allocate an invoice number, try again"
   },
@@ -91,6 +92,17 @@
     "unitPrice": "Unit price",
     "net": "Net",
     "lineTotal": "Total",
+    "receipt": {
+      "open": "Sell and collect",
+      "title": "Sales receipt for {number}",
+      "description": "Invoices what this delivery has not billed yet, posts the invoice and records the full payment in one step.",
+      "confirm": "Create receipt",
+      "creating": "Creating...",
+      "date": "Receipt date",
+      "method": "Received in",
+      "cash": "Cash",
+      "bank": "Bank"
+    },
     "fromDelivery": {
       "open": "Create invoice",
       "title": "Invoice {number}",

@@ -24,6 +24,8 @@ import {
   type CustomerStatementResponse,
   type CreateSalesInvoiceFromDeliveryInput,
   type CreateSalesInvoiceInput,
+  type CreateSalesReceiptInput,
+  type SalesReceiptDto,
   type ReverseSalesInvoiceInput,
   type SalesInvoiceDto,
   type SalesInvoiceLineInput,
@@ -260,6 +262,53 @@ export function createSalesInvoiceService(deps: SalesInvoiceServiceDeps) {
       }
       if (lines.length === 0) return failWith(Err.SALES_INVOICE_NOTHING_TO_INVOICE)
       return createFor(actorId, orgId, first.delivery.salesOrderId, input, lines)
+    },
+
+    /**
+     * Sales receipt: invoice a posted delivery, post the invoice, and record a posted payment for the full
+     * total. Each step is its own transaction, so a failed payment reverses the posted invoice again.
+     */
+    async receiptFromDelivery(
+      actorId: string,
+      orgId: string,
+      deliveryId: string,
+      input: CreateSalesReceiptInput
+    ): Promise<Result<SalesReceiptDto, Code>> {
+      const payments = deps.payments
+      if (!payments) return failWith(Err.SALES_INVOICE_RECEIPT_PAYMENT_FAILED)
+      const created = await this.createFromDelivery(actorId, orgId, deliveryId, {
+        invoiceDate: input.invoiceDate,
+        dueDate: input.invoiceDate,
+        notes: input.notes,
+      })
+      if (!created.success) return created
+      const posted = await this.post(actorId, orgId, created.data.id)
+      if (!posted.success) {
+        await this.delete(actorId, orgId, created.data.id)
+        return posted
+      }
+      const invoice = posted.data
+      const rollback = async () => {
+        await this.reverse(actorId, orgId, invoice.id, { reason: "Sales receipt payment failed" })
+        return failWith(Err.SALES_INVOICE_RECEIPT_PAYMENT_FAILED)
+      }
+      const draft = await payments.create(actorId, orgId, {
+        partyId: invoice.partyId,
+        paymentDate: input.invoiceDate,
+        method: input.method,
+        referenceNumber: input.referenceNumber ?? null,
+        notes: `Sales receipt ${invoice.number}`,
+        allocations: [{ salesInvoiceId: invoice.id, amountMinor: invoice.total }],
+      })
+      if (!draft.success) return rollback()
+      const paid = await payments.post(actorId, orgId, draft.data.id)
+      if (!paid.success) {
+        await payments.delete(actorId, orgId, draft.data.id)
+        return rollback()
+      }
+      const refreshed = await loadDto(orgId, invoice.id)
+      if (!refreshed.success) return refreshed
+      return ok({ data: { invoice: refreshed.data, payment: paid.data } })
     },
 
     async list(actorId: string, orgId: string, filter: SalesInvoiceListFilter): Promise<Result<SalesInvoiceListResponse, Code>> {

@@ -3,6 +3,7 @@ import { accountingService } from "../accounting/index.js"
 import { activityLogService } from "../activity-log/index.js"
 import { customerAdapter, getSalesOrderRepository, paymentTermAdapter } from "../sales-order/deps.js"
 import { permissionChecker } from "../role/index.js"
+import { customerPaymentService } from "../customer-payment/index.js"
 import { createSalesInvoiceRepository } from "./sales-invoice.repository.js"
 import { createSalesInvoiceService, type SalesInvoiceService } from "./sales-invoice.service.js"
 import type { SalesInvoiceRepository } from "./sales-invoice.types.js"
@@ -21,6 +22,7 @@ export function getSalesInvoiceService(): SalesInvoiceService {
     customers: customerAdapter,
     paymentTerms: paymentTermAdapter,
     accounting: accountingService as any,
+    payments: customerPaymentService as any,
     permissions: permissionChecker,
     activityLog: { record: (entry) => activityLogService.log(entry as any) },
   }))

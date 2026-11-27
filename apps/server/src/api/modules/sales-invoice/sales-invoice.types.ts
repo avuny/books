@@ -147,7 +147,16 @@ export interface AccountingPort {
   ): Promise<Result<JournalEntryDto, any>>
 }
 
+/** What the sales receipt flow needs from the customer payment service. */
+export interface ReceiptPaymentPort {
+  create(actorId: string, orgId: string, input: any): Promise<Result<any, any>>
+  post(actorId: string, orgId: string, id: string): Promise<Result<any, any>>
+  delete(actorId: string, orgId: string, id: string): Promise<Result<any, any>>
+}
+
 export interface SalesInvoiceServiceDeps {
+  /** Optional: only the sales receipt flow uses it. */
+  payments?: ReceiptPaymentPort
   repository: SalesInvoiceRepository
   orders: OrderCountersPort
   customers: CustomerPort
