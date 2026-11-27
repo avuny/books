@@ -402,6 +402,7 @@ export function createSalesDeliveryService(deps: SalesDeliveryServiceDeps) {
           const current = await repo.findAggregate(orgId, id, tx)
           if (!current) throw new PostingAbort(Err.SALES_DELIVERY_NOT_FOUND)
           if (current.row.status !== "POSTED") throw new PostingAbort(Err.SALES_DELIVERY_NOT_POSTED)
+          if (await repo.hasPostedInvoices(orgId, id, tx)) throw new PostingAbort(Err.SALES_DELIVERY_ALREADY_INVOICED)
 
           const order = await deps.orders.findAggregate(orgId, current.row.salesOrderId, tx)
           if (!order) throw new PostingAbort(Err.SALES_DELIVERY_SALES_ORDER_NOT_FOUND)
