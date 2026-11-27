@@ -17,15 +17,15 @@ export function buildArAging(invoices: readonly ArAgingInputInvoice[], asOf: str
 export const reconcileReceivable = reconcileAmounts
 
 export interface CustomerStatementInputRow {
-  kind: "INVOICE" | "PAYMENT"
+  kind: "INVOICE" | "PAYMENT" | "CREDIT_NOTE"
   date: string
   number: string
   reference: string | null
-  /** Positive minor units. An invoice increases what the customer owes, a payment decreases it. */
+  /** Positive minor units. An invoice increases what the customer owes, a payment or credit note decreases it. */
   amount: string
 }
 
-/** Orders activity by date (invoices before payments on the same day) and adds a running balance. */
+/** Orders activity by date (invoices first on the same day) and adds a running balance. */
 export function buildCustomerStatement(
   rows: readonly CustomerStatementInputRow[],
   openingBalance: string
@@ -43,7 +43,7 @@ export function buildCustomerStatement(
       number: r.number,
       reference: r.reference,
       charge: r.kind === "INVOICE" ? r.amount : "0",
-      payment: r.kind === "PAYMENT" ? r.amount : "0",
+      payment: r.kind === "INVOICE" ? "0" : r.amount,
       balance: String(balance),
     }
   })
@@ -65,7 +65,7 @@ export type ArAgingResponse = z.infer<typeof ArAgingResponseSchema>
 
 export const CustomerStatementQuerySchema = z.object({ partyId: z.string().uuid(), from: date.optional(), to: date.optional() })
 export const CustomerStatementLineSchema = z.object({
-  kind: z.enum(["INVOICE", "PAYMENT"]),
+  kind: z.enum(["INVOICE", "PAYMENT", "CREDIT_NOTE"]),
   date,
   number: z.string(),
   reference: z.string().nullable(),

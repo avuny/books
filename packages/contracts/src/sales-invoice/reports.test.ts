@@ -27,4 +27,15 @@ describe("customer statement", () => {
     expect(lines.map((l) => l.balance)).toEqual(["1050", "750"])
     expect(closingBalance).toBe("750")
   })
+  it("credit notes reduce the balance like payments", () => {
+    const { lines, closingBalance } = buildCustomerStatement(
+      [
+        { kind: "INVOICE", date: "2026-11-05", number: "INV-000001", reference: null, amount: "1000" },
+        { kind: "CREDIT_NOTE", date: "2026-11-06", number: "CN-000001", reference: "INV-000001", amount: "250" },
+      ],
+      "0"
+    )
+    expect(lines[1]).toMatchObject({ kind: "CREDIT_NOTE", charge: "0", payment: "250", balance: "750" })
+    expect(closingBalance).toBe("750")
+  })
 })

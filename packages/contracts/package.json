@@ -125,6 +125,11 @@
       "import": "./dist/role/index.js",
       "default": "./dist/role/index.js"
     },
+    "./sales-credit-note": {
+      "types": "./dist/sales-credit-note/index.d.ts",
+      "import": "./dist/sales-credit-note/index.js",
+      "default": "./dist/sales-credit-note/index.js"
+    },
     "./sales-delivery": {
       "types": "./dist/sales-delivery/index.d.ts",
       "import": "./dist/sales-delivery/index.js",

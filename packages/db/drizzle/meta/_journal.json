@@ -232,6 +232,13 @@
       "when": 1795815124911,
       "tag": "0032_customer_payment",
       "breakpoints": true
+    },
+    {
+      "idx": 33,
+      "version": "7",
+      "when": 1795817119227,
+      "tag": "0033_sales_credit_note",
+      "breakpoints": true
     }
   ]
 }

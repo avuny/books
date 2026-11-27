@@ -26,7 +26,7 @@ const deliveryLine = (over: Partial<InvoiceableDeliveryLine> = {}): InvoiceableD
     ...over,
   }) as unknown as InvoiceableDeliveryLine
 
-function setup(opts: { allowed?: boolean; arInvoices?: any[]; statement?: any; ledger?: string; lines?: InvoiceableDeliveryLine[]; orderStatus?: string; paid?: boolean } = {}) {
+function setup(opts: { allowed?: boolean; credited?: boolean; arInvoices?: any[]; statement?: any; ledger?: string; lines?: InvoiceableDeliveryLine[]; orderStatus?: string; paid?: boolean } = {}) {
   const invoices = new Map<string, any>()
   const lines = opts.lines ?? [deliveryLine()]
   const counters: Record<string, string> = { "sol-1": "0" }
@@ -46,6 +46,7 @@ function setup(opts: { allowed?: boolean; arInvoices?: any[]; statement?: any; l
       invoices.get(id).lines = ls.map((l, i) => ({ id: `il-${i}`, salesInvoiceId: id, ...l }))
     },
     hasPostedPayments: async () => opts.paid ?? false,
+    hasPostedCreditNotes: async () => opts.credited ?? false,
     postedInvoicesWithPaid: async () => opts.arInvoices ?? [],
     statementSource: async () => (opts.statement === undefined ? null : opts.statement),
     ledgerDebitBalance: async () => opts.ledger ?? "0",
@@ -205,6 +206,16 @@ describe("sales invoice service", () => {
     const res = await service.reverse(ACTOR, ORG, created.data.id, { reason: "x" })
     expect(res.success).toBe(false)
     if (!res.success) expect(res.error).toBe("SALES_INVOICE_HAS_PAYMENTS")
+  })
+
+  it("refuses to reverse an invoice with posted credit notes", async () => {
+    const { service } = setup({ credited: true })
+    const created = await service.createFromDelivery(ACTOR, ORG, "dl-1", { invoiceDate: "2026-11-26" })
+    if (!created.success) throw new Error("setup")
+    await service.post(ACTOR, ORG, created.data.id)
+    const res = await service.reverse(ACTOR, ORG, created.data.id, { reason: "x" })
+    expect(res.success).toBe(false)
+    if (!res.success) expect(res.error).toBe("SALES_INVOICE_HAS_CREDIT_NOTES")
   })
 
   it("only drafts can be deleted", async () => {

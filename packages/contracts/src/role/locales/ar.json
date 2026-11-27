@@ -24,6 +24,7 @@
       "sales_order": "أوامر البيع",
       "sales_delivery": "التسليمات",
       "sales_invoice": "فواتير المبيعات",
+      "sales_credit_note": "إشعارات الدائن",
       "customer_payment": "مدفوعات العملاء",
       "purchase_shipment": "شحنات الموردين",
       "purchase_receipt": "إيصالات الاستلام",
