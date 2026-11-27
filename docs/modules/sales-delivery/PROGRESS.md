@@ -5,7 +5,7 @@
 | Spec | [`SPEC.md`](./SPEC.md) · imported 2026-11-26 |
 | Plan | [`IMPLEMENTATION-PLAN.md`](./IMPLEMENTATION-PLAN.md) |
 | Last updated | 2026-11-27 |
-| Current phase | Phase 1 — Backend built, web pending |
+| Current phase | Phase 2 — Web built, e2e pending |
 | Tasks done | 0 / 17 |
 | Gates passed | 0 / 4 |
 
@@ -17,7 +17,7 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done · `[!]` blocked · `[-]` 
 
 ## Next action
 
-> **Web milestone** — deliveries panel on the sales-order details page (create with open quantities prefilled, post, reverse), delivery details page, en/ar UI locales, e2e. Then the invoice handoff (SPEC P1-06) with the sales-invoice-payment module.
+> **E2E and invoice handoff** — add a web e2e spec for create, post and reverse. Then the invoice handoff (SPEC P1-06) with the sales-invoice-payment module.
 
 ## Status board
 
@@ -25,7 +25,7 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done · `[!]` blocked · `[-]` 
 |---|---|---|---|
 | 0 | Discovery and decisions | G0 | not started |
 | 1 | Build (backend) | G1 | done, web pending |
-| 2 | Web and copy | G2 | not started |
+| 2 | Web and copy | G2 | panel done (order page), e2e pending |
 | 3 | Hardening and acceptance | G3 | not started |
 
 ## Decision log
@@ -38,7 +38,7 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done · `[!]` blocked · `[-]` 
 | D5 | Posting needs FIFO cost layers covering the quantity, else COST_UNAVAILABLE. Journal is Dr COGS / Cr Inventory at the cost taken from layers | decided | agent, 2026-11-27 |
 | D6 | Reversal restores cost layers at the original cost and reverses the journal. The reservation is not restored (returned goods become free stock) | decided | agent, 2026-11-27 |
 | D7 | Invoice-linked reversal guard and the draft-invoice handoff are deferred to the sales-invoice-payment milestone | deferred | agent, 2026-11-27 |
-| D8 | No global deliveries list yet. Deliveries show on the order details page in the web milestone | decided | agent, 2026-11-27 |
+| D8 | No global deliveries list or details page yet. Deliveries are managed from a panel on the order details page (create prefilled with open quantities, post, reverse with reason) | decided | agent, 2026-11-27 |
 | D1 | Transaction-capable DB driver is available before posting use cases are built | open | see `../SAAS-SPEC-FIXES-PLAN.md` D1 |
 
 ## Deviations
@@ -50,3 +50,4 @@ None.
 | Date | Task | Command | Result |
 |---|---|---|---|
 | 2026-11-27 | Backend | `pnpm test src/api/modules/sales-delivery src/api/modules/sales-order` (apps/server), `tsc --noEmit` | 52 unit tests pass, typecheck clean. Integration runs in CI only (no local Postgres) |
+| 2026-11-27 | Web | `pnpm typecheck`, vitest sales-order-module (apps/web) | typecheck clean, build-delivery tests pass |

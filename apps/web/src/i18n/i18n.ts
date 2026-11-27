@@ -37,6 +37,7 @@ i18n
       "purchase-receipt",
       "purchase-shipment",
       "role",
+      "sales-delivery",
       "sales-order",
       "stock-movement",
       "unit",

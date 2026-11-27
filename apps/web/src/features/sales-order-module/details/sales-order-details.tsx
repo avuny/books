@@ -15,6 +15,7 @@ import {
 
 import { SALES_ORDER_DEFAULT_RESERVATION_POLICY, SALES_ORDER_RESERVATION_POLICIES, type SalesOrderReservationPolicy } from "@avuny/contracts"
 import { SalesOrderStatusBadge } from "../components"
+import { DeliveriesPanel } from "../deliveries"
 import { bpsToPercent, formatMinorAmount, useSalesOrderLabels } from "../lib"
 import {
   useCancelSalesOrderMutation,
@@ -177,7 +178,7 @@ export function SalesOrderDetails({ orgId, orderId, onBack, onEdit }: Props) {
         </dl>
       </section>
 
-
+      <DeliveriesPanel orgId={orgId} order={order} />
 
       <Dialog open={action === "confirm"} onOpenChange={(o) => !o && reset()}>
         <DialogContent>

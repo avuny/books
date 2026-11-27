@@ -34,5 +34,29 @@
     "SALES_DELIVERY_DELETED": "Delivery deleted successfully",
     "SALES_DELIVERY_POSTED": "Delivery posted. Stock and cost are updated",
     "SALES_DELIVERY_REVERSED": "Delivery reversed"
+  },
+  "ui": {
+    "title": "Deliveries",
+    "new": "New delivery",
+    "none": "No deliveries yet.",
+    "number": "Delivery",
+    "date": "Date",
+    "carrier": "Carrier",
+    "tracking": "Tracking number",
+    "status": "Status",
+    "cost": "Cost",
+    "post": "Post",
+    "reverse": "Reverse",
+    "cancel": "Cancel",
+    "create": "Create delivery",
+    "creating": "Creating...",
+    "reverseTitle": "Reverse delivery",
+    "reverseDescription": "This brings the goods back into stock at their original cost and reverses the cost journal. The reservation is not restored.",
+    "reason": "Reason",
+    "noOpenLines": "Enter the quantity to deliver for each line. Leave a line empty to skip it.",
+    "open": "Open",
+    "quantity": "Quantity",
+    "invalidQty": "Check the quantities: each must be above zero and not exceed the open quantity.",
+    "nothingToDeliver": "Enter a quantity for at least one line."
   }
 }
