@@ -1,0 +1,47 @@
+{
+  "errors": {
+    "SALES_INVOICE_NOT_FOUND": "Sales invoice not found",
+    "SALES_INVOICE_NOT_EDITABLE": "Only draft invoices can be edited",
+    "SALES_INVOICE_NOT_DELETABLE": "Only draft invoices can be deleted. Reverse a posted invoice instead",
+    "SALES_INVOICE_ALREADY_POSTED": "The invoice is already posted",
+    "SALES_INVOICE_NOT_POSTED": "Only posted invoices can be reversed",
+    "SALES_INVOICE_SALES_ORDER_NOT_FOUND": "The sales order does not exist",
+    "SALES_INVOICE_SALES_ORDER_CANCELLED": "A cancelled sales order cannot be invoiced",
+    "SALES_INVOICE_DELIVERY_NOT_FOUND": "The delivery does not exist",
+    "SALES_INVOICE_DELIVERY_NOT_POSTED": "Only posted deliveries can be invoiced",
+    "SALES_INVOICE_DELIVERY_ORDER_MISMATCH": "The delivery line does not belong to this sales order",
+    "SALES_INVOICE_CUSTOMER_NOT_FOUND": "The customer does not exist",
+    "SALES_INVOICE_CUSTOMER_NOT_CUSTOMER": "The party is not a customer",
+    "SALES_INVOICE_CUSTOMER_INACTIVE": "The customer is inactive",
+    "SALES_INVOICE_NO_LINES": "At least one invoice line is required",
+    "SALES_INVOICE_NOTHING_TO_INVOICE": "Nothing left to invoice on this delivery",
+    "SALES_INVOICE_LINE_NOT_FOUND": "A delivery line does not exist",
+    "SALES_INVOICE_DUPLICATE_LINES": "A delivery line can appear only once per invoice",
+    "SALES_INVOICE_QUANTITY_NOT_POSITIVE": "Quantity must be above zero",
+    "SALES_INVOICE_EXCEEDS_UNINVOICED": "Quantity exceeds what is still uninvoiced on the delivery line",
+    "SALES_INVOICE_PAYMENT_TERM_NOT_FOUND": "The payment term does not exist",
+    "SALES_INVOICE_DUE_DATE_BEFORE_INVOICE": "The due date cannot be before the invoice date",
+    "SALES_INVOICE_HAS_PAYMENTS": "A payment is applied to this invoice. Reverse the payment first",
+    "SALES_INVOICE_POSTING_FAILED": "The invoice could not be posted",
+    "SALES_INVOICE_NUMBER_TAKEN": "Could not allocate an invoice number, try again"
+  },
+  "labels": {
+    "status": {
+      "DRAFT": "Draft",
+      "POSTED": "Posted",
+      "REVERSED": "Reversed"
+    },
+    "paymentStatus": {
+      "UNPAID": "Unpaid",
+      "PARTIALLY_PAID": "Partially paid",
+      "PAID": "Paid"
+    }
+  },
+  "msgs": {
+    "SALES_INVOICE_CREATED": "Invoice created",
+    "SALES_INVOICE_POSTED": "Invoice posted",
+    "SALES_INVOICE_REVERSED": "Invoice reversed",
+    "SALES_INVOICE_DELETED": "Invoice deleted",
+    "SALES_INVOICE_UPDATED": "Invoice updated"
+  }
+}

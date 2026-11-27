@@ -125,6 +125,11 @@
       "import": "./dist/sales-delivery/index.js",
       "default": "./dist/sales-delivery/index.js"
     },
+    "./sales-invoice": {
+      "types": "./dist/sales-invoice/index.d.ts",
+      "import": "./dist/sales-invoice/index.js",
+      "default": "./dist/sales-invoice/index.js"
+    },
     "./sales-order": {
       "types": "./dist/sales-order/index.d.ts",
       "import": "./dist/sales-order/index.js",
