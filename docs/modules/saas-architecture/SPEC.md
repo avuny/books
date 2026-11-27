@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | Version | 1.0 · 2026-11-27 |
-| Status | proposed (waiting for owner decisions Q1 to Q24 in PROGRESS.md) |
+| Status | decisions Q1 to Q24 answered with defaults 2026-11-27 (see PROGRESS.md); approved for scaffolding |
 | Owner | Khalid (avuny) |
 | Depends on | organization, organization-user, role, sidebar, activity-log, admin, the module registry (`packages/contracts/src/modules/registry.ts`) |
 | Related | [`PLATFORM-ADMIN-SPEC.md`](./PLATFORM-ADMIN-SPEC.md), `../SAAS-OVERVIEW.md`, `../plan`, `../subscription`, `../payment`, `../billing`, `../feature-gate`, `../SAAS-SPEC-REVIEW.md`, `../SAAS-SPEC-FIXES-PLAN.md` |
