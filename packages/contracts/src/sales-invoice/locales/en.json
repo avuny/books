@@ -98,6 +98,45 @@
       "creating": "Creating...",
       "invoiceDate": "Invoice date",
       "dueDate": "Due date (optional)"
+    },
+    "reports": {
+      "title": "AR reports",
+      "description": "What customers owe you, and whether the books agree.",
+      "open": "AR reports",
+      "aging": "AR aging",
+      "agingNote": "Outstanding on posted invoices today, by days past the due date.",
+      "agingNone": "Nothing outstanding.",
+      "customer": "Customer",
+      "total": "Total",
+      "statement": "Statement",
+      "buckets": {
+        "CURRENT": "Current",
+        "DAYS_1_30": "1-30",
+        "DAYS_31_60": "31-60",
+        "DAYS_61_90": "61-90",
+        "OVER_90": "Over 90"
+      },
+      "reconciliation": "Reconciliation",
+      "ledger": "Ledger",
+      "subledger": "Subledger",
+      "difference": "Difference",
+      "ok": "Balanced",
+      "off": "Does not match",
+      "ar": "Accounts receivable vs open invoices",
+      "stmt": {
+        "title": "Statement: {name}",
+        "from": "From",
+        "to": "To",
+        "opening": "Opening balance",
+        "closing": "Closing balance",
+        "date": "Date",
+        "document": "Document",
+        "reference": "Reference",
+        "charge": "Invoiced",
+        "payment": "Received",
+        "balance": "Balance",
+        "none": "No activity in this period."
+      }
     }
   }
 }

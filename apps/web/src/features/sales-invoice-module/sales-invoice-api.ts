@@ -10,6 +10,9 @@ import {
   getGetSalesInvoiceQueryKey,
   getListSalesInvoicesQueryKey,
   useCreateSalesInvoiceFromDelivery,
+  useGetArAging,
+  useGetArReconciliation,
+  useGetCustomerStatement,
   useDeleteSalesInvoice,
   useGetMyPermissions,
   useGetSalesInvoice,
@@ -18,7 +21,7 @@ import {
   useReverseSalesInvoice,
 } from "@/api"
 
-import type { SalesInvoiceDto } from "./types"
+import type { ArAgingResponse, ArReconciliationResponse, CustomerStatementResponse, SalesInvoiceDto } from "./types"
 
 const NO_INVOICES: SalesInvoiceDto[] = []
 
@@ -101,4 +104,26 @@ export function useReverseInvoiceMutation(orgId: string) {
 export function useDeleteInvoiceMutation(orgId: string) {
   const invalidate = useInvalidate(orgId)
   return useDeleteSalesInvoice({ mutation: { onSuccess: () => invalidate() } })
+}
+
+export function useArAging(orgId: string) {
+  const query = useGetArAging(orgId)
+  const aging = (query.data?.data ?? null) as ArAgingResponse | null
+  return { aging, isLoading: query.isLoading, error: query.error }
+}
+
+export function useArReconciliation(orgId: string) {
+  const query = useGetArReconciliation(orgId)
+  const reconciliation = (query.data?.data ?? null) as ArReconciliationResponse | null
+  return { reconciliation, isLoading: query.isLoading, error: query.error }
+}
+
+export function useCustomerStatement(orgId: string, params: { partyId: string; from?: string; to?: string } | null) {
+  const query = useGetCustomerStatement(
+    orgId,
+    { partyId: params?.partyId ?? "", from: params?.from || undefined, to: params?.to || undefined },
+    { query: { enabled: Boolean(params) } }
+  )
+  const statement = (query.data?.data ?? null) as CustomerStatementResponse | null
+  return { statement, isLoading: query.isLoading && Boolean(params), error: query.error }
 }
