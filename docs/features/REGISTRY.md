@@ -13,6 +13,7 @@ One row per module. Update in the same commit that changes status. Statuses: pro
 | item | done | n/a | n/a | unit | audit B2, B8 |
 | warehouse, warehouse-location | done | n/a | n/a | unit | audit B9 |
 | inventory-adjustment, stock-movement, inventory-costing, batch | done | n/a | n/a | unit | audit B3, B4 |
+| inventory-transfer | done (phases 1-5, 7; phase 6 shortage journal skipped) | n/a | n/a | unit, route integration | docs/modules/inventory-transfer/SPEC.md |
 | accounting | in-progress | n/a | n/a | unit | server only, no web page (B5) |
 | activity-log, audit | done | n/a | n/a | unit | no viewer in web |
 | SaaS: plan, subscription, payment, billing, feature-gate | planned | [overview](../modules/SAAS-OVERVIEW.md) | [plan](../modules/IMPLEMENTATION-PLAN.md) | none | see SAAS-SPEC-FIXES-PLAN |
