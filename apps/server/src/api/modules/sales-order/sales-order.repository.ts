@@ -1,5 +1,6 @@
 import { and, asc, count, desc, eq, gte, ilike, lte, or, sql } from "drizzle-orm"
 import {
+  salesDeliveries,
   items,
   parties,
   salesOrderLines,
@@ -206,6 +207,15 @@ export function createSalesOrderRepository({ db }: { db: DB }): SalesOrderReposi
         .where(and(eq(salesOrderLines.orgId, orgId), eq(salesOrderLines.id, lineId)))
     },
 
+    async lockLines(orgId, id, tx) {
+      return tx
+        .select()
+        .from(salesOrderLines)
+        .where(and(eq(salesOrderLines.orgId, orgId), eq(salesOrderLines.salesOrderId, id)))
+        .orderBy(asc(salesOrderLines.lineNo))
+        .for("update")
+    },
+
     async deleteById(orgId, id, tx) {
       await ex(tx)
         .delete(salesOrders)
@@ -213,8 +223,8 @@ export function createSalesOrderRepository({ db }: { db: DB }): SalesOrderReposi
     },
 
     async hasDeliveries(orgId, id, tx) {
-      // Sales delivery lands in the next milestone. Until then the delivered counters are the source of truth.
-      const [r] = await ex(tx)
+      // Delivered counters cover reversed deliveries too: a reversal lowers them again.
+      const [lines] = await ex(tx)
         .select({ n: count() })
         .from(salesOrderLines)
         .where(
@@ -224,7 +234,12 @@ export function createSalesOrderRepository({ db }: { db: DB }): SalesOrderReposi
             sql`${salesOrderLines.deliveredBaseQty} > 0`
           )
         )
-      return Number(r?.n ?? 0) > 0
+      if (Number(lines?.n ?? 0) > 0) return true
+      const [posted] = await ex(tx)
+        .select({ n: count() })
+        .from(salesDeliveries)
+        .where(and(eq(salesDeliveries.orgId, orgId), eq(salesDeliveries.salesOrderId, id), eq(salesDeliveries.status, "POSTED")))
+      return Number(posted?.n ?? 0) > 0
     },
   }
 }

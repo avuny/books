@@ -69,9 +69,11 @@ export interface SalesOrderRepository {
   setLineCounters(
     orgId: string,
     lineId: string,
-    counters: { reservedBaseQty?: string; cancelledBaseQty?: string },
+    counters: { reservedBaseQty?: string; cancelledBaseQty?: string; deliveredBaseQty?: string },
     tx?: Tx
   ): Promise<void>
+  /** Locks and returns the lines of an order for a counter update inside a posting transaction. */
+  lockLines(orgId: string, id: string, tx: Tx): Promise<SalesOrderLine[]>
   deleteById(orgId: string, id: string, tx?: Tx): Promise<void>
   /** True when any posted delivery references the order. Always false until sales delivery exists. */
   hasDeliveries(orgId: string, id: string, tx?: Tx): Promise<boolean>
