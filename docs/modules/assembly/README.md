@@ -50,7 +50,7 @@ Let a user create an item from existing items. The range is wide: put item A in 
 
 | # | Question | Default used in the specs |
 |---|---|---|
-| Q1 | v1 scope: single-step assembly (no WIP) or full production orders with WIP, partial completion and scrap? | Single-step in v1. WIP production orders are phase 2 (section 9). |
+| Q1 | v1 scope: single-step assembly (no WIP) or full production orders with WIP, partial completion and scrap? | Both, in phases. v1 is single-step. The same order grows into staged production later, see [STAGED-PRODUCTION.md](./STAGED-PRODUCTION.md). v1 only adds small hooks (a `mode` column and a `posting_seq` column). |
 | Q2 | Component stock that has no cost layer (for example adjustment gains): block, or fall back to the item's default cost price? | Block with a clear error. A later flag can allow the fallback, marked "estimated". |
 | Q3 | Weighted average items: consume FIFO layers anyway until weighted average exists, or block assembly for them? | Consume FIFO layers and document the gap. The first weighted average implementation must go into the costing service so assembly and sales share it. |
 | Q4 | Labor, machine and overhead: credit a new "Manufacturing cost absorbed" account (standard absorption costing), or credit accounts payable or cash directly? | New mapping key `ASSEMBLY_COST_ABSORBED`, default account 5600. Real wages stay in Salaries. The difference shows as under or over absorbed. |
@@ -109,6 +109,8 @@ Stock at the moment of posting (FIFO layers): candles layer 20.00 each, box 8.00
 Each phase ships as its own PR. Phases 1 to 3 do not change stock behaviour, so they are safe to merge early.
 
 ## 9. Phase 2 (not in v1, but v1 must not block it)
+
+The design for staged production with WIP (statuses, movements, WIP account, costing, what v1 adds now) is in [STAGED-PRODUCTION.md](./STAGED-PRODUCTION.md).
 
 - **Production orders with WIP:** release, issue components in several steps, record labor actuals, complete in parts, scrap and by-products. Needs a stockable WIP location role (the existing PRODUCTION role is a counterparty with no balance), a WIP journal (Dr WIP, Cr Inventory, then Dr Inventory, Cr WIP), and cost variance accounts.
 - **Disassembly:** the reverse recipe (unpack a bag into parts). Model as an order kind that reuses the same two movement types in the opposite roles.
