@@ -150,3 +150,75 @@ describe("locales", () => {
     expect(Object.keys(en.errors).sort()).toEqual(Object.keys(ar.errors).sort())
   })
 })
+
+import { allocateFifo, determineCost } from "./rules.js"
+
+describe("determineCost (R1 to R5)", () => {
+  it("fails when there is no cost input", () => {
+    expect(determineCost(undefined, "1")).toEqual({ ok: false, error: "STOCK_MOVEMENT_COST_REQUIRED" })
+  })
+  it("document and user costs are exact", () => {
+    const d = determineCost({ source: "DOCUMENT", totalValueMinor: "1250" }, "5")
+    expect(d.ok && d.cost.valueMinor).toBe(1250n)
+    const u = determineCost({ source: "USER", unitCost: "33.3333333333" }, "3")
+    expect(u.ok && u.cost.valueMinor).toBe(100n)
+  })
+  it("zero needs a reason, and a reason needs zero", () => {
+    expect(determineCost({ source: "DOCUMENT", totalValueMinor: "0" }, "1")).toEqual({ ok: false, error: "COST_ZERO_REASON_REQUIRED" })
+    const z = determineCost({ source: "DOCUMENT", totalValueMinor: "0", zeroCost: { reason: "SAMPLE" } }, "1")
+    expect(z.ok && z.cost.isZeroCost).toBe(true)
+    expect(determineCost({ source: "DOCUMENT", totalValueMinor: "5", zeroCost: { reason: "SAMPLE" } }, "1")).toEqual({ ok: false, error: "COST_INVALID" })
+  })
+  it("missing is not zero: a missing unit cost is invalid, not 0", () => {
+    expect(determineCost({ source: "USER", unitCost: "" }, "1").ok).toBe(false)
+  })
+  it("proposal keeps the proposed value next to the final one", () => {
+    const p = determineCost({ source: "CONFIRMED_PROPOSAL", unitCost: "10", proposedUnitCost: "12" }, "2")
+    expect(p.ok && [p.cost.valueMinor, p.cost.proposedValueMinor]).toEqual([20n, 24n])
+  })
+  it("inherited needs a found source, adds extra cost and may be zero", () => {
+    expect(determineCost({ source: "INHERITED" }, "1")).toEqual({ ok: false, error: "COST_SOURCE_NOT_FOUND" })
+    const i = determineCost({ source: "INHERITED", additionalValueMinor: "50" }, "1", 300n)
+    expect(i.ok && i.cost.valueMinor).toBe(350n)
+    const z = determineCost({ source: "INHERITED" }, "1", 0n)
+    expect(z.ok && z.cost.isZeroCost).toBe(true)
+  })
+})
+
+describe("FIFO allocation", () => {
+  const L = (id: string, q: string, v: bigint) => ({ id, remainingQtyMicro: toMicro(q), remainingValueMinor: v })
+  it("takes whole layers fully and a partial layer proportionally", () => {
+    const r = allocateFifo([L("a", "2", 100n), L("b", "4", 301n)], toMicro("3"))!
+    expect(r.slices.map((s) => s.valueMinor)).toEqual([100n, 75n]) // 301 * 1 / 4 = 75.25
+    expect(r.totalValueMinor).toBe(175n)
+  })
+  it("fails when layers cover less than the quantity (R6)", () => {
+    expect(allocateFifo([L("a", "2", 100n)], toMicro("3"))).toBeNull()
+    expect(allocateFifo([], toMicro("1"))).toBeNull()
+  })
+  it("property: drawing a pool down piece by piece uses exactly its value", () => {
+    for (let seed = 1; seed <= 100; seed++) {
+      const r = rng(seed)
+      const layers = Array.from({ length: 4 }, (_, i) => L(`l${i}`, String(1 + Math.floor(r() * 9)), BigInt(Math.floor(r() * 5000))))
+      const totalQty = layers.reduce((a, l) => a + l.remainingQtyMicro, 0n)
+      const totalValue = layers.reduce((a, l) => a + l.remainingValueMinor, 0n)
+      let state = layers.map((l) => ({ ...l }))
+      let used = 0n
+      let leftQty = totalQty
+      while (leftQty > 0n) {
+        const q = BigInt(Math.floor(r() * 3_000_000)) + 1n
+        const take = q > leftQty ? leftQty : q
+        const res = allocateFifo(state, take)!
+        for (const s of res.slices) {
+          const l = state.find((x) => x.id === s.layerId)!
+          l.remainingQtyMicro -= s.qtyMicro
+          l.remainingValueMinor -= s.valueMinor
+          expect(l.remainingValueMinor >= 0n).toBe(true)
+        }
+        used += res.totalValueMinor
+        leftQty -= take
+      }
+      expect(used).toBe(totalValue)
+    }
+  })
+})
