@@ -17,6 +17,7 @@ Next validates only the fields of the current step (`STEP_FIELDS`). Enter does n
 - Stored in `item_unit_prices` (one row per item and non-base unit). The price is per 1 of that unit.
 - The item's own `costPrice` / `sellingPrice` are the base unit prices.
 - They are stored defaults only. Nothing server-side consumes them yet.
+- The item details page (Overview tab) shows a Prices table: base unit row plus one row per priced unit, padded API values trimmed with `trimDecimal`. Hidden when no price is set (`details/item-details-view.tsx`, strings `details.prices.*`).
 - The update form edits them too. The update request replaces the whole set.
 
 ## Opening stock lines
