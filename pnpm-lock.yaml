@@ -27,6 +27,52 @@ importers:
         specifier: ~6.0.2
         version: 6.0.3
 
+  apps/platform-server:
+    dependencies:
+      '@avuny/contracts':
+        specifier: workspace:*
+        version: link:../../packages/contracts
+      '@avuny/hono':
+        specifier: workspace:*
+        version: link:../../packages/hono
+      '@avuny/logger':
+        specifier: workspace:*
+        version: link:../../packages/logger
+      '@avuny/utils':
+        specifier: workspace:*
+        version: link:../../packages/utils
+      '@avuny/zod':
+        specifier: workspace:*
+        version: link:../../packages/zod
+      '@hono/swagger-ui':
+        specifier: ^0.5.0
+        version: 0.5.3(hono@4.13.13)
+      '@hono/zod-openapi':
+        specifier: ^1.1.5
+        version: 1.6.3(hono@4.13.13)(zod@4.6.5)
+      hono:
+        specifier: ^4.10.7
+        version: 4.13.13
+    devDependencies:
+      '@cloudflare/workers-types':
+        specifier: ^4.20250101.0
+        version: 4.20260702.1
+      eslint:
+        specifier: ^9.28.0
+        version: 9.39.5(jiti@2.7.0)(supports-color@10.2.2)
+      tsx:
+        specifier: ^4.21.0
+        version: 4.23.15
+      typescript:
+        specifier: ^5.9.0
+        version: 5.9.3
+      vitest:
+        specifier: ^3.2.3
+        version: 3.2.7(@types/node@26.6.5)(@vitest/ui@3.2.7)(jiti@2.7.0)(jsdom@30.1.2)(lightningcss@1.33.0)(supports-color@10.2.2)(tsx@4.23.15)(yaml@2.9.1)
+      wrangler:
+        specifier: ^4.0.0
+        version: 4.151.0(@cloudflare/workers-types@4.20260702.1)(@types/node@26.6.5)
+
   apps/server:
     dependencies:
       '@avuny/contracts':
@@ -10717,7 +10763,7 @@ snapshots:
       sirv: 3.0.2
       tinyglobby: 0.2.17
       tinyrainbow: 2.0.0
-      vitest: 3.2.7(@types/node@24.19.1)(@vitest/ui@3.2.7)(jiti@2.7.0)(jsdom@30.1.2)(lightningcss@1.33.0)(supports-color@10.2.2)(tsx@4.23.15)(yaml@2.9.1)
+      vitest: 3.2.7(@types/node@26.6.5)(@vitest/ui@3.2.7)(jiti@2.7.0)(jsdom@30.1.2)(lightningcss@1.33.0)(supports-color@10.2.2)(tsx@4.23.15)(yaml@2.9.1)
 
   '@vitest/utils@3.2.7':
     dependencies:

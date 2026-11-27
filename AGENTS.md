@@ -21,6 +21,7 @@ Repository guide for AI agents working in this monorepo.
 | ------------- | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
 | `apps/server` | `@avuny/books-server` | Hono REST/OpenAPI API. Mounts feature modules under `src/api/modules/*`. Deploys to Cloudflare Workers or runs via Node.                    |
 | `apps/web`    | `@avuny/books-web`    | Client SPA. Uses TanStack file-based routing (`src/routes`), feature modules (`src/features/*`), and Orval-generated queries (`src/api/*`). |
+| `apps/platform-server` | `@avuny/platform-server` | Platform (SaaS back office) API: admin identity, plans, subscriptions, payments, webhooks, jobs, landing content. Separate Worker. Scaffold only; see its AGENTS.md. |
 
 ### Shared Packages (`packages/`)
 
