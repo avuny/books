@@ -19,6 +19,7 @@ export const PLATFORM_AUDIT_ACTIONS = {
   ADMIN_LOGIN: "login",
   ADMIN_LOGIN_FAILED: "login_failed",
   ADMIN_LOGOUT: "logout",
+  ADMIN_SESSION_REVOKED: "session_revoked",
   ROLE_CREATED: "created",
   ROLE_UPDATED: "updated",
   ROLE_DELETED: "deleted",

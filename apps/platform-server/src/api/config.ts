@@ -14,6 +14,15 @@ export const envSchema = z.object({
   // because the health scaffold does not use it; every module route requires it.
   DATABASE_URL: z.string().min(1).optional(),
 
+  // Platform auth (A1-04). Separate secrets from the tenant server: a tenant token
+  // must never authenticate here and the reverse (PLATFORM-ADMIN-SPEC 2.4).
+  // bcryptjs cost factor, same convention as apps/server.
+  BCRYPT_ROUNDS: z.coerce.number().int().min(4).max(31).default(12),
+  // HMAC secret for the short-lived login/enrollment tickets between auth steps.
+  PLATFORM_AUTH_TICKET_SECRET: z.string().min(32),
+  // AES-256-GCM key material for TOTP secrets at rest (SHA-256 derived to 32 bytes).
+  PLATFORM_TOTP_ENC_KEY: z.string().min(32),
+
   // Admin web app origin. The admin cookie is SameSite=Strict by default and
   // CORS never allows the tenant web app origin (PLATFORM-ADMIN-SPEC 2.4).
   WEB_APP_URL: z.string().default("http://localhost:5174"),

@@ -2,7 +2,7 @@
 
 The platform (SaaS back office) API: admin identity and roles, plan and catalog configuration, organizations, subscriptions, payments, provider webhooks, scheduled jobs, landing content and the public read API. A separate Cloudflare Worker from `apps/server`.
 
-Specs: `docs/modules/saas-architecture/PLATFORM-ADMIN-SPEC.md` (this app), `SPEC.md` (entitlement model), `LANDING-SPEC.md` (public site API). Status and next tasks: `docs/modules/saas-architecture/PROGRESS.md` (admin track A1 to A8). **This app is a scaffold: only `/api/health` exists. No business logic yet.**
+Specs: `docs/modules/saas-architecture/PLATFORM-ADMIN-SPEC.md` (this app), `SPEC.md` (entitlement model), `LANDING-SPEC.md` (public site API). Status and next tasks: `docs/modules/saas-architecture/PROGRESS.md` (admin track A1 to A8). **Status: A1-02 to A1-04 done.** Identity schema + migrations, roles registry/seed/bootstrap CLI, and the `platform-auth` module (login + TOTP, sessions, invite acceptance) exist; no business modules yet.
 
 ## Follow the server conventions
 Everything in the root `AGENTS.md` and `apps/server/AGENTS.md` applies here unchanged: module structure under `src/api/modules/<module-name>/` (repository, service, types, permissions, errors, `deps.ts`, `testing.ts`, `hono-routes/`), `Result<T, E>` services, `handleResult` error maps, contracts first in `packages/contracts`, `z` from `@avuny/zod`, unit tests with fakes and integration tests against the real app, activity/audit on every mutation, localized messages through locale files. Reference module for the pattern is `apps/server/src/api/modules/party`.
