@@ -121,7 +121,7 @@ type LineCardProps = {
   onRemove: () => void
 }
 
-/** One opening stock line on two rows: where / how much / at what cost, then when. */
+/** One opening stock line on three rows: location and unit, quantity and cost, then dates. */
 function LineCard({
   index,
   control,
@@ -176,9 +176,7 @@ function LineCard({
     <div className="rounded-md border border-border bg-card p-3 shadow-xs">
       <div className="flex items-start gap-3">
         <div className="flex-1 space-y-3">
-          <div
-            className={`grid gap-3 ${hasUnits ? "sm:grid-cols-2 md:grid-cols-4" : "sm:grid-cols-3"}`}
-          >
+          <div className="grid gap-3">
             <AsyncComboboxField
               control={control}
               name={`openingStockLines.${index}.locationId`}
@@ -198,6 +196,8 @@ function LineCard({
                 placeholder={copy.line.unit.placeholder}
               />
             ) : null}
+          </div>
+          <div className="grid gap-3 sm:grid-cols-2">
             <InputField
               control={control}
               name={`openingStockLines.${index}.quantity`}
