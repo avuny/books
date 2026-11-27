@@ -191,7 +191,10 @@ describe("invite acceptance and enrollment (A1-04)", () => {
     const expired = await createSecondInviteToken()
     await db
       .update(platformInvites)
-      .set({ expiresAt: new Date(Date.now() - 1000) })
+      .set({
+        createdAt: new Date(Date.now() - 2 * 3_600_000),
+        expiresAt: new Date(Date.now() - 3_600_000),
+      })
       .where(eq(platformInvites.tokenHash, expired.hash))
     const gone = await post("/platform-auth/invites/accept", {
       token: expired.token,
@@ -446,7 +449,10 @@ describe("sessions (A1-04, PAC2)", () => {
     const [session] = await db.select().from(platformAdminSessions)
     await db
       .update(platformAdminSessions)
-      .set({ expiresAt: new Date(Date.now() - 1000) })
+      .set({
+        createdAt: new Date(Date.now() - 2 * 3_600_000),
+        expiresAt: new Date(Date.now() - 3_600_000),
+      })
       .where(eq(platformAdminSessions.id, session!.id))
     expect((await get("/platform-auth/me", cookie)).status).toBe(401)
 
