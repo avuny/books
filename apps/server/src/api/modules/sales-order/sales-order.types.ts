@@ -69,7 +69,7 @@ export interface SalesOrderRepository {
   setLineCounters(
     orgId: string,
     lineId: string,
-    counters: { reservedBaseQty?: string; cancelledBaseQty?: string; deliveredBaseQty?: string },
+    counters: { reservedBaseQty?: string; cancelledBaseQty?: string; deliveredBaseQty?: string; invoicedBaseQty?: string },
     tx?: Tx
   ): Promise<void>
   /** Locks and returns the lines of an order for a counter update inside a posting transaction. */

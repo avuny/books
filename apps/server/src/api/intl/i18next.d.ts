@@ -18,6 +18,7 @@ import type purchaseReceiptEn from "./locales/purchase-receipt/en.json"
 import type purchaseShipmentEn from "./locales/purchase-shipment/en.json"
 import type roleEn from "./locales/role/en.json"
 import type salesDeliveryEn from "./locales/sales-delivery/en.json"
+import type salesInvoiceEn from "./locales/sales-invoice/en.json"
 import type salesOrderEn from "./locales/sales-order/en.json"
 import type sidebarEn from "./locales/sidebar/en.json"
 import type unitEn from "./locales/unit/en.json"
@@ -48,6 +49,7 @@ type PurchaseReceiptMessages = typeof purchaseReceiptEn
 type PurchaseShipmentMessages = typeof purchaseShipmentEn
 type RoleMessages = typeof roleEn
 type SalesDeliveryMessages = typeof salesDeliveryEn
+type SalesInvoiceMessages = typeof salesInvoiceEn
 type SalesOrderMessages = typeof salesOrderEn
 type SidebarMessages = typeof sidebarEn
 type UnitMessages = typeof unitEn
@@ -92,6 +94,8 @@ declare module "i18next" {
       role: RoleMessages
       "sales-delivery": SalesDeliveryMessages
       salesDelivery: SalesDeliveryMessages
+      "sales-invoice": SalesInvoiceMessages
+      salesInvoice: SalesInvoiceMessages
       "sales-order": SalesOrderMessages
       salesOrder: SalesOrderMessages
       sidebar: SidebarMessages

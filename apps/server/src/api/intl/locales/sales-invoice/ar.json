@@ -1,0 +1,28 @@
+{
+  "errors": {
+    "SALES_INVOICE_NOT_FOUND": "فاتورة المبيعات غير موجودة",
+    "SALES_INVOICE_NOT_EDITABLE": "يمكن تعديل الفواتير المسودة فقط",
+    "SALES_INVOICE_NOT_DELETABLE": "يمكن حذف الفواتير المسودة فقط. اعكس الفاتورة المرحّلة بدلًا من ذلك",
+    "SALES_INVOICE_ALREADY_POSTED": "الفاتورة مرحّلة بالفعل",
+    "SALES_INVOICE_NOT_POSTED": "يمكن عكس الفواتير المرحّلة فقط",
+    "SALES_INVOICE_SALES_ORDER_NOT_FOUND": "أمر البيع غير موجود",
+    "SALES_INVOICE_SALES_ORDER_CANCELLED": "لا يمكن إصدار فاتورة لأمر بيع ملغى",
+    "SALES_INVOICE_DELIVERY_NOT_FOUND": "التسليم غير موجود",
+    "SALES_INVOICE_DELIVERY_NOT_POSTED": "يمكن إصدار فواتير للتسليمات المرحّلة فقط",
+    "SALES_INVOICE_DELIVERY_ORDER_MISMATCH": "سطر التسليم لا يتبع أمر البيع هذا",
+    "SALES_INVOICE_CUSTOMER_NOT_FOUND": "العميل غير موجود",
+    "SALES_INVOICE_CUSTOMER_NOT_CUSTOMER": "الطرف ليس عميلًا",
+    "SALES_INVOICE_CUSTOMER_INACTIVE": "العميل غير نشط",
+    "SALES_INVOICE_NO_LINES": "مطلوب سطر واحد على الأقل في الفاتورة",
+    "SALES_INVOICE_NOTHING_TO_INVOICE": "لا يوجد ما يمكن فوترته في هذا التسليم",
+    "SALES_INVOICE_LINE_NOT_FOUND": "سطر التسليم غير موجود",
+    "SALES_INVOICE_DUPLICATE_LINES": "يمكن أن يظهر سطر التسليم مرة واحدة فقط في الفاتورة",
+    "SALES_INVOICE_QUANTITY_NOT_POSITIVE": "يجب أن تكون الكمية أكبر من صفر",
+    "SALES_INVOICE_EXCEEDS_UNINVOICED": "الكمية تتجاوز ما لم يُفوتر بعد في سطر التسليم",
+    "SALES_INVOICE_PAYMENT_TERM_NOT_FOUND": "شرط الدفع غير موجود",
+    "SALES_INVOICE_DUE_DATE_BEFORE_INVOICE": "لا يمكن أن يسبق تاريخ الاستحقاق تاريخ الفاتورة",
+    "SALES_INVOICE_HAS_PAYMENTS": "توجد دفعة مطبقة على هذه الفاتورة. اعكس الدفعة أولًا",
+    "SALES_INVOICE_POSTING_FAILED": "تعذر ترحيل الفاتورة",
+    "SALES_INVOICE_NUMBER_TAKEN": "تعذر تخصيص رقم للفاتورة، حاول مرة أخرى"
+  }
+}
