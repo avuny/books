@@ -1,4 +1,5 @@
 export * from "./components"
+export * from "./deliveries"
 export * from "./details"
 export * from "./forms"
 export * from "./list"

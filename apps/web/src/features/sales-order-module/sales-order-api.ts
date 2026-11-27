@@ -104,6 +104,9 @@ export function useSalesOrderAbilities(orgId: string) {
         canClose: false,
         canCancel: false,
         canManagePaymentTerms: false,
+        canCreateDelivery: false,
+        canPostDelivery: false,
+        canReverseDelivery: false,
       }
     }
     const s: PermissionSnapshot = {
@@ -118,6 +121,9 @@ export function useSalesOrderAbilities(orgId: string) {
       canConfirm: hasPermission(s, "confirm:sales-order"),
       canClose: hasPermission(s, "close:sales-order"),
       canCancel: hasPermission(s, "cancel:sales-order"),
+      canCreateDelivery: hasPermission(s, "create:sales-delivery"),
+      canPostDelivery: hasPermission(s, "post:sales-delivery"),
+      canReverseDelivery: hasPermission(s, "reverse:sales-delivery"),
       canManagePaymentTerms:
         hasPermission(s, "create:payment-term") && hasPermission(s, "update:payment-term"),
     }
@@ -287,4 +293,50 @@ export async function fetchItemUnits(
 export function useUpdateSalesOrderMutation(orgId: string) {
   const invalidate = useInvalidateSalesOrders(orgId)
   return useUpdateSalesOrder({ mutation: { onSuccess: (_r, v) => invalidate(v.id) } })
+}
+
+/* ------------------------------- deliveries ------------------------------- */
+
+import {
+  getListSalesDeliveriesQueryKey,
+  useCreateSalesDelivery,
+  useListSalesDeliveries,
+  usePostSalesDelivery,
+  useReverseSalesDelivery,
+} from "@/api"
+
+export type DeliveryDto = import("@avuny/contracts").SalesDeliveryDto
+
+export function useSalesDeliveries(orgId: string, orderId: string) {
+  const query = useListSalesDeliveries(orgId, orderId)
+  const deliveries = useMemo(
+    () => ((query.data?.data as { items?: DeliveryDto[] } | undefined)?.items ?? []) as DeliveryDto[],
+    [query.data]
+  )
+  return { deliveries, isLoading: query.isLoading }
+}
+
+function useInvalidateDeliveries(orgId: string, orderId: string) {
+  const queryClient = useQueryClient()
+  return () =>
+    Promise.all([
+      queryClient.invalidateQueries({ queryKey: getListSalesDeliveriesQueryKey(orgId, orderId) }),
+      queryClient.invalidateQueries({ queryKey: getGetSalesOrderQueryKey(orgId, orderId) }),
+      queryClient.invalidateQueries({ queryKey: getListSalesOrdersQueryKey(orgId) }),
+    ])
+}
+
+export function useCreateDeliveryMutation(orgId: string, orderId: string) {
+  const invalidate = useInvalidateDeliveries(orgId, orderId)
+  return useCreateSalesDelivery({ mutation: { onSuccess: () => invalidate() } })
+}
+
+export function usePostDeliveryMutation(orgId: string, orderId: string) {
+  const invalidate = useInvalidateDeliveries(orgId, orderId)
+  return usePostSalesDelivery({ mutation: { onSuccess: () => invalidate() } })
+}
+
+export function useReverseDeliveryMutation(orgId: string, orderId: string) {
+  const invalidate = useInvalidateDeliveries(orgId, orderId)
+  return useReverseSalesDelivery({ mutation: { onSuccess: () => invalidate() } })
 }
