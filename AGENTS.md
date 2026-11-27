@@ -27,13 +27,14 @@ Repository guide for AI agents working in this monorepo.
 | Path                         | Package Name               | Rules & Responsibilities                                                                                                                             |
 | ---------------------------- | -------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `packages/contracts`         | `@avuny/contracts`         | **Single source of truth** for API schemas, types, and domain locale files (`src/<module>/locales/{en,ar}.json`). Runtime-agnostic (no Node/DOM/DB). |
-| `packages/db`                | `@avuny/db`                | Drizzle ORM schemas, migrations (`drizzle-kit`), and client. **Only `@avuny/books-server` may import this package.**                                 |
+| `packages/db`                | `@avuny/db`                | Drizzle ORM schemas, migrations (`drizzle-kit`), and client. **Only server apps (`@avuny/books-server`, and `@avuny/platform-server` once added) may import this package.**                                 |
 | `packages/ui`                | `@workspace/ui`            | Shared UI components (shadcn/ui style, Tailwind 4). Form building blocks live in `@workspace/ui/blocks/form`.                                        |
 | `packages/hono`              | `@avuny/hono`              | Server utilities: `createOpenAPIRouter`, `handleResult`, request language resolution via `node:async_hooks`.                                         |
 | `packages/i18n`              | `@avuny/i18n`              | Shared locale types, default locale, RTL/LTR detection, and `resolveLocale`.                                                                         |
 | `packages/logger`            | `@avuny/logger`            | Structured Pino logger for server and background tasks.                                                                                              |
 | `packages/utils`             | `@avuny/utils`             | Pure runtime-agnostic utility functions and the `Result<T, E>` pattern (`ok`, `fail`).                                                               |
 | `packages/zod`               | `@avuny/zod`               | Central Zod instance and validation helpers. **Always import `z` from `@avuny/zod`, never directly from `zod`.**                                     |
+| `packages/entitlements`      | `@avuny/entitlements`      | SaaS entitlement domain code (resolver, snapshot recompute, plan publish rules). Runtime-agnostic, database access injected through ports. Scaffold only. See `docs/modules/saas-architecture/`. |
 | `packages/eslint-config`     | `@avuny/eslint-config`     | Monorepo ESLint configurations.                                                                                                                      |
 | `packages/typescript-config` | `@avuny/typescript-config` | Shared TypeScript tsconfig presets.                                                                                                                  |
 
@@ -75,7 +76,7 @@ pnpm dlx shadcn@latest add <component-name> -c apps/web
    - Infer TypeScript types using `z.infer<typeof ...>`. Never duplicate schema shapes manually in server or web.
    - When modifying routes/contracts, run `pnpm api:generate` to regenerate client hooks.
 2. **Strict Package Boundaries**:
-   - Never import `@avuny/db` into client apps or shared packages; only the server may access it.
+   - Never import `@avuny/db` into client apps or shared packages; only the server apps may access it (`apps/server`, and `apps/platform-server`, see `docs/modules/saas-architecture/PLATFORM-ADMIN-SPEC.md`).
    - Never import `zod` directly. Always use `import { z } from "@avuny/zod"`.
    - `packages/contracts` and `packages/utils` must remain strictly runtime-agnostic (no Node, DOM, or DB dependencies).
 3. **Domain Error & Result Handling**:
