@@ -144,6 +144,7 @@ The codebase already has **port interfaces** for plan features that are currentl
 | [Billing Module SPEC](./billing/SPEC.md) | Invoice generation, billing history, credits, proration |
 | [Feature Gate Module SPEC](./feature-gate/SPEC.md) | Runtime feature/limit enforcement, frontend plan gating |
 | [Implementation Plan](./IMPLEMENTATION-PLAN.md) | Phased rollout, dependencies, task breakdown |
+| [SaaS Architecture (modules and entitlements)](./saas-architecture/SPEC.md) | Module catalog, entitlement resolver, plan bundles, tenant module switches, provider port, phased plan S0 to S8. Proposed; adds to and in places supersedes the documents above (see its section 2.3). Decisions and progress: [PROGRESS](./saas-architecture/PROGRESS.md) |
 
 ---
 
