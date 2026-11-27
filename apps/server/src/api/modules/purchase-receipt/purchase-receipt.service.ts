@@ -19,8 +19,6 @@ import {
   unshippedBaseQty,
   type ActivityLogAction,
   type CreatePurchaseReceiptInput,
-  type QuickPurchaseReceiptDto,
-  type QuickPurchaseReceiptInput,
   type PurchaseReceiptDto,
   type PurchaseReceiptLineInput,
   type PurchaseReceiptListResponse,
@@ -208,74 +206,6 @@ export function createPurchaseReceiptService(deps: PurchaseReceiptServiceDeps) {
       if (!createdId) return failWith(Err.PURCHASE_RECEIPT_NUMBER_TAKEN)
       await audit(orgId, actorId, PURCHASE_RECEIPT_AUDIT_EVENTS.CREATED, createdId)
       return loadDto(orgId, createdId)
-    },
-
-    /**
-     * Quick receipt: receive, post, bill, post the bill and pay in full. Each step is its own transaction,
-     * so when a later step fails everything done before it is reversed or deleted again.
-     */
-    async quickReceive(
-      actorId: string,
-      orgId: string,
-      purchaseOrderId: string,
-      input: QuickPurchaseReceiptInput
-    ): Promise<Result<QuickPurchaseReceiptDto, Code>> {
-      const { bills, payments } = deps
-      const stepFailed = (msg?: string) => fail({ error: Err.PURCHASE_RECEIPT_QUICK_STEP_FAILED, msg: msg ?? message(Err.PURCHASE_RECEIPT_QUICK_STEP_FAILED) })
-      if (!bills?.createFromReceipt || !bills.reverse || !payments?.create) return stepFailed()
-      const reason = { reason: "Quick receipt failed" }
-
-      const created = await this.createForOrder(actorId, orgId, purchaseOrderId, input.receipt)
-      if (!created.success) return created
-      const posted = await this.post(actorId, orgId, created.data.id)
-      if (!posted.success) {
-        await this.delete(actorId, orgId, created.data.id)
-        return posted
-      }
-      const undoReceipt = () => this.reverse(actorId, orgId, created.data.id, reason)
-
-      const draftBill = await bills.createFromReceipt(actorId, orgId, {
-        purchaseReceiptId: created.data.id,
-        supplierInvoiceNumber: input.supplierInvoiceNumber ?? null,
-        invoiceDate: input.receipt.receiptDate,
-        dueDate: input.receipt.receiptDate,
-      })
-      if (!draftBill.success) {
-        await undoReceipt()
-        return stepFailed(draftBill.msg)
-      }
-      const postedBill = await bills.post(actorId, orgId, draftBill.data.id)
-      if (!postedBill.success) {
-        await bills.delete(actorId, orgId, draftBill.data.id)
-        await undoReceipt()
-        return stepFailed(postedBill.msg)
-      }
-      const undoBill = async () => {
-        await bills.reverse!(actorId, orgId, draftBill.data.id, reason)
-        await undoReceipt()
-      }
-
-      const draftPayment = await payments.create!(actorId, orgId, {
-        partyId: postedBill.data.partyId,
-        paymentDate: input.receipt.receiptDate,
-        method: input.method,
-        referenceNumber: input.referenceNumber ?? null,
-        notes: `Quick receipt ${created.data.number}`,
-        allocations: [{ vendorBillId: postedBill.data.id, amountMinor: postedBill.data.total }],
-      })
-      if (!draftPayment.success) {
-        await undoBill()
-        return stepFailed(draftPayment.msg)
-      }
-      const paid = await payments.post(actorId, orgId, draftPayment.data.id)
-      if (!paid.success) {
-        await payments.delete(actorId, orgId, draftPayment.data.id)
-        await undoBill()
-        return stepFailed(paid.msg)
-      }
-      const [receipt, bill] = await Promise.all([loadDto(orgId, created.data.id), bills.get?.(actorId, orgId, draftBill.data.id)])
-      if (!receipt.success) return receipt
-      return ok({ data: { receipt: receipt.data, bill: bill && bill.success ? bill.data : postedBill.data, payment: paid.data } })
     },
 
     async listByOrder(
