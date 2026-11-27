@@ -17,14 +17,14 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done · `[!]` blocked · `[-]` 
 
 ## Next action
 
-> **P0-01** — Answer the SPEC "Repository checks before implementation" list by reading the code.
+> **M4 web** (sales-invoice pages, "create invoice after delivery" on delivery post), then **M5** customer payment (allocations, advances, reversal), then **M6** credit notes, AR aging, customer statement.
 
 ## Status board
 
 | Phase | Title | Gate | Status |
 |---|---|---|---|
-| 0 | Discovery and decisions | G0 | not started |
-| 1 | Build | G1 | not started |
+| 0 | Discovery and decisions | G0 | done (specs read; milestone plan M4 to M6) |
+| 1 | Build | G1 | in progress: M4 sales-invoice backend done (migration 0031); M5, M6 todo |
 | 2 | Web and copy | G2 | not started |
 | 3 | Hardening and acceptance | G3 | not started |
 
@@ -33,6 +33,12 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done · `[!]` blocked · `[-]` 
 | ID | Decision | Status | Owner response · date |
 |---|---|---|---|
 | D1 | Transaction-capable DB driver is available before posting use cases are built | open | see `../SAAS-SPEC-FIXES-PLAN.md` D1 |
+| D2 | Invoice lines name a delivery line and a quantity. Price, discount and tax rate come from the sales order line, pro-rated by base quantity (`prorateAmount`, half up). Tiny rounding dust across partial invoices is accepted | decided | agent, M4 |
+| D3 | One sales order per invoice; several partial invoices per order. The party is the order's party | decided | agent, M4 |
+| D4 | Post books Dr AR, Cr Revenue, Cr Output VAT through `sale_revenue` (settlement receivable). Stock and COGS stay with the delivery | decided | agent, M4 |
+| D5 | Invoice stores a customer name snapshot and payment-term snapshots. An address snapshot is deferred until print/PDF needs it | decided | agent, M4 |
+| D6 | Reversing a delivery that a posted invoice bills is refused (`SALES_DELIVERY_ALREADY_INVOICED`); reversing an invoice with posted payments is refused (`SALES_INVOICE_HAS_PAYMENTS`, stubbed until M5) | decided | agent, M4 |
+| D7 | Pre-delivery (advance) invoices are deferred; invoices need a posted delivery | decided | agent, M4 |
 
 ## Deviations
 
