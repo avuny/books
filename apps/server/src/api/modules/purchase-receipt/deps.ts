@@ -16,6 +16,8 @@ import { itemUnitAdapter, getPurchaseOrderRepository, locationAdapter } from "..
 import { permissionChecker } from "../role/index.js"
 import { stockMovementService } from "../stock-movement/index.js"
 import { batchService } from "../batch/index.js"
+import { vendorBillService } from "../vendor-bill/index.js"
+import { vendorPaymentService } from "../vendor-payment/index.js"
 import { createPurchaseReceiptRepository } from "./purchase-receipt.repository.js"
 import { createPurchaseReceiptService, type PurchaseReceiptService } from "./purchase-receipt.service.js"
 import type { CostLayerPort, PurchaseReceiptRepository, ReceiptBatchPort } from "./purchase-receipt.types.js"
@@ -133,6 +135,8 @@ export function getPurchaseReceiptService(): PurchaseReceiptService {
     stockMovement: stockMovementService,
     costing: costLayerAdapter,
     batches: receiptBatchAdapter,
+    bills: vendorBillService as any,
+    payments: vendorPaymentService as any,
     accounting: accountingService as any,
     projection: createInventoryProjection({ db }),
     permissions: permissionChecker,

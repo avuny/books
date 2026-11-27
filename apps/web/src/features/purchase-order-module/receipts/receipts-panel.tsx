@@ -18,6 +18,7 @@ import { CreateBillFromReceiptDialog, useVendorBillAbilities } from "../../vendo
 import type { PurchaseOrderDto } from "../types"
 import {
   useCreateReceiptMutation,
+  useQuickReceiveMutation,
   usePostReceiptMutation,
   usePurchaseOrderAbilities,
   usePurchaseReceipts,
@@ -39,6 +40,8 @@ export function ReceiptsPanel({ orgId, order }: Props) {
   const [billing, setBilling] = useState<ReceiptDto | null>(null)
   const { receipts } = usePurchaseReceipts(orgId, order.id)
   const createMutation = useCreateReceiptMutation(orgId, order.id)
+  const quickMutation = useQuickReceiveMutation(orgId, order.id)
+  const [quickMethod, setQuickMethod] = useState<"cash" | "bank">("bank")
   const postMutation = usePostReceiptMutation(orgId, order.id)
   const reverseMutation = useReverseReceiptMutation(orgId, order.id)
 
@@ -68,6 +71,21 @@ export function ReceiptsPanel({ orgId, order }: Props) {
     }
     try {
       await createMutation.mutateAsync({ orgId, id: order.id, data: built.data })
+      setCreating(false)
+      setRows({})
+    } catch (e) {
+      fail(e)
+    }
+  }
+
+  const submitQuick = async () => {
+    setError(null)
+    const built = buildReceiptPayload({ date, reference, notes: "" }, open, rows)
+    if (!built.ok) {
+      return setError(built.reason === "rejectionReason" ? t("ui.reasonRequired") : t("ui.invalidQty"))
+    }
+    try {
+      await quickMutation.mutateAsync({ orgId, id: order.id, data: { receipt: built.data, method: quickMethod } })
       setCreating(false)
       setRows({})
     } catch (e) {
@@ -207,6 +225,17 @@ export function ReceiptsPanel({ orgId, order }: Props) {
             <Button variant="outline" onClick={() => setCreating(false)}>
               {t("ui.cancel")}
             </Button>
+            {abilities.canPostReceipt && billAbilities.canCreateBill && billAbilities.canPostBill ? (
+              <>
+                <select className="h-9 rounded-md border bg-background px-2 text-sm" value={quickMethod} onChange={(e) => setQuickMethod(e.target.value as "cash" | "bank")} aria-label={t("ui.quick.method")}>
+                  <option value="bank">{t("ui.quick.bank")}</option>
+                  <option value="cash">{t("ui.quick.cash")}</option>
+                </select>
+                <Button variant="outline" onClick={submitQuick} disabled={quickMutation.isPending || createMutation.isPending}>
+                  {quickMutation.isPending ? t("ui.quick.creating") : t("ui.quick.confirm")}
+                </Button>
+              </>
+            ) : null}
             <Button onClick={submitCreate} disabled={createMutation.isPending}>
               {createMutation.isPending ? t("ui.creating") : t("ui.create")}
             </Button>
