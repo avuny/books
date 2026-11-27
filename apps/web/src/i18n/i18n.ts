@@ -25,6 +25,7 @@ i18n
       "batch",
       "common",
       "inventory-adjustment",
+      "inventory-transfer",
       "item",
       "item-category",
       "organization",
