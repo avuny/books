@@ -21,6 +21,9 @@ export default defineConfig({
           setupFiles: ["./src/api/test-support/setup-env.ts"],
           testTimeout: 30_000,
           hookTimeout: 60_000,
+          // Platform roles/admins are global singletons: tests own whole tables,
+          // so files must not run concurrently against the one test database.
+          fileParallelism: false,
         },
       },
     ],

@@ -253,6 +253,13 @@
       "when": 1795847385153,
       "tag": "0035_platform_identity",
       "breakpoints": true
+    },
+    {
+      "idx": 31,
+      "version": "7",
+      "when": 1795815858060,
+      "tag": "0031_platform_audit_truncate_guard",
+      "breakpoints": true
     }
   ]
 }
