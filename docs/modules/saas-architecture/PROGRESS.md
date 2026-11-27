@@ -5,8 +5,8 @@
 | Spec | [`SPEC.md`](./SPEC.md) v1.0 · 2026-11-27 |
 | Last updated | 2026-11-27 |
 | Current phase | S0 |
-| Tasks done | 0 / 62 |
-| Gates passed | 0 / 16 |
+| Tasks done | 0 / 75 |
+| Gates passed | 0 / 22 |
 
 ## How to use this file
 Resume protocol: 1) read AGENTS.md files and SPEC sections 0 to 4 and the current phase. 2) read this file. 3) continue at Next action.
@@ -14,7 +14,7 @@ Tick a task only when its "done when" is true and evidence is in the Verificatio
 Legend: `[ ]` todo · `[~]` in progress · `[x]` done · `[!]` blocked · `[-]` not applicable (say why)
 
 ## Next action
-> **S0-01**: get the owner's answers on the open decisions below (Q1 to Q14 for the SaaS core, Q15 to Q24 for the admin panel, see `PLATFORM-ADMIN-SPEC.md`). Blocking ones: Q1, Q2, Q4, Q5, Q10, and for the admin panel Q15 and Q20. The rest have defaults that may be used if the owner says "use defaults". Also record fixes-plan decisions D1 to D8 (`../SAAS-SPEC-FIXES-PLAN.md`), which are still open.
+> **S0-01**: get the owner's answers on the open decisions below (Q1 to Q14 for the SaaS core, Q15 to Q24 for the admin panel, see `PLATFORM-ADMIN-SPEC.md`). Blocking ones: Q1, Q2, Q4, Q5, Q10, and for the admin panel Q15 and Q20. The rest have defaults that may be used if the owner says "use defaults". Landing decisions Q25 to Q30 are proposed with defaults and still need his answer. Also record fixes-plan decisions D1 to D8 (`../SAAS-SPEC-FIXES-PLAN.md`), which are still open.
 
 ## Status board
 | Phase | Title | Tasks | Gate | Status |
@@ -35,6 +35,12 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done · `[!]` blocked · `[-]` 
 | A5 | Payments and provider events | 3 | gate A5 | [ ] |
 | A6 | Jobs and reminders | 4 | gate A6 | [ ] |
 | A7 | Hardening, old admin migration | 4 | gate A7 | [ ] |
+| A8 | Landing content editor, media, publish | 3 | gate A8 | [ ] |
+| L1 | Landing scaffold (Next.js) | 2 | gate L1 | [ ] |
+| L2 | Block components and design system | 3 | gate L2 | [ ] |
+| L3 | Snapshot integration and pricing | 2 | gate L3 | [ ] |
+| L4 | i18n, SEO, performance, accessibility | 2 | gate L4 | [ ] |
+| L5 | Deploy pipeline and launch | 1 | gate L5 | [ ] |
 
 ## Open decisions for the owner
 Each has a proposed default. "Blocks" says which phase cannot start without the answer. Answer with the number and a letter, or "defaults".
@@ -70,6 +76,16 @@ Each has a proposed default. "Blocks" says which phase cannot start without the 
 | Q22 | Admin app language | (a) English; (b) English and Arabic | (a) | none |
 | Q23 | Admin hostname | `admin.<your domain>` if you have a domain; otherwise a workers.dev subdomain for now | What domain should the product use? Needed for cookies, email links, provider webhooks. | A1 |
 | Q24 | Reminder channels | (a) Email through the existing messaging module; (b) also WhatsApp or SMS | (a) | A6 |
+
+### Landing site decisions (see `LANDING-SPEC.md`)
+| # | Decision | Options | Proposed default | Blocks |
+|---|---|---|---|---|
+| Q25 | Rendering and hosting | (a) Next.js static export on Workers assets, rebuilt on publish; (b) Next.js on Workers via OpenNext with ISR; (c) Cloudflare Pages | (a). Fastest and cheapest, matches `apps/web`. Choose (b) only if you need per-request personalization. | L1 deploy, A8 |
+| Q26 | How publish triggers a rebuild | (a) Platform API dispatches a GitHub Actions workflow (needs a GitHub token as a platform secret); (b) Cloudflare deploy hook; (c) manual redeploy at first | (a) later; (c) until the pipeline is approved. | L5 |
+| Q27 | Draft preview | (a) Preview build on a preview hostname; (b) embedded preview in the admin using shared block components | (b) first (no extra deploy), (a) later if needed. | A8 |
+| Q28 | Brand inputs | Name, logo, colors, tone, product screenshots, legal text | Needed from you before the design phase L2. I will propose a first visual direction from the app's own UI if you prefer. | L2 |
+| Q29 | Landing languages | English and Arabic with RTL | Both, Arabic first-class. | L2 |
+| Q30 | Analytics and forms | (a) None at first, contact form only; (b) privacy-friendly analytics (Cloudflare Web Analytics); (c) full analytics with consent | (a), then (b). | L4 |
 
 ### Draft plan matrix (for Q3)
 Numbers reuse the existing plan spec where it had them, shifted onto Free, Pro, Max. Modules marked "future" are not seeded until they exist.
@@ -210,6 +226,38 @@ Spec: `PLATFORM-ADMIN-SPEC.md`. A1 needs Q15, Q16, Q18, Q23. Docs only so far.
 - [ ] **A7-04** Optional network guard (Q17), runbook, secret rotation procedure, backup admin recovery procedure.
 - **Gate A7**: old admin removed, security checklist signed by the owner.
 
+#### Phase A8: Landing content editor (needs A2; spec `LANDING-SPEC.md`)
+- [ ] **A8-01** Schema and routes: site_pages, site_blocks, site_media, site_settings, site_content_versions, plan_marketing, site_matrix_rows; media upload to R2 with required alt text.
+- [ ] **A8-02** Content editor UI for typed blocks, settings, media library, matrix row picker, plan marketing fields, localized fields with missing-locale warnings.
+- [ ] **A8-03** Publish validation (LR1 to LR7), immutable snapshots, rollback, public read API with caching (LAC3, LAC7, LAC9).
+- **Gate A8**: owner edits a headline, an image and the matrix in the admin, publishes, and the public API returns it.
+
+### Landing track (`apps/landing`, Next.js)
+#### Phase L1: Scaffold
+- [ ] **L1-01** `apps/landing` with AGENTS.md, Next.js static export, Tailwind 4, locale routes, fixture snapshot, build and typecheck in CI (no deploy).
+- [ ] **L1-02** Content loader with schema validation and a clear failure when the snapshot is invalid (LAC8).
+- **Gate L1**: `pnpm turbo run typecheck build` passes with the fixture; nothing deployed.
+
+#### Phase L2: Block components and design system (needs Q28)
+- [ ] **L2-01** Design tokens, themes (light and dark), typography for en and ar, animated primitives with reduced-motion support.
+- [ ] **L2-02** Block components for the first block set (hero, feature_grid, module_showcase, steps, faq, cta_banner, pricing, comparison_table) rendered from the fixture.
+- [ ] **L2-03** Home and pricing pages composed from blocks; product mockups from app screenshots.
+- **Gate L2**: owner approves the design on a preview.
+
+#### Phase L3: Snapshot integration and pricing (needs A8)
+- [ ] **L3-01** Build reads the public snapshot; pricing and matrix equal plan data (LAC1, LAC2).
+- [ ] **L3-02** Interval toggle, currency switch, sign-up links carrying the chosen plan to the app.
+- **Gate L3**: a plan change in the admin shows on the rebuilt site.
+
+#### Phase L4: i18n, SEO, performance, accessibility
+- [ ] **L4-01** hreflang, sitemap, robots, Open Graph, structured data; RTL screenshots (LAC4).
+- [ ] **L4-02** Reduced motion, Lighthouse thresholds, keyboard and contrast checks (LAC5, LAC6).
+- **Gate L4**: thresholds met on CI.
+
+#### Phase L5: Deploy pipeline and launch (needs Q23, Q26)
+- [ ] **L5-01** Cloudflare Worker for the landing, deploy workflow, publish-triggered rebuild, custom domain, rollback drill, legal pages.
+- **Gate L5**: owner signs off the launch checklist.
+
 ## Risks
 | Risk | Mitigation |
 |---|---|
@@ -218,6 +266,8 @@ Spec: `PLATFORM-ADMIN-SPEC.md`. A1 needs Q15, Q16, Q18, Q23. Docs only so far.
 | Payment edge cases (retries, out-of-order events) | Event ledger and ordering guard, reconciliation job, fake provider tests |
 | Provider not available for Egypt | S0-03 spike before any payment code; manual transfer adapter as fallback |
 | Over-engineering before revenue | Phases S1 to S5 are useful without a provider; Q2 option (c) and Q5 option (c) are valid minimal launches |
+| Landing shows something the plans do not contain | Pricing and matrix rendered from published plan versions only (LR4, LR5, LR7) |
+| Bad content breaks the public site | Typed blocks, publish validation, schema-checked build, rollback |
 | Admin panel is a powerful target | Separate Worker, hostname, identity, mandatory TOTP, least-privilege database role, append-only audit, anti-escalation rules |
 | Admin edits a plan and silently changes existing customers | Versioned plans, impact preview, removals at renewal (Q20) |
 | Admin overrides fight code seeds | Code owns keys, admin owns display fields and data; grant changes only via reviewed seed patch (Q19b) |
