@@ -49,6 +49,24 @@ export interface SalesInvoiceListFilter {
   salesOrderId?: string
 }
 
+export interface PostedInvoiceWithPaid {
+  id: string
+  number: string
+  partyId: string
+  partyName: string | null
+  currency: string
+  invoiceDate: string
+  dueDate: string
+  total: string
+  paid: string
+}
+
+export interface CustomerStatementSource {
+  partyName: string | null
+  currency: string | null
+  rows: { kind: "INVOICE" | "PAYMENT"; date: string; number: string; reference: string | null; amount: string }[]
+}
+
 export interface SalesInvoiceRepository {
   transaction<T>(fn: (tx: Tx) => Promise<T>): Promise<T>
   maxNumberSuffix(orgId: string, tx?: Tx): Promise<number>
@@ -68,6 +86,12 @@ export interface SalesInvoiceRepository {
   updateHeader(orgId: string, id: string, patch: Partial<Omit<NewSalesInvoice, "orgId" | "id">>, tx?: Tx): Promise<void>
   replaceLines(orgId: string, id: string, lines: readonly NewInvoiceLine[], tx?: Tx): Promise<void>
   deleteById(orgId: string, id: string, tx?: Tx): Promise<void>
+  /** Every posted invoice with what posted payments have applied to it (AR aging, reconciliation). */
+  postedInvoicesWithPaid(orgId: string): Promise<PostedInvoiceWithPaid[]>
+  /** Every posted invoice and posted payment of one customer, for the statement. Null when the party does not exist. */
+  statementSource(orgId: string, partyId: string): Promise<CustomerStatementSource | null>
+  /** Debits less credits on the account with this system key, over posted and reversed journals. */
+  ledgerDebitBalance(orgId: string, systemKey: string): Promise<string>
   /** True when a posted customer payment is applied to this invoice. */
   hasPostedPayments(orgId: string, id: string, tx?: Tx): Promise<boolean>
   /**

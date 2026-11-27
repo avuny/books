@@ -6,6 +6,9 @@ import {
   SALES_INVOICE_SOURCE_TYPE,
   SalesInvoiceErrorCode as Err,
   addQty,
+  buildArAging,
+  buildCustomerStatement,
+  reconcileReceivable,
   cmpQty,
   computeDueDate,
   computeInvoiceLineTax,
@@ -16,6 +19,9 @@ import {
   salesInvoiceTranslationsEn,
   subQty,
   type ActivityLogAction,
+  type ArAgingResponse,
+  type ArReconciliationResponse,
+  type CustomerStatementResponse,
   type CreateSalesInvoiceFromDeliveryInput,
   type CreateSalesInvoiceInput,
   type ReverseSalesInvoiceInput,
@@ -260,6 +266,39 @@ export function createSalesInvoiceService(deps: SalesInvoiceServiceDeps) {
       if (!(await can(actorId, P.READ, orgId))) return forbidden()
       const rows = await repo.list(orgId, filter)
       return ok({ data: { items: rows.map((r) => toSalesInvoiceDto(r.row, r.lines)) } })
+    },
+
+    async arAging(actorId: string, orgId: string): Promise<Result<ArAgingResponse, Code>> {
+      if (!(await can(actorId, P.READ, orgId))) return forbidden()
+      const invoices = await repo.postedInvoicesWithPaid(orgId)
+      const asOf = new Date().toISOString().slice(0, 10)
+      return ok({
+        data: buildArAging(
+          invoices.map((i) => ({ id: i.id, number: i.number, partyId: i.partyId, partyName: i.partyName, currency: i.currency, dueDate: i.dueDate, outstanding: String(BigInt(i.total) - BigInt(i.paid)) })),
+          asOf
+        ),
+      })
+    },
+
+    async customerStatement(actorId: string, orgId: string, q: { partyId: string; from?: string; to?: string }): Promise<Result<CustomerStatementResponse, Code>> {
+      if (!(await can(actorId, P.READ, orgId))) return forbidden()
+      const src = await repo.statementSource(orgId, q.partyId)
+      if (!src) return failWith(Err.SALES_INVOICE_CUSTOMER_NOT_FOUND)
+      const inRange = src.rows.filter((r) => !q.to || r.date <= q.to)
+      const before = q.from ? inRange.filter((r) => r.date < q.from!) : []
+      const opening = before.reduce((sum, r) => sum + (r.kind === "INVOICE" ? BigInt(r.amount) : -BigInt(r.amount)), 0n)
+      const shown = q.from ? inRange.filter((r) => r.date >= q.from!) : inRange
+      const { lines, closingBalance } = buildCustomerStatement(shown, String(opening))
+      return ok({
+        data: { partyId: q.partyId, partyName: src.partyName, currency: src.currency, from: q.from ?? null, to: q.to ?? null, openingBalance: String(opening), closingBalance, lines },
+      })
+    },
+
+    async arReconciliation(actorId: string, orgId: string): Promise<Result<ArReconciliationResponse, Code>> {
+      if (!(await can(actorId, P.READ, orgId))) return forbidden()
+      const [ledger, invoices] = await Promise.all([repo.ledgerDebitBalance(orgId, "ACCOUNTS_RECEIVABLE"), repo.postedInvoicesWithPaid(orgId)])
+      const sub = invoices.reduce((sum, i) => sum + BigInt(i.total) - BigInt(i.paid), 0n)
+      return ok({ data: { accountsReceivable: reconcileReceivable(ledger, String(sub)) } })
     },
 
     async get(actorId: string, orgId: string, id: string): Promise<Result<SalesInvoiceDto, Code>> {

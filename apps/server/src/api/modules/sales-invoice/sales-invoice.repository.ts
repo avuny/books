@@ -1,5 +1,8 @@
 import { and, asc, desc, eq, inArray, sql } from "drizzle-orm"
 import {
+  accounts,
+  journalEntries,
+  journalEntryLines,
   items,
   parties,
   salesDeliveries,
@@ -237,6 +240,60 @@ export function createSalesInvoiceRepository({ db }: { db: DB }): SalesInvoiceRe
 
     async deleteById(orgId, id, tx) {
       await ex(tx).delete(salesInvoices).where(and(eq(salesInvoices.orgId, orgId), eq(salesInvoices.id, id)))
+    },
+
+    async postedInvoicesWithPaid(orgId) {
+      return db
+        .select({
+          id: salesInvoices.id,
+          number: salesInvoices.number,
+          partyId: salesInvoices.partyId,
+          partyName: parties.displayName,
+          currency: salesInvoices.currency,
+          invoiceDate: salesInvoices.invoiceDate,
+          dueDate: salesInvoices.dueDate,
+          total: sql<string>`${salesInvoices.totalAmount}::text`,
+          paid: sql<string>`coalesce((select sum(cpa.allocated_amount) from ${customerPaymentAllocations} cpa join ${customerPayments} cp on cp.org_id = cpa.org_id and cp.id = cpa.customer_payment_id where cpa.org_id = ${salesInvoices.orgId} and cpa.sales_invoice_id = ${salesInvoices.id} and cp.status = 'POSTED'), 0)::text`,
+        })
+        .from(salesInvoices)
+        .leftJoin(parties, and(eq(parties.orgId, salesInvoices.orgId), eq(parties.id, salesInvoices.partyId)))
+        .where(and(eq(salesInvoices.orgId, orgId), eq(salesInvoices.status, "POSTED")))
+        .orderBy(asc(salesInvoices.dueDate), asc(salesInvoices.number))
+    },
+
+    async statementSource(orgId, partyId) {
+      const [party] = await db
+        .select({ name: parties.displayName })
+        .from(parties)
+        .where(and(eq(parties.orgId, orgId), eq(parties.id, partyId)))
+        .limit(1)
+      if (!party) return null
+      const invoices = await db
+        .select({ number: salesInvoices.number, date: salesInvoices.invoiceDate, amount: sql<string>`${salesInvoices.totalAmount}::text`, currency: salesInvoices.currency })
+        .from(salesInvoices)
+        .where(and(eq(salesInvoices.orgId, orgId), eq(salesInvoices.partyId, partyId), eq(salesInvoices.status, "POSTED")))
+      const pays = await db
+        .select({ number: customerPayments.number, date: customerPayments.paymentDate, reference: customerPayments.referenceNumber, amount: sql<string>`${customerPayments.amount}::text`, currency: customerPayments.currency })
+        .from(customerPayments)
+        .where(and(eq(customerPayments.orgId, orgId), eq(customerPayments.partyId, partyId), eq(customerPayments.status, "POSTED")))
+      return {
+        partyName: party.name,
+        currency: invoices[0]?.currency ?? pays[0]?.currency ?? null,
+        rows: [
+          ...invoices.map((i) => ({ kind: "INVOICE" as const, date: i.date, number: i.number, reference: null, amount: i.amount })),
+          ...pays.map((p) => ({ kind: "PAYMENT" as const, date: p.date, number: p.number, reference: p.reference, amount: p.amount })),
+        ],
+      }
+    },
+
+    async ledgerDebitBalance(orgId, systemKey) {
+      const [r] = await db
+        .select({ v: sql<string>`coalesce(sum(${journalEntryLines.debit}) - sum(${journalEntryLines.credit}), 0)::text` })
+        .from(journalEntryLines)
+        .innerJoin(journalEntries, and(eq(journalEntries.orgId, journalEntryLines.orgId), eq(journalEntries.id, journalEntryLines.journalEntryId)))
+        .innerJoin(accounts, and(eq(accounts.orgId, journalEntryLines.orgId), eq(accounts.id, journalEntryLines.accountId)))
+        .where(and(eq(journalEntryLines.orgId, orgId), eq(accounts.systemKey, systemKey as any), inArray(journalEntries.status, ["POSTED", "REVERSED"])))
+      return r?.v ?? "0"
     },
 
     async hasPostedPayments(orgId, id, tx) {
