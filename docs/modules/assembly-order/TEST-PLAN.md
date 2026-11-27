@@ -38,7 +38,7 @@ Testing note: the local test database runs a pass-through transaction with no ro
 - Reverse twice, reverse a draft, cancel a posted order.
 
 ## Checklist
-- [ ] Unit: each rule R1 to R34 by id
+- [ ] Unit: each rule R1 to R35 by id (R35: service rejects any mode other than SINGLE_STEP, posting_seq is 1)
 - [ ] Integration per endpoint: 401, 403, tenant isolation, 422, domain errors, happy path, audit entry
 - [ ] Posting: idempotency, reversal, concurrency, reconciliation (stock, layers, journal)
 - [ ] Test builders in test-support (through real endpoints): items, locations, stock in, BOM, cost type

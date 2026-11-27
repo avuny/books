@@ -53,7 +53,7 @@ Phases 2 and 3 belong to the cost type and bill of materials modules. Phase 4 st
 Same ids as README section 5. Defaults apply until the owner answers.
 | ID | Decision (default applied) | Status | Owner response · date |
 |---|---|---|---|
-| Q1 | Single-step post, no WIP in v1 | open | no response yet |
+| Q1 | Both in phases: single-step v1 with extension hooks (SPEC R35), staged WIP later | open | no response yet |
 | Q2 | Block when stock has no cost layer | open | no response yet |
 | Q3 | Weighted average items use FIFO layers in v1, or are blocked (owner to choose) | open | no response yet |
 | Q4 | Additional cost posts Dr Inventory, Cr absorbed account 5600 | open | no response yet |

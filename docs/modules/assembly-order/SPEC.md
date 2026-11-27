@@ -138,6 +138,7 @@ Tests reference these ids.
 - R31. Every table row carries `org_id`; composite FKs keep item, location, batch and warehouse in the same organization.
 - R32. Order numbers are `ASM-` plus six digits, unique per organization, allocated under an advisory lock as the transfer module does. Do not copy the `count + 1` pattern.
 - R33. Audit events are written after commit (section 8).
+- R35. Extensibility hooks (staged production, see [`../assembly/STAGED-PRODUCTION.md`](../assembly/STAGED-PRODUCTION.md) section 7): the service is built from internal `issue`, `addCost` and `finish` operations that `post` composes in one transaction; the PRODUCTION location is resolved in one function; status transitions live in one table driven function; reports and trace read consumption and output rows, not movements by order id. Only `SINGLE_STEP` is accepted in v1.
 - R34. An item that has a POSTED assembly keeps the existing lock on base unit, tracking flags and valuation method (already enforced once a movement exists). `can_assembled` cannot be turned off while an active BOM or a non-cancelled order references the item.
 
 ## 5. Database design
@@ -154,6 +155,7 @@ Money is `bigint` minor units (`money()`), quantities are `quantity()` (numeric,
 assembly_orders
 - number                      text, ASM-######, unique (org_id, number)
 - status                      assembly_order_status, default DRAFT
+- mode                        text check in ('SINGLE_STEP'), default SINGLE_STEP; reserved for STAGED (see ../assembly/STAGED-PRODUCTION.md)
 - warehouse_id                FK (org_id, warehouse_id) restrict
 - assembly_date               date (org local)
 - bom_id                      nullable FK (org_id, bom_id) restrict
@@ -202,6 +204,7 @@ assembly_order_consumptions          (written at post, append only)
 - component_id                FK to assembly_order_components
 - item_id, from_location_id, batch_id (nullable)
 - base_qty
+- posting_seq                 int, always 1 in v1 (staged production adds more events per order)
 - movement_line_id            FK (org_id, id) to stock_movement_lines
 - value_minor                 bigint, sum of the allocations of that movement line
 ```
@@ -397,5 +400,6 @@ Phases and task ids live in [`PROGRESS.md`](./PROGRESS.md). Order: 0 decisions, 
 - The order snapshots BOM data. BOM edits never rewrite history.
 - The output table allows several rows, the service allows one.
 - Reversal only while the output is untouched.
+- v1 must stay extendable to staged production with WIP. Keep the hooks of R35 and do not add unused states or tables.
 
 Open questions: README section 5. Risks: README section 10.
