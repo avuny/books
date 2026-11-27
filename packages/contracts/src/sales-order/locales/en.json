@@ -1,4 +1,49 @@
 {
+  "actions": {
+    "view": "View details",
+    "delete": "Delete draft",
+    "confirm": "Confirm",
+    "confirmTitle": "Confirm sales order",
+    "confirmDescription": "Confirming reserves stock for the order. Choose what to do if stock is short. A confirmed order cannot be edited.",
+    "close": "Close order",
+    "closeTitle": "Close sales order",
+    "closeDescription": "Closing stops the remaining undelivered quantity from being reserved. Give a reason.",
+    "cancel": "Cancel order",
+    "cancelTitle": "Cancel sales order",
+    "cancelDescription": "Cancelling releases reserved stock. This only works before anything has been delivered.",
+    "deleteTitle": "Delete draft",
+    "deleteDescription": "This permanently deletes the draft sales order.",
+    "reason": "Reason",
+    "dismiss": "Keep it",
+    "back": "Back to sales orders",
+    "edit": "Edit",
+    "reservationPolicy": "If stock is short"
+  },
+  "details": {
+    "title": "Sales order",
+    "customer": "Customer",
+    "orderDate": "Order date",
+    "expectedDelivery": "Requested delivery",
+    "paymentTerm": "Payment term",
+    "warehouse": "Warehouse",
+    "customerReference": "Customer reference",
+    "notes": "Notes",
+    "closeReason": "Close reason",
+    "lines": "Order lines",
+    "subtotal": "Subtotal",
+    "discount": "Discount",
+    "total": "Total",
+    "none": "None",
+    "notFound": "Sales order not found",
+    "tax": "Tax",
+    "taxRate": "Tax rate",
+    "discountRate": "Discount rate",
+    "lineTotal": "Total"
+  },
+  "empty": {
+    "title": "No sales orders",
+    "description": "Create a sales order to sell stock to a customer."
+  },
   "errors": {
     "SALES_ORDER_NOT_FOUND": "Sales order not found",
     "SALES_ORDER_NOT_EDITABLE": "Only draft sales orders can be edited",
@@ -34,6 +79,45 @@
     "SALES_ORDER_NUMBER_TAKEN": "Could not allocate a sales order number. Please try again",
     "SALES_ORDER_INSUFFICIENT_STOCK": "Not enough available stock to reserve the full quantity"
   },
+  "form": {
+    "title": "New sales order",
+    "description": "Sell stock to a customer. Save as a draft, then confirm when it is final.",
+    "customer": "Customer",
+    "customerPlaceholder": "Select a customer",
+    "orderDate": "Order date",
+    "expectedDelivery": "Requested delivery",
+    "paymentTerm": "Payment term",
+    "paymentTermPlaceholder": "Due on receipt",
+    "warehouse": "Warehouse",
+    "customerReference": "Customer reference",
+    "notes": "Notes",
+    "linesTitle": "Order lines",
+    "addLine": "Add line",
+    "removeLine": "Remove line",
+    "noLines": "Add at least one item",
+    "itemPlaceholder": "Select an item",
+    "quantity": "Quantity",
+    "unitPrice": "Unit price",
+    "discount": "Discount",
+    "lineNotes": "Line notes",
+    "save": "Save draft",
+    "saving": "Saving...",
+    "saveConfirm": "Save and confirm",
+    "cancel": "Cancel",
+    "invalidMoney": "Prices must be plain numbers with the currency's decimals",
+    "currencyNote": "Amounts are in {currency}",
+    "taxRate": "Tax %",
+    "discountRate": "Discount %",
+    "invalidRate": "Rates are percentages from 0 to 100 with up to two decimals",
+    "locationPlaceholder": "Select a location",
+    "discountMode": "Discount type",
+    "discountModePercent": "Percentage",
+    "discountModeAmount": "Fixed amount",
+    "rateConflict": "Use either a discount % or a discount amount on a line",
+    "editTitle": "Edit sales order",
+    "update": "Save changes",
+    "updating": "Saving…"
+  },
   "labels": {
     "status": {
       "DRAFT": "Draft",
@@ -47,6 +131,23 @@
       "ALLOW_BACKORDER_WITHOUT_RESERVATION": "Allow backorder without reservation"
     }
   },
+  "lineFields": {
+    "item": "Item",
+    "location": "Location",
+    "unit": "Unit",
+    "ordered": "Ordered",
+    "unitPrice": "Unit price",
+    "net": "Net",
+    "reserved": "Reserved",
+    "delivered": "Delivered",
+    "unreserved": "Unreserved"
+  },
+  "list": {
+    "title": "Sales orders",
+    "description": "Orders from your customers and what is still to deliver.",
+    "newButton": "New sales order",
+    "searchPlaceholder": "Search by number or customer"
+  },
   "msgs": {
     "SALES_ORDER_CREATED": "Sales order created successfully",
     "SALES_ORDER_UPDATED": "Sales order updated successfully",
@@ -54,5 +155,26 @@
     "SALES_ORDER_CONFIRMED": "Sales order confirmed. Stock is reserved",
     "SALES_ORDER_CLOSED": "Sales order closed",
     "SALES_ORDER_CANCELLED": "Sales order cancelled"
+  },
+  "pagination": {
+    "showing": "Showing {from} to {to} of {total} sales orders"
+  },
+  "scopes": {
+    "all": "All",
+    "DRAFT": "Draft",
+    "CONFIRMED": "Confirmed",
+    "CLOSED": "Closed",
+    "CANCELLED": "Cancelled"
+  },
+  "table": {
+    "number": "Number",
+    "customer": "Customer",
+    "orderDate": "Order date",
+    "expectedDelivery": "Requested delivery",
+    "total": "Total",
+    "lines": "Lines",
+    "status": "Status",
+    "actions": "Actions",
+    "actionsFor": "Actions for {number}"
   }
 }

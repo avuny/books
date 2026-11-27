@@ -14,6 +14,10 @@ import {
   inventoryAdjustmentTranslationsAr,
   inventoryAdjustmentTranslationsEn,
 } from "@avuny/contracts/inventory-adjustment"
+import {
+  inventoryTransferTranslationsAr,
+  inventoryTransferTranslationsEn,
+} from "@avuny/contracts/inventory-transfer"
 import { itemTranslationsAr, itemTranslationsEn } from "@avuny/contracts/item"
 import {
   itemCategoryTranslationsAr,
@@ -53,6 +57,10 @@ import {
 } from "@avuny/contracts/purchase-shipment"
 import { roleTranslationsAr, roleTranslationsEn } from "@avuny/contracts/role"
 import {
+  salesOrderTranslationsAr,
+  salesOrderTranslationsEn,
+} from "@avuny/contracts/sales-order"
+import {
   stockMovementTranslationsAr,
   stockMovementTranslationsEn,
 } from "@avuny/contracts/stock-movement"
@@ -85,6 +93,7 @@ export const resources = {
     batch: batchTranslationsEn,
     common: commonTranslationsEn,
     "inventory-adjustment": inventoryAdjustmentTranslationsEn,
+    "inventory-transfer": inventoryTransferTranslationsEn,
     item: itemTranslationsEn,
     "item-category": itemCategoryTranslationsEn,
     organization: organizationTranslationsEn,
@@ -96,6 +105,7 @@ export const resources = {
     "purchase-receipt": purchaseReceiptTranslationsEn,
     "purchase-shipment": purchaseShipmentTranslationsEn,
     role: roleTranslationsEn,
+    "sales-order": salesOrderTranslationsEn,
     "stock-movement": stockMovementTranslationsEn,
     unit: unitTranslationsEn,
     "unit-collection": unitCollectionTranslationsEn,
@@ -110,6 +120,7 @@ export const resources = {
     batch: batchTranslationsAr,
     common: commonTranslationsAr,
     "inventory-adjustment": inventoryAdjustmentTranslationsAr,
+    "inventory-transfer": inventoryTransferTranslationsAr,
     item: itemTranslationsAr,
     "item-category": itemCategoryTranslationsAr,
     organization: organizationTranslationsAr,
@@ -121,6 +132,7 @@ export const resources = {
     "purchase-receipt": purchaseReceiptTranslationsAr,
     "purchase-shipment": purchaseShipmentTranslationsAr,
     role: roleTranslationsAr,
+    "sales-order": salesOrderTranslationsAr,
     "stock-movement": stockMovementTranslationsAr,
     unit: unitTranslationsAr,
     "unit-collection": unitCollectionTranslationsAr,
