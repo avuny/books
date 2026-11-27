@@ -1,0 +1,77 @@
+{
+  "errors": {
+    "CUSTOMER_PAYMENT_NOT_FOUND": "دفعة العميل غير موجودة",
+    "CUSTOMER_PAYMENT_NOT_EDITABLE": "يمكن تعديل الدفعات المسودة فقط",
+    "CUSTOMER_PAYMENT_NOT_DELETABLE": "يمكن حذف الدفعات المسودة فقط. اعكس الدفعة المرحّلة بدلاً من ذلك",
+    "CUSTOMER_PAYMENT_ALREADY_POSTED": "الدفعة مرحّلة بالفعل",
+    "CUSTOMER_PAYMENT_NOT_POSTED": "يمكن عكس الدفعات المرحّلة فقط",
+    "CUSTOMER_PAYMENT_CUSTOMER_NOT_FOUND": "العميل غير موجود",
+    "CUSTOMER_PAYMENT_CUSTOMER_NOT_CUSTOMER": "الطرف المحدد ليس عميلًا",
+    "CUSTOMER_PAYMENT_CUSTOMER_INACTIVE": "العميل غير نشط",
+    "CUSTOMER_PAYMENT_NO_ALLOCATIONS": "طبّق الدفعة على فاتورة واحدة على الأقل",
+    "CUSTOMER_PAYMENT_DUPLICATE_INVOICES": "الفاتورة نفسها مكررة",
+    "CUSTOMER_PAYMENT_INVOICE_NOT_FOUND": "إحدى الفواتير في الدفعة غير موجودة",
+    "CUSTOMER_PAYMENT_INVOICE_NOT_POSTED": "يمكن دفع الفواتير المرحّلة فقط",
+    "CUSTOMER_PAYMENT_INVOICE_CUSTOMER_MISMATCH": "يجب أن تعود كل الفواتير في الدفعة إلى عميل الدفعة",
+    "CUSTOMER_PAYMENT_AMOUNT_NOT_POSITIVE": "يجب أن تكون المبالغ أكبر من صفر",
+    "CUSTOMER_PAYMENT_EXCEEDS_OUTSTANDING": "إحدى الدفعات أكبر من المبلغ المتبقي على الفاتورة",
+    "CUSTOMER_PAYMENT_POSTING_FAILED": "فشل ترحيل الدفعة. لم يتم تغيير أي شيء. حاول مرة أخرى",
+    "CUSTOMER_PAYMENT_NUMBER_TAKEN": "تعذر تخصيص رقم للدفعة. حاول مرة أخرى"
+  },
+  "labels": {
+    "status": {
+      "DRAFT": "مسودة",
+      "POSTED": "مرحّلة",
+      "REVERSED": "معكوسة"
+    },
+    "method": {
+      "cash": "نقدًا",
+      "bank": "بنك"
+    },
+    "paymentStatus": {
+      "UNPAID": "غير مدفوعة",
+      "PARTIALLY_PAID": "مدفوعة جزئيًا",
+      "PAID": "مدفوعة"
+    }
+  },
+  "msgs": {
+    "CUSTOMER_PAYMENT_CREATED": "تم إنشاء دفعة العميل بنجاح",
+    "CUSTOMER_PAYMENT_UPDATED": "تم تحديث دفعة العميل بنجاح",
+    "CUSTOMER_PAYMENT_DELETED": "تم حذف دفعة العميل بنجاح",
+    "CUSTOMER_PAYMENT_POSTED": "تم ترحيل الدفعة. انخفض رصيد العميل",
+    "CUSTOMER_PAYMENT_REVERSED": "تم عكس الدفعة"
+  },
+  "ui": {
+    "title": "مدفوعات العملاء",
+    "description": "الأموال المستلمة من العملاء والمطبّقة على الفواتير المرحّلة.",
+    "none": "لا توجد مدفوعات عملاء بعد.",
+    "number": "الدفعة",
+    "customer": "العميل",
+    "date": "التاريخ",
+    "method": "الطريقة",
+    "amount": "المبلغ",
+    "invoices": "مطبّقة على",
+    "status": "الحالة",
+    "post": "ترحيل",
+    "reverse": "عكس",
+    "reverseTitle": "عكس الدفعة",
+    "reverseDescription": "يعكس قيد اليومية ويعيد فتح الفواتير التي سددتها.",
+    "delete": "حذف",
+    "cancel": "إلغاء",
+    "reason": "السبب",
+    "posting": "جارٍ الحفظ…",
+    "dialog": {
+      "open": "تسجيل دفعة",
+      "title": "تسجيل دفعة للفاتورة {number}",
+      "description": "المتبقي: {amount}",
+      "full": "المبلغ كاملًا",
+      "partial": "جزء منه",
+      "amount": "المبلغ",
+      "method": "استلمت في",
+      "date": "تاريخ الدفعة",
+      "reference": "المرجع (اختياري)",
+      "confirm": "استلام الدفعة",
+      "amountInvalid": "أدخل مبلغًا أكبر من صفر ولا يزيد عن المتبقي."
+    }
+  }
+}

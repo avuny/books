@@ -35,6 +35,11 @@
       "import": "./dist/common/index.js",
       "default": "./dist/common/index.js"
     },
+    "./customer-payment": {
+      "types": "./dist/customer-payment/index.d.ts",
+      "import": "./dist/customer-payment/index.js",
+      "default": "./dist/customer-payment/index.js"
+    },
     "./errors": {
       "types": "./dist/errors/index.d.ts",
       "import": "./dist/errors/index.js",

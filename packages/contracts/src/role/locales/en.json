@@ -24,6 +24,7 @@
       "sales_order": "Sales orders",
       "sales_delivery": "Deliveries",
       "sales_invoice": "Sales invoices",
+      "customer_payment": "Customer payments",
       "purchase_shipment": "Supplier shipments",
       "purchase_receipt": "Goods receipts",
       "vendor_bill": "Vendor bills",

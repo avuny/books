@@ -1,0 +1,77 @@
+{
+  "errors": {
+    "CUSTOMER_PAYMENT_NOT_FOUND": "Customer payment not found",
+    "CUSTOMER_PAYMENT_NOT_EDITABLE": "Only draft payments can be edited",
+    "CUSTOMER_PAYMENT_NOT_DELETABLE": "Only draft payments can be deleted. Reverse a posted payment instead",
+    "CUSTOMER_PAYMENT_ALREADY_POSTED": "The payment is already posted",
+    "CUSTOMER_PAYMENT_NOT_POSTED": "Only posted payments can be reversed",
+    "CUSTOMER_PAYMENT_CUSTOMER_NOT_FOUND": "The customer does not exist",
+    "CUSTOMER_PAYMENT_CUSTOMER_NOT_CUSTOMER": "The selected party is not a customer",
+    "CUSTOMER_PAYMENT_CUSTOMER_INACTIVE": "The customer is inactive",
+    "CUSTOMER_PAYMENT_NO_ALLOCATIONS": "Apply the payment to at least one invoice",
+    "CUSTOMER_PAYMENT_DUPLICATE_INVOICES": "The same invoice appears more than once",
+    "CUSTOMER_PAYMENT_INVOICE_NOT_FOUND": "An invoice on the payment does not exist",
+    "CUSTOMER_PAYMENT_INVOICE_NOT_POSTED": "Only posted invoices can be paid",
+    "CUSTOMER_PAYMENT_INVOICE_CUSTOMER_MISMATCH": "All invoices on a payment must belong to the payment's customer",
+    "CUSTOMER_PAYMENT_AMOUNT_NOT_POSITIVE": "Amounts must be greater than zero",
+    "CUSTOMER_PAYMENT_EXCEEDS_OUTSTANDING": "A payment is more than what is still owed on the invoice",
+    "CUSTOMER_PAYMENT_POSTING_FAILED": "Posting the payment failed. Nothing was changed. Please try again",
+    "CUSTOMER_PAYMENT_NUMBER_TAKEN": "Could not allocate a payment number. Please try again"
+  },
+  "labels": {
+    "status": {
+      "DRAFT": "Draft",
+      "POSTED": "Posted",
+      "REVERSED": "Reversed"
+    },
+    "method": {
+      "cash": "Cash",
+      "bank": "Bank"
+    },
+    "paymentStatus": {
+      "UNPAID": "Unpaid",
+      "PARTIALLY_PAID": "Partly paid",
+      "PAID": "Paid"
+    }
+  },
+  "msgs": {
+    "CUSTOMER_PAYMENT_CREATED": "Customer payment created successfully",
+    "CUSTOMER_PAYMENT_UPDATED": "Customer payment updated successfully",
+    "CUSTOMER_PAYMENT_DELETED": "Customer payment deleted successfully",
+    "CUSTOMER_PAYMENT_POSTED": "Payment posted. The customer balance went down",
+    "CUSTOMER_PAYMENT_REVERSED": "Payment reversed"
+  },
+  "ui": {
+    "title": "Customer payments",
+    "description": "Money received from customers and applied to posted invoices.",
+    "none": "No customer payments yet.",
+    "number": "Payment",
+    "customer": "Customer",
+    "date": "Date",
+    "method": "Method",
+    "amount": "Amount",
+    "invoices": "Applied to",
+    "status": "Status",
+    "post": "Post",
+    "reverse": "Reverse",
+    "reverseTitle": "Reverse payment",
+    "reverseDescription": "Reverses the journal entry and reopens the invoices it paid.",
+    "delete": "Delete",
+    "cancel": "Cancel",
+    "reason": "Reason",
+    "posting": "Saving…",
+    "dialog": {
+      "open": "Record payment",
+      "title": "Record payment for {number}",
+      "description": "Outstanding: {amount}",
+      "full": "Full amount",
+      "partial": "Part of it",
+      "amount": "Amount",
+      "method": "Received in",
+      "date": "Payment date",
+      "reference": "Reference (optional)",
+      "confirm": "Receive payment",
+      "amountInvalid": "Enter an amount greater than zero and not more than the outstanding amount."
+    }
+  }
+}
