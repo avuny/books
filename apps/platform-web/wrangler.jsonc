@@ -1,0 +1,10 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  // SCAFFOLD: not deployed yet and not wired into .github/workflows/deploy.yml.
+  "name": "avuny-platform-web",
+  "compatibility_date": "2026-10-15",
+  "assets": {
+    "directory": "./dist",
+    "not_found_handling": "single-page-application",
+  },
+}
