@@ -15,6 +15,8 @@ export default defineConfig({
           name: "unit",
           include: ["src/**/*.{test,spec}.ts"],
           exclude: ["src/**/*.int.test.ts", "**/node_modules/**"],
+          // Same safe defaults as integration (test secrets, NODE_ENV=test), no database.
+          setupFiles: ["./src/api/test-support/setup-env.ts"],
         },
       },
       {

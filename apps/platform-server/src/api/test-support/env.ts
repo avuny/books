@@ -79,5 +79,11 @@ export function loadTestEnv(): void {
   })
   // Keep the suite fast without turning any protection off (override in .env.test if needed).
   process.env.BCRYPT_ROUNDS ??= "4"
+  // Auth secrets for the test run only (A1-04). Fixed values keep tests deterministic;
+  // production values come from wrangler secrets, never from the repo.
+  process.env.PLATFORM_AUTH_TICKET_SECRET ??=
+    "test-ticket-secret-0123456789abcdef0123456789abcdef"
+  process.env.PLATFORM_TOTP_ENC_KEY ??=
+    "test-totp-enc-key-0123456789abcdef0123456789abcdef"
   loaded = true
 }

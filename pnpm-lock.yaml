@@ -105,6 +105,9 @@ importers:
       '@hono/zod-openapi':
         specifier: ^1.1.5
         version: 1.6.3(hono@4.13.13)(zod@4.6.5)
+      bcryptjs:
+        specifier: ^3.0.3
+        version: 3.0.3
       dotenv:
         specifier: ^17.4.2
         version: 17.4.2
