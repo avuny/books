@@ -17,4 +17,4 @@ Output each proposed commit with its staging `git add` command and commit messag
 
 ## Author identity for AI agents
 
-Agents set the git author and committer name to `Avuny Bot-001` before committing (`git config user.name "Avuny Bot-001"` in the clone). Keep the configured email unless the owner says otherwise. Do not rewrite commits that are already pushed.
+Agents set the git author and committer name to `Avuny-Bot-001` before committing (`git config user.name "Avuny-Bot-001"` in the clone). Keep the configured email unless the owner says otherwise. Do not rewrite commits that are already pushed.
