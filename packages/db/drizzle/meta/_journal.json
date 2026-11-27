@@ -211,6 +211,13 @@
       "when": 1795731129517,
       "tag": "0029_sales_order",
       "breakpoints": true
+    },
+    {
+      "idx": 30,
+      "version": "7",
+      "when": 1795776506860,
+      "tag": "0030_sales_delivery",
+      "breakpoints": true
     }
   ]
 }

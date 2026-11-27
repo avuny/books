@@ -205,6 +205,13 @@ export const MODULES = {
       reverse: { permission: true, event: "reversed" },
     },
   },
+  sales_delivery: {
+    actions: {
+      ...CRUD,
+      post: { permission: true, event: "posted" },
+      reverse: { permission: true, event: "reversed" },
+    },
+  },
   vendor_bill: {
     sidebar: {
       group: "purchases",

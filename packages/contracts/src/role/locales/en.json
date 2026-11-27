@@ -22,6 +22,7 @@
       "customer": "Customers",
       "purchase_order": "Purchase orders",
       "sales_order": "Sales orders",
+      "sales_delivery": "Deliveries",
       "purchase_shipment": "Supplier shipments",
       "purchase_receipt": "Goods receipts",
       "vendor_bill": "Vendor bills",

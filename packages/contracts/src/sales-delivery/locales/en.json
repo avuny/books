@@ -1,0 +1,38 @@
+{
+  "errors": {
+    "SALES_DELIVERY_NOT_FOUND": "Delivery not found",
+    "SALES_DELIVERY_NOT_EDITABLE": "Only draft deliveries can be edited",
+    "SALES_DELIVERY_NOT_DELETABLE": "Only draft deliveries can be deleted. Reverse a posted delivery instead",
+    "SALES_DELIVERY_ALREADY_POSTED": "The delivery is already posted",
+    "SALES_DELIVERY_NOT_POSTED": "Only posted deliveries can be reversed",
+    "SALES_DELIVERY_SALES_ORDER_NOT_FOUND": "The sales order does not exist",
+    "SALES_DELIVERY_SALES_ORDER_NOT_OPEN": "The sales order must be confirmed and open to deliver goods",
+    "SALES_DELIVERY_NO_LINES": "At least one delivery line is required",
+    "SALES_DELIVERY_LINE_NOT_ON_ORDER": "A delivery line does not belong to this sales order",
+    "SALES_DELIVERY_DUPLICATE_LINES": "The same order line appears more than once",
+    "SALES_DELIVERY_UNIT_NOT_IN_COLLECTION": "The selected unit is not configured for this item",
+    "SALES_DELIVERY_QUANTITY_NOT_POSITIVE": "Delivered quantities must be greater than zero",
+    "SALES_DELIVERY_EXCEEDS_OPEN": "The delivered quantity is more than what is still open on the order line",
+    "SALES_DELIVERY_LOCATION_INVALID": "Choose a valid stock location in the order's warehouse",
+    "SALES_DELIVERY_INSUFFICIENT_STOCK": "Not enough stock to deliver this quantity",
+    "SALES_DELIVERY_COST_UNAVAILABLE": "The cost of the delivered goods could not be worked out. Check that the item has stock cost layers",
+    "SALES_DELIVERY_ALREADY_INVOICED": "The delivery is already on a posted invoice. Reverse the invoice first",
+    "SALES_DELIVERY_POSTING_FAILED": "Posting the delivery failed. Nothing was changed. Please try again",
+    "SALES_DELIVERY_PROJECTION_CONFLICT": "Stock quantities changed while posting. Please try again",
+    "SALES_DELIVERY_NUMBER_TAKEN": "Could not allocate a delivery number. Please try again"
+  },
+  "labels": {
+    "status": {
+      "DRAFT": "Draft",
+      "POSTED": "Posted",
+      "REVERSED": "Reversed"
+    }
+  },
+  "msgs": {
+    "SALES_DELIVERY_CREATED": "Delivery created successfully",
+    "SALES_DELIVERY_UPDATED": "Delivery updated successfully",
+    "SALES_DELIVERY_DELETED": "Delivery deleted successfully",
+    "SALES_DELIVERY_POSTED": "Delivery posted. Stock and cost are updated",
+    "SALES_DELIVERY_REVERSED": "Delivery reversed"
+  }
+}

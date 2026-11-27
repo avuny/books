@@ -67,7 +67,38 @@ export interface ReleaseLineResult {
   releasedBaseQty: string
 }
 
+export interface ConsumeLineInput {
+  sourceLineId: string
+  /** Base quantity the document now takes out of the reservation. */
+  baseQty: string
+}
+
+/** One slice of an allocation that was consumed: the caller posts a stock line per slice. */
+export interface ConsumedPick {
+  sourceLineId: string
+  itemId: string
+  inventoryItemId: string
+  /** The batch the slice came from; null for items without batches. */
+  batchId: string | null
+  baseQty: string
+}
+
 export interface InventoryReservationPort {
+  /**
+   * Moves quantity from reserved to consumed for the given source lines, oldest allocation first (allocations
+   * were made first-expiry-first-out, so this keeps FEFO). Reserved projections drop by the consumed quantity;
+   * the stock movement of the delivery drops on hand by the same amount. A line that has less active
+   * reservation than asked simply consumes what is there: the caller handles the remainder.
+   */
+  consume(
+    orgId: string,
+    sourceType: string,
+    sourceId: string,
+    lines: readonly ConsumeLineInput[],
+    tx: Tx
+  ): Promise<ConsumedPick[]>
+  /** Free stock at a location: on hand minus reserved, never below zero. */
+  freeQty(orgId: string, itemId: string, locationId: string, tx: Tx): Promise<string>
   reserve(orgId: string, input: ReserveInput, tx: Tx): Promise<ReserveResult>
   /** Releases every active allocation of the source and closes the reservation. No-op without one. */
   release(orgId: string, sourceType: string, sourceId: string, tx: Tx): Promise<ReleaseLineResult[]>
@@ -224,6 +255,88 @@ export function createInventoryReservation({ db }: { db: DB }): InventoryReserva
         }
       }
       return { ok: true, lines }
+    },
+
+    async consume(orgId, sourceType, sourceId, lines, tx) {
+      const [header] = await tx
+        .select({ id: inventoryReservations.id })
+        .from(inventoryReservations)
+        .where(
+          and(
+            eq(inventoryReservations.orgId, orgId),
+            eq(inventoryReservations.sourceType, sourceType),
+            eq(inventoryReservations.sourceId, sourceId)
+          )
+        )
+        .for("update")
+      if (!header) return []
+      const allocs = await tx
+        .select({
+          alloc: inventoryReservationAllocations,
+          batchId: inventoryItemBatches.batchId,
+        })
+        .from(inventoryReservationAllocations)
+        .leftJoin(
+          inventoryItemBatches,
+          and(
+            eq(inventoryItemBatches.orgId, inventoryReservationAllocations.orgId),
+            eq(inventoryItemBatches.id, inventoryReservationAllocations.inventoryItemBatchId)
+          )
+        )
+        .where(and(eq(inventoryReservationAllocations.orgId, orgId), eq(inventoryReservationAllocations.reservationId, header.id)))
+        .orderBy(
+          asc(inventoryReservationAllocations.inventoryItemId),
+          asc(inventoryReservationAllocations.createdAt),
+          asc(inventoryReservationAllocations.id)
+        )
+        .for("update", { of: inventoryReservationAllocations })
+
+      const picks: ConsumedPick[] = []
+      for (const line of lines) {
+        let need = line.baseQty
+        for (const { alloc: a, batchId } of allocs) {
+          if (!isPositiveQty(need)) break
+          if (a.sourceLineId !== line.sourceLineId) continue
+          const active = subQty(subQty(a.reservedQty, a.consumedQty), a.releasedQty)
+          if (!isPositiveQty(active)) continue
+          const take = cmpQty(active, need) <= 0 ? active : need
+          await tx
+            .update(inventoryReservationAllocations)
+            .set({ consumedQty: sql`${inventoryReservationAllocations.consumedQty} + ${take}::numeric` })
+            .where(eq(inventoryReservationAllocations.id, a.id))
+          a.consumedQty = addQty(a.consumedQty, take)
+          await tx
+            .update(inventoryItems)
+            .set({ reservedQty: sql`${inventoryItems.reservedQty} - ${take}::numeric` })
+            .where(and(eq(inventoryItems.orgId, orgId), eq(inventoryItems.id, a.inventoryItemId)))
+          if (a.inventoryItemBatchId) {
+            await tx
+              .update(inventoryItemBatches)
+              .set({ reservedQty: sql`${inventoryItemBatches.reservedQty} - ${take}::numeric` })
+              .where(and(eq(inventoryItemBatches.orgId, orgId), eq(inventoryItemBatches.id, a.inventoryItemBatchId)))
+          }
+          picks.push({
+            sourceLineId: line.sourceLineId,
+            itemId: a.itemId,
+            inventoryItemId: a.inventoryItemId,
+            batchId: batchId ?? null,
+            baseQty: take,
+          })
+          need = subQty(need, take)
+        }
+      }
+      return picks
+    },
+
+    async freeQty(orgId, itemId, locationId, tx) {
+      const [inv] = await tx
+        .select({ onHand: inventoryItems.onHandQty, reserved: inventoryItems.reservedQty })
+        .from(inventoryItems)
+        .where(and(eq(inventoryItems.orgId, orgId), eq(inventoryItems.itemId, itemId), eq(inventoryItems.locationId, locationId)))
+        .for("update")
+      if (!inv) return "0"
+      const free = subQty(inv.onHand, inv.reserved)
+      return cmpQty(free, "0") === 1 ? free : "0"
     },
 
     async release(orgId, sourceType, sourceId, tx) {
