@@ -38,9 +38,10 @@ export const platformInvites = pgTable(
     index("platform_invites_email_idx").on(t.email),
     check("platform_invites_email_normalized_chk", isNormalized(t.email)),
     check("platform_invites_expiry_chk", sql`${t.expiresAt} > ${t.createdAt}`),
+    // cardinality, not array_length: array_length('{}', 1) is NULL and NULL passes a CHECK.
     check(
       "platform_invites_role_ids_chk",
-      sql`array_length(${t.roleIds}, 1) >= 1`
+      sql`cardinality(${t.roleIds}) >= 1`
     ),
     // One terminal state only: an invite is accepted or revoked, never both.
     check(
