@@ -52,6 +52,10 @@ function createRepoMock(): InventoryCostingRepository {
     findFifoLayers: vi.fn(async () => [mockLayer()]),
     findLayersBySourceLine: vi.fn(async () => [mockLayer()]),
     findAllocationsByLayer: vi.fn(async () => [mockAllocation()]),
+    findOpenLayersBySourceLine: vi.fn(async () => [mockLayer()]),
+    findAllocationsByOutgoingLine: vi.fn(async () => [mockAllocation()]),
+    restoreCostLayer: vi.fn(async () => {}),
+    deleteAllocation: vi.fn(async () => {}),
   }
 }
 

@@ -110,7 +110,7 @@ class FakeRepo implements InventoryTransferRepository {
       kind: ev.kind,
       status: this.eventStatus.get(ev.id) ?? "POSTED",
       stockMovementId: ev.stockMovementId,
-      lines: ev.lines ?? [],
+      lines: (ev.lines ?? []).map((l: any) => ({ ...l, stockMovementLineId: l.stockMovementLineId ?? null })),
     }
   }
   async setEventStatus(_o: string, eventId: string, status: "POSTED" | "REVERSED") {
@@ -135,6 +135,7 @@ describe("InventoryTransferService drafts", () => {
   let postFails = false
   let posts: any[] = []
   let reversed = 0
+  let costCalls: string[] = []
   let service: ReturnType<typeof createInventoryTransferService>
 
   const line = { itemId, sourceLocationId: srcLoc, destinationLocationId: dstLoc, unitId, quantity: "5" }
@@ -151,8 +152,23 @@ describe("InventoryTransferService drafts", () => {
     postFails = false
     posts = []
     reversed = 0
+    costCalls = []
     service = createInventoryTransferService({
       repository: repo,
+      costing: {
+        async dispatch(_o: string, p: any) {
+          costCalls.push(`dispatch:${p.qty}`)
+        },
+        async settle(_o: string, p: any) {
+          costCalls.push(`settle:${p.toLocationId ? "to" : "loss"}:${p.qty}`)
+        },
+        async undoDispatch(_o: string, p: any) {
+          costCalls.push(`undoDispatch:${p.qty}`)
+        },
+        async undoSettle(_o: string, p: any) {
+          costCalls.push(`undoSettle:${p.qty}`)
+        },
+      },
       stock: {
         async post(_a: string, _o: string, input: any) {
           if (postFails) return { success: false, error: "STOCK_MOVEMENT_INSUFFICIENT_STOCK" } as any
@@ -437,6 +453,28 @@ describe("InventoryTransferService drafts", () => {
       await service.closeShort(actorId, orgId, id)
       const res = await service.reverseReceipt(actorId, orgId, id, repo.events[0].id)
       expect(!res.success && res.error).toBe(Err.INVENTORY_TRANSFER_CANNOT_REVERSE)
+    })
+  })
+
+  describe("costing follows the stock", () => {
+    it("moves cost layers on dispatch, receive, loss and the reversals", async () => {
+      const c = await service.create(actorId, orgId, input)
+      if (!c.success) throw new Error("create failed")
+      await service.dispatch(actorId, orgId, c.data.id)
+      const allocationId = repo.allocs[0].id
+      await service.receive(actorId, orgId, c.data.id, { lines: [{ allocationId, baseQuantity: "3" }] })
+      await service.closeShort(actorId, orgId, c.data.id)
+      expect(costCalls).toEqual(["dispatch:5", "settle:to:3", "settle:loss:2"])
+      await service.reverseReceipt(actorId, orgId, c.data.id, repo.events[0].id)
+      expect(costCalls.at(-1)).toBe("undoSettle:3")
+    })
+
+    it("undoes the cost of an untouched dispatch when it is reversed", async () => {
+      const c = await service.create(actorId, orgId, input)
+      if (!c.success) throw new Error("create failed")
+      await service.dispatch(actorId, orgId, c.data.id)
+      await service.reverseDispatch(actorId, orgId, c.data.id, {})
+      expect(costCalls).toEqual(["dispatch:5", "undoDispatch:5"])
     })
   })
 })

@@ -342,6 +342,7 @@ export function createInventoryTransferRepository({ db }: { db: DB }): Inventory
         .select({
           allocationId: inventoryTransferEventLines.allocationId,
           baseQuantity: inventoryTransferEventLines.baseQuantity,
+          stockMovementLineId: inventoryTransferEventLines.stockMovementLineId,
         })
         .from(inventoryTransferEventLines)
         .where(and(eq(inventoryTransferEventLines.orgId, orgId), eq(inventoryTransferEventLines.eventId, eventId)))

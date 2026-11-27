@@ -57,3 +57,7 @@ Not yet covered: API integration tests for the new routes, permission denial per
 ## Phase 4 coverage (unit)
 Partial receive twice then full, over-receipt, zero, duplicate and unknown allocation, wrong state, permission denial, close short after partial receive, reverse receipt restores counters and status, double reversal, unknown event, reversing a loss event.
 Not yet covered: integration tests, deadlock test for opposite concurrent transfers.
+
+## Phase 5 coverage
+Unit: FIFO order and value split, uncovered quantity, derived layer origin and age, exact value over repeated takes, restore of allocations, service calls to costing on every step and reversal.
+Integration: auth, tenancy, 404 and 422 for all routes. Open: end-to-end layer conservation against a seeded database.
