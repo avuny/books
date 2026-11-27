@@ -41,7 +41,7 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done · `[!]` blocked · `[-]` 
 | P1-03 | Schema: pools, entries, layer, allocation and adjustment line columns | Section 5 matches code | [x] |
 | P1-04 | Migration with backfill flags, tested on a copy of data | AC17 | [~] |
 | P2-01 | Valuation engine port and FIFO strategy | Existing FIFO tests pass unchanged | [~] 2a done: engine and FIFO strategy behind the costing service, no caller uses it yet. 2b to 2d move callers over. Sales delivery keeps its own FIFO adapter until a later phase. |
-| P2-02 | Stock movement post and reverse call the engine, cost input required for value-in | AC1 | [ ] |
+| P2-02 | Stock movement post and reverse call the engine, cost input required for value-in | AC1 | [~] 2b: post costs value-in lines that carry a cost, through a costing port. Requirement (reject lines without cost) is switched on in 2c, once callers stop writing their own layers, so nothing double-counts. Reverse inherits cost in 2c. |
 | P2-03 | Opening stock and purchase receipt pass cost inputs, opening cost required | AC1, AC2 | [ ] |
 | P2-04 | Transfer uses the engine, uncovered quantity fails | AC6, AC7 | [ ] |
 | P3-01 | WAC receipt and issue with locks and seq | AC4, AC5 | [ ] |
