@@ -5,6 +5,10 @@ import { defineConfig } from "vitest/config"
 //   pnpm test:int  -> integration: a real test database (see src/api/test-support)
 export default defineConfig({
   test: {
+    // Platform roles/admins are global singletons and integration tests own whole
+    // tables, so files must not run concurrently against the one test database.
+    // This is a run-level (root) option: project-level fileParallelism is ignored.
+    fileParallelism: false,
     projects: [
       {
         test: {
@@ -21,9 +25,6 @@ export default defineConfig({
           setupFiles: ["./src/api/test-support/setup-env.ts"],
           testTimeout: 30_000,
           hookTimeout: 60_000,
-          // Platform roles/admins are global singletons: tests own whole tables,
-          // so files must not run concurrently against the one test database.
-          fileParallelism: false,
         },
       },
     ],
