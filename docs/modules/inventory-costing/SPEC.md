@@ -86,7 +86,7 @@ Tests reference these ids.
 - R1. Every value-in line needs a **cost determination** before the posting can write anything. If it is missing or invalid the whole posting fails with `STOCK_MOVEMENT_COST_REQUIRED` (or `COST_INVALID`). Nothing is written.
 - R2. A cost determination has one `source`:
   - `DOCUMENT`: the value comes from the source document line (for example a receipt line value). The calling module supplies `totalValueMinor`.
-  - `INHERITED`: the value is copied from the cost of a source transaction (a sale return takes the cost of the original sale line, a reversal takes the cost of the movement it reverses, assembly produce takes the rolled up cost of its consumed components). The caller supplies `sourceEntryId` (WAC) or `sourceLayerIds` (FIFO) and the engine computes the value. The caller cannot override the number.
+  - `INHERITED`: the value is copied from the cost of a source transaction (a sale return takes the cost of the original sale line, a reversal takes the cost of the movement it reverses, assembly produce takes the rolled up cost of its consumed components). The caller names the source (`sourceEntryId` for WAC, `sourceLayerIds` for FIFO, or `fromMovementId` for assembly produce, with an optional `additionalValueMinor` for non-stock cost added to the consumed value) and the engine computes the value. The caller cannot override the number.
   - `USER`: the user typed a unit cost.
   - `CONFIRMED_PROPOSAL`: the system proposed a cost (current average, last receipt cost) and the user confirmed it. The proposal value is stored next to the final value.
 - R3. **Missing is not zero.** The cost input has no default. `unitCost` or `totalValueMinor` is required. The value 0 is accepted only with `zeroCost: true` and a reason from a fixed list (`SAMPLE`, `PROMOTION`, `FREE_ISSUE`, `OTHER`). Zero cost records carry `is_zero_cost = true` and appear in a report. An `INHERITED` zero is allowed when the source was a stated zero.
@@ -288,7 +288,8 @@ type CostInput =
   | { source: "DOCUMENT"; totalValueMinor: string; zeroCost?: ZeroCost }
   | { source: "USER"; unitCost: string; zeroCost?: ZeroCost }
   | { source: "CONFIRMED_PROPOSAL"; unitCost: string; proposedUnitCost: string }
-  | { source: "INHERITED"; sourceEntryId?: string; sourceLayerIds?: string[] }
+  | { source: "INHERITED"; sourceEntryId?: string; sourceLayerIds?: string[];
+      fromMovementId?: string; additionalValueMinor?: string }
 type ZeroCost = { reason: "SAMPLE" | "PROMOTION" | "FREE_ISSUE" | "OTHER" }
 ```
 
