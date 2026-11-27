@@ -38,6 +38,7 @@ i18n
       "purchase-receipt",
       "purchase-shipment",
       "role",
+      "sales-credit-note",
       "sales-delivery",
       "sales-invoice",
       "sales-order",
