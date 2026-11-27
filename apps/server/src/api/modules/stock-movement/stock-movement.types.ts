@@ -1,5 +1,7 @@
 import type {
   AllocatableBatch,
+  CostInput,
+  InventoryCostingErrorCode,
   BatchStatus,
   StockMovementErrorCode,
   WarehouseLocationErrorCode,
@@ -14,7 +16,7 @@ export type StockMovementRepository = ReturnType<typeof createStockMovementRepos
 export type StockMovementService = ReturnType<typeof createStockMovementService>
 
 /** Own codes plus the codes the location module answers with when a location cannot take a posting. */
-export type Code = StockMovementErrorCode | WarehouseLocationErrorCode
+export type Code = StockMovementErrorCode | WarehouseLocationErrorCode | InventoryCostingErrorCode
 
 /** What the stock rules need to know about an item (answered by the item module). */
 export interface StockItemPolicy {
@@ -66,9 +68,36 @@ export interface StockLocationsPort {
   >
 }
 
+/** One value-in line the costing port has to cost and turn into a layer. */
+export interface StockCostingReceiveLine {
+  orgId: string
+  movementLineId: string
+  itemId: string
+  batchId: string | null
+  /** Warehouse location that receives the stock. */
+  toLocationId: string
+  /** Base unit quantity, positive numeric string. */
+  quantity: string
+  receivedAt: Date
+  cost: CostInput
+}
+
+/** Port to the valuation engine (inventory-costing). Failures come back as values. */
+export interface StockCostingPort {
+  receiveLine(
+    line: StockCostingReceiveLine,
+    tx: Tx
+  ): Promise<{ ok: true } | { ok: false; error: InventoryCostingErrorCode; msg: string }>
+}
+
 export interface StockMovementServiceDeps {
   repository: StockMovementRepository
   locations: StockLocationsPort
   batches: StockBatchesPort
   items?: StockItemsPort // optional port; defaults to a strict placeholder
+  /**
+   * Optional until phase 2c. When set, a value-in line that carries a `cost` is costed and gets its
+   * layer here. Lines without a cost are not rejected yet, because callers still write their own layer.
+   */
+  costing?: StockCostingPort
 }

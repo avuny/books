@@ -1,4 +1,8 @@
+import { and, eq } from "drizzle-orm"
+import { inventoryItemBatches, inventoryItems, organizations } from "@avuny/db"
 import { db } from "../../db.js"
+import { getInventoryCostingService } from "../inventory-costing/index.js"
+import { createValuationEngine } from "../inventory-costing/valuation-engine.js"
 import { getBatchService } from "../batch/index.js"
 // Adjust to the names the item and warehouse-location barrels export.
 import { getItemRepository } from "../item/index.js"
@@ -26,6 +30,59 @@ export function getStockMovementService(): StockMovementService {
       findForPosting: (orgId, batchIds, tx) => getBatchService().findForPosting(orgId, batchIds, tx),
       listAllocatable: (orgId, itemId, locationId, tx) =>
         getBatchService().listAllocatable(orgId, itemId, locationId, tx),
+    },
+    // Costs value-in lines through the valuation engine. The engine is built lazily, like the others.
+    costing: {
+      async receiveLine(line, tx) {
+        const [inv] = await tx
+          .select({ id: inventoryItems.id })
+          .from(inventoryItems)
+          .where(
+            and(
+              eq(inventoryItems.orgId, line.orgId),
+              eq(inventoryItems.itemId, line.itemId),
+              eq(inventoryItems.locationId, line.toLocationId)
+            )
+          )
+          .limit(1)
+        if (!inv) throw new Error("Inventory item row missing after stock lock")
+        let inventoryItemBatchId: string | null = null
+        if (line.batchId) {
+          const [b] = await tx
+            .select({ id: inventoryItemBatches.id })
+            .from(inventoryItemBatches)
+            .where(
+              and(
+                eq(inventoryItemBatches.orgId, line.orgId),
+                eq(inventoryItemBatches.inventoryItemId, inv.id),
+                eq(inventoryItemBatches.batchId, line.batchId)
+              )
+            )
+            .limit(1)
+          inventoryItemBatchId = b?.id ?? null
+        }
+        const [org] = await tx
+          .select({ currency: organizations.defaultCurrency })
+          .from(organizations)
+          .where(eq(organizations.id, line.orgId))
+          .limit(1)
+        const engine = createValuationEngine({ costing: getInventoryCostingService() })
+        const res = await engine.receive(
+          {
+            orgId: line.orgId,
+            inventoryItemId: inv.id,
+            itemId: line.itemId,
+            inventoryItemBatchId,
+            sourceMovementLineId: line.movementLineId,
+            quantity: line.quantity,
+            currency: org?.currency ?? "USD",
+            receivedAt: line.receivedAt,
+            cost: line.cost,
+          },
+          tx
+        )
+        return res.ok ? { ok: true } : { ok: false, error: res.error, msg: res.msg }
+      },
     },
     // See ITEM_CHANGES.md: findStockPolicies is a small query to add to the item repository.
     items: {
