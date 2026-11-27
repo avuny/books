@@ -102,7 +102,7 @@ describe("SalesDeliveryService", () => {
       items: okItems,
       locations: okLocations,
       stockMovement: {
-        async post(_a, _o, input) {
+        async post(_a: any, _o: any, input: any) {
           movements.push(input)
           return {
             success: true,
@@ -114,16 +114,16 @@ describe("SalesDeliveryService", () => {
             },
           } as any
         },
-        async reverse(_a, _o, id) {
+        async reverse(_a: any, _o: any, id: any) {
           reversedMovements.push(id)
           return { success: true, data: { id: `rev-${id}`, lines: [] } } as any
         },
       },
       costing: {
-        async consume(_o, input) {
+        async consume(_o: any, input: any) {
           return costAvailable ? { totalValue: Number(input.qty) * 100, slices: [] } : null
         },
-        async restore(_o, input) {
+        async restore(_o: any, input: any) {
           restores.push(input)
         },
       },
@@ -136,11 +136,11 @@ describe("SalesDeliveryService", () => {
         },
       },
       accounting: {
-        async postBusinessEvent(_a, _o, event) {
+        async postBusinessEvent(_a: any, _o: any, event: any) {
           journals.push(event)
           return { success: true, data: { id: `je-${journals.length}` } } as any
         },
-        async reverseJournalEntry(_a, _o, id) {
+        async reverseJournalEntry(_a: any, _o: any, id: any) {
           reversedJournals.push(id)
           return { success: true, data: { id: `jr-${id}` } } as any
         },
