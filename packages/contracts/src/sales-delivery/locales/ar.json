@@ -1,0 +1,38 @@
+{
+  "errors": {
+    "SALES_DELIVERY_NOT_FOUND": "التسليم غير موجود",
+    "SALES_DELIVERY_NOT_EDITABLE": "يمكن تعديل التسليمات المسودة فقط",
+    "SALES_DELIVERY_NOT_DELETABLE": "يمكن حذف التسليمات المسودة فقط. اعكس التسليم المرحّل بدلاً من ذلك",
+    "SALES_DELIVERY_ALREADY_POSTED": "التسليم مرحّل بالفعل",
+    "SALES_DELIVERY_NOT_POSTED": "يمكن عكس التسليمات المرحّلة فقط",
+    "SALES_DELIVERY_SALES_ORDER_NOT_FOUND": "أمر البيع غير موجود",
+    "SALES_DELIVERY_SALES_ORDER_NOT_OPEN": "يجب أن يكون أمر البيع مؤكداً ومفتوحاً للتسليم",
+    "SALES_DELIVERY_NO_LINES": "مطلوب بند تسليم واحد على الأقل",
+    "SALES_DELIVERY_LINE_NOT_ON_ORDER": "بند التسليم لا يخص أمر البيع هذا",
+    "SALES_DELIVERY_DUPLICATE_LINES": "بند الأمر نفسه مكرر",
+    "SALES_DELIVERY_UNIT_NOT_IN_COLLECTION": "الوحدة المختارة غير مهيأة لهذا الصنف",
+    "SALES_DELIVERY_QUANTITY_NOT_POSITIVE": "يجب أن تكون الكميات المسلّمة أكبر من صفر",
+    "SALES_DELIVERY_EXCEEDS_OPEN": "الكمية المسلّمة أكبر من المتبقي على بند الأمر",
+    "SALES_DELIVERY_LOCATION_INVALID": "اختر موقع مخزون صالحاً في مستودع الأمر",
+    "SALES_DELIVERY_INSUFFICIENT_STOCK": "لا يوجد مخزون كافٍ لتسليم هذه الكمية",
+    "SALES_DELIVERY_COST_UNAVAILABLE": "تعذر حساب تكلفة البضاعة المسلّمة. تأكد من وجود طبقات تكلفة للصنف",
+    "SALES_DELIVERY_ALREADY_INVOICED": "التسليم مدرج في فاتورة مرحّلة. اعكس الفاتورة أولاً",
+    "SALES_DELIVERY_POSTING_FAILED": "فشل ترحيل التسليم. لم يتغير شيء. حاول مرة أخرى",
+    "SALES_DELIVERY_PROJECTION_CONFLICT": "تغيرت كميات المخزون أثناء الترحيل. حاول مرة أخرى",
+    "SALES_DELIVERY_NUMBER_TAKEN": "تعذر تخصيص رقم التسليم. حاول مرة أخرى"
+  },
+  "labels": {
+    "status": {
+      "DRAFT": "مسودة",
+      "POSTED": "مرحّل",
+      "REVERSED": "معكوس"
+    }
+  },
+  "msgs": {
+    "SALES_DELIVERY_CREATED": "تم إنشاء التسليم بنجاح",
+    "SALES_DELIVERY_UPDATED": "تم تحديث التسليم بنجاح",
+    "SALES_DELIVERY_DELETED": "تم حذف التسليم بنجاح",
+    "SALES_DELIVERY_POSTED": "تم ترحيل التسليم. تم تحديث المخزون والتكلفة",
+    "SALES_DELIVERY_REVERSED": "تم عكس التسليم"
+  }
+}

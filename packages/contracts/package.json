@@ -120,6 +120,11 @@
       "import": "./dist/role/index.js",
       "default": "./dist/role/index.js"
     },
+    "./sales-delivery": {
+      "types": "./dist/sales-delivery/index.d.ts",
+      "import": "./dist/sales-delivery/index.js",
+      "default": "./dist/sales-delivery/index.js"
+    },
     "./sales-order": {
       "types": "./dist/sales-order/index.d.ts",
       "import": "./dist/sales-order/index.js",
