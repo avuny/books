@@ -225,6 +225,19 @@ export const MODULES = {
       reverse: { permission: true, event: "reversed" },
     },
   },
+  customer_payment: {
+    sidebar: {
+      group: "sales",
+      icon: "badge-dollar-sign",
+      path: "/customer-payments",
+      label: { en: "Customer payments", ar: "مدفوعات العملاء" },
+    },
+    actions: {
+      ...CRUD,
+      post: { permission: true, event: "posted" },
+      reverse: { permission: true, event: "reversed" },
+    },
+  },
   vendor_bill: {
     sidebar: {
       group: "purchases",

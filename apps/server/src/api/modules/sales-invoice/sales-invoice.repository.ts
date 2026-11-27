@@ -8,12 +8,35 @@ import {
   salesInvoices,
   salesOrderLines,
   salesOrders,
+  customerPaymentAllocations,
+  customerPayments,
   units,
   type DB,
   type Tx,
 } from "@avuny/db"
 import { isUniqueViolation } from "../shared/pg-errors.js"
 import type { InvoiceableDeliveryLine, SalesInvoiceRepository } from "./sales-invoice.types.js"
+
+/** Sum of POSTED customer payment allocations per invoice (reversed and draft payments do not count). */
+async function paidByInvoice(exec: DB | Tx, orgId: string, invoiceIds: readonly string[]): Promise<Map<string, number>> {
+  if (invoiceIds.length === 0) return new Map()
+  const rows = await exec
+    .select({ id: customerPaymentAllocations.salesInvoiceId, paid: sql<string>`sum(${customerPaymentAllocations.allocatedAmount})::text` })
+    .from(customerPaymentAllocations)
+    .innerJoin(
+      customerPayments,
+      and(eq(customerPayments.orgId, customerPaymentAllocations.orgId), eq(customerPayments.id, customerPaymentAllocations.customerPaymentId))
+    )
+    .where(
+      and(
+        eq(customerPaymentAllocations.orgId, orgId),
+        inArray(customerPaymentAllocations.salesInvoiceId, [...invoiceIds]),
+        eq(customerPayments.status, "POSTED")
+      )
+    )
+    .groupBy(customerPaymentAllocations.salesInvoiceId)
+  return new Map(rows.map((r) => [r.id, Number(r.paid)]))
+}
 
 export function createSalesInvoiceRepository({ db }: { db: DB }): SalesInvoiceRepository {
   const ex = (tx?: Tx) => tx ?? db
@@ -172,8 +195,8 @@ export function createSalesInvoiceRepository({ db }: { db: DB }): SalesInvoiceRe
         .limit(1)
       if (!head) return null
       const lines = await detailLines(exec, orgId, [id])
-      // Customer payments arrive with the payment module; until then nothing has been applied.
-      return { row: { ...head.invoice, salesOrderNumber: head.orderNumber, paidAmount: 0 }, lines: lines.map(toLine) }
+      const paid = (await paidByInvoice(exec, orgId, [id])).get(id) ?? 0
+      return { row: { ...head.invoice, salesOrderNumber: head.orderNumber, paidAmount: paid }, lines: lines.map(toLine) }
     },
 
     async list(orgId, filter) {
@@ -192,8 +215,9 @@ export function createSalesInvoiceRepository({ db }: { db: DB }): SalesInvoiceRe
         .orderBy(desc(salesInvoices.createdAt), desc(salesInvoices.id))
       if (heads.length === 0) return []
       const lines = await detailLines(db, orgId, heads.map((h) => h.invoice.id))
+      const paid = await paidByInvoice(db, orgId, heads.map((h) => h.invoice.id))
       return heads.map((h) => ({
-        row: { ...h.invoice, salesOrderNumber: h.orderNumber, paidAmount: 0 },
+        row: { ...h.invoice, salesOrderNumber: h.orderNumber, paidAmount: paid.get(h.invoice.id) ?? 0 },
         lines: lines.filter((l) => l.line.salesInvoiceId === h.invoice.id).map(toLine),
       }))
     },
@@ -215,9 +239,8 @@ export function createSalesInvoiceRepository({ db }: { db: DB }): SalesInvoiceRe
       await ex(tx).delete(salesInvoices).where(and(eq(salesInvoices.orgId, orgId), eq(salesInvoices.id, id)))
     },
 
-    async hasPostedPayments() {
-      // Customer payments are a later milestone: nothing can be applied yet.
-      return false
+    async hasPostedPayments(orgId, id, tx) {
+      return ((await paidByInvoice(ex(tx), orgId, [id])).get(id) ?? 0) > 0
     },
 
     async loadDeliveryLines(orgId, lineIds, opts, tx) {
