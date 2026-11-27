@@ -5,7 +5,7 @@
 | Spec | [`SPEC.md`](./SPEC.md) · imported 2026-11-26 |
 | Plan | [`IMPLEMENTATION-PLAN.md`](./IMPLEMENTATION-PLAN.md) |
 | Last updated | 2026-11-26 |
-| Current phase | Phase 1 — Build (server done, web next) |
+| Current phase | Phase 2 — Web (UI built, CI pending) |
 | Tasks done | 0 / 17 |
 | Gates passed | 0 / 4 |
 
@@ -17,7 +17,7 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done · `[!]` blocked · `[-]` 
 
 ## Next action
 
-> Web UI (list, form, details, confirm dialog with reservation summary, sidebar entry).
+> Web e2e spec, then hand off to sales-delivery.
 
 ## Status board
 
@@ -43,6 +43,15 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done · `[!]` blocked · `[-]` 
 - Customer must have an active CUSTOMER party role.
 - DB checks: delivered + cancelled <= ordered, reserved + cancelled <= ordered. Migration 0029.
 - Reservation port has no DB-level test locally (no Postgres); covered by CI integration tests.
+
+## Implementation notes (M2, web)
+
+- `apps/web/src/features/sales-order-module` is cloned from purchase-order without shipments, receipts and payment-term pages. Routes under `/organization/$orgId/sales-orders`.
+- Customer picker uses party role CUSTOMER. Line columns show reserved, delivered and unreserved quantities.
+- Confirm opens a dialog with the reservation policy select (default REQUIRE_FULL_RESERVATION). Create-and-confirm uses the default policy.
+- UI locale sections live in the contracts sales-order locales (en/ar).
+- Not done: web e2e spec; reservation summary after confirm (the line table shows reserved vs unreserved).
+- `pnpm sync:i18n` also added the missing inventory-transfer namespace (drift from the earlier release).
 
 ## Deviations
 
