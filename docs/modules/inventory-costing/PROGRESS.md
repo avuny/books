@@ -5,7 +5,7 @@
 | Spec | [`SPEC.md`](./SPEC.md) v1.0 · 2026-11-27 |
 | Analysis | [`ANALYSIS.md`](./ANALYSIS.md) |
 | Last updated | 2026-11-27 |
-| Current phase | Phase 0 (waiting for owner review of the spec) |
+| Current phase | Phase 1 |
 | Tasks done | 0 / 22 |
 | Gates passed | 0 / 9 |
 
@@ -16,7 +16,7 @@ Each phase ships as its own PR. Manufacturing (assembly) waits for gate 6.
 Legend: `[ ]` todo · `[~]` in progress · `[x]` done · `[!]` blocked · `[-]` not applicable (say why)
 
 ## Next action
-> **P0-01**: the owner reviews the spec and answers W1, W2, W3, W5, W6 (needed before phase 1).
+> **P1-01**: W1, W2, W3, W5, W6 are decided. Start phase 1 (pure math, contracts, schema). Prod data check for items below zero is needed before negative stock is enforced (phase 2/3), owner to supply counts.
 
 ## Status board
 | Phase | Title | Tasks | Gate | Status |
@@ -34,7 +34,7 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done · `[!]` blocked · `[-]` 
 ## Tasks
 | ID | Task | Done when | Status |
 |---|---|---|---|
-| P0-01 | Close open decisions | Decision log filled | [ ] |
+| P0-01 | Close open decisions | Decision log filled | [x] |
 | P0-02 | Run SPEC section 14.2 checks | Results in the verification log | [ ] |
 | P1-01 | Pure arithmetic and rules in contracts (issue value, receipt value, millions helpers, cost input schemas) | Property tests for AC5 | [ ] |
 | P1-02 | Error codes and locales en and ar | Locale parity test | [ ] |
@@ -60,12 +60,12 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done · `[!]` blocked · `[-]` 
 ## Decision log
 | ID | Decision (default applied) | Status | Owner response · date |
 |---|---|---|---|
-| W1 | One pool per item per organization | open | no response yet |
-| W2 | One average per item, not per batch | open | no response yet |
-| W3 | No negative stock for costed items in v1 | open | no response yet |
+| W1 | One pool per item per organization | decided | owner, 2026-11-27 (WhatsApp), as the default |
+| W2 | One average per item, not per batch | decided | owner, 2026-11-27 (WhatsApp), as the default |
+| W3 | No negative stock for costed items in v1. Before enforcing, run a prod data check for items below zero and report counts to the owner | decided | owner, 2026-11-27 (WhatsApp), as the default |
 | W4 | Posting order costing, flag backdated | open | no response yet |
-| W5 | Invoice price differences to PPV | open | no response yet |
-| W6 | One Inventory account for the WAC work, per category accounts as a separate module | open | no response yet |
+| W5 | Invoice price differences to PPV | decided | owner, 2026-11-27 (WhatsApp), as the default |
+| W6 | One Inventory account for the WAC work, per category accounts as a separate module | decided | owner, 2026-11-27 (WhatsApp), as the default |
 | W7 | Legacy zero layers flagged for review only | open | no response yet |
 | W8 | Convert weighted average items with the drift check | open | no response yet |
 | W9 | Gain adjustment proposal is the pool average | open | no response yet |
