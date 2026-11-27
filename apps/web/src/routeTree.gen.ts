@@ -45,6 +45,7 @@ import { Route as OrganizationOrgIdPurchaseOrdersOrderIdRouteImport } from './ro
 import { Route as OrganizationOrgIdPurchaseOrdersNewRouteImport } from './routes/organization/$orgId/purchase-orders/new'
 import { Route as OrganizationOrgIdRolesIndexRouteImport } from './routes/organization/$orgId/roles/index'
 import { Route as OrganizationOrgIdRolesRoleIdRouteImport } from './routes/organization/$orgId/roles/$roleId'
+import { Route as OrganizationOrgIdSalesCreditNotesIndexRouteImport } from './routes/organization/$orgId/sales-credit-notes/index'
 import { Route as OrganizationOrgIdSalesInvoicesIndexRouteImport } from './routes/organization/$orgId/sales-invoices/index'
 import { Route as OrganizationOrgIdSalesInvoicesInvoiceIdRouteImport } from './routes/organization/$orgId/sales-invoices/$invoiceId'
 import { Route as OrganizationOrgIdSalesInvoicesReportsRouteImport } from './routes/organization/$orgId/sales-invoices/reports'
@@ -269,6 +270,12 @@ const OrganizationOrgIdRolesRoleIdRoute =
     path: '/roles/$roleId',
     getParentRoute: () => OrganizationOrgIdRouteRoute,
   } as any)
+const OrganizationOrgIdSalesCreditNotesIndexRoute =
+  OrganizationOrgIdSalesCreditNotesIndexRouteImport.update({
+    id: '/sales-credit-notes/',
+    path: '/sales-credit-notes/',
+    getParentRoute: () => OrganizationOrgIdRouteRoute,
+  } as any)
 const OrganizationOrgIdSalesInvoicesIndexRoute =
   OrganizationOrgIdSalesInvoicesIndexRouteImport.update({
     id: '/sales-invoices/',
@@ -466,6 +473,7 @@ export interface FileRoutesByFullPath {
   '/organization/$orgId/items/': typeof OrganizationOrgIdItemsIndexRoute
   '/organization/$orgId/purchase-orders/': typeof OrganizationOrgIdPurchaseOrdersIndexRoute
   '/organization/$orgId/roles/': typeof OrganizationOrgIdRolesIndexRoute
+  '/organization/$orgId/sales-credit-notes/': typeof OrganizationOrgIdSalesCreditNotesIndexRoute
   '/organization/$orgId/sales-invoices/': typeof OrganizationOrgIdSalesInvoicesIndexRoute
   '/organization/$orgId/sales-orders/': typeof OrganizationOrgIdSalesOrdersIndexRoute
   '/organization/$orgId/settings/': typeof OrganizationOrgIdSettingsIndexRoute
@@ -523,6 +531,7 @@ export interface FileRoutesByTo {
   '/organization/$orgId/items': typeof OrganizationOrgIdItemsIndexRoute
   '/organization/$orgId/purchase-orders': typeof OrganizationOrgIdPurchaseOrdersIndexRoute
   '/organization/$orgId/roles': typeof OrganizationOrgIdRolesIndexRoute
+  '/organization/$orgId/sales-credit-notes': typeof OrganizationOrgIdSalesCreditNotesIndexRoute
   '/organization/$orgId/sales-invoices': typeof OrganizationOrgIdSalesInvoicesIndexRoute
   '/organization/$orgId/sales-orders': typeof OrganizationOrgIdSalesOrdersIndexRoute
   '/organization/$orgId/settings': typeof OrganizationOrgIdSettingsIndexRoute
@@ -587,6 +596,7 @@ export interface FileRoutesById {
   '/organization/$orgId/items/': typeof OrganizationOrgIdItemsIndexRoute
   '/organization/$orgId/purchase-orders/': typeof OrganizationOrgIdPurchaseOrdersIndexRoute
   '/organization/$orgId/roles/': typeof OrganizationOrgIdRolesIndexRoute
+  '/organization/$orgId/sales-credit-notes/': typeof OrganizationOrgIdSalesCreditNotesIndexRoute
   '/organization/$orgId/sales-invoices/': typeof OrganizationOrgIdSalesInvoicesIndexRoute
   '/organization/$orgId/sales-orders/': typeof OrganizationOrgIdSalesOrdersIndexRoute
   '/organization/$orgId/settings/': typeof OrganizationOrgIdSettingsIndexRoute
@@ -652,6 +662,7 @@ export interface FileRouteTypes {
     | '/organization/$orgId/items/'
     | '/organization/$orgId/purchase-orders/'
     | '/organization/$orgId/roles/'
+    | '/organization/$orgId/sales-credit-notes/'
     | '/organization/$orgId/sales-invoices/'
     | '/organization/$orgId/sales-orders/'
     | '/organization/$orgId/settings/'
@@ -709,6 +720,7 @@ export interface FileRouteTypes {
     | '/organization/$orgId/items'
     | '/organization/$orgId/purchase-orders'
     | '/organization/$orgId/roles'
+    | '/organization/$orgId/sales-credit-notes'
     | '/organization/$orgId/sales-invoices'
     | '/organization/$orgId/sales-orders'
     | '/organization/$orgId/settings'
@@ -772,6 +784,7 @@ export interface FileRouteTypes {
     | '/organization/$orgId/items/'
     | '/organization/$orgId/purchase-orders/'
     | '/organization/$orgId/roles/'
+    | '/organization/$orgId/sales-credit-notes/'
     | '/organization/$orgId/sales-invoices/'
     | '/organization/$orgId/sales-orders/'
     | '/organization/$orgId/settings/'
@@ -1052,6 +1065,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OrganizationOrgIdRolesRoleIdRouteImport
       parentRoute: typeof OrganizationOrgIdRouteRoute
     }
+    '/organization/$orgId/sales-credit-notes/': {
+      id: '/organization/$orgId/sales-credit-notes/'
+      path: '/sales-credit-notes'
+      fullPath: '/organization/$orgId/sales-credit-notes/'
+      preLoaderRoute: typeof OrganizationOrgIdSalesCreditNotesIndexRouteImport
+      parentRoute: typeof OrganizationOrgIdRouteRoute
+    }
     '/organization/$orgId/sales-invoices/': {
       id: '/organization/$orgId/sales-invoices/'
       path: '/sales-invoices'
@@ -1305,6 +1325,7 @@ interface OrganizationOrgIdRouteRouteChildren {
   OrganizationOrgIdItemsIndexRoute: typeof OrganizationOrgIdItemsIndexRoute
   OrganizationOrgIdPurchaseOrdersIndexRoute: typeof OrganizationOrgIdPurchaseOrdersIndexRoute
   OrganizationOrgIdRolesIndexRoute: typeof OrganizationOrgIdRolesIndexRoute
+  OrganizationOrgIdSalesCreditNotesIndexRoute: typeof OrganizationOrgIdSalesCreditNotesIndexRoute
   OrganizationOrgIdSalesInvoicesIndexRoute: typeof OrganizationOrgIdSalesInvoicesIndexRoute
   OrganizationOrgIdSalesOrdersIndexRoute: typeof OrganizationOrgIdSalesOrdersIndexRoute
   OrganizationOrgIdStockMovementsIndexRoute: typeof OrganizationOrgIdStockMovementsIndexRoute
@@ -1370,6 +1391,8 @@ const OrganizationOrgIdRouteRouteChildren: OrganizationOrgIdRouteRouteChildren =
     OrganizationOrgIdPurchaseOrdersIndexRoute:
       OrganizationOrgIdPurchaseOrdersIndexRoute,
     OrganizationOrgIdRolesIndexRoute: OrganizationOrgIdRolesIndexRoute,
+    OrganizationOrgIdSalesCreditNotesIndexRoute:
+      OrganizationOrgIdSalesCreditNotesIndexRoute,
     OrganizationOrgIdSalesInvoicesIndexRoute:
       OrganizationOrgIdSalesInvoicesIndexRoute,
     OrganizationOrgIdSalesOrdersIndexRoute:

@@ -14,6 +14,8 @@ import {
   DialogTitle,
 } from "@workspace/ui/components/dialog"
 
+import { InvoiceCreditNoteDialog } from "../../sales-credit-note-module/dialog"
+import { useSalesCreditNoteAbilities } from "../../sales-credit-note-module/sales-credit-note-api"
 import { InvoicePaymentDialog } from "../../customer-payment-module/dialog"
 import { useCustomerPaymentAbilities } from "../../customer-payment-module/customer-payment-api"
 import { formatMinorAmount } from "../../purchase-order-module/lib/format-money"
@@ -39,13 +41,15 @@ function Field({ label, value }: { label: string; value: React.ReactNode }) {
 export function SalesInvoiceDetails({ orgId, invoiceId, onBack }: Props) {
   const { t, i18n } = useTranslation("sales-invoice")
   const { t: tp } = useTranslation("customer-payment")
+  const { t: tc } = useTranslation("sales-credit-note")
   const { invoice, isLoading } = useSalesInvoice(orgId, invoiceId)
   const abilities = useSalesInvoiceAbilities(orgId)
   const postMutation = usePostInvoiceMutation(orgId)
   const reverseMutation = useReverseInvoiceMutation(orgId)
   const deleteMutation = useDeleteInvoiceMutation(orgId)
   const paymentAbilities = useCustomerPaymentAbilities(orgId)
-  const [dialog, setDialog] = useState<"post" | "reverse" | "delete" | "pay" | null>(null)
+  const noteAbilities = useSalesCreditNoteAbilities(orgId)
+  const [dialog, setDialog] = useState<"post" | "reverse" | "delete" | "pay" | "credit" | null>(null)
   const [reason, setReason] = useState("")
   const [error, setError] = useState<string | null>(null)
 
@@ -105,6 +109,9 @@ export function SalesInvoiceDetails({ orgId, invoiceId, onBack }: Props) {
           {invoice.status === "POSTED" && paymentAbilities.canCreatePayment && paymentAbilities.canPostPayment && BigInt(invoice.outstandingAmount) > 0n ? (
             <Button onClick={() => setDialog("pay")}>{tp("ui.dialog.open")}</Button>
           ) : null}
+          {invoice.status === "POSTED" && noteAbilities.canCreateNote && noteAbilities.canPostNote && BigInt(invoice.outstandingAmount) > 0n ? (
+            <Button variant="outline" onClick={() => setDialog("credit")}>{tc("ui.dialog.open")}</Button>
+          ) : null}
           {invoice.status === "POSTED" && abilities.canReverseInvoice ? (
             <Button variant="outline" onClick={() => setDialog("reverse")}>{t("ui.reverse")}</Button>
           ) : null}
@@ -156,6 +163,7 @@ export function SalesInvoiceDetails({ orgId, invoiceId, onBack }: Props) {
         </div>
       </section>
 
+      {dialog === "credit" ? <InvoiceCreditNoteDialog orgId={orgId} invoice={invoice} onClose={() => setDialog(null)} /> : null}
       {dialog === "pay" ? <InvoicePaymentDialog orgId={orgId} invoice={invoice} onClose={() => setDialog(null)} /> : null}
 
       <ConfirmDialog

@@ -1,0 +1,59 @@
+{
+  "errors": {
+    "SALES_CREDIT_NOTE_NOT_FOUND": "Credit note not found",
+    "SALES_CREDIT_NOTE_NOT_EDITABLE": "Only draft credit notes can be edited",
+    "SALES_CREDIT_NOTE_NOT_DELETABLE": "Only draft credit notes can be deleted. Reverse a posted one instead",
+    "SALES_CREDIT_NOTE_ALREADY_POSTED": "The credit note is already posted",
+    "SALES_CREDIT_NOTE_NOT_POSTED": "Only posted credit notes can be reversed",
+    "SALES_CREDIT_NOTE_INVOICE_NOT_FOUND": "The invoice does not exist",
+    "SALES_CREDIT_NOTE_INVOICE_NOT_POSTED": "Only posted invoices can be credited",
+    "SALES_CREDIT_NOTE_AMOUNT_NOT_POSITIVE": "The credit must be greater than zero",
+    "SALES_CREDIT_NOTE_EXCEEDS_OUTSTANDING": "The credit is more than what is still owed on the invoice",
+    "SALES_CREDIT_NOTE_POSTING_FAILED": "Posting the credit note failed. Nothing was changed. Please try again",
+    "SALES_CREDIT_NOTE_NUMBER_TAKEN": "Could not allocate a credit note number. Please try again"
+  },
+  "labels": {
+    "status": {
+      "DRAFT": "Draft",
+      "POSTED": "Posted",
+      "REVERSED": "Reversed"
+    }
+  },
+  "msgs": {
+    "SALES_CREDIT_NOTE_CREATED": "Credit note created successfully",
+    "SALES_CREDIT_NOTE_UPDATED": "Credit note updated successfully",
+    "SALES_CREDIT_NOTE_DELETED": "Credit note deleted successfully",
+    "SALES_CREDIT_NOTE_POSTED": "Credit note posted. The customer owes less",
+    "SALES_CREDIT_NOTE_REVERSED": "Credit note reversed"
+  },
+  "ui": {
+    "title": "Credit notes",
+    "description": "Corrections to posted invoices. A credit reduces what the customer owes. It does not return stock.",
+    "none": "No credit notes yet.",
+    "number": "Credit note",
+    "customer": "Customer",
+    "invoice": "Invoice",
+    "date": "Date",
+    "reason": "Reason",
+    "amount": "Amount",
+    "status": "Status",
+    "post": "Post",
+    "reverse": "Reverse",
+    "reverseTitle": "Reverse credit note",
+    "reverseDescription": "Reverses the journal entry. The invoice owes the credited amount again.",
+    "delete": "Delete",
+    "cancel": "Cancel",
+    "saving": "Saving…",
+    "dialog": {
+      "open": "Issue credit note",
+      "title": "Credit note for {number}",
+      "description": "Outstanding: {amount}",
+      "amount": "Credit amount",
+      "date": "Credit date",
+      "reason": "Reason",
+      "confirm": "Issue credit note",
+      "amountInvalid": "Enter an amount greater than zero and not more than the outstanding amount.",
+      "reasonRequired": "Enter a reason."
+    }
+  }
+}

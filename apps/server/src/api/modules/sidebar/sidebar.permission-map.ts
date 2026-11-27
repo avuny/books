@@ -29,6 +29,7 @@ export const sidebarOptionResources = {
   vendorBill: "vendor-bill",
   vendorPayment: "vendor-payment",
   customerPayment: "customer-payment",
+  salesCreditNote: "sales-credit-note",
   inventoryAdjustment: "inventory-adjustment",
   inventoryTransfer: "inventory-transfer",
   warehouse: "warehouse",

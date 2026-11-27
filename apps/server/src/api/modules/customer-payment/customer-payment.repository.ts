@@ -1,5 +1,5 @@
 import { and, asc, desc, eq, inArray, sql } from "drizzle-orm"
-import { parties, salesInvoices, customerPaymentAllocations, customerPayments, type DB, type Tx } from "@avuny/db"
+import { parties, salesCreditNotes, salesInvoices, customerPaymentAllocations, customerPayments, type DB, type Tx } from "@avuny/db"
 import { isUniqueViolation } from "../shared/pg-errors.js"
 import type { PayableInvoice, CustomerPaymentRepository } from "./customer-payment.types.js"
 
@@ -154,7 +154,14 @@ export function createCustomerPaymentRepository({ db }: { db: DB }): CustomerPay
           )
         )
         .groupBy(customerPaymentAllocations.salesInvoiceId)
+      // Posted credit notes settle an invoice the same way payments do
+      const credits = await exec
+        .select({ invoiceId: salesCreditNotes.salesInvoiceId, amount: sql<string>`coalesce(sum(${salesCreditNotes.totalAmount}), 0)::text` })
+        .from(salesCreditNotes)
+        .where(and(eq(salesCreditNotes.orgId, orgId), inArray(salesCreditNotes.salesInvoiceId, [...invoiceIds]), eq(salesCreditNotes.status, "POSTED")))
+        .groupBy(salesCreditNotes.salesInvoiceId)
       const byInvoice = new Map(paid.map((p) => [p.billId, Number(p.amount)]))
+      for (const c of credits) byInvoice.set(c.invoiceId, (byInvoice.get(c.invoiceId) ?? 0) + Number(c.amount))
       return invoices.map((invoice): PayableInvoice => ({ invoice, paidAmount: byInvoice.get(invoice.id) ?? 0 }))
     },
   }

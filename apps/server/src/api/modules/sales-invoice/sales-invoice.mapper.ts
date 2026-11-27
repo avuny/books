@@ -28,6 +28,8 @@ export const toSalesInvoiceDto = (
   lines: readonly SalesInvoiceLineDetailRow[]
 ): SalesInvoiceDto => {
   const paid = String(r.paidAmount ?? 0)
+  const credited = String(r.creditedAmount ?? 0)
+  const settled = String(BigInt(paid) + BigInt(credited))
   const total = String(r.totalAmount)
   return {
     id: r.id,
@@ -48,8 +50,9 @@ export const toSalesInvoiceDto = (
     taxAmount: String(r.taxAmount),
     total,
     paidAmount: paid,
-    outstandingAmount: r.status === "POSTED" ? String(computeOutstanding(total, paid)) : "0",
-    paymentStatus: r.status === "POSTED" ? derivePaymentStatus(total, paid) : null,
+    creditedAmount: credited,
+    outstandingAmount: r.status === "POSTED" ? String(computeOutstanding(total, settled)) : "0",
+    paymentStatus: r.status === "POSTED" ? derivePaymentStatus(total, settled) : null,
     journalEntryId: r.journalEntryId ?? null,
     postedAt: r.postedAt?.toISOString() ?? null,
     postedBy: r.postedBy ?? null,

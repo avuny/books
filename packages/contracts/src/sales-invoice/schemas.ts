@@ -112,6 +112,8 @@ export const SalesInvoiceDtoSchema = z.object({
   total: z.string(),
   /** Applied by posted customer payments. */
   paidAmount: z.string(),
+  /** Posted credit notes against this invoice. They reduce the outstanding amount like a payment does. */
+  creditedAmount: z.string(),
   outstandingAmount: z.string(),
   paymentStatus: SalesInvoicePaymentStatusSchema.nullable(),
   journalEntryId: id.nullable(),

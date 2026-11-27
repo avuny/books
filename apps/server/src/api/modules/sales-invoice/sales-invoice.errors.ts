@@ -23,6 +23,7 @@ export const salesInvoiceErrorsHttpMap = {
   SALES_INVOICE_EXCEEDS_UNINVOICED: { statusCode: 409, responseMessage: "A line invoices more than what was delivered and not yet invoiced" },
   SALES_INVOICE_PAYMENT_TERM_NOT_FOUND: { statusCode: 422, responseMessage: "The payment term does not exist" },
   SALES_INVOICE_DUE_DATE_BEFORE_INVOICE: { statusCode: 422, responseMessage: "The due date cannot be before the invoice date" },
+  SALES_INVOICE_HAS_CREDIT_NOTES: { statusCode: 409, responseMessage: "The invoice has posted credit notes. Reverse them first" },
   SALES_INVOICE_HAS_PAYMENTS: { statusCode: 409, responseMessage: "The invoice has posted payments. Reverse them first" },
   SALES_INVOICE_POSTING_FAILED: { statusCode: 409, responseMessage: "Posting the invoice failed. Nothing was changed. Please try again" },
   SALES_INVOICE_NUMBER_TAKEN: { statusCode: 409, responseMessage: "Could not allocate an invoice number. Please try again" },

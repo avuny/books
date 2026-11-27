@@ -25,6 +25,7 @@ export interface SalesInvoiceDetailRow extends SalesInvoice {
   salesOrderNumber?: string | null
   /** Applied by posted customer payments, minor units. */
   paidAmount?: number
+  creditedAmount?: number
 }
 export interface SalesInvoiceLineDetailRow extends SalesInvoiceLine {
   salesDeliveryNumber?: string | null
@@ -64,7 +65,7 @@ export interface PostedInvoiceWithPaid {
 export interface CustomerStatementSource {
   partyName: string | null
   currency: string | null
-  rows: { kind: "INVOICE" | "PAYMENT"; date: string; number: string; reference: string | null; amount: string }[]
+  rows: { kind: "INVOICE" | "PAYMENT" | "CREDIT_NOTE"; date: string; number: string; reference: string | null; amount: string }[]
 }
 
 export interface SalesInvoiceRepository {
@@ -92,6 +93,8 @@ export interface SalesInvoiceRepository {
   statementSource(orgId: string, partyId: string): Promise<CustomerStatementSource | null>
   /** Debits less credits on the account with this system key, over posted and reversed journals. */
   ledgerDebitBalance(orgId: string, systemKey: string): Promise<string>
+  /** True when a posted credit note is applied to this invoice. */
+  hasPostedCreditNotes(orgId: string, id: string, tx?: Tx): Promise<boolean>
   /** True when a posted customer payment is applied to this invoice. */
   hasPostedPayments(orgId: string, id: string, tx?: Tx): Promise<boolean>
   /**

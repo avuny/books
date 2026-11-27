@@ -439,6 +439,7 @@ export function createSalesInvoiceService(deps: SalesInvoiceServiceDeps) {
           if (!current) throw new PostingAbort(Err.SALES_INVOICE_NOT_FOUND)
           if (current.row.status !== "POSTED") throw new PostingAbort(Err.SALES_INVOICE_NOT_POSTED)
           if (await repo.hasPostedPayments(orgId, id, tx)) throw new PostingAbort(Err.SALES_INVOICE_HAS_PAYMENTS)
+          if (await repo.hasPostedCreditNotes(orgId, id, tx)) throw new PostingAbort(Err.SALES_INVOICE_HAS_CREDIT_NOTES)
           if (current.row.journalEntryId) {
             const journal = await deps.accounting.reverseJournalEntry(
               actorId,

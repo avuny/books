@@ -225,6 +225,19 @@ export const MODULES = {
       reverse: { permission: true, event: "reversed" },
     },
   },
+  sales_credit_note: {
+    sidebar: {
+      group: "sales",
+      icon: "file-text",
+      path: "/sales-credit-notes",
+      label: { en: "Credit notes", ar: "إشعارات الدائن" },
+    },
+    actions: {
+      ...CRUD,
+      post: { permission: true, event: "posted" },
+      reverse: { permission: true, event: "reversed" },
+    },
+  },
   customer_payment: {
     sidebar: {
       group: "sales",

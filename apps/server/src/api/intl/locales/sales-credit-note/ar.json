@@ -1,0 +1,59 @@
+{
+  "errors": {
+    "SALES_CREDIT_NOTE_NOT_FOUND": "إشعار الدائن غير موجود",
+    "SALES_CREDIT_NOTE_NOT_EDITABLE": "يمكن تعديل إشعارات الدائن المسودة فقط",
+    "SALES_CREDIT_NOTE_NOT_DELETABLE": "يمكن حذف إشعارات الدائن المسودة فقط. اعكس الإشعار المرحّل بدلاً من ذلك",
+    "SALES_CREDIT_NOTE_ALREADY_POSTED": "إشعار الدائن مرحّل بالفعل",
+    "SALES_CREDIT_NOTE_NOT_POSTED": "يمكن عكس إشعارات الدائن المرحّلة فقط",
+    "SALES_CREDIT_NOTE_INVOICE_NOT_FOUND": "الفاتورة غير موجودة",
+    "SALES_CREDIT_NOTE_INVOICE_NOT_POSTED": "يمكن إصدار إشعار دائن للفواتير المرحّلة فقط",
+    "SALES_CREDIT_NOTE_AMOUNT_NOT_POSITIVE": "يجب أن يكون مبلغ الإشعار أكبر من صفر",
+    "SALES_CREDIT_NOTE_EXCEEDS_OUTSTANDING": "مبلغ الإشعار أكبر من المتبقي على الفاتورة",
+    "SALES_CREDIT_NOTE_POSTING_FAILED": "فشل ترحيل إشعار الدائن. لم يتم تغيير أي شيء. حاول مرة أخرى",
+    "SALES_CREDIT_NOTE_NUMBER_TAKEN": "تعذر تخصيص رقم لإشعار الدائن. حاول مرة أخرى"
+  },
+  "labels": {
+    "status": {
+      "DRAFT": "مسودة",
+      "POSTED": "مرحّل",
+      "REVERSED": "معكوس"
+    }
+  },
+  "msgs": {
+    "SALES_CREDIT_NOTE_CREATED": "تم إنشاء إشعار الدائن بنجاح",
+    "SALES_CREDIT_NOTE_UPDATED": "تم تحديث إشعار الدائن بنجاح",
+    "SALES_CREDIT_NOTE_DELETED": "تم حذف إشعار الدائن بنجاح",
+    "SALES_CREDIT_NOTE_POSTED": "تم ترحيل إشعار الدائن. أصبح العميل مدينًا بمبلغ أقل",
+    "SALES_CREDIT_NOTE_REVERSED": "تم عكس إشعار الدائن"
+  },
+  "ui": {
+    "title": "إشعارات الدائن",
+    "description": "تصحيحات للفواتير المرحّلة. الإشعار يقلل ما يدين به العميل ولا يعيد المخزون.",
+    "none": "لا توجد إشعارات دائن بعد.",
+    "number": "إشعار الدائن",
+    "customer": "العميل",
+    "invoice": "الفاتورة",
+    "date": "التاريخ",
+    "reason": "السبب",
+    "amount": "المبلغ",
+    "status": "الحالة",
+    "post": "ترحيل",
+    "reverse": "عكس",
+    "reverseTitle": "عكس إشعار الدائن",
+    "reverseDescription": "يعكس قيد اليومية. تعود الفاتورة مدينة بالمبلغ المخصوم.",
+    "delete": "حذف",
+    "cancel": "إلغاء",
+    "saving": "جارٍ الحفظ…",
+    "dialog": {
+      "open": "إصدار إشعار دائن",
+      "title": "إشعار دائن للفاتورة {number}",
+      "description": "المتبقي: {amount}",
+      "amount": "مبلغ الإشعار",
+      "date": "تاريخ الإشعار",
+      "reason": "السبب",
+      "confirm": "إصدار إشعار الدائن",
+      "amountInvalid": "أدخل مبلغًا أكبر من صفر ولا يزيد عن المتبقي.",
+      "reasonRequired": "أدخل السبب."
+    }
+  }
+}

@@ -13,6 +13,7 @@ import {
   salesOrders,
   customerPaymentAllocations,
   customerPayments,
+  salesCreditNotes,
   units,
   type DB,
   type Tx,
@@ -39,6 +40,17 @@ async function paidByInvoice(exec: DB | Tx, orgId: string, invoiceIds: readonly 
     )
     .groupBy(customerPaymentAllocations.salesInvoiceId)
   return new Map(rows.map((r) => [r.id, Number(r.paid)]))
+}
+
+/** Sum of POSTED credit note totals per invoice. */
+async function creditedByInvoice(exec: DB | Tx, orgId: string, invoiceIds: readonly string[]): Promise<Map<string, number>> {
+  if (invoiceIds.length === 0) return new Map()
+  const rows = await exec
+    .select({ id: salesCreditNotes.salesInvoiceId, credited: sql<string>`sum(${salesCreditNotes.totalAmount})::text` })
+    .from(salesCreditNotes)
+    .where(and(eq(salesCreditNotes.orgId, orgId), inArray(salesCreditNotes.salesInvoiceId, [...invoiceIds]), eq(salesCreditNotes.status, "POSTED")))
+    .groupBy(salesCreditNotes.salesInvoiceId)
+  return new Map(rows.map((r) => [r.id, Number(r.credited)]))
 }
 
 export function createSalesInvoiceRepository({ db }: { db: DB }): SalesInvoiceRepository {
@@ -199,7 +211,8 @@ export function createSalesInvoiceRepository({ db }: { db: DB }): SalesInvoiceRe
       if (!head) return null
       const lines = await detailLines(exec, orgId, [id])
       const paid = (await paidByInvoice(exec, orgId, [id])).get(id) ?? 0
-      return { row: { ...head.invoice, salesOrderNumber: head.orderNumber, paidAmount: paid }, lines: lines.map(toLine) }
+      const credited = (await creditedByInvoice(exec, orgId, [id])).get(id) ?? 0
+      return { row: { ...head.invoice, salesOrderNumber: head.orderNumber, paidAmount: paid, creditedAmount: credited }, lines: lines.map(toLine) }
     },
 
     async list(orgId, filter) {
@@ -219,8 +232,9 @@ export function createSalesInvoiceRepository({ db }: { db: DB }): SalesInvoiceRe
       if (heads.length === 0) return []
       const lines = await detailLines(db, orgId, heads.map((h) => h.invoice.id))
       const paid = await paidByInvoice(db, orgId, heads.map((h) => h.invoice.id))
+      const credited = await creditedByInvoice(db, orgId, heads.map((h) => h.invoice.id))
       return heads.map((h) => ({
-        row: { ...h.invoice, salesOrderNumber: h.orderNumber, paidAmount: paid.get(h.invoice.id) ?? 0 },
+        row: { ...h.invoice, salesOrderNumber: h.orderNumber, paidAmount: paid.get(h.invoice.id) ?? 0, creditedAmount: credited.get(h.invoice.id) ?? 0 },
         lines: lines.filter((l) => l.line.salesInvoiceId === h.invoice.id).map(toLine),
       }))
     },
@@ -253,7 +267,7 @@ export function createSalesInvoiceRepository({ db }: { db: DB }): SalesInvoiceRe
           invoiceDate: salesInvoices.invoiceDate,
           dueDate: salesInvoices.dueDate,
           total: sql<string>`${salesInvoices.totalAmount}::text`,
-          paid: sql<string>`coalesce((select sum(cpa.allocated_amount) from ${customerPaymentAllocations} cpa join ${customerPayments} cp on cp.org_id = cpa.org_id and cp.id = cpa.customer_payment_id where cpa.org_id = ${salesInvoices.orgId} and cpa.sales_invoice_id = ${salesInvoices.id} and cp.status = 'POSTED'), 0)::text`,
+          paid: sql<string>`(coalesce((select sum(cpa.allocated_amount) from ${customerPaymentAllocations} cpa join ${customerPayments} cp on cp.org_id = cpa.org_id and cp.id = cpa.customer_payment_id where cpa.org_id = ${salesInvoices.orgId} and cpa.sales_invoice_id = ${salesInvoices.id} and cp.status = 'POSTED'), 0) + coalesce((select sum(cn.total_amount) from ${salesCreditNotes} cn where cn.org_id = ${salesInvoices.orgId} and cn.sales_invoice_id = ${salesInvoices.id} and cn.status = 'POSTED'), 0))::text`,
         })
         .from(salesInvoices)
         .leftJoin(parties, and(eq(parties.orgId, salesInvoices.orgId), eq(parties.id, salesInvoices.partyId)))
@@ -276,12 +290,18 @@ export function createSalesInvoiceRepository({ db }: { db: DB }): SalesInvoiceRe
         .select({ number: customerPayments.number, date: customerPayments.paymentDate, reference: customerPayments.referenceNumber, amount: sql<string>`${customerPayments.amount}::text`, currency: customerPayments.currency })
         .from(customerPayments)
         .where(and(eq(customerPayments.orgId, orgId), eq(customerPayments.partyId, partyId), eq(customerPayments.status, "POSTED")))
+      const credits = await db
+        .select({ number: salesCreditNotes.number, date: salesCreditNotes.creditDate, reference: salesInvoices.number, amount: sql<string>`${salesCreditNotes.totalAmount}::text`, currency: salesCreditNotes.currency })
+        .from(salesCreditNotes)
+        .leftJoin(salesInvoices, and(eq(salesInvoices.orgId, salesCreditNotes.orgId), eq(salesInvoices.id, salesCreditNotes.salesInvoiceId)))
+        .where(and(eq(salesCreditNotes.orgId, orgId), eq(salesCreditNotes.partyId, partyId), eq(salesCreditNotes.status, "POSTED")))
       return {
         partyName: party.name,
-        currency: invoices[0]?.currency ?? pays[0]?.currency ?? null,
+        currency: invoices[0]?.currency ?? pays[0]?.currency ?? credits[0]?.currency ?? null,
         rows: [
           ...invoices.map((i) => ({ kind: "INVOICE" as const, date: i.date, number: i.number, reference: null, amount: i.amount })),
           ...pays.map((p) => ({ kind: "PAYMENT" as const, date: p.date, number: p.number, reference: p.reference, amount: p.amount })),
+          ...credits.map((c) => ({ kind: "CREDIT_NOTE" as const, date: c.date, number: c.number, reference: c.reference, amount: c.amount })),
         ],
       }
     },
@@ -294,6 +314,10 @@ export function createSalesInvoiceRepository({ db }: { db: DB }): SalesInvoiceRe
         .innerJoin(accounts, and(eq(accounts.orgId, journalEntryLines.orgId), eq(accounts.id, journalEntryLines.accountId)))
         .where(and(eq(journalEntryLines.orgId, orgId), eq(accounts.systemKey, systemKey as any), inArray(journalEntries.status, ["POSTED", "REVERSED"])))
       return r?.v ?? "0"
+    },
+
+    async hasPostedCreditNotes(orgId, id, tx) {
+      return ((await creditedByInvoice(ex(tx), orgId, [id])).get(id) ?? 0) > 0
     },
 
     async hasPostedPayments(orgId, id, tx) {

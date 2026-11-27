@@ -22,6 +22,7 @@
     "SALES_INVOICE_PAYMENT_TERM_NOT_FOUND": "شرط الدفع غير موجود",
     "SALES_INVOICE_DUE_DATE_BEFORE_INVOICE": "لا يمكن أن يسبق تاريخ الاستحقاق تاريخ الفاتورة",
     "SALES_INVOICE_HAS_PAYMENTS": "توجد دفعة مطبقة على هذه الفاتورة. اعكس الدفعة أولًا",
+    "SALES_INVOICE_HAS_CREDIT_NOTES": "اعكس إشعارات الدائن على هذه الفاتورة أولاً",
     "SALES_INVOICE_POSTING_FAILED": "تعذر ترحيل الفاتورة",
     "SALES_INVOICE_NUMBER_TAKEN": "تعذر تخصيص رقم للفاتورة، حاول مرة أخرى"
   },
