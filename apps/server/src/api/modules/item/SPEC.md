@@ -43,6 +43,8 @@ Items: what the organization buys, sells, stores and assembles. Each item has on
 | `ITEM_UNIT_INVALID` | 422 | Base unit missing or inactive |
 | `ITEM_UNIT_COLLECTION_INVALID` | 422 | Collection missing or foreign |
 | `ITEM_BATCH_REQUIRES_TRACKING` | 422 | Batch tracking without inventory tracking |
+| `ITEM_UNIT_PRICE_UNIT_INVALID` | 422 | A per-unit price names the base unit or a unit outside the item's collection |
+| `ITEM_OPENING_STOCK_UNIT_INVALID` | 422 | An opening stock line names a unit outside the item's collection |
 | `ITEM_LOCKED_FIELD` | 409 | Locked field changed after stock movements |
 | `ITEM_HAS_HISTORY` | 409 | Delete refused, deactivate instead |
 
@@ -66,3 +68,37 @@ item/
 ├── hono-routes/
 └── __tests__/item.routes.test.ts
 ```
+
+## 7. Per-unit prices (added 2026-11-27)
+
+Buying or selling a ton can cost less than 1000 x 1 kg, so an item can carry optional prices for
+each OTHER unit of its unit collection.
+
+- Table `item_unit_prices` (migration `0029_item_unit_prices`): one row per (item, unit), nullable
+  `cost_price` and `selling_price`, at least one set, both >= 0. Prices are per 1 of THAT unit, major
+  units. `ON DELETE CASCADE` from the item.
+- The base unit's prices stay on `items.cost_price` / `items.selling_price` (unchanged). A row for the
+  base unit is refused (`ITEM_UNIT_PRICE_UNIT_INVALID`); so is a unit outside the collection.
+- API: `unitPrices: [{ unitId, costPrice?, sellingPrice? }]` on create and update; `ItemDto.unitPrices`
+  is `[{ unit, costPrice, sellingPrice }]` (empty when none). On update the array REPLACES the whole
+  set (`[]` clears it; omit the field to keep it). Changing the item's unit collection clears the old
+  rows unless a new `unitPrices` is sent.
+- A new single-unit collection (created from `baseUnitId`) has no other unit, so prices need an
+  existing `unitCollectionId`.
+- Prices are DEFAULTS that prefill lines of purchase and sales documents; those modules do not read
+  them yet (nothing consumes `unitPrices` server-side beyond storing and returning them).
+
+## 8. Opening stock lines: unit and posting date (added 2026-11-27)
+
+`openingStock.lines[]` accepts, besides `locationId`, `quantity`, `cost`, `manufacturedOn`, `batch`:
+
+- `unitId` (optional): the collection unit `quantity` and `cost` are entered in. Default: base unit.
+  The server stores BASE-unit quantities: `quantity * factor`; the cost becomes `cost / factor` per base
+  unit (BigInt decimal math, 6 decimals, half up: `item-unit.rules.ts`). The cost layer and journal
+  value come from the ENTERED quantity x entered cost, so converting does not change the value.
+- `postedAt` (optional, date or datetime): this line's posting date. Falls back to
+  `openingStock.postedAt`, then to now.
+- Lines are grouped by posting date; each group is one `opening` stock movement. The first group uses
+  the item as `sourceId` (so opening stock is still "posted once" per item); later groups use a fresh
+  UUID as `sourceId`. Each group posts its own opening-balance journal entry for its lines.
+

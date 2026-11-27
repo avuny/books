@@ -15,6 +15,9 @@ export const ITEM_DESCRIPTION_MAX_LENGTH = 2000
 
 export const ITEM_OPENING_STOCK_SOURCE_TYPE = "item_opening" as const
 
+/** Most per-unit price rows one item can carry (one per non-base unit of its collection). */
+export const ITEM_UNIT_PRICES_MAX = 50
+
 export const ITEM_SEARCH_MAX_LENGTH = 100
 export const ITEM_LIST_DEFAULT_PAGE_SIZE = 20
 export const ITEM_LIST_MAX_PAGE_SIZE = 100

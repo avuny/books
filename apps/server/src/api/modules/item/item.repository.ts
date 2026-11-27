@@ -5,6 +5,7 @@ import {
   itemCategories,
   itemExpirySettings,
   itemInventorySettings,
+  itemUnitPrices,
   items,
   units,
   warehouses,
@@ -12,6 +13,7 @@ import {
   type Item,
   type ItemExpirySettings,
   type ItemInventorySettings,
+  type ItemUnitPrice,
   type Tx,
   type Unit,
 } from "@avuny/db"
@@ -32,6 +34,8 @@ export type ItemRow = {
   categoryName: string
   unit: Unit
   availableQuantity?: string | null
+  /** Prices of non-base units. Filled by findDetail only. */
+  unitPrices?: { price: ItemUnitPrice; unit: Unit }[]
 }
 export type ItemWriteResult =
   | { ok: true; row: Item }
@@ -134,7 +138,29 @@ export function createItemRepository({ db }: { db: DB }) {
       const [row] = await rowQuery(exec(tx))
         .where(and(eq(items.orgId, orgId), eq(items.id, id)))
         .limit(1)
-      return row ?? null
+      if (!row) return null
+      const unitPrices = await exec(tx)
+        .select({ price: itemUnitPrices, unit: units })
+        .from(itemUnitPrices)
+        .innerJoin(units, eq(units.id, itemUnitPrices.unitId))
+        .where(and(eq(itemUnitPrices.orgId, orgId), eq(itemUnitPrices.itemId, id)))
+        .orderBy(asc(units.name))
+      return { ...row, unitPrices }
+    },
+
+    /** Replaces ALL per-unit prices of an item with `rows` (an empty list clears them). */
+    async replaceUnitPrices(
+      orgId: string,
+      itemId: string,
+      rows: { unitId: string; costPrice: string | null; sellingPrice: string | null }[],
+      tx?: Tx
+    ): Promise<void> {
+      const e = exec(tx)
+      await e
+        .delete(itemUnitPrices)
+        .where(and(eq(itemUnitPrices.orgId, orgId), eq(itemUnitPrices.itemId, itemId)))
+      if (rows.length === 0) return
+      await e.insert(itemUnitPrices).values(rows.map((r) => ({ orgId, itemId, ...r })))
     },
 
     async list(
