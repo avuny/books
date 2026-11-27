@@ -25,7 +25,7 @@ The platform owner (and a small team) needs one place to run the SaaS without to
 ### 1.2 Non-goals (v1)
 - "Login as the customer" (impersonation). Listed as decision Q21, default off.
 - Editing the enforcement code or inventing new enforceable features from the UI. New module, feature and limit keys come from code and seeds only.
-- Customer support ticketing, CRM, marketing tools.
+- Customer support ticketing, CRM, marketing automation. The admin does edit the public landing site content (`LANDING-SPEC.md`).
 - Tenant-facing billing screens. Those stay in the tenant web app (SPEC section 7).
 
 ## 2. Architecture
@@ -228,6 +228,9 @@ Resource and actions, each action a grantable permission:
 | `platform-sidebar` | read, update |
 | `platform-permission-catalog` | read, update |
 | `platform-audit` | read, export |
+| `platform-site` | read, update, publish, rollback (landing content, see `LANDING-SPEC.md`) |
+| `platform-media` | read, create, delete |
+| `platform-plan-marketing` | read, update |
 | `platform-dashboard` | read |
 
 ## 9. Accounting and inventory effects
