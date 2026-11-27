@@ -97,7 +97,7 @@ export class InMemorySalesOrderRepository implements SalesOrderRepository {
     return this.makeLines(orgId, id, lines)
   }
 
-  async setLineCounters(_orgId: string, lineId: string, counters: { reservedBaseQty?: string; cancelledBaseQty?: string; deliveredBaseQty?: string }) {
+  async setLineCounters(_orgId: string, lineId: string, counters: { reservedBaseQty?: string; cancelledBaseQty?: string; deliveredBaseQty?: string; invoicedBaseQty?: string }) {
     const l = this.lines.find((x) => x.id === lineId)
     if (l) Object.assign(l, counters)
   }

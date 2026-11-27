@@ -1,0 +1,29 @@
+import type { ErrorMeta } from "@avuny/utils"
+import type { SalesInvoiceErrorCode } from "@avuny/contracts"
+
+export const salesInvoiceErrorsHttpMap = {
+  SALES_INVOICE_NOT_FOUND: { statusCode: 404, responseMessage: "Sales invoice not found" },
+  SALES_INVOICE_NOT_EDITABLE: { statusCode: 409, responseMessage: "Only draft invoices can be edited" },
+  SALES_INVOICE_NOT_DELETABLE: { statusCode: 409, responseMessage: "Only draft invoices can be deleted. Reverse a posted invoice instead" },
+  SALES_INVOICE_ALREADY_POSTED: { statusCode: 409, responseMessage: "The invoice is already posted" },
+  SALES_INVOICE_NOT_POSTED: { statusCode: 409, responseMessage: "Only posted invoices can be reversed" },
+  SALES_INVOICE_SALES_ORDER_NOT_FOUND: { statusCode: 404, responseMessage: "The sales order does not exist" },
+  SALES_INVOICE_SALES_ORDER_CANCELLED: { statusCode: 409, responseMessage: "A cancelled sales order cannot be invoiced" },
+  SALES_INVOICE_DELIVERY_NOT_FOUND: { statusCode: 404, responseMessage: "The delivery does not exist" },
+  SALES_INVOICE_DELIVERY_NOT_POSTED: { statusCode: 409, responseMessage: "Only posted deliveries can be invoiced" },
+  SALES_INVOICE_DELIVERY_ORDER_MISMATCH: { statusCode: 422, responseMessage: "The delivery line does not belong to this sales order" },
+  SALES_INVOICE_CUSTOMER_NOT_FOUND: { statusCode: 404, responseMessage: "The customer does not exist" },
+  SALES_INVOICE_CUSTOMER_NOT_CUSTOMER: { statusCode: 422, responseMessage: "The party is not a customer" },
+  SALES_INVOICE_CUSTOMER_INACTIVE: { statusCode: 422, responseMessage: "The customer is inactive" },
+  SALES_INVOICE_NO_LINES: { statusCode: 422, responseMessage: "At least one invoice line is required" },
+  SALES_INVOICE_NOTHING_TO_INVOICE: { statusCode: 409, responseMessage: "This delivery has nothing left to invoice" },
+  SALES_INVOICE_LINE_NOT_FOUND: { statusCode: 404, responseMessage: "A delivery line does not exist" },
+  SALES_INVOICE_DUPLICATE_LINES: { statusCode: 422, responseMessage: "A delivery line can appear only once per invoice" },
+  SALES_INVOICE_QUANTITY_NOT_POSITIVE: { statusCode: 422, responseMessage: "Quantities must be greater than zero" },
+  SALES_INVOICE_EXCEEDS_UNINVOICED: { statusCode: 409, responseMessage: "A line invoices more than what was delivered and not yet invoiced" },
+  SALES_INVOICE_PAYMENT_TERM_NOT_FOUND: { statusCode: 422, responseMessage: "The payment term does not exist" },
+  SALES_INVOICE_DUE_DATE_BEFORE_INVOICE: { statusCode: 422, responseMessage: "The due date cannot be before the invoice date" },
+  SALES_INVOICE_HAS_PAYMENTS: { statusCode: 409, responseMessage: "The invoice has posted payments. Reverse them first" },
+  SALES_INVOICE_POSTING_FAILED: { statusCode: 409, responseMessage: "Posting the invoice failed. Nothing was changed. Please try again" },
+  SALES_INVOICE_NUMBER_TAKEN: { statusCode: 409, responseMessage: "Could not allocate an invoice number. Please try again" },
+} as const satisfies Record<SalesInvoiceErrorCode, ErrorMeta>

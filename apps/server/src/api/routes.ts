@@ -32,6 +32,7 @@ import { purchaseReceiptRoutes } from "./modules/purchase-receipt/index.js"
 import { purchaseShipmentRoutes } from "./modules/purchase-shipment/index.js"
 import { roleRoutes } from "./modules/role/index.js"
 import { salesDeliveryRoutes } from "./modules/sales-delivery/index.js"
+import { salesInvoiceRoutes } from "./modules/sales-invoice/index.js"
 import { salesOrderRoutes } from "./modules/sales-order/index.js"
 import { sidebarRoutes } from "./modules/sidebar/index.js"
 import { stockMovementRoutes } from "./modules/stock-movement/index.js"
@@ -121,6 +122,7 @@ app.route("/purchaseReceipt", purchaseReceiptRoutes)
 app.route("/purchaseShipment", purchaseShipmentRoutes)
 app.route("/roles", roleRoutes)
 app.route("/salesDelivery", salesDeliveryRoutes)
+app.route("/salesInvoice", salesInvoiceRoutes)
 app.route("/salesOrder", salesOrderRoutes)
 app.route("/sidebar", sidebarRoutes)
 app.route("/stockMovement", stockMovementRoutes)

@@ -212,6 +212,19 @@ export const MODULES = {
       reverse: { permission: true, event: "reversed" },
     },
   },
+  sales_invoice: {
+    sidebar: {
+      group: "sales",
+      icon: "file-text",
+      path: "/sales-invoices",
+      label: { en: "Sales invoices", ar: "فواتير المبيعات" },
+    },
+    actions: {
+      ...CRUD,
+      post: { permission: true, event: "posted" },
+      reverse: { permission: true, event: "reversed" },
+    },
+  },
   vendor_bill: {
     sidebar: {
       group: "purchases",

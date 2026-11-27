@@ -688,6 +688,12 @@ The objective is to make development resumable and resilient to lost AI conversa
 3. Open a PR `dev` -> `main`, wait for green CI, merge it (merge commit). The push to `main` runs the deploy job. Push the tag (`git push origin vX.Y.Z`).
 4. Smoke test production after the deploy (API + web URLs are in the module PROGRESS notes). Prod sign-in: `POST /api/auth/sign-in` with `{identifier,password}`, send a browser-like User-Agent (the default Python one is blocked by Cloudflare).
 
+### Pre-release migration check (required before merging to main)
+
+1. Compare the candidate `packages/db/drizzle/meta/_journal.json` with fresh `main`: main's entries must be an exact prefix, every new tag unique, `when` timestamps strictly increasing, and no applied SQL file rewritten.
+2. Verify each newly required migration and the objects it creates exist on the target database, not just that the newest timestamp matches.
+3. Rerun the comparison if `main` moves before the merge. Another agent may ship to `main` too: merge `origin/main` into the release branch and renumber unreleased migrations if needed.
+
 ### Deploy: migrations and seed run automatically
 
 - `.github/workflows/deploy.yml` job `deploy` (environment `production`) runs, before shipping code: migrate the production database, check that the newest journal entry in `packages/db/drizzle/meta/_journal.json` matches `max(created_at)` in `drizzle.__drizzle_migrations`, then `pnpm seed` (system data only: roles, permissions, sidebar, units, default accounting for orgs lacking it; idempotent, never changes existing org accounts).

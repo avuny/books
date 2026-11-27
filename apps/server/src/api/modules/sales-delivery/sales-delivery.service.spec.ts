@@ -67,6 +67,10 @@ class InMemoryDeliveryRepository implements SalesDeliveryRepository {
     const l = this.lines.find((x) => x.id === lineId)
     if (l) (l as any).costAmount = cost
   }
+  invoiced = false
+  async hasPostedInvoices(_o: string, _id: string) {
+    return this.invoiced
+  }
   async deleteById(_o: string, id: string) {
     this.rows = this.rows.filter((s) => s.id !== id)
     this.lines = this.lines.filter((l) => l.salesDeliveryId !== id)

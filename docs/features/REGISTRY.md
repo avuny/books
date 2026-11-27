@@ -21,4 +21,4 @@ One row per module. Update in the same commit that changes status. Statuses: pro
 | vendor-bill-payment | in-progress | [SPEC](../modules/vendor-bill-payment/SPEC.md) | [PROGRESS](../modules/vendor-bill-payment/PROGRESS.md) | [TEST-PLAN](../modules/vendor-bill-payment/TEST-PLAN.md) | stage 1 |
 | sales-order | server + web (e2e pending) | [SPEC](../modules/sales-order/SPEC.md) | [PROGRESS](../modules/sales-order/PROGRESS.md) | [TEST-PLAN](../modules/sales-order/TEST-PLAN.md) | stage 2 |
 | sales-delivery | server + web panel (e2e pending) | [SPEC](../modules/sales-delivery/SPEC.md) | [PROGRESS](../modules/sales-delivery/PROGRESS.md) | [TEST-PLAN](../modules/sales-delivery/TEST-PLAN.md) | stage 2 |
-| sales-invoice-payment | planned | [SPEC](../modules/sales-invoice-payment/SPEC.md) | [PROGRESS](../modules/sales-invoice-payment/PROGRESS.md) | [TEST-PLAN](../modules/sales-invoice-payment/TEST-PLAN.md) | stage 2 |
+| sales-invoice-payment | in progress (M4 invoice backend) | [SPEC](../modules/sales-invoice-payment/SPEC.md) | [PROGRESS](../modules/sales-invoice-payment/PROGRESS.md) | [TEST-PLAN](../modules/sales-invoice-payment/TEST-PLAN.md) | stage 2 |

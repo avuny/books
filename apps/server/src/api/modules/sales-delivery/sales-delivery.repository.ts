@@ -4,6 +4,8 @@ import {
   parties,
   salesDeliveries,
   salesDeliveryLines,
+  salesInvoiceLines,
+  salesInvoices,
   salesOrders,
   units,
   warehouseLocations,
@@ -149,6 +151,20 @@ export function createSalesDeliveryRepository({ db }: { db: DB }): SalesDelivery
         .update(salesDeliveryLines)
         .set({ costAmount })
         .where(and(eq(salesDeliveryLines.orgId, orgId), eq(salesDeliveryLines.id, lineId)))
+    },
+
+    async hasPostedInvoices(orgId, id, tx) {
+      const [r] = await ex(tx)
+        .select({ n: sql<number>`count(*)::int` })
+        .from(salesInvoiceLines)
+        .innerJoin(
+          salesInvoices,
+          and(eq(salesInvoices.orgId, salesInvoiceLines.orgId), eq(salesInvoices.id, salesInvoiceLines.salesInvoiceId))
+        )
+        .where(
+          and(eq(salesInvoiceLines.orgId, orgId), eq(salesInvoiceLines.salesDeliveryId, id), eq(salesInvoices.status, "POSTED"))
+        )
+      return (r?.n ?? 0) > 0
     },
 
     async deleteById(orgId, id, tx) {

@@ -61,6 +61,8 @@ export interface SalesDeliveryRepository {
   ): Promise<SalesDelivery | null>
   replaceLines(orgId: string, id: string, lines: readonly NewDeliveryLine[], tx?: Tx): Promise<void>
   setLineCost(orgId: string, lineId: string, costAmount: number, tx?: Tx): Promise<void>
+  /** True when a posted sales invoice bills any line of this delivery. */
+  hasPostedInvoices(orgId: string, id: string, tx?: Tx): Promise<boolean>
   deleteById(orgId: string, id: string, tx?: Tx): Promise<void>
 }
 
