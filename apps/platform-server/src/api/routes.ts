@@ -6,6 +6,8 @@ import { requestId } from "hono/request-id"
 import { config } from "./index.js"
 import healthRoute from "./health.route.js"
 import { platformAuthRoutes } from "./modules/platform-auth/index.js"
+import { platformAdminRoutes } from "./modules/platform-admin/index.js"
+import { platformRoleRoutes } from "./modules/platform-role/index.js"
 import { onError } from "./onError.js"
 
 const APP_NAME = "avuny-platform-api"
@@ -50,6 +52,8 @@ app.use(requestLogger())
 // Every platform route must declare its required permission (PLATFORM-ADMIN-SPEC PA-R7).
 app.route("/", healthRoute)
 app.route("/", platformAuthRoutes)
+app.route("/", platformAdminRoutes)
+app.route("/", platformRoleRoutes)
 
 app.notFound((c) =>
   c.json(

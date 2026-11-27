@@ -1,5 +1,7 @@
 import { beforeAll, describe, expect, it } from "vitest"
 import { PLATFORM_AUTH_ROUTE_ACCESS } from "./modules/platform-auth/platform-auth.permissions.js"
+import { PLATFORM_ADMIN_ROUTE_ACCESS } from "./modules/platform-admin/platform-admin.permissions.js"
+import { PLATFORM_ROLE_ROUTE_ACCESS } from "./modules/platform-role/platform-role.permissions.js"
 
 /**
  * Route inventory tests (A1-04: PAC1, PA-R7).
@@ -15,6 +17,8 @@ const INFRA_ROUTES = new Set(["GET /health"])
 /** Access declarations from every module, merged as modules land (A1-05+). */
 const ROUTE_ACCESS: Record<string, string> = {
   ...PLATFORM_AUTH_ROUTE_ACCESS,
+  ...PLATFORM_ADMIN_ROUTE_ACCESS,
+  ...PLATFORM_ROLE_ROUTE_ACCESS,
 }
 
 type OpenApiDoc = { paths: Record<string, Record<string, unknown>> }
@@ -48,8 +52,10 @@ describe("route inventory (PAC1, PA-R7)", () => {
   })
 
   it("creates admins only through invite acceptance (PAC1)", () => {
-    const adminCreating = inventory.filter(
-      (route) => /admins?\b/i.test(route) && route.startsWith("POST")
+    // A violation is a direct collection-level create (POST /platform-admins);
+    // action endpoints under it (invite, disable) do not create admins.
+    const adminCreating = inventory.filter((route) =>
+      /^POST \/(platform-)?admins\/?$/i.test(route)
     )
     expect(adminCreating).toEqual([])
   })
