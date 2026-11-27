@@ -1,12 +1,22 @@
 import type { Context } from "hono"
 import { createMiddleware } from "hono/factory"
 import { getCookie, setCookie, deleteCookie } from "hono/cookie"
+import { eq } from "@avuny/db"
 import {
   PLATFORM_AUTH_COOKIE_NAME,
   PLATFORM_AUTH_COOKIE_PATH,
   PlatformAuthErrorCode,
+  PlatformManagementErrorCode,
+  type PlatformPermissionKey,
 } from "@avuny/contracts/platform-admin"
-import type { PlatformAdmin, PlatformAdminSession, DB } from "@avuny/db"
+import {
+  platformAdminRoles,
+  platformRolePermissions,
+  platformRoles,
+  type PlatformAdmin,
+  type PlatformAdminSession,
+  type DB,
+} from "@avuny/db"
 import { config } from "../../config.js"
 import { resolveSession } from "./platform-auth.service.js"
 
@@ -79,3 +89,57 @@ export const createRequirePlatformAuth = (db: DB) =>
     c.set("platformAdminSession", resolved.session)
     await next()
   })
+
+/* ------------------------------------------------------- permissions (PA-R7) */
+
+/** Effective permission keys: the union over every role the admin holds (spec 3.1). */
+export async function loadEffectivePermissions(
+  db: DB,
+  adminId: string
+): Promise<Set<string>> {
+  const rows = await db
+    .selectDistinct({ permissionKey: platformRolePermissions.permissionKey })
+    .from(platformAdminRoles)
+    .innerJoin(
+      platformRolePermissions,
+      eq(platformAdminRoles.roleId, platformRolePermissions.roleId)
+    )
+    .where(eq(platformAdminRoles.adminId, adminId))
+  return new Set(rows.map((row) => row.permissionKey))
+}
+
+/** Whether the admin holds the built-in super_admin role itself (PA-R2). */
+export async function isSuperAdmin(db: DB, adminId: string): Promise<boolean> {
+  const rows = await db
+    .select({ key: platformRoles.key })
+    .from(platformAdminRoles)
+    .innerJoin(platformRoles, eq(platformAdminRoles.roleId, platformRoles.id))
+    .where(eq(platformAdminRoles.adminId, adminId))
+  return rows.some((row) => row.key === "super_admin")
+}
+
+const permissionDenied = (c: Context) =>
+  c.json(
+    {
+      success: false as const,
+      type: "domain" as const,
+      code: PlatformManagementErrorCode.PERMISSION_DENIED,
+      message: "You do not have the required permission",
+    },
+    403
+  )
+
+/**
+ * Requires the signed-in admin to hold `permission` (PA-R7). Mount AFTER
+ * requirePlatformAuth; every platform route declares its permission in the
+ * module's access map, and the inventory test enforces the declarations.
+ */
+export const createRequirePlatformPermission =
+  (db: DB, permission: PlatformPermissionKey) =>
+    createMiddleware<PlatformAuthEnv>(async (c, next) => {
+      const admin = c.get("platformAdmin")
+      if (!admin) return unauthenticated(c)
+      const permissions = await loadEffectivePermissions(db, admin.id)
+      if (!permissions.has(permission)) return permissionDenied(c)
+      await next()
+    })
