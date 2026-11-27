@@ -107,6 +107,52 @@ export function createInventoryCostingRepository({ db }: { db: DB }) {
         )
     },
 
+    /** Layers created by one movement line that still hold quantity, FIFO order, locked. */
+    async findOpenLayersBySourceLine(orgId: string, sourceMovementLineId: string, tx: Tx): Promise<InventoryCostLayer[]> {
+      return tx
+        .select()
+        .from(inventoryCostLayers)
+        .where(
+          and(
+            eq(inventoryCostLayers.orgId, orgId),
+            eq(inventoryCostLayers.sourceMovementLineId, sourceMovementLineId),
+            gt(inventoryCostLayers.remainingQty, "0")
+          )
+        )
+        .orderBy(asc(inventoryCostLayers.receivedAt), asc(inventoryCostLayers.id))
+        .for("update")
+    },
+
+    async findAllocationsByOutgoingLine(orgId: string, outgoingMovementLineId: string, tx: Tx): Promise<InventoryCostAllocation[]> {
+      return tx
+        .select()
+        .from(inventoryCostAllocations)
+        .where(
+          and(
+            eq(inventoryCostAllocations.orgId, orgId),
+            eq(inventoryCostAllocations.outgoingMovementLineId, outgoingMovementLineId)
+          )
+        )
+    },
+
+    /** Gives quantity and value back to a layer (undo of a depletion). */
+    async restoreCostLayer(orgId: string, layerId: string, qty: string, value: string, tx: Tx): Promise<void> {
+      await tx
+        .update(inventoryCostLayers)
+        .set({
+          remainingQty: sql`${inventoryCostLayers.remainingQty} + ${qty}`,
+          remainingValue: sql`${inventoryCostLayers.remainingValue} + ${value}`,
+          updatedAt: sql`now()`,
+        })
+        .where(and(eq(inventoryCostLayers.orgId, orgId), eq(inventoryCostLayers.id, layerId)))
+    },
+
+    async deleteAllocation(orgId: string, id: string, tx: Tx): Promise<void> {
+      await tx
+        .delete(inventoryCostAllocations)
+        .where(and(eq(inventoryCostAllocations.orgId, orgId), eq(inventoryCostAllocations.id, id)))
+    },
+
     /**
      * Find all allocations for a given cost layer.
      */

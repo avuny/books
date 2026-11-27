@@ -22,7 +22,7 @@ import { SHELF_LIFE_UNITS } from "@avuny/contracts/batch"
 import { lengthBetween, pk, quantity, timestamps } from "../_helpers.js"
 import { orgRef } from "../organization/organizations.js"
 import { itemCategories } from "./item-category.js"
-import { unitCollections } from "./unit.js"
+import { unitCollections, units } from "./unit.js"
 
 /** Cost method for stock leaving the warehouse. DERIVED from @avuny/contracts. */
 export const inventoryValuationMethodEnum = pgEnum(
@@ -234,8 +234,50 @@ export const itemExpirySettings = pgTable(
     ]
 )
 
+/**
+ * ITEM_UNIT_PRICES: optional cost and selling price of an item for ONE OTHER unit of its
+ * collection (e.g. a ton of cement can be cheaper than 1000 x 1 kg). Prices are per 1 of
+ * that unit, decimals in major units. The base unit's prices stay on items.cost_price and
+ * items.selling_price. One row per (item, unit); at least one of the two prices is set.
+ * The service guarantees the unit belongs to the item's collection and is not the base unit.
+ */
+export const itemUnitPrices = pgTable(
+    "item_unit_prices",
+    {
+        id: pk(),
+        orgId: orgRef(),
+        itemId: uuid("item_id").notNull(),
+        unitId: uuid("unit_id")
+            .notNull()
+            .references(() => units.id, { onDelete: "restrict" }),
+        /** Purchase price per 1 of this unit, decimal in major units. */
+        costPrice: quantity("cost_price"),
+        /** Selling price per 1 of this unit, decimal in major units. */
+        sellingPrice: quantity("selling_price"),
+        ...timestamps(),
+    },
+    (t) => [
+        foreignKey({
+            name: "fk_item_unit_price_item",
+            columns: [t.orgId, t.itemId],
+            foreignColumns: [items.orgId, items.id],
+        }).onDelete("cascade"),
+        unique("ux_item_unit_price").on(t.itemId, t.unitId),
+        index("ix_item_unit_price_unit").on(t.unitId),
+        check(
+            "ck_item_unit_price_non_negative",
+            sql`(${t.costPrice} is null or ${t.costPrice} >= 0) and (${t.sellingPrice} is null or ${t.sellingPrice} >= 0)`
+        ),
+        check(
+            "ck_item_unit_price_any",
+            sql`${t.costPrice} is not null or ${t.sellingPrice} is not null`
+        ),
+    ]
+)
+
 export type Item = typeof items.$inferSelect
 export type ItemInventorySettings = typeof itemInventorySettings.$inferSelect
 export type ItemWarehouseSettings = typeof itemWarehouseSettings.$inferSelect
 export type ItemExpirySettings = typeof itemExpirySettings.$inferSelect
 export type NewItemExpirySettings = typeof itemExpirySettings.$inferInsert
+export type ItemUnitPrice = typeof itemUnitPrices.$inferSelect

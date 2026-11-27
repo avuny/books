@@ -60,10 +60,17 @@
       "label": "Unit",
       "placeholder": "Choose a unit"
     },
-    "conversionFactor": {
-      "label": "Conversion factor",
-      "placeholder": "e.g. 0.01",
-      "description": "How many base units one of this unit equals."
+    "conversion": {
+      "amount": {
+        "label": "Amount",
+        "placeholder": "e.g. 50"
+      },
+      "directionLabel": "Conversion direction",
+      "perUnit": "1 {unit} = {amount} {base}",
+      "perBase": "1 {base} = {amount} {unit}",
+      "unitFallback": "this unit",
+      "baseFallback": "the base unit",
+      "amountFallback": "…"
     }
   },
   "actions": {
@@ -108,6 +115,7 @@
     "factor": "Conversion",
     "inUseHint": "Items use this collection, so it cannot be deleted.",
     "conversion": "1 {unit} = {factor} {base}",
+    "conversionInverse": "1 {base} = {factor} {unit}",
     "type": "Type"
   },
   "pagination": {

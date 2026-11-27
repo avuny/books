@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next"
 import { parseApiError } from "@workspace/ui/lib/api-error"
 
 import { UnitCollectionButton } from "../forms"
-import { trimDecimal } from "../lib"
+import { friendlyReciprocal, trimDecimal } from "../lib"
 import { useUnitAbilities, useUnitCollection } from "../unit-collection-api"
 import { UnitCollectionDetailsView } from "./unit-collection-details-view"
 
@@ -53,15 +53,23 @@ export function UnitCollectionDetails({
         inUseHint: t("details.inUseHint"),
       }}
       getTypeLabel={(type) => t(`type.${type}`, { defaultValue: type })}
-      getConversionLabel={(unit) =>
-        unit.isBase || !baseUnit
-          ? ""
+      getConversionLabel={(unit) => {
+        if (unit.isBase || !baseUnit) return ""
+        const factor = trimDecimal(unit.conversionFactor)
+        // Below 1 the other direction reads better: "1 m = 100 cm" over "1 cm = 0.01 m".
+        const inverse = friendlyReciprocal(factor)
+        return inverse
+          ? t("details.conversionInverse", {
+              base: baseUnit.symbol,
+              factor: inverse,
+              unit: unit.symbol,
+            })
           : t("details.conversion", {
               unit: unit.symbol,
-              factor: trimDecimal(unit.conversionFactor),
+              factor,
               base: baseUnit.symbol,
             })
-      }
+      }}
       createdAt={collection ? formatDate(collection.createdAt) : ""}
       updatedAt={collection ? formatDate(collection.updatedAt) : ""}
       onBack={onBack}

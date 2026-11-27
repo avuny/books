@@ -26,7 +26,7 @@ export interface ItemServiceDeps {
   /** Only what item creation needs from the unit module. */
   unitRepository: Pick<
     UnitCollectionRepository,
-    "findUnitsByIds" | "findCollection" | "insertCollection" | "insertCollectionUnits"
+    "findUnitsByIds" | "findCollection" | "insertCollection" | "insertCollectionUnits" | "listCollectionUnits"
   >
   /** Only what the item needs from the category module. */
   categoryRepository: Pick<ItemCategoryRepository, "findById">

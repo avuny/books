@@ -47,6 +47,7 @@ const item: ItemDto = {
   allowNegativeStock: false,
   costPrice: null,
   sellingPrice: null,
+  unitPrices: [],
   reorderPoint: "20.000000",
   createdAt: "2026-01-01T00:00:00Z",
   updatedAt: "2026-01-01T00:00:00Z",
@@ -142,31 +143,54 @@ describe("form values -> API input", () => {
     expect(viaCollection).not.toHaveProperty("baseUnitId")
   })
 
-  it("create: normalizes opening stock postedAt date to ISO datetime", () => {
+  it("create: keeps the per-line posting date and omits blank dates", () => {
     const values = CreateItemFormSchema.parse({
       ...filled,
       baseUnitId: uuid(2),
-      openingStockPostedAt: "2026-11-15",
       openingStockLines: [
-        {
-          locationId: uuid(5),
-          quantity: "50",
-          manufacturedOn: "",
-        },
+        { locationId: uuid(5), quantity: "50", manufacturedOn: "", postedAt: "2026-11-15" },
+        { locationId: uuid(5), quantity: "7", manufacturedOn: "" },
       ],
     })
     const input = toCreateItemInput(values)
-    expect(input.openingStock).toBeDefined()
-    expect(input.openingStock?.postedAt).toMatch(
-      /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/
-    )
     expect(input.openingStock?.lines).toEqual([
-      {
-        locationId: uuid(5),
-        quantity: "50",
-        cost: null,
-        manufacturedOn: null,
-      },
+      { locationId: uuid(5), quantity: "50", cost: null, manufacturedOn: null, postedAt: "2026-11-15" },
+      { locationId: uuid(5), quantity: "7", cost: null, manufacturedOn: null },
+    ])
+    expect(input.openingStock).not.toHaveProperty("postedAt")
+  })
+
+  it("create: sends unit prices, drops empty rows", () => {
+    const values = CreateItemFormSchema.parse({
+      ...filled,
+      baseUnitId: uuid(2),
+      unitPrices: [
+        { unitId: uuid(7), costPrice: "900", sellingPrice: "" },
+        { unitId: uuid(8), costPrice: "", sellingPrice: "" },
+      ],
+    })
+    expect(toCreateItemInput(values).unitPrices).toEqual([
+      { unitId: uuid(7), costPrice: "900", sellingPrice: null },
+    ])
+  })
+
+  it("create: a line cost defaults to its unit's cost price; unitId is omitted for the base unit", () => {
+    const values = CreateItemFormSchema.parse({
+      ...filled,
+      baseUnitId: uuid(2),
+      costPrice: "1",
+      unitPrices: [{ unitId: uuid(7), costPrice: "900", sellingPrice: "" }],
+      openingStockLines: [
+        { locationId: uuid(5), quantity: "2", unitId: uuid(7), manufacturedOn: "" },
+        { locationId: uuid(5), quantity: "3", unitId: uuid(2), manufacturedOn: "" },
+        { locationId: uuid(5), quantity: "4", unitId: uuid(7), cost: "850", manufacturedOn: "" },
+      ],
+    })
+    const lines = toCreateItemInput(values, { baseUnitId: uuid(2) }).openingStock?.lines
+    expect(lines?.map((l) => [l.unitId, l.cost])).toEqual([
+      [uuid(7), "900"],
+      [undefined, "1"],
+      [uuid(7), "850"],
     ])
   })
 

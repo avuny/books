@@ -2,11 +2,9 @@ import {
   ITEM_OPENING_STOCK_SOURCE_TYPE,
   STOCK_MOVEMENT_SOURCE_REF_MAX_LENGTH,
   batchNumberKey,
-  computeLineValueMinor,
   minorToStorage,
   type AccountingErrorCode,
   type BatchSpec,
-  type CreateItemInput,
   type PostInventoryOpeningBalanceInput,
 } from "@avuny/contracts"
 import type { Tx } from "@avuny/db"
@@ -14,6 +12,7 @@ import type { Result } from "@avuny/utils"
 import type { BatchService } from "../batch/index.js"
 import type { InventoryCostingService } from "../inventory-costing/index.js"
 import type { StockMovementService } from "../stock-movement/index.js"
+import type { NormalizedOpeningLine } from "./item-opening-stock.rules.js"
 import { seedInventoryDefaults } from "../warehouse/warehouse.defaults.js"
 
 export function generateBatchNumber(index?: number): string {
@@ -45,7 +44,7 @@ export interface ItemOpeningStockDeps {
   }
 }
 
-type OpeningStock = NonNullable<CreateItemInput["openingStock"]>
+type OpeningStock = { lines: NormalizedOpeningLine[] }
 
 /**
  * Creates the batches of a new item and posts its opening stock, inside the caller's transaction.
@@ -89,128 +88,131 @@ export async function postOpeningStock(
     for (const batch of ensured.data) batchIdByKey.set(batchNumberKey(batch.batchNumber), batch.id)
   }
 
-  const postPayload = {
-    type: "opening" as const,
-    postedAt: opening.postedAt ?? new Date().toISOString(),
-    // The item is the source document: opening stock can be posted for it once.
-    sourceType: ITEM_OPENING_STOCK_SOURCE_TYPE,
-    sourceId: itemId,
-    sourceRef: itemName.slice(0, STOCK_MOVEMENT_SOURCE_REF_MAX_LENGTH),
-    lines: opening.lines.map((l, index) => ({
-      itemId,
-      batchId: isBatchTracked
-        ? (batchIdByKey.get(batchNumberKey(lineBatchNumbers[index]!)) ?? null)
-        : null,
-      toLocationId: l.locationId,
-      quantity: l.quantity,
-    })),
+  // One stock movement per distinct posting date. The item is the source document of the first one
+  // (opening stock is posted once per item); later dates use their own source id.
+  const groups = new Map<string, number[]>()
+  for (const [index, line] of opening.lines.entries()) {
+    const group = groups.get(line.postedAt)
+    if (group) group.push(index)
+    else groups.set(line.postedAt, [index])
   }
-
-  let posted = await deps.stockMovements.post(actorId, orgId, postPayload, tx)
-  if (!posted.success && posted.error === "STOCK_MOVEMENT_SYSTEM_LOCATION_MISSING") {
-    try {
-      await seedInventoryDefaults(tx, orgId)
-      posted = await deps.stockMovements.post(actorId, orgId, postPayload, tx)
-    } catch {
-      // Best-effort auto-seeding
-    }
-  }
-  if (!posted.success) return { ok: false, error: posted.error, msg: posted.msg }
 
   // Resolve organization currency (needed for cost layers and accounting)
   const currency = (deps.findOrgCurrency ? await deps.findOrgCurrency(orgId, tx) : null) ?? "USD"
 
-  let totalValueMinorBigInt = 0n
-  for (const line of opening.lines) {
-    const val = computeLineValueMinor(line.quantity, line.cost ?? "0", 0) ?? 0n
-    totalValueMinorBigInt += val
-  }
+  let groupNumber = 0
+  for (const [postedAt, indexes] of groups) {
+    const sourceId = groupNumber === 0 ? itemId : crypto.randomUUID()
+    groupNumber += 1
+    const groupLines = indexes.map((i) => opening.lines[i]!)
 
-  // Create FIFO cost layers for each inbound line (opening stock is always inbound)
-  if (deps.inventoryCosting && posted.data?.lines) {
-    for (const [index, postedLine] of posted.data.lines.entries()) {
-      const openingLine = opening.lines[index]
-      if (!openingLine) continue
-
-      const inventoryItemId = await deps.inventoryCosting.findInventoryItemId(
-        orgId,
-        itemId,
-        postedLine.toLocationId,
-        tx
-      )
-      if (!inventoryItemId) continue
-
-      let inventoryItemBatchId: string | null = null
-      if (postedLine.batchId) {
-        inventoryItemBatchId = await deps.inventoryCosting.findInventoryItemBatchId(
-          orgId,
-          inventoryItemId,
-          postedLine.batchId,
-          tx
-        )
-      }
-
-      const qty = postedLine.quantity
-      const unitCost = openingLine.cost ?? "0"
-      const lineValueMinor = computeLineValueMinor(qty, unitCost, 0) ?? 0n
-      const receivedValue = minorToStorage(lineValueMinor)
-
-      await deps.inventoryCosting.service.createCostLayer(
-        {
-          orgId,
-          inventoryItemId,
-          itemId,
-          inventoryItemBatchId,
-          sourceMovementLineId: postedLine.id,
-          originCostLayerId: null,
-          receivedQty: qty,
-          receivedValue,
-          currency,
-          receivedAt: new Date(opening.postedAt ?? new Date().toISOString()),
-        },
-        tx
-      )
-    }
-  }
-
-  // Post opening inventory to accounting: Dr Inventory Asset, Cr Opening Balance Equity
-  if (deps.accounting) {
-    const accountingInput: PostInventoryOpeningBalanceInput = {
+    const postPayload = {
+      type: "opening" as const,
+      postedAt,
       sourceType: ITEM_OPENING_STOCK_SOURCE_TYPE,
-      sourceId: itemId,
+      sourceId,
       sourceRef: itemName.slice(0, STOCK_MOVEMENT_SOURCE_REF_MAX_LENGTH),
-      postedAt: opening.postedAt ?? new Date().toISOString(),
-      amountMinor: totalValueMinorBigInt.toString(),
-      currency,
+      lines: indexes.map((i) => ({
+        itemId,
+        batchId: isBatchTracked ? (batchIdByKey.get(batchNumberKey(lineBatchNumbers[i]!)) ?? null) : null,
+        toLocationId: opening.lines[i]!.locationId,
+        quantity: opening.lines[i]!.quantity,
+      })),
     }
 
-    let accountingResult = await deps.accounting.postInventoryOpeningBalance(
-      actorId,
-      orgId,
-      accountingInput,
-      tx
-    )
-
-    if (
-      !accountingResult.success &&
-      accountingResult.error === "ACCOUNT_MAPPING_MISSING" &&
-      deps.accounting.initializeChartOfAccounts
-    ) {
+    let posted = await deps.stockMovements.post(actorId, orgId, postPayload, tx)
+    if (!posted.success && posted.error === "STOCK_MOVEMENT_SYSTEM_LOCATION_MISSING") {
       try {
-        await deps.accounting.initializeChartOfAccounts(orgId, tx)
-        accountingResult = await deps.accounting.postInventoryOpeningBalance(
-          actorId,
-          orgId,
-          accountingInput,
-          tx
-        )
+        await seedInventoryDefaults(tx, orgId)
+        posted = await deps.stockMovements.post(actorId, orgId, postPayload, tx)
       } catch {
         // Best-effort auto-seeding
       }
     }
+    if (!posted.success) return { ok: false, error: posted.error, msg: posted.msg }
 
-    if (!accountingResult.success) {
-      return { ok: false, error: accountingResult.error, msg: accountingResult.msg }
+    // Create FIFO cost layers for each inbound line (opening stock is always inbound)
+    if (deps.inventoryCosting && posted.data?.lines) {
+      for (const [position, postedLine] of posted.data.lines.entries()) {
+        const openingLine = groupLines[position]
+        if (!openingLine) continue
+
+        const inventoryItemId = await deps.inventoryCosting.findInventoryItemId(
+          orgId,
+          itemId,
+          postedLine.toLocationId,
+          tx
+        )
+        if (!inventoryItemId) continue
+
+        let inventoryItemBatchId: string | null = null
+        if (postedLine.batchId) {
+          inventoryItemBatchId = await deps.inventoryCosting.findInventoryItemBatchId(
+            orgId,
+            inventoryItemId,
+            postedLine.batchId,
+            tx
+          )
+        }
+
+        await deps.inventoryCosting.service.createCostLayer(
+          {
+            orgId,
+            inventoryItemId,
+            itemId,
+            inventoryItemBatchId,
+            sourceMovementLineId: postedLine.id,
+            originCostLayerId: null,
+            receivedQty: postedLine.quantity,
+            receivedValue: minorToStorage(openingLine.valueMinor),
+            currency,
+            receivedAt: new Date(postedAt),
+          },
+          tx
+        )
+      }
+    }
+
+    // Post opening inventory to accounting: Dr Inventory Asset, Cr Opening Balance Equity
+    if (deps.accounting) {
+      const totalValueMinor = groupLines.reduce((sum, l) => sum + l.valueMinor, 0n)
+      const accountingInput: PostInventoryOpeningBalanceInput = {
+        sourceType: ITEM_OPENING_STOCK_SOURCE_TYPE,
+        sourceId,
+        sourceRef: itemName.slice(0, STOCK_MOVEMENT_SOURCE_REF_MAX_LENGTH),
+        postedAt,
+        amountMinor: totalValueMinor.toString(),
+        currency,
+      }
+
+      let accountingResult = await deps.accounting.postInventoryOpeningBalance(
+        actorId,
+        orgId,
+        accountingInput,
+        tx
+      )
+
+      if (
+        !accountingResult.success &&
+        accountingResult.error === "ACCOUNT_MAPPING_MISSING" &&
+        deps.accounting.initializeChartOfAccounts
+      ) {
+        try {
+          await deps.accounting.initializeChartOfAccounts(orgId, tx)
+          accountingResult = await deps.accounting.postInventoryOpeningBalance(
+            actorId,
+            orgId,
+            accountingInput,
+            tx
+          )
+        } catch {
+          // Best-effort auto-seeding
+        }
+      }
+
+      if (!accountingResult.success) {
+        return { ok: false, error: accountingResult.error, msg: accountingResult.msg }
+      }
     }
   }
 

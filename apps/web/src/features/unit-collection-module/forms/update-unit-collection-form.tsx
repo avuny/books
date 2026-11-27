@@ -98,6 +98,7 @@ export function UpdateUnitCollectionForm({
 
         <UnitCollectionExtraUnitsField
           control={form.control}
+          setValue={form.setValue}
           copy={copy.extraUnits}
           pickerConfig={extraUnitPickerConfig}
           initialOptions={initialOptions}

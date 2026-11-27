@@ -1,5 +1,5 @@
 {
-  "id": "610576c4-6a26-4cbf-a224-7d31256a80e6",
+  "id": "7f7fa88d-db95-46ee-b61e-dd603d689ef4",
   "prevId": "84f80456-0334-47a2-8f6f-336f4f316e8b",
   "version": "7",
   "dialect": "postgresql",
@@ -6593,6 +6593,146 @@
       },
       "isRLSEnabled": false
     },
+    "public.item_unit_prices": {
+      "name": "item_unit_prices",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "org_id": {
+          "name": "org_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "item_id": {
+          "name": "item_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "unit_id": {
+          "name": "unit_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "cost_price": {
+          "name": "cost_price",
+          "type": "numeric(18, 6)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "selling_price": {
+          "name": "selling_price",
+          "type": "numeric(18, 6)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "ix_item_unit_price_unit": {
+          "name": "ix_item_unit_price_unit",
+          "columns": [
+            {
+              "expression": "unit_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "item_unit_prices_org_id_organizations_id_fk": {
+          "name": "item_unit_prices_org_id_organizations_id_fk",
+          "tableFrom": "item_unit_prices",
+          "tableTo": "organizations",
+          "columnsFrom": [
+            "org_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "item_unit_prices_unit_id_units_id_fk": {
+          "name": "item_unit_prices_unit_id_units_id_fk",
+          "tableFrom": "item_unit_prices",
+          "tableTo": "units",
+          "columnsFrom": [
+            "unit_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "fk_item_unit_price_item": {
+          "name": "fk_item_unit_price_item",
+          "tableFrom": "item_unit_prices",
+          "tableTo": "items",
+          "columnsFrom": [
+            "org_id",
+            "item_id"
+          ],
+          "columnsTo": [
+            "org_id",
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "ux_item_unit_price": {
+          "name": "ux_item_unit_price",
+          "nullsNotDistinct": false,
+          "columns": [
+            "item_id",
+            "unit_id"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {
+        "ck_item_unit_price_non_negative": {
+          "name": "ck_item_unit_price_non_negative",
+          "value": "(\"item_unit_prices\".\"cost_price\" is null or \"item_unit_prices\".\"cost_price\" >= 0) and (\"item_unit_prices\".\"selling_price\" is null or \"item_unit_prices\".\"selling_price\" >= 0)"
+        },
+        "ck_item_unit_price_any": {
+          "name": "ck_item_unit_price_any",
+          "value": "\"item_unit_prices\".\"cost_price\" is not null or \"item_unit_prices\".\"selling_price\" is not null"
+        }
+      },
+      "isRLSEnabled": false
+    },
     "public.item_warehouse_settings": {
       "name": "item_warehouse_settings",
       "schema": "",
@@ -12328,815 +12468,6 @@
       },
       "isRLSEnabled": false
     },
-    "public.sales_order_lines": {
-      "name": "sales_order_lines",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
-        },
-        "org_id": {
-          "name": "org_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "sales_order_id": {
-          "name": "sales_order_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "line_no": {
-          "name": "line_no",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "item_id": {
-          "name": "item_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "description_snapshot": {
-          "name": "description_snapshot",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "warehouse_id": {
-          "name": "warehouse_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "location_id": {
-          "name": "location_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "unit_id": {
-          "name": "unit_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "base_unit_factor_snapshot": {
-          "name": "base_unit_factor_snapshot",
-          "type": "numeric(24, 12)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "ordered_qty": {
-          "name": "ordered_qty",
-          "type": "numeric(18, 6)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "ordered_base_qty": {
-          "name": "ordered_base_qty",
-          "type": "numeric(18, 6)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "reserved_base_qty": {
-          "name": "reserved_base_qty",
-          "type": "numeric(18, 6)",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'0'"
-        },
-        "delivered_base_qty": {
-          "name": "delivered_base_qty",
-          "type": "numeric(18, 6)",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'0'"
-        },
-        "invoiced_base_qty": {
-          "name": "invoiced_base_qty",
-          "type": "numeric(18, 6)",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'0'"
-        },
-        "cancelled_base_qty": {
-          "name": "cancelled_base_qty",
-          "type": "numeric(18, 6)",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'0'"
-        },
-        "unit_price": {
-          "name": "unit_price",
-          "type": "bigint",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "discount_amount": {
-          "name": "discount_amount",
-          "type": "bigint",
-          "primaryKey": false,
-          "notNull": true,
-          "default": 0
-        },
-        "discount_rate_bps": {
-          "name": "discount_rate_bps",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "default": 0
-        },
-        "tax_rate_bps": {
-          "name": "tax_rate_bps",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "default": 0
-        },
-        "line_net_amount": {
-          "name": "line_net_amount",
-          "type": "bigint",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "tax_amount": {
-          "name": "tax_amount",
-          "type": "bigint",
-          "primaryKey": false,
-          "notNull": true,
-          "default": 0
-        },
-        "line_total_amount": {
-          "name": "line_total_amount",
-          "type": "bigint",
-          "primaryKey": false,
-          "notNull": true,
-          "default": 0
-        },
-        "requested_delivery_date": {
-          "name": "requested_delivery_date",
-          "type": "date",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "notes": {
-          "name": "notes",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        }
-      },
-      "indexes": {
-        "ix_sales_order_line_item": {
-          "name": "ix_sales_order_line_item",
-          "columns": [
-            {
-              "expression": "org_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "item_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "ix_sales_order_line_location": {
-          "name": "ix_sales_order_line_location",
-          "columns": [
-            {
-              "expression": "org_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "location_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {
-        "sales_order_lines_org_id_organizations_id_fk": {
-          "name": "sales_order_lines_org_id_organizations_id_fk",
-          "tableFrom": "sales_order_lines",
-          "tableTo": "organizations",
-          "columnsFrom": [
-            "org_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "restrict",
-          "onUpdate": "no action"
-        },
-        "sales_order_lines_unit_id_units_id_fk": {
-          "name": "sales_order_lines_unit_id_units_id_fk",
-          "tableFrom": "sales_order_lines",
-          "tableTo": "units",
-          "columnsFrom": [
-            "unit_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "restrict",
-          "onUpdate": "no action"
-        },
-        "fk_sales_order_line_order": {
-          "name": "fk_sales_order_line_order",
-          "tableFrom": "sales_order_lines",
-          "tableTo": "sales_orders",
-          "columnsFrom": [
-            "org_id",
-            "sales_order_id"
-          ],
-          "columnsTo": [
-            "org_id",
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "fk_sales_order_line_item": {
-          "name": "fk_sales_order_line_item",
-          "tableFrom": "sales_order_lines",
-          "tableTo": "items",
-          "columnsFrom": [
-            "org_id",
-            "item_id"
-          ],
-          "columnsTo": [
-            "org_id",
-            "id"
-          ],
-          "onDelete": "restrict",
-          "onUpdate": "no action"
-        },
-        "fk_sales_order_line_warehouse": {
-          "name": "fk_sales_order_line_warehouse",
-          "tableFrom": "sales_order_lines",
-          "tableTo": "warehouses",
-          "columnsFrom": [
-            "org_id",
-            "warehouse_id"
-          ],
-          "columnsTo": [
-            "org_id",
-            "id"
-          ],
-          "onDelete": "restrict",
-          "onUpdate": "no action"
-        },
-        "fk_sales_order_line_location": {
-          "name": "fk_sales_order_line_location",
-          "tableFrom": "sales_order_lines",
-          "tableTo": "warehouse_locations",
-          "columnsFrom": [
-            "org_id",
-            "warehouse_id",
-            "location_id"
-          ],
-          "columnsTo": [
-            "org_id",
-            "warehouse_id",
-            "id"
-          ],
-          "onDelete": "restrict",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {
-        "ux_sales_order_line_org_id": {
-          "name": "ux_sales_order_line_org_id",
-          "nullsNotDistinct": false,
-          "columns": [
-            "org_id",
-            "id"
-          ]
-        },
-        "ux_sales_order_line_no": {
-          "name": "ux_sales_order_line_no",
-          "nullsNotDistinct": false,
-          "columns": [
-            "sales_order_id",
-            "line_no"
-          ]
-        }
-      },
-      "policies": {},
-      "checkConstraints": {
-        "ck_sales_order_line_ordered_positive": {
-          "name": "ck_sales_order_line_ordered_positive",
-          "value": "\"sales_order_lines\".\"ordered_qty\" > 0 and \"sales_order_lines\".\"ordered_base_qty\" > 0"
-        },
-        "ck_sales_order_line_counters_non_negative": {
-          "name": "ck_sales_order_line_counters_non_negative",
-          "value": "\"sales_order_lines\".\"reserved_base_qty\" >= 0 and \"sales_order_lines\".\"delivered_base_qty\" >= 0 and \"sales_order_lines\".\"invoiced_base_qty\" >= 0 and \"sales_order_lines\".\"cancelled_base_qty\" >= 0"
-        },
-        "ck_sales_order_line_delivered_within_ordered": {
-          "name": "ck_sales_order_line_delivered_within_ordered",
-          "value": "\"sales_order_lines\".\"delivered_base_qty\" + \"sales_order_lines\".\"cancelled_base_qty\" <= \"sales_order_lines\".\"ordered_base_qty\""
-        },
-        "ck_sales_order_line_reserved_within_ordered": {
-          "name": "ck_sales_order_line_reserved_within_ordered",
-          "value": "\"sales_order_lines\".\"reserved_base_qty\" + \"sales_order_lines\".\"cancelled_base_qty\" <= \"sales_order_lines\".\"ordered_base_qty\""
-        },
-        "ck_sales_order_line_amount_max": {
-          "name": "ck_sales_order_line_amount_max",
-          "value": "\"sales_order_lines\".\"unit_price\" between 0 and 999999999999999 and \"sales_order_lines\".\"discount_amount\" between 0 and 999999999999999 and \"sales_order_lines\".\"line_net_amount\" between 0 and 999999999999999"
-        },
-        "ck_sales_order_line_rate_bps": {
-          "name": "ck_sales_order_line_rate_bps",
-          "value": "\"sales_order_lines\".\"discount_rate_bps\" between 0 and 10000 and \"sales_order_lines\".\"tax_rate_bps\" between 0 and 10000"
-        },
-        "ck_sales_order_line_tax_amount": {
-          "name": "ck_sales_order_line_tax_amount",
-          "value": "\"sales_order_lines\".\"tax_amount\" between 0 and 999999999999999 and \"sales_order_lines\".\"line_total_amount\" between 0 and 999999999999999"
-        },
-        "ck_sales_order_line_text_len": {
-          "name": "ck_sales_order_line_text_len",
-          "value": "(\"sales_order_lines\".\"notes\" is null or char_length(\"sales_order_lines\".\"notes\") <= 500) and (\"sales_order_lines\".\"description_snapshot\" is null or char_length(\"sales_order_lines\".\"description_snapshot\") <= 500)"
-        }
-      },
-      "isRLSEnabled": false
-    },
-    "public.sales_orders": {
-      "name": "sales_orders",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
-        },
-        "org_id": {
-          "name": "org_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "number": {
-          "name": "number",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "party_id": {
-          "name": "party_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "order_date": {
-          "name": "order_date",
-          "type": "date",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "requested_delivery_date": {
-          "name": "requested_delivery_date",
-          "type": "date",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "payment_term_id": {
-          "name": "payment_term_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "payment_term_name_snapshot": {
-          "name": "payment_term_name_snapshot",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "payment_term_method_snapshot": {
-          "name": "payment_term_method_snapshot",
-          "type": "payment_term_method",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "payment_term_days_snapshot": {
-          "name": "payment_term_days_snapshot",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "currency": {
-          "name": "currency",
-          "type": "char(3)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "warehouse_id": {
-          "name": "warehouse_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "customer_reference": {
-          "name": "customer_reference",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "notes": {
-          "name": "notes",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "status": {
-          "name": "status",
-          "type": "sales_order_status",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'DRAFT'"
-        },
-        "subtotal_amount": {
-          "name": "subtotal_amount",
-          "type": "bigint",
-          "primaryKey": false,
-          "notNull": true,
-          "default": 0
-        },
-        "discount_amount": {
-          "name": "discount_amount",
-          "type": "bigint",
-          "primaryKey": false,
-          "notNull": true,
-          "default": 0
-        },
-        "tax_amount": {
-          "name": "tax_amount",
-          "type": "bigint",
-          "primaryKey": false,
-          "notNull": true,
-          "default": 0
-        },
-        "total_amount": {
-          "name": "total_amount",
-          "type": "bigint",
-          "primaryKey": false,
-          "notNull": true,
-          "default": 0
-        },
-        "close_reason": {
-          "name": "close_reason",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "created_by": {
-          "name": "created_by",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "confirmed_by": {
-          "name": "confirmed_by",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "confirmed_at": {
-          "name": "confirmed_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "closed_by": {
-          "name": "closed_by",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "closed_at": {
-          "name": "closed_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "cancelled_by": {
-          "name": "cancelled_by",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "cancelled_at": {
-          "name": "cancelled_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        }
-      },
-      "indexes": {
-        "ux_sales_order_org_number": {
-          "name": "ux_sales_order_org_number",
-          "columns": [
-            {
-              "expression": "org_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "number",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": true,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "ix_sales_order_party": {
-          "name": "ix_sales_order_party",
-          "columns": [
-            {
-              "expression": "org_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "party_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "ix_sales_order_status": {
-          "name": "ix_sales_order_status",
-          "columns": [
-            {
-              "expression": "org_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "status",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "ix_sales_order_date": {
-          "name": "ix_sales_order_date",
-          "columns": [
-            {
-              "expression": "org_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "order_date",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "ix_sales_order_requested": {
-          "name": "ix_sales_order_requested",
-          "columns": [
-            {
-              "expression": "org_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "requested_delivery_date",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {
-        "sales_orders_org_id_organizations_id_fk": {
-          "name": "sales_orders_org_id_organizations_id_fk",
-          "tableFrom": "sales_orders",
-          "tableTo": "organizations",
-          "columnsFrom": [
-            "org_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "restrict",
-          "onUpdate": "no action"
-        },
-        "sales_orders_created_by_users_id_fk": {
-          "name": "sales_orders_created_by_users_id_fk",
-          "tableFrom": "sales_orders",
-          "tableTo": "users",
-          "columnsFrom": [
-            "created_by"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "set null",
-          "onUpdate": "no action"
-        },
-        "sales_orders_confirmed_by_users_id_fk": {
-          "name": "sales_orders_confirmed_by_users_id_fk",
-          "tableFrom": "sales_orders",
-          "tableTo": "users",
-          "columnsFrom": [
-            "confirmed_by"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "set null",
-          "onUpdate": "no action"
-        },
-        "sales_orders_closed_by_users_id_fk": {
-          "name": "sales_orders_closed_by_users_id_fk",
-          "tableFrom": "sales_orders",
-          "tableTo": "users",
-          "columnsFrom": [
-            "closed_by"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "set null",
-          "onUpdate": "no action"
-        },
-        "sales_orders_cancelled_by_users_id_fk": {
-          "name": "sales_orders_cancelled_by_users_id_fk",
-          "tableFrom": "sales_orders",
-          "tableTo": "users",
-          "columnsFrom": [
-            "cancelled_by"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "set null",
-          "onUpdate": "no action"
-        },
-        "fk_sales_order_party": {
-          "name": "fk_sales_order_party",
-          "tableFrom": "sales_orders",
-          "tableTo": "parties",
-          "columnsFrom": [
-            "org_id",
-            "party_id"
-          ],
-          "columnsTo": [
-            "org_id",
-            "id"
-          ],
-          "onDelete": "restrict",
-          "onUpdate": "no action"
-        },
-        "fk_sales_order_warehouse": {
-          "name": "fk_sales_order_warehouse",
-          "tableFrom": "sales_orders",
-          "tableTo": "warehouses",
-          "columnsFrom": [
-            "org_id",
-            "warehouse_id"
-          ],
-          "columnsTo": [
-            "org_id",
-            "id"
-          ],
-          "onDelete": "restrict",
-          "onUpdate": "no action"
-        },
-        "fk_sales_order_payment_term": {
-          "name": "fk_sales_order_payment_term",
-          "tableFrom": "sales_orders",
-          "tableTo": "payment_terms",
-          "columnsFrom": [
-            "org_id",
-            "payment_term_id"
-          ],
-          "columnsTo": [
-            "org_id",
-            "id"
-          ],
-          "onDelete": "restrict",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {
-        "ux_sales_order_org_id": {
-          "name": "ux_sales_order_org_id",
-          "nullsNotDistinct": false,
-          "columns": [
-            "org_id",
-            "id"
-          ]
-        }
-      },
-      "policies": {},
-      "checkConstraints": {
-        "ck_sales_order_number_fmt": {
-          "name": "ck_sales_order_number_fmt",
-          "value": "\"sales_orders\".\"number\" ~ '^SO-[0-9]{6,}$'"
-        },
-        "ck_sales_order_currency_fmt": {
-          "name": "ck_sales_order_currency_fmt",
-          "value": "\"sales_orders\".\"currency\" ~ '^[A-Z]{3}$'"
-        },
-        "ck_sales_order_text_len": {
-          "name": "ck_sales_order_text_len",
-          "value": "(\"sales_orders\".\"customer_reference\" is null or char_length(\"sales_orders\".\"customer_reference\") <= 64) and (\"sales_orders\".\"notes\" is null or char_length(\"sales_orders\".\"notes\") <= 1000) and (\"sales_orders\".\"close_reason\" is null or char_length(\"sales_orders\".\"close_reason\") <= 500)"
-        },
-        "ck_sales_order_amount_max": {
-          "name": "ck_sales_order_amount_max",
-          "value": "\"sales_orders\".\"subtotal_amount\" between 0 and 999999999999999 and \"sales_orders\".\"discount_amount\" between 0 and 999999999999999 and \"sales_orders\".\"tax_amount\" between 0 and 999999999999999 and \"sales_orders\".\"total_amount\" between 0 and 999999999999999"
-        }
-      },
-      "isRLSEnabled": false
-    },
     "public.sidebar_headings": {
       "name": "sidebar_headings",
       "schema": "",
@@ -15192,16 +14523,6 @@
         "DRAFT",
         "POSTED",
         "REVERSED"
-      ]
-    },
-    "public.sales_order_status": {
-      "name": "sales_order_status",
-      "schema": "public",
-      "values": [
-        "DRAFT",
-        "CONFIRMED",
-        "CLOSED",
-        "CANCELLED"
       ]
     },
     "public.platform_role": {

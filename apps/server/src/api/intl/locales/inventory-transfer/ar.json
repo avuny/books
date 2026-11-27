@@ -63,5 +63,84 @@
     "INVENTORY_TRANSFER_CLOSED_SHORT": "تم شطب البضاعة المتبقية",
     "INVENTORY_TRANSFER_CANCELLED": "تم إلغاء تحويل المخزون بنجاح",
     "INVENTORY_TRANSFER_REVERSED": "تم عكس خطوة التحويل بنجاح"
+  },
+  "ui": {
+    "title": "تحويلات المخزون",
+    "description": "انقل المخزون بين المواقع والمستودعات مع مرحلة في الطريق.",
+    "new": "تحويل جديد",
+    "empty": "لا توجد تحويلات بعد",
+    "emptyHint": "أنشئ تحويلا لنقل المخزون بين المستودعات.",
+    "search": "بحث بالرقم",
+    "all": "الكل",
+    "cols": {
+      "number": "الرقم",
+      "date": "التاريخ",
+      "route": "من / إلى",
+      "lines": "البنود",
+      "status": "الحالة"
+    },
+    "fields": {
+      "date": "التاريخ",
+      "reference": "المرجع",
+      "description": "الوصف",
+      "source": "مستودع المصدر",
+      "destination": "مستودع الوجهة",
+      "item": "الصنف",
+      "sourceLocation": "موقع المصدر",
+      "destinationLocation": "موقع الوجهة",
+      "quantity": "الكمية",
+      "unit": "الوحدة",
+      "select": "اختر..."
+    },
+    "actions": {
+      "view": "عرض",
+      "dispatch": "شحن",
+      "cancel": "إلغاء التحويل",
+      "delete": "حذف",
+      "receive": "استلام",
+      "returnRest": "إرجاع المتبقي إلى المصدر",
+      "closeShort": "شطب المتبقي كمفقود",
+      "reverseDispatch": "عكس الشحن",
+      "reverseReceipt": "عكس الاستلام",
+      "addLine": "إضافة بند",
+      "removeLine": "إزالة",
+      "save": "إنشاء مسودة",
+      "back": "رجوع",
+      "confirm": "تأكيد",
+      "close": "إغلاق"
+    },
+    "details": {
+      "lines": "البنود",
+      "history": "السجل",
+      "requested": "المطلوب",
+      "dispatched": "المشحون",
+      "received": "المستلم",
+      "returned": "المرجع",
+      "lost": "المفقود",
+      "pending": "المتبقي",
+      "batch": "الدفعة",
+      "noHistory": "لم يحدث شيء بعد.",
+      "from": "من",
+      "to": "إلى",
+      "receiveTitle": "استلام البضاعة",
+      "receiveHint": "أدخل ما وصل فعليا. ما لم يُستلم يبقى في الطريق.",
+      "receiveNow": "استلام الآن",
+      "note": "ملاحظة"
+    },
+    "confirms": {
+      "dispatch": "شحن هذا التحويل؟ ينتقل المخزون من المصدر إلى الطريق.",
+      "cancel": "إلغاء هذه المسودة؟ لن يتأثر المخزون.",
+      "delete": "حذف هذه المسودة؟",
+      "returnRest": "إرجاع كل ما هو في الطريق إلى مواقع المصدر؟",
+      "closeShort": "شطب كل ما هو في الطريق كمفقود؟ سيُزال من المخزون.",
+      "reverseDispatch": "عكس الشحن؟ يعود المخزون إلى المصدر ويُلغى التحويل.",
+      "reverseReceipt": "عكس هذا الاستلام؟ ستعود البضاعة إلى الطريق."
+    },
+    "validation": {
+      "noLines": "أضف بندا واحدا على الأقل مع صنف وكمية.",
+      "warehouses": "اختر المستودعين.",
+      "quantity": "أدخل كمية أكبر من صفر.",
+      "locations": "اختر الموقعين."
+    }
   }
 }

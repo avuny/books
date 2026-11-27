@@ -42,6 +42,11 @@ export function toItemDto(row: ItemRow): ItemDto {
     reorderPoint: settings?.reorderPoint ?? null,
     costPrice: item.costPrice ?? null,
     sellingPrice: item.sellingPrice ?? null,
+    unitPrices: (row.unitPrices ?? []).map(({ price, unit }) => ({
+      unit: toUnit(unit),
+      costPrice: price.costPrice ?? null,
+      sellingPrice: price.sellingPrice ?? null,
+    })),
     createdAt: item.createdAt.toISOString(),
     updatedAt: item.updatedAt.toISOString(),
   }

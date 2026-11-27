@@ -41,17 +41,17 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done · `[!]` blocked · `[-]` 
 | P3-01 | Batch pre-allocation and available check | Phase 3 acceptance in SPEC section 12 | [x] |
 | P3-02 | Dispatch posting and allocations | Phase 3 acceptance in SPEC section 12 | [x] |
 | P3-03 | Return rest, reverse dispatch | Phase 3 acceptance in SPEC section 12 | [x] |
-| P4-01 | Receive and partial receive | Phase 4 acceptance in SPEC section 12 | [ ] |
-| P4-02 | Close short | Phase 4 acceptance in SPEC section 12 | [ ] |
-| P4-03 | Reverse receipt | Phase 4 acceptance in SPEC section 12 | [ ] |
-| P5-01 | consumeFifo, deriveLayer, consumeLayersOfSourceLine | Phase 5 acceptance in SPEC section 12 | [ ] |
-| P5-02 | Wire costing into dispatch, receive, return, reversal | Phase 5 acceptance in SPEC section 12 | [ ] |
+| P4-01 | Receive and partial receive | Phase 4 acceptance in SPEC section 12 | [x] |
+| P4-02 | Close short | Phase 4 acceptance in SPEC section 12 | [x] |
+| P4-03 | Reverse receipt | Phase 4 acceptance in SPEC section 12 | [x] |
+| P5-01 | consumeFifo, deriveLayer, consumeLayersOfSourceLine | Phase 5 acceptance in SPEC section 12 | [x] |
+| P5-02 | Wire costing into dispatch, receive, return, reversal | Phase 5 acceptance in SPEC section 12 | [x] |
 | P6-01 | Shortage journal on close short | Phase 6 acceptance in SPEC section 12 | [ ] |
-| P7-01 | List, form, details | Phase 7 acceptance in SPEC section 12 | [ ] |
-| P7-02 | Receive dialog, status actions | Phase 7 acceptance in SPEC section 12 | [ ] |
-| P7-03 | Stock movement list labels and From/To | Phase 7 acceptance in SPEC section 12 | [ ] |
-| P8-01 | FEATURE-TRACKING, REGISTRY, TESTING-PLAN, PROGRESS updates | Phase 8 acceptance in SPEC section 12 | [ ] |
-| P8-02 | Reconciliation test | Phase 8 acceptance in SPEC section 12 | [ ] |
+| P7-01 | List, form, details | Phase 7 acceptance in SPEC section 12 | [x] |
+| P7-02 | Receive dialog, status actions | Phase 7 acceptance in SPEC section 12 | [x] |
+| P7-03 | Stock movement list labels and From/To | Phase 7 acceptance in SPEC section 12 | [ ] (not done: optional) |
+| P8-01 | FEATURE-TRACKING, REGISTRY, TESTING-PLAN, PROGRESS updates | Phase 8 acceptance in SPEC section 12 | [x] |
+| P8-02 | Reconciliation test | Phase 8 acceptance in SPEC section 12 | [x] |
 
 ## Decision log
 | ID | Decision (default applied) | Status | Owner response · date |
@@ -92,3 +92,19 @@ None yet.
 - Availability check uses batch available for batch-tracked items only. Non-batch items rely on the stock engine's on-hand check. Reservations are not considered for them (known gap).
 - A partial return re-derives status to PARTIALLY_RECEIVED.
 - Verification: tsc clean, 15 unit tests pass for the module. Live production test deferred until the Phase 7 UI.
+
+## Phase 4 notes (receive, close short, reverse receipt)
+- Routes: POST {id}/receive, {id}/close-short, {id}/receipts/{receiptId}/reverse.
+- Receive can override the destination location per allocation (must be in the destination warehouse and receivable). Receipt `receivedAt` becomes the movement `postedAt`.
+- Close short posts an `adjustment` movement from the transit location (loss), no journal until Phase 6.
+- Only RECEIPT events can be reversed, once. RETURN and LOSS events cannot.
+- Dispatch-and-receive in one step (Q1) is not implemented as a single call; dispatch then receive.
+- Concurrency: the transfer and allocation rows are locked in a stable order; a two-transfer deadlock test needs the integration suite and is not yet written.
+- Verification: tsc clean, 21 unit tests pass.
+
+## Phase 5 notes (costing)
+- New costing service methods: `consumeFifo`, `consumeLayersOfSourceLine`, `deriveLayer`, `restoreAllocationsOfLine`. Money math in bigint; the whole remainder of a layer takes its exact remaining value.
+- Dispatch consumes source layers FIFO and derives transit layers (origin set, age kept). Receive and return consume only the transit layers of that allocation's dispatch line and derive layers at the destination or source. Loss consumes only.
+- Decision (mine): reversals restore the original layer in place (quantity and value added back, the allocation rows of that line deleted) instead of deriving a new layer. This keeps the transit layers findable by dispatch line for later receives. The spec text suggested a new derived layer; revisit if a sales consumer needs the history.
+- Uncovered stock (Q5 default): moves without layers. The uncovered quantity is not yet returned in the API response (gap).
+- Verification: tsc clean, 33 unit tests (transfer and costing). New route-level integration test file added. Layer SQL has not run against a real database yet; production UI test will confirm.
