@@ -26,5 +26,6 @@ export const salesInvoiceErrorsHttpMap = {
   SALES_INVOICE_HAS_CREDIT_NOTES: { statusCode: 409, responseMessage: "The invoice has posted credit notes. Reverse them first" },
   SALES_INVOICE_HAS_PAYMENTS: { statusCode: 409, responseMessage: "The invoice has posted payments. Reverse them first" },
   SALES_INVOICE_POSTING_FAILED: { statusCode: 409, responseMessage: "Posting the invoice failed. Nothing was changed. Please try again" },
+  SALES_INVOICE_RECEIPT_PAYMENT_FAILED: { statusCode: 409, responseMessage: "The receipt payment could not be recorded. The invoice was reversed" },
   SALES_INVOICE_NUMBER_TAKEN: { statusCode: 409, responseMessage: "Could not allocate an invoice number. Please try again" },
 } as const satisfies Record<SalesInvoiceErrorCode, ErrorMeta>

@@ -9,6 +9,9 @@ import {
   SALES_INVOICE_LINE_DESCRIPTION_MAX_LENGTH,
 } from "./constants.js"
 
+import { CUSTOMER_PAYMENT_REFERENCE_MAX_LENGTH } from "../customer-payment/constants.js"
+import { CustomerPaymentDtoSchema, CustomerPaymentMethodSchema } from "../customer-payment/schemas.js"
+
 const id = z.string().uuid()
 const timestamp = z.string().datetime()
 const date = z.string().trim().regex(/^\d{4}-\d{2}-\d{2}$/, "Use YYYY-MM-DD")
@@ -85,6 +88,18 @@ export const UpdateSalesInvoiceSchema = z
   .refine((v) => Object.keys(v).length > 0, "At least one field must be provided for update")
 export type UpdateSalesInvoiceInput = z.infer<typeof UpdateSalesInvoiceSchema>
 
+/**
+ * Sales receipt (POS style): invoices what is left on one posted delivery, posts the invoice and
+ * records a posted, fully allocated customer payment in one step.
+ */
+export const CreateSalesReceiptSchema = z.object({
+  invoiceDate: date,
+  notes: text(SALES_INVOICE_NOTES_MAX_LENGTH).nullish(),
+  method: CustomerPaymentMethodSchema,
+  referenceNumber: text(CUSTOMER_PAYMENT_REFERENCE_MAX_LENGTH).nullish(),
+})
+export type CreateSalesReceiptInput = z.infer<typeof CreateSalesReceiptSchema>
+
 export const ReverseSalesInvoiceSchema = z.object({
   reason: text(SALES_INVOICE_REASON_MAX_LENGTH).min(1, "A reason is required"),
 })
@@ -133,3 +148,9 @@ export const SalesInvoiceListResponseSchema = z.object({
   items: z.array(SalesInvoiceDtoSchema),
 })
 export type SalesInvoiceListResponse = z.infer<typeof SalesInvoiceListResponseSchema>
+
+export const SalesReceiptDtoSchema = z.object({
+  invoice: SalesInvoiceDtoSchema,
+  payment: CustomerPaymentDtoSchema,
+})
+export type SalesReceiptDto = z.infer<typeof SalesReceiptDtoSchema>
