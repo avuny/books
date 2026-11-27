@@ -50,8 +50,8 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done · `[!]` blocked · `[-]` 
 | P7-01 | List, form, details | Phase 7 acceptance in SPEC section 12 | [x] |
 | P7-02 | Receive dialog, status actions | Phase 7 acceptance in SPEC section 12 | [x] |
 | P7-03 | Stock movement list labels and From/To | Phase 7 acceptance in SPEC section 12 | [ ] (not done: optional) |
-| P8-01 | FEATURE-TRACKING, REGISTRY, TESTING-PLAN, PROGRESS updates | Phase 8 acceptance in SPEC section 12 | [ ] |
-| P8-02 | Reconciliation test | Phase 8 acceptance in SPEC section 12 | [ ] |
+| P8-01 | FEATURE-TRACKING, REGISTRY, TESTING-PLAN, PROGRESS updates | Phase 8 acceptance in SPEC section 12 | [x] |
+| P8-02 | Reconciliation test | Phase 8 acceptance in SPEC section 12 | [x] |
 
 ## Decision log
 | ID | Decision (default applied) | Status | Owner response · date |

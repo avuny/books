@@ -34,6 +34,7 @@ Gap table. "P1" means write first (a bug in the 2026-11-26 audit or a money/stoc
 | item | create with/without opening stock (atomic, audit B2), idempotency on retry, tracking type, category required message (B8), deactivate | create item with opening stock, see per-location stock (B4) | P1 |
 | warehouse, location | CRUD, system virtual locations hidden from user pickers (B9), default location | create warehouse and location | P2 |
 | inventory-adjustment | draft, confirm, post (batch rules B3), cancel, negative stock policy, concurrency double-post | adjust stock up and down, ledger shows it | P1 |
+| inventory-transfer | draft, dispatch, partial receive, return, close short, cancel, reverse dispatch and receipt, costing layers | UI flow on production with ZZ-TEST data (done 2026-11-27); concurrency/deadlock test not written | P1 |
 | stock-movement, inventory-costing | ledger entries per posting, cost layers FIFO/average, reversal | movement list filters | P1 |
 | batch | batch required only when tracked, expiry | pick batch on adjustment | P2 |
 | accounting | accounts, journal balance (debits = credits), period lock | accounting pages (when added) | P2 |
