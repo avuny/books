@@ -43,7 +43,11 @@ export function setSessionCookie(c: Context, token: string, expiresAt: Date): vo
 }
 
 export function clearSessionCookie(c: Context): void {
-  deleteCookie(c, PLATFORM_AUTH_COOKIE_NAME, { path: PLATFORM_AUTH_COOKIE_PATH })
+  // __Host- rules are enforced on deletion too: Secure is mandatory.
+  deleteCookie(c, PLATFORM_AUTH_COOKIE_NAME, {
+    path: PLATFORM_AUTH_COOKIE_PATH,
+    secure: true,
+  })
 }
 
 const unauthenticated = (c: Context) =>
