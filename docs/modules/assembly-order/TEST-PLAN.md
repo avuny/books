@@ -12,7 +12,7 @@ Testing note: the local test database runs a pass-through transaction with no ro
 | AC3 | Integration | route test > ad hoc order post | [ ] |
 | AC4, R16, R19 | Integration | post > layers consumed, output layer value equals materials plus additional | [ ] |
 | AC5, R11 | Integration | insufficient stock per location, per batch, with `allowNegativeStock` | [ ] |
-| AC6, R17 | Integration | stock from an adjustment gain (no layer) blocks | [ ] |
+| AC6, R17 | Integration | legacy stock with no cost record blocks, a new gain adjustment without cost is already rejected by the engine | [ ] |
 | AC7, R12 to R15 | Integration | FEFO pick, output batch, expiry cap, later expiry rejected | [ ] |
 | AC8, R25 | Integration + unit | journal balanced; none when additional cost is 0; failing journal port stops the post | [ ] |
 | AC9, R23 | Integration | repeated and concurrent post | [ ] |
@@ -26,6 +26,9 @@ Testing note: the local test database runs a pass-through transaction with no ro
 | AC17 | Integration | trace both directions | [ ] |
 
 ## Edge cases to cover
+- Weighted average items: consume at pool average, output joins its pool, reverse blocked after a later sale of the item.
+- Reverse blocked when the output was transferred, used in another assembly or reduced by a loss adjustment (R28 checks 1 to 3).
+- Absorption report: absorbed versus actual, over absorption close journal.
 - Rounding: quantity with 6 decimals, scale factor with a repeating decimal, bigint cost split over many layers, remainder stays exact.
 - Component in several batches and several layers in one line.
 - Same item in two locations of the warehouse.
