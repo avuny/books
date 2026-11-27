@@ -1,0 +1,11 @@
+{
+  "app": {
+    "name": "Avuny Platform",
+    "tagline": "SaaS back office"
+  },
+  "home": {
+    "title": "Platform admin",
+    "scaffold": "This app is a scaffold. Sign-in, plans, organizations, subscriptions and jobs arrive in the admin track phases of the SaaS plan."
+  },
+  "notFound": "Page not found."
+}
