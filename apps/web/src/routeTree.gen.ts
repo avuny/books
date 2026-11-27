@@ -30,6 +30,7 @@ import { Route as OrganizationOrgIdPaymentTermsRouteImport } from './routes/orga
 import { Route as OrganizationOrgIdRoleRouteImport } from './routes/organization/$orgId/role'
 import { Route as OrganizationOrgIdSettingsRouteRouteImport } from './routes/organization/$orgId/settings/route'
 import { Route as OrganizationOrgIdWarehouseRouteImport } from './routes/organization/$orgId/warehouse'
+import { Route as OrganizationOrgIdCustomerPaymentsIndexRouteImport } from './routes/organization/$orgId/customer-payments/index'
 import { Route as OrganizationOrgIdCustomersIndexRouteImport } from './routes/organization/$orgId/customers/index'
 import { Route as OrganizationOrgIdCustomersPartyIdRouteImport } from './routes/organization/$orgId/customers/$partyId'
 import { Route as OrganizationOrgIdInventoryAdjustmentsIndexRouteImport } from './routes/organization/$orgId/inventory-adjustments/index'
@@ -175,6 +176,12 @@ const OrganizationOrgIdWarehouseRoute =
   OrganizationOrgIdWarehouseRouteImport.update({
     id: '/warehouse',
     path: '/warehouse',
+    getParentRoute: () => OrganizationOrgIdRouteRoute,
+  } as any)
+const OrganizationOrgIdCustomerPaymentsIndexRoute =
+  OrganizationOrgIdCustomerPaymentsIndexRouteImport.update({
+    id: '/customer-payments/',
+    path: '/customer-payments/',
     getParentRoute: () => OrganizationOrgIdRouteRoute,
   } as any)
 const OrganizationOrgIdCustomersIndexRoute =
@@ -443,6 +450,7 @@ export interface FileRoutesByFullPath {
   '/organization/$orgId/vendor-bills/$billId': typeof OrganizationOrgIdVendorBillsBillIdRoute
   '/organization/$orgId/vendor-bills/reports': typeof OrganizationOrgIdVendorBillsReportsRoute
   '/organization/$orgId/vendors/$partyId': typeof OrganizationOrgIdVendorsPartyIdRoute
+  '/organization/$orgId/customer-payments/': typeof OrganizationOrgIdCustomerPaymentsIndexRoute
   '/organization/$orgId/customers/': typeof OrganizationOrgIdCustomersIndexRoute
   '/organization/$orgId/inventory-adjustments/': typeof OrganizationOrgIdInventoryAdjustmentsIndexRoute
   '/organization/$orgId/invitations/': typeof OrganizationOrgIdInvitationsIndexRoute
@@ -498,6 +506,7 @@ export interface FileRoutesByTo {
   '/organization/$orgId/vendor-bills/$billId': typeof OrganizationOrgIdVendorBillsBillIdRoute
   '/organization/$orgId/vendor-bills/reports': typeof OrganizationOrgIdVendorBillsReportsRoute
   '/organization/$orgId/vendors/$partyId': typeof OrganizationOrgIdVendorsPartyIdRoute
+  '/organization/$orgId/customer-payments': typeof OrganizationOrgIdCustomerPaymentsIndexRoute
   '/organization/$orgId/customers': typeof OrganizationOrgIdCustomersIndexRoute
   '/organization/$orgId/inventory-adjustments': typeof OrganizationOrgIdInventoryAdjustmentsIndexRoute
   '/organization/$orgId/invitations': typeof OrganizationOrgIdInvitationsIndexRoute
@@ -560,6 +569,7 @@ export interface FileRoutesById {
   '/organization/$orgId/vendor-bills/$billId': typeof OrganizationOrgIdVendorBillsBillIdRoute
   '/organization/$orgId/vendor-bills/reports': typeof OrganizationOrgIdVendorBillsReportsRoute
   '/organization/$orgId/vendors/$partyId': typeof OrganizationOrgIdVendorsPartyIdRoute
+  '/organization/$orgId/customer-payments/': typeof OrganizationOrgIdCustomerPaymentsIndexRoute
   '/organization/$orgId/customers/': typeof OrganizationOrgIdCustomersIndexRoute
   '/organization/$orgId/inventory-adjustments/': typeof OrganizationOrgIdInventoryAdjustmentsIndexRoute
   '/organization/$orgId/invitations/': typeof OrganizationOrgIdInvitationsIndexRoute
@@ -623,6 +633,7 @@ export interface FileRouteTypes {
     | '/organization/$orgId/vendor-bills/$billId'
     | '/organization/$orgId/vendor-bills/reports'
     | '/organization/$orgId/vendors/$partyId'
+    | '/organization/$orgId/customer-payments/'
     | '/organization/$orgId/customers/'
     | '/organization/$orgId/inventory-adjustments/'
     | '/organization/$orgId/invitations/'
@@ -678,6 +689,7 @@ export interface FileRouteTypes {
     | '/organization/$orgId/vendor-bills/$billId'
     | '/organization/$orgId/vendor-bills/reports'
     | '/organization/$orgId/vendors/$partyId'
+    | '/organization/$orgId/customer-payments'
     | '/organization/$orgId/customers'
     | '/organization/$orgId/inventory-adjustments'
     | '/organization/$orgId/invitations'
@@ -739,6 +751,7 @@ export interface FileRouteTypes {
     | '/organization/$orgId/vendor-bills/$billId'
     | '/organization/$orgId/vendor-bills/reports'
     | '/organization/$orgId/vendors/$partyId'
+    | '/organization/$orgId/customer-payments/'
     | '/organization/$orgId/customers/'
     | '/organization/$orgId/inventory-adjustments/'
     | '/organization/$orgId/invitations/'
@@ -919,6 +932,13 @@ declare module '@tanstack/react-router' {
       path: '/warehouse'
       fullPath: '/organization/$orgId/warehouse'
       preLoaderRoute: typeof OrganizationOrgIdWarehouseRouteImport
+      parentRoute: typeof OrganizationOrgIdRouteRoute
+    }
+    '/organization/$orgId/customer-payments/': {
+      id: '/organization/$orgId/customer-payments/'
+      path: '/customer-payments'
+      fullPath: '/organization/$orgId/customer-payments/'
+      preLoaderRoute: typeof OrganizationOrgIdCustomerPaymentsIndexRouteImport
       parentRoute: typeof OrganizationOrgIdRouteRoute
     }
     '/organization/$orgId/customers/': {
@@ -1256,6 +1276,7 @@ interface OrganizationOrgIdRouteRouteChildren {
   OrganizationOrgIdVendorBillsBillIdRoute: typeof OrganizationOrgIdVendorBillsBillIdRoute
   OrganizationOrgIdVendorBillsReportsRoute: typeof OrganizationOrgIdVendorBillsReportsRoute
   OrganizationOrgIdVendorsPartyIdRoute: typeof OrganizationOrgIdVendorsPartyIdRoute
+  OrganizationOrgIdCustomerPaymentsIndexRoute: typeof OrganizationOrgIdCustomerPaymentsIndexRoute
   OrganizationOrgIdCustomersIndexRoute: typeof OrganizationOrgIdCustomersIndexRoute
   OrganizationOrgIdInventoryAdjustmentsIndexRoute: typeof OrganizationOrgIdInventoryAdjustmentsIndexRoute
   OrganizationOrgIdInvitationsIndexRoute: typeof OrganizationOrgIdInvitationsIndexRoute
@@ -1313,6 +1334,8 @@ const OrganizationOrgIdRouteRouteChildren: OrganizationOrgIdRouteRouteChildren =
     OrganizationOrgIdVendorBillsReportsRoute:
       OrganizationOrgIdVendorBillsReportsRoute,
     OrganizationOrgIdVendorsPartyIdRoute: OrganizationOrgIdVendorsPartyIdRoute,
+    OrganizationOrgIdCustomerPaymentsIndexRoute:
+      OrganizationOrgIdCustomerPaymentsIndexRoute,
     OrganizationOrgIdCustomersIndexRoute: OrganizationOrgIdCustomersIndexRoute,
     OrganizationOrgIdInventoryAdjustmentsIndexRoute:
       OrganizationOrgIdInventoryAdjustmentsIndexRoute,

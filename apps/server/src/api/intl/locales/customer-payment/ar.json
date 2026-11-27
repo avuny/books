@@ -40,5 +40,38 @@
     "CUSTOMER_PAYMENT_DELETED": "تم حذف دفعة العميل بنجاح",
     "CUSTOMER_PAYMENT_POSTED": "تم ترحيل الدفعة. انخفض رصيد العميل",
     "CUSTOMER_PAYMENT_REVERSED": "تم عكس الدفعة"
+  },
+  "ui": {
+    "title": "مدفوعات العملاء",
+    "description": "الأموال المستلمة من العملاء والمطبّقة على الفواتير المرحّلة.",
+    "none": "لا توجد مدفوعات عملاء بعد.",
+    "number": "الدفعة",
+    "customer": "العميل",
+    "date": "التاريخ",
+    "method": "الطريقة",
+    "amount": "المبلغ",
+    "invoices": "مطبّقة على",
+    "status": "الحالة",
+    "post": "ترحيل",
+    "reverse": "عكس",
+    "reverseTitle": "عكس الدفعة",
+    "reverseDescription": "يعكس قيد اليومية ويعيد فتح الفواتير التي سددتها.",
+    "delete": "حذف",
+    "cancel": "إلغاء",
+    "reason": "السبب",
+    "posting": "جارٍ الحفظ…",
+    "dialog": {
+      "open": "تسجيل دفعة",
+      "title": "تسجيل دفعة للفاتورة {number}",
+      "description": "المتبقي: {amount}",
+      "full": "المبلغ كاملًا",
+      "partial": "جزء منه",
+      "amount": "المبلغ",
+      "method": "استلمت في",
+      "date": "تاريخ الدفعة",
+      "reference": "المرجع (اختياري)",
+      "confirm": "استلام الدفعة",
+      "amountInvalid": "أدخل مبلغًا أكبر من صفر ولا يزيد عن المتبقي."
+    }
   }
 }

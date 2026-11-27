@@ -14,6 +14,8 @@ import {
   DialogTitle,
 } from "@workspace/ui/components/dialog"
 
+import { InvoicePaymentDialog } from "../../customer-payment-module/dialog"
+import { useCustomerPaymentAbilities } from "../../customer-payment-module/customer-payment-api"
 import { formatMinorAmount } from "../../purchase-order-module/lib/format-money"
 import {
   useDeleteInvoiceMutation,
@@ -36,12 +38,14 @@ function Field({ label, value }: { label: string; value: React.ReactNode }) {
 
 export function SalesInvoiceDetails({ orgId, invoiceId, onBack }: Props) {
   const { t, i18n } = useTranslation("sales-invoice")
+  const { t: tp } = useTranslation("customer-payment")
   const { invoice, isLoading } = useSalesInvoice(orgId, invoiceId)
   const abilities = useSalesInvoiceAbilities(orgId)
   const postMutation = usePostInvoiceMutation(orgId)
   const reverseMutation = useReverseInvoiceMutation(orgId)
   const deleteMutation = useDeleteInvoiceMutation(orgId)
-  const [dialog, setDialog] = useState<"post" | "reverse" | "delete" | null>(null)
+  const paymentAbilities = useCustomerPaymentAbilities(orgId)
+  const [dialog, setDialog] = useState<"post" | "reverse" | "delete" | "pay" | null>(null)
   const [reason, setReason] = useState("")
   const [error, setError] = useState<string | null>(null)
 
@@ -98,6 +102,9 @@ export function SalesInvoiceDetails({ orgId, invoiceId, onBack }: Props) {
           {invoice.status === "DRAFT" && abilities.canDeleteInvoice ? (
             <Button variant="outline" onClick={() => setDialog("delete")}>{t("ui.delete")}</Button>
           ) : null}
+          {invoice.status === "POSTED" && paymentAbilities.canCreatePayment && paymentAbilities.canPostPayment && BigInt(invoice.outstandingAmount) > 0n ? (
+            <Button onClick={() => setDialog("pay")}>{tp("ui.dialog.open")}</Button>
+          ) : null}
           {invoice.status === "POSTED" && abilities.canReverseInvoice ? (
             <Button variant="outline" onClick={() => setDialog("reverse")}>{t("ui.reverse")}</Button>
           ) : null}
@@ -148,6 +155,8 @@ export function SalesInvoiceDetails({ orgId, invoiceId, onBack }: Props) {
           </table>
         </div>
       </section>
+
+      {dialog === "pay" ? <InvoicePaymentDialog orgId={orgId} invoice={invoice} onClose={() => setDialog(null)} /> : null}
 
       <ConfirmDialog
         open={dialog === "post"}

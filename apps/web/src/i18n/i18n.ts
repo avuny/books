@@ -24,6 +24,7 @@ i18n
       "accounting",
       "batch",
       "common",
+      "customer-payment",
       "inventory-adjustment",
       "inventory-transfer",
       "item",

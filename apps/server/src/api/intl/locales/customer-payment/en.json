@@ -40,5 +40,38 @@
     "CUSTOMER_PAYMENT_DELETED": "Customer payment deleted successfully",
     "CUSTOMER_PAYMENT_POSTED": "Payment posted. The customer balance went down",
     "CUSTOMER_PAYMENT_REVERSED": "Payment reversed"
+  },
+  "ui": {
+    "title": "Customer payments",
+    "description": "Money received from customers and applied to posted invoices.",
+    "none": "No customer payments yet.",
+    "number": "Payment",
+    "customer": "Customer",
+    "date": "Date",
+    "method": "Method",
+    "amount": "Amount",
+    "invoices": "Applied to",
+    "status": "Status",
+    "post": "Post",
+    "reverse": "Reverse",
+    "reverseTitle": "Reverse payment",
+    "reverseDescription": "Reverses the journal entry and reopens the invoices it paid.",
+    "delete": "Delete",
+    "cancel": "Cancel",
+    "reason": "Reason",
+    "posting": "Saving…",
+    "dialog": {
+      "open": "Record payment",
+      "title": "Record payment for {number}",
+      "description": "Outstanding: {amount}",
+      "full": "Full amount",
+      "partial": "Part of it",
+      "amount": "Amount",
+      "method": "Received in",
+      "date": "Payment date",
+      "reference": "Reference (optional)",
+      "confirm": "Receive payment",
+      "amountInvalid": "Enter an amount greater than zero and not more than the outstanding amount."
+    }
   }
 }
