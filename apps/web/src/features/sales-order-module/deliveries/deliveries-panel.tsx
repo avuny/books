@@ -1,5 +1,6 @@
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
+import { useNavigate } from "@tanstack/react-router"
 import { parseApiError } from "@workspace/ui/lib/api-error"
 import { Button } from "@workspace/ui/components/button"
 import { Input } from "@workspace/ui/components/input"
@@ -13,6 +14,7 @@ import {
   DialogTitle,
 } from "@workspace/ui/components/dialog"
 
+import { CreateInvoiceFromDeliveryDialog, useSalesInvoiceAbilities } from "../../sales-invoice-module"
 import type { SalesOrderDto } from "../types"
 import {
   useCreateDeliveryMutation,
@@ -30,6 +32,10 @@ type Props = { orgId: string; order: SalesOrderDto }
 export function DeliveriesPanel({ orgId, order }: Props) {
   const { t } = useTranslation("sales-delivery")
   const abilities = useSalesOrderAbilities(orgId)
+  const invoiceAbilities = useSalesInvoiceAbilities(orgId)
+  const navigate = useNavigate()
+  const { t: ti } = useTranslation("sales-invoice")
+  const [invoicing, setInvoicing] = useState<DeliveryDto | null>(null)
   const { deliveries } = useSalesDeliveries(orgId, order.id)
   const createMutation = useCreateDeliveryMutation(orgId, order.id)
   const postMutation = usePostDeliveryMutation(orgId, order.id)
@@ -128,6 +134,11 @@ export function DeliveriesPanel({ orgId, order }: Props) {
                         {t("ui.post")}
                       </Button>
                     ) : null}
+                    {d.status === "POSTED" && invoiceAbilities.canCreateInvoice ? (
+                      <Button size="sm" variant="outline" onClick={() => setInvoicing(d)}>
+                        {ti("ui.fromDelivery.open")}
+                      </Button>
+                    ) : null}
                     {d.status === "POSTED" && abilities.canReverseDelivery ? (
                       <Button size="sm" variant="outline" onClick={() => setReversing(d)}>
                         {t("ui.reverse")}
@@ -140,6 +151,16 @@ export function DeliveriesPanel({ orgId, order }: Props) {
           </table>
         </div>
       )}
+
+      <CreateInvoiceFromDeliveryDialog
+        orgId={orgId}
+        deliveryId={invoicing?.id ?? null}
+        deliveryNumber={invoicing?.number ?? ""}
+        onClose={() => setInvoicing(null)}
+        onCreated={(invoiceId) =>
+          navigate({ to: "/organization/$orgId/sales-invoices/$invoiceId", params: { orgId, invoiceId } })
+        }
+      />
 
       <Dialog open={creating} onOpenChange={(o) => !o && setCreating(false)}>
         <DialogContent className="sm:max-w-2xl">

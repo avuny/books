@@ -61,6 +61,10 @@ import {
   salesDeliveryTranslationsEn,
 } from "@avuny/contracts/sales-delivery"
 import {
+  salesInvoiceTranslationsAr,
+  salesInvoiceTranslationsEn,
+} from "@avuny/contracts/sales-invoice"
+import {
   salesOrderTranslationsAr,
   salesOrderTranslationsEn,
 } from "@avuny/contracts/sales-order"
@@ -110,6 +114,7 @@ export const resources = {
     "purchase-shipment": purchaseShipmentTranslationsEn,
     role: roleTranslationsEn,
     "sales-delivery": salesDeliveryTranslationsEn,
+    "sales-invoice": salesInvoiceTranslationsEn,
     "sales-order": salesOrderTranslationsEn,
     "stock-movement": stockMovementTranslationsEn,
     unit: unitTranslationsEn,
@@ -138,6 +143,7 @@ export const resources = {
     "purchase-shipment": purchaseShipmentTranslationsAr,
     role: roleTranslationsAr,
     "sales-delivery": salesDeliveryTranslationsAr,
+    "sales-invoice": salesInvoiceTranslationsAr,
     "sales-order": salesOrderTranslationsAr,
     "stock-movement": stockMovementTranslationsAr,
     unit: unitTranslationsAr,

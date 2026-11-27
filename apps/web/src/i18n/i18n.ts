@@ -38,6 +38,7 @@ i18n
       "purchase-shipment",
       "role",
       "sales-delivery",
+      "sales-invoice",
       "sales-order",
       "stock-movement",
       "unit",
