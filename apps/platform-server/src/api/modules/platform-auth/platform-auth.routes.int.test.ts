@@ -116,7 +116,7 @@ const acceptEnrollAndSignIn = async (
     "/platform-auth/invites/enroll-totp",
     { enrollmentTicket, code: totpCode(totpSecret) }
   )
-  expect(enroll.status).toBe(200)
+  expect(enroll.status, JSON.stringify(enroll.body)).toBe(200)
   return {
     cookie: sessionCookieFrom(enroll.setCookie),
     admin: enroll.body.data!.admin,
@@ -214,7 +214,7 @@ describe("invite acceptance and enrollment (A1-04)", () => {
       enrollmentTicket,
       code: wrongCode,
     })
-    expect(bad.status).toBe(401)
+    expect(bad.status, JSON.stringify(bad.body)).toBe(401)
     expect(bad.body.code).toBe(Code.INVALID_CREDENTIALS)
 
     // The admin is still invited: no session possible before enrollment.
@@ -224,7 +224,7 @@ describe("invite acceptance and enrollment (A1-04)", () => {
       email: "owner@avuny.dev",
       password: PASSWORD,
     })
-    expect(loginAttempt.status).toBe(401)
+    expect(loginAttempt.status, JSON.stringify(loginAttempt.body)).toBe(401)
 
     const tampered = await post("/platform-auth/invites/enroll-totp", {
       enrollmentTicket: enrollmentTicket.replace(/.$/, "A"),
