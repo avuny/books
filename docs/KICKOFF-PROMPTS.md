@@ -1,6 +1,6 @@
 # Kickoff prompts for AI coding agents
 
-One prompt per module. Paste each into a **fresh** agent session (Claude, Antigravity, or similar).
+One prompt per module. Paste each into a **fresh** agent session.
 
 ## Rules
 

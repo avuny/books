@@ -138,7 +138,7 @@ Detailed architectural standards and design patterns are documented in `/docs`. 
 | [docs/GIT.md](docs/GIT.md)           | Creating commit messages            | Conventional Commits rules, subject line conventions, and body bullet formatting.                                                                                                |
 # AGENTS.md — how to build modules in this monorepo
 
-Audience: AI coding agents (Claude Code, Codex, Cursor, Copilot, …).
+Audience: AI coding agents (the bots, Avuny-Bot-001/002/003, and any other tool).
 Read this file fully, then open the **skill** that matches your task. Skills hold copy-paste templates, **rules** are short must/never lists, the **workflow** gives the order of work.
 
 ## 1. Repo map
@@ -684,8 +684,9 @@ Several AI agents (bots) work in this repo next to the owner. GitHub Issues is t
 
 ### Who is who
 - **Avuny-Bot-001** (git author `Avuny-Bot-001`, GitHub account `avuny`): sales, purchasing and vendor bill and payment, ops (deploy, release, monitoring, runtime limits), SaaS spec work.
-- **Avuny-Bot-002**: inventory costing (WAC, valuation engine) and assembly (cost type, bill of materials, assembly order).
-- **Avuny-Bot-003**: the owner's other agent. No standing area yet; it works only on an issue assigned to it.
+- **Avuny-Bot-002**: no standing area at the moment; it works only on an issue assigned to it.
+- **Avuny-Bot-003**: inventory costing (WAC, valuation engine, cost enforcement) and assembly (cost type, bill of materials, assembly order). Owner's decision, 2026-11-28.
+- **Fleet lead**: Avuny-Bot-001 leads the fleet. It owns the board (priorities, assignments, labels), resolves cross-bot conflicts, reviews other bots' PRs before the owner merges, and keeps the coordination docs current. Merges to `dev`, releases to `main` and money decisions stay with the owner.
 - **Owner**: Khaled. Product decisions and every release to `main` need his OK, relayed by the bot he talks to.
 - Bots are known by number only. Use these names in issues, comments and commits.
 - Area ownership means: do not edit another bot's area code without a comment on the owning issue and a reply. Merging a PR that brings their code into dev or main is fine.
