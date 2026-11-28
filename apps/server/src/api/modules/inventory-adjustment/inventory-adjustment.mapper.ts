@@ -68,6 +68,7 @@ export function toInventoryAdjustmentLineDto(
     notes: row.notes ?? null,
     unitCost: row.unitCost ?? null,
     zeroCostReason: row.zeroCostReason ?? null,
+    proposedUnitCost: row.proposedUnitCost ?? null,
     createdAt: formatTimestamp(row.createdAt),
     updatedAt: formatTimestamp(row.updatedAt),
   }

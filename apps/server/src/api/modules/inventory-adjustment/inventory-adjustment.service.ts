@@ -15,6 +15,7 @@ import {
   inventoryAdjustmentTranslationsEn,
   RoleErrorCode,
 } from "@avuny/contracts"
+import type { Tx } from "@avuny/db"
 import { fail, ok, toCursorPage, type Result } from "@avuny/utils"
 import {
   toInventoryAdjustmentDto,
@@ -118,6 +119,37 @@ export function createInventoryAdjustmentService(deps: InventoryAdjustmentServic
 
   const makeSnapshotToken = (systemQuantityBase: string) =>
     `${systemQuantityBase}:${Date.now()}`
+
+  /**
+   * Cost columns of one line. The line is a CONFIRMED_PROPOSAL only when the user kept the proposal
+   * the server would give right now; any other typed cost is USER (SPEC R4, R5). Never a silent fill.
+   */
+  const costFields = async (
+    orgId: string,
+    line: {
+      itemId: string
+      locationId: string
+      unitCost?: string | null
+      zeroCostReason?: string | null
+      proposedUnitCost?: string | null
+    },
+    tx: Tx
+  ) => {
+    const unitCost = line.unitCost ?? null
+    const isZero = unitCost !== null && Number(unitCost) === 0
+    let proposed: string | null = null
+    if (unitCost !== null && !isZero && line.proposedUnitCost) {
+      const current = await deps.inventoryCosting.proposeUnitCost(orgId, line.itemId, line.locationId, tx)
+      if (current !== null && current === line.proposedUnitCost && current === unitCost) proposed = current
+    }
+    return {
+      unitCost,
+      costSource: unitCost === null ? null : proposed ? ("CONFIRMED_PROPOSAL" as const) : ("USER" as const),
+      isZeroCost: isZero,
+      zeroCostReason: isZero ? (line.zeroCostReason ?? null) : null,
+      proposedUnitCost: proposed,
+    }
+  }
 
   return {
     async create(
@@ -230,10 +262,7 @@ export function createInventoryAdjustmentService(deps: InventoryAdjustmentServic
             quantityDeltaBase,
             snapshotToken: line.snapshotToken || makeSnapshotToken(systemQuantityBase),
             notes: line.notes ?? null,
-            unitCost: line.unitCost ?? null,
-            costSource: line.unitCost ? ("USER" as const) : null,
-            isZeroCost: !!line.unitCost && Number(line.unitCost) === 0,
-            zeroCostReason: line.unitCost && Number(line.unitCost) === 0 ? (line.zeroCostReason ?? null) : null,
+            ...(await costFields(orgId, line, tx)),
           })
         }
 
@@ -381,10 +410,7 @@ export function createInventoryAdjustmentService(deps: InventoryAdjustmentServic
               quantityDeltaBase,
               snapshotToken: line.snapshotToken || makeSnapshotToken(systemQuantityBase),
               notes: line.notes ?? null,
-              unitCost: line.unitCost ?? null,
-              costSource: line.unitCost ? ("USER" as const) : null,
-              isZeroCost: !!line.unitCost && Number(line.unitCost) === 0,
-              zeroCostReason: line.unitCost && Number(line.unitCost) === 0 ? (line.zeroCostReason ?? null) : null,
+              ...(await costFields(orgId, line, tx)),
             })
           }
 
@@ -569,11 +595,18 @@ export function createInventoryAdjustmentService(deps: InventoryAdjustmentServic
                 batchId: line.batchId,
                 toLocationId: line.locationId,
                 quantity,
-                cost: {
-                  source: "USER" as const,
-                  unitCost: line.unitCost,
-                  ...(Number(line.unitCost) === 0 ? { zeroCost: { reason: line.zeroCostReason as any } } : {}),
-                },
+                cost:
+                  line.costSource === "CONFIRMED_PROPOSAL" && line.proposedUnitCost
+                    ? {
+                        source: "CONFIRMED_PROPOSAL" as const,
+                        unitCost: line.unitCost,
+                        proposedUnitCost: line.proposedUnitCost,
+                      }
+                    : {
+                        source: "USER" as const,
+                        unitCost: line.unitCost,
+                        ...(Number(line.unitCost) === 0 ? { zeroCost: { reason: line.zeroCostReason as any } } : {}),
+                      },
               })
             } else {
               // Loss: fromLocation is the warehouse location, to is null (resolved to adjustment system location)
@@ -766,6 +799,11 @@ export function createInventoryAdjustmentService(deps: InventoryAdjustmentServic
           systemQuantityBase,
           systemQuantitySelectedUnit,
           snapshotToken,
+          proposedUnitCost: await deps.inventoryCosting.proposeUnitCost(
+            orgId,
+            query.itemId,
+            query.locationId
+          ),
         },
         msg: "Stock snapshot retrieved successfully",
       })

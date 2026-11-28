@@ -82,6 +82,11 @@ export const InventoryAdjustmentLineInputSchema = z.object({
   unitCost: UnitCostMinorSchema.nullish(),
   /** Needed when unitCost is zero (SPEC R3). */
   zeroCostReason: ZeroCostReasonSchema.nullish(),
+  /**
+   * The proposal the user saw and kept. The server checks it against the current proposal and
+   * records the line as CONFIRMED_PROPOSAL only when it matches and the cost was not changed.
+   */
+  proposedUnitCost: UnitCostMinorSchema.nullish(),
 })
 export type InventoryAdjustmentLineInput = z.infer<
   typeof InventoryAdjustmentLineInputSchema
@@ -113,6 +118,7 @@ export const InventoryAdjustmentLineDtoSchema = z.object({
   notes: z.string().nullable(),
   unitCost: z.string().nullable().optional(),
   zeroCostReason: z.string().nullable().optional(),
+  proposedUnitCost: z.string().nullable().optional(),
   createdAt: timestamp,
   updatedAt: timestamp,
 })
@@ -265,5 +271,7 @@ export const StockSnapshotDtoSchema = z.object({
   systemQuantityBase: z.string(),
   systemQuantitySelectedUnit: z.string(),
   snapshotToken: z.string(),
+  /** Suggested cost per base unit in minor units, for a gain line. Null when the item was never costed. */
+  proposedUnitCost: z.string().nullable().optional(),
 })
 export type StockSnapshotDto = z.infer<typeof StockSnapshotDtoSchema>

@@ -1,4 +1,5 @@
 import type { InventoryCostLayer, NewInventoryCostAllocation, NewInventoryCostLayer, Tx } from "@avuny/db"
+import { toMicro } from "@avuny/contracts"
 import type { InventoryCostingServiceDeps } from "./inventory-costing.types.js"
 
 /**
@@ -139,6 +140,28 @@ export function createInventoryCostingService(deps: InventoryCostingServiceDeps)
       tx?: Tx
     ): Promise<InventoryCostLayer[]> {
       return repo.findFifoLayers(orgId, inventoryItemId, inventoryItemBatchId, opts, tx)
+    },
+
+    /**
+     * Proposed cost per base unit (minor units, decimal string) for stock the books have no cost
+     * for, from the last receipt layer: here first, then any location. Null when nothing was ever
+     * costed above zero. A proposal only: the caller shows it and the user confirms it (R5).
+     */
+    async proposeUnitCost(
+      orgId: string,
+      itemId: string,
+      locationId: string,
+      tx?: Tx
+    ): Promise<string | null> {
+      const layer = await repo.findLatestCostedLayer(orgId, itemId, locationId, tx)
+      if (!layer) return null
+      const qtyMicro = toMicro(layer.receivedQty)
+      if (qtyMicro <= 0n) return null
+      // value / qty to 10 decimals, round half up, exact integer math (qty has 6 decimals)
+      const scaled = (BigInt(layer.receivedValue) * 10n ** 16n * 2n + qtyMicro) / (qtyMicro * 2n)
+      const whole = scaled / 10n ** 10n
+      const frac = (scaled % 10n ** 10n).toString().padStart(10, "0").replace(/0+$/, "")
+      return frac ? `${whole}.${frac}` : whole.toString()
     },
 
     /**

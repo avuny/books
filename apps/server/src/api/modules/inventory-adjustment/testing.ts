@@ -87,7 +87,7 @@ export class InMemoryInventoryAdjustmentRepository implements InventoryAdjustmen
       isZeroCost: l.isZeroCost ?? false,
       zeroCostReason: l.zeroCostReason ?? null,
       costValueMinor: null,
-      proposedUnitCost: null,
+      proposedUnitCost: l.proposedUnitCost ?? null,
       createdAt: now,
       updatedAt: now,
     }))
@@ -150,7 +150,7 @@ export class InMemoryInventoryAdjustmentRepository implements InventoryAdjustmen
       isZeroCost: l.isZeroCost ?? false,
       zeroCostReason: l.zeroCostReason ?? null,
       costValueMinor: null,
-      proposedUnitCost: null,
+      proposedUnitCost: l.proposedUnitCost ?? null,
       createdAt: now,
       updatedAt: now,
     }))
@@ -275,6 +275,9 @@ export const dummyStockMovement: StockMovementPort = {
 }
 
 export const dummyInventoryCosting: InventoryCostingPort = {
+  async proposeUnitCost() {
+    return null
+  },
   async createCostLayer(input) {
     return {
       id: "cost-layer-1",
