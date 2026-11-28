@@ -138,7 +138,7 @@ Detailed architectural standards and design patterns are documented in `/docs`. 
 | [docs/GIT.md](docs/GIT.md)           | Creating commit messages            | Conventional Commits rules, subject line conventions, and body bullet formatting.                                                                                                |
 # AGENTS.md — how to build modules in this monorepo
 
-Audience: AI coding agents (Claude Code, Codex, Cursor, Copilot, …).
+Audience: AI coding agents (the bots, Avuny-Bot-001/002/003, and any other tool).
 Read this file fully, then open the **skill** that matches your task. Skills hold copy-paste templates, **rules** are short must/never lists, the **workflow** gives the order of work.
 
 ## 1. Repo map
