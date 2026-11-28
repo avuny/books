@@ -2,11 +2,14 @@
 
 ## [Unreleased]
 
-## [0.6.1] - 2026-11-28
-
-- Known limit: Receive and pay undoes failed steps from the browser. If the tab closes mid-way, or a request gets no answer, the client does not undo automatically and asks the user to check the receipt, bill and payment before retrying.
+## [0.6.2] - 2026-11-28
 ### Fixed
-- Quick purchase receipt ("Receive and pay") now runs step by step from the web app with undo on failure. The single server endpoint hit the Cloudflare Workers database call limit in production and could leave a half-done receipt
+- Receive and pay asks for the supplier invoice number (required to post the bill). In 0.6.1 the button posted the receipt, failed on the bill and undid everything.
+
+## [0.6.1] - 2026-11-28
+### Fixed
+- Quick purchase receipt ("Receive and pay") now runs step by step from the web app with undo on failure. The single server endpoint hit the Cloudflare Workers database call limit in production and could leave a half-done receipt.
+- Known limit: the undo runs in the browser. If the tab closes mid-way, or a request gets no answer, the client does not undo automatically and asks the user to check the receipt, bill and payment before retrying.
 
 ## [0.6.0] - 2026-11-28
 ### Added

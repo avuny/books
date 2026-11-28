@@ -81,6 +81,7 @@
       "confirm": "Receive and pay",
       "creating": "Working...",
       "method": "Paid from",
+      "supplierInvoice": "Supplier invoice no.",
       "cash": "Cash",
       "bank": "Bank",
       "stepFailed": "A step failed and the earlier steps were undone: {message}",
