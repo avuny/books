@@ -147,10 +147,30 @@ export const PRODUCT_MODULES = {
   sales: {
     label: { en: "Sales", ar: "المبيعات" },
     dependsOn: ["inventory"],
+    softDependsOn: [
+      {
+        module: "accounting",
+        reason:
+          "Sales orders, deliveries, invoices, credit notes and customer payments post journal entries when Accounting is on (SPEC 2.4).",
+      },
+      {
+        module: "inventory_costing",
+        reason: "Sales deliveries value outbound stock through the costing service.",
+      },
+      {
+        module: "inventory_advanced",
+        reason:
+          "Sales orders and deliveries reserve stock through inventory reservation.",
+      },
+      {
+        module: "purchasing",
+        reason:
+          "Sales orders reference payment terms, which live in the purchasing product (shared party tables, SPEC 2.4).",
+      },
+    ],
     switchable: true,
     defaultOn: false,
     showLocked: true,
-    // Only customers exist today; future sales documents register here.
   },
   accounting: {
     label: { en: "Accounting", ar: "المحاسبة" },
