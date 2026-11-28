@@ -21,8 +21,7 @@
     "PURCHASE_RECEIPT_POSTING_FAILED": "Posting the receipt failed. Nothing was changed. Please try again",
     "PURCHASE_RECEIPT_PROJECTION_CONFLICT": "Stock quantities changed while posting. Please try again",
     "PURCHASE_RECEIPT_ALREADY_BILLED": "The receipt has a posted supplier bill. Reverse the bill first",
-    "PURCHASE_RECEIPT_NUMBER_TAKEN": "Could not allocate a receipt number. Please try again",
-    "PURCHASE_RECEIPT_QUICK_STEP_FAILED": "A step of the quick receipt failed. Everything done before it was reversed"
+    "PURCHASE_RECEIPT_NUMBER_TAKEN": "Could not allocate a receipt number. Please try again"
   },
   "labels": {
     "status": {
@@ -78,14 +77,15 @@
     "quick": {
       "open": "Receive and pay",
       "title": "Quick receipt for {number}",
-      "description": "Receives the lines below, posts the receipt, bills it, posts the bill and records the full payment in one step.",
+      "description": "Receives the lines below, posts the receipt, bills it, posts the bill and records the full payment, step by step.",
       "confirm": "Receive and pay",
       "creating": "Working...",
       "method": "Paid from",
       "cash": "Cash",
       "bank": "Bank",
-      "invoiceDate": "Bill date",
-      "supplierInvoiceNumber": "Supplier invoice number"
+      "stepFailed": "A step failed and the earlier steps were undone: {message}",
+      "stepFailedUndo": "A step failed and some earlier steps could not be undone. Check the receipt and bill: {message}",
+      "stepUnknown": "The connection dropped, so we cannot tell if the last step went through. Nothing was undone. Check the receipt, bill and payment before trying again."
     }
   }
 }

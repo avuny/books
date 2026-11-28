@@ -11,11 +11,6 @@ import {
   PURCHASE_RECEIPT_STATUSES,
 } from "./constants.js"
 
-import { VENDOR_BILL_SUPPLIER_INVOICE_MAX_LENGTH } from "../vendor-bill/constants.js"
-import { VendorBillDtoSchema } from "../vendor-bill/schemas.js"
-import { VENDOR_PAYMENT_REFERENCE_MAX_LENGTH } from "../vendor-payment/constants.js"
-import { VendorPaymentDtoSchema, VendorPaymentMethodSchema } from "../vendor-payment/schemas.js"
-
 const id = z.string().uuid()
 const timestamp = z.string().datetime()
 const date = z.string().trim().regex(/^\d{4}-\d{2}-\d{2}$/, "Use YYYY-MM-DD")
@@ -154,22 +149,3 @@ export const PurchaseReceiptListResponseSchema = z.object({
   items: z.array(PurchaseReceiptDtoSchema),
 })
 export type PurchaseReceiptListResponse = z.infer<typeof PurchaseReceiptListResponseSchema>
-
-/**
- * Quick purchase receipt: receives goods on one purchase order, posts the receipt, bills it, posts the
- * bill and records a posted supplier payment for the full bill total in one step.
- */
-export const QuickPurchaseReceiptSchema = z.object({
-  receipt: CreatePurchaseReceiptSchema,
-  supplierInvoiceNumber: text(VENDOR_BILL_SUPPLIER_INVOICE_MAX_LENGTH).nullish(),
-  method: VendorPaymentMethodSchema,
-  referenceNumber: text(VENDOR_PAYMENT_REFERENCE_MAX_LENGTH).nullish(),
-})
-export type QuickPurchaseReceiptInput = z.infer<typeof QuickPurchaseReceiptSchema>
-
-export const QuickPurchaseReceiptDtoSchema = z.object({
-  receipt: PurchaseReceiptDtoSchema,
-  bill: VendorBillDtoSchema,
-  payment: VendorPaymentDtoSchema,
-})
-export type QuickPurchaseReceiptDto = z.infer<typeof QuickPurchaseReceiptDtoSchema>
