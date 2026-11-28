@@ -6,9 +6,9 @@ import { PRODUCT_MODULES, type ProductModuleKey } from "./product-modules.js"
 
 /**
  * S1-01 done-when: the catalog type-checks and lists every registry module
- * under exactly one product module. S1-02 preview: dependencies are real
- * product modules and the graph is acyclic (the full import-scan graph
- * replaces this in S1-02).
+ * under exactly one product module. S1-02 adds the server-side import-scan
+ * test (apps/server/src/api/modules/module-deps.test.ts), which checks the
+ * declared graph against the real imports between api/modules dirs.
  */
 
 describe("MODULE_CATALOG (S1-01)", () => {
