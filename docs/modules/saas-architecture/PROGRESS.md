@@ -116,7 +116,7 @@ Every task: "done when" is checkable. Every phase ends with a gate. Run `pnpm ty
 ### Phase S0: Decisions and spikes
 - [~] **S0-01** Owner answers Q1 to Q14 and fixes-plan D1 to D8. Q1 to Q24 answered 2026-11-27 (all defaults); fixes-plan D1 to D8 still open. Done when: answers recorded in the Decisions log below.
 - [x] **S0-02** Repository checks from SPEC section 13, output pasted in the Verification log. Done 2026-11-28: all 7 results recorded below (2026-11-28 rows).
-- [ ] **S0-03** Provider spike: for each candidate in Q5, verify with current official sources: can the business onboard from Egypt, supported currencies and payment methods, subscription support, webhook model, Workers compatibility, fees, tax invoice requirements. Done when: a one-page comparison with source links is added to this folder as `PROVIDER-SPIKE.md`.
+- [x] **S0-03** Provider spike: for each candidate in Q5, verify with current official sources: can the business onboard from Egypt, supported currencies and payment methods, subscription support, webhook model, Workers compatibility, fees, tax invoice requirements. Done 2026-11-28: [`PROVIDER-SPIKE.md`](./PROVIDER-SPIKE.md). Material finding: Stripe cannot onboard an Egypt-registered business (needs a US entity), so Paymob is the recommended launch processor; Stripe stays the international adapter; Fawry is the local fallback.
 - [ ] **S0-04** Transaction-capable database driver decided and merged (fixes plan Phase 2) or scheduled before S5. Done when: a rollback test passes.
 - **Gate S0**: S0-01 to S0-04 ticked; no open "blocks S1" decision.
 
