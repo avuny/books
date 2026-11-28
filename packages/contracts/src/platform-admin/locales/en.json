@@ -1,0 +1,267 @@
+{
+  "shell": {
+    "appName": "Avuny admin",
+    "nav": {
+      "admins": "Admins",
+      "roles": "Roles"
+    },
+    "signOut": "Sign out",
+    "signingOut": "Signing out…",
+    "loading": "Loading…"
+  },
+  "auth": {
+    "signIn": {
+      "title": "Admin sign in",
+      "description": "Sign in with your platform admin account.",
+      "email": {
+        "label": "Email",
+        "placeholder": "you@avuny.com"
+      },
+      "password": {
+        "label": "Password",
+        "placeholder": "Your password"
+      },
+      "submitLabel": "Continue",
+      "submittingLabel": "Checking…",
+      "genericError": "Something went wrong. Try again."
+    },
+    "totp": {
+      "title": "Two-factor authentication",
+      "description": "Enter the 6-digit code from your authenticator app.",
+      "code": {
+        "label": "Authentication code",
+        "placeholder": "123456"
+      },
+      "submitLabel": "Sign in",
+      "submittingLabel": "Signing in…",
+      "backLabel": "Back",
+      "ticketExpired": "This sign-in has expired. Start again."
+    },
+    "acceptInvite": {
+      "title": "Accept your invite",
+      "description": "Set your name and password to join the platform admin team.",
+      "name": {
+        "label": "Full name",
+        "placeholder": "Your name"
+      },
+      "password": {
+        "label": "Password",
+        "placeholder": "At least 8 characters"
+      },
+      "passwordHelp": "Use at least 8 characters.",
+      "submitLabel": "Continue",
+      "submittingLabel": "Creating your account…",
+      "invalidInvite": "This invite link is invalid, used or expired",
+      "missingToken": "This link is missing its invite token. Ask for a new invite."
+    },
+    "enrollTotp": {
+      "title": "Set up two-factor authentication",
+      "description": "Add this account to your authenticator app, then enter the 6-digit code it shows.",
+      "secretLabel": "Setup key",
+      "secretHelp": "Enter this key in your authenticator app to add the account.",
+      "code": {
+        "label": "Authentication code",
+        "placeholder": "123456"
+      },
+      "submitLabel": "Finish setup",
+      "submittingLabel": "Verifying…",
+      "ticketExpired": "This setup session has expired. Start again."
+    }
+  },
+  "admins": {
+    "title": "Admins",
+    "description": "Platform admins and their access.",
+    "inviteLabel": "Invite admin",
+    "empty": "No admins yet.",
+    "loadMore": "Load more",
+    "loadingMore": "Loading…",
+    "columns": {
+      "name": "Name",
+      "email": "Email",
+      "roles": "Roles",
+      "status": "Status",
+      "createdAt": "Joined",
+      "actions": "Actions"
+    },
+    "status": {
+      "invited": "Invited",
+      "active": "Active",
+      "disabled": "Disabled"
+    },
+    "filter": {
+      "all": "All",
+      "active": "Active",
+      "invited": "Invited",
+      "disabled": "Disabled"
+    },
+    "invite": {
+      "title": "Invite an admin",
+      "description": "They get a one-time link to set up their account.",
+      "email": {
+        "label": "Email",
+        "placeholder": "teammate@avuny.com"
+      },
+      "rolesLabel": "Roles",
+      "rolesHelp": "They get the combined permissions of every selected role.",
+      "submitLabel": "Create invite",
+      "submittingLabel": "Creating invite…",
+      "createdTitle": "Invite created",
+      "createdDescription": "Share this one-time link with them. It expires in 24 hours and is only shown once.",
+      "copyLink": "Copy link",
+      "copiedLabel": "Copied",
+      "doneLabel": "Done"
+    },
+    "edit": {
+      "title": "Edit admin",
+      "description": "Only the name can be edited here.",
+      "name": {
+        "label": "Full name",
+        "placeholder": "Their name"
+      },
+      "submitLabel": "Save",
+      "submittingLabel": "Saving…"
+    },
+    "roles": {
+      "title": "Roles",
+      "description": "Replace this admin's roles. They get the combined permissions of every selected role.",
+      "submitLabel": "Save roles",
+      "submittingLabel": "Saving…",
+      "emptyLabel": "No roles selected. This admin will not be able to do anything."
+    },
+    "disable": {
+      "label": "Disable admin",
+      "title": "Disable this admin?",
+      "description": "They lose access immediately and every signed-in session ends. This does not delete their audit history.",
+      "confirmLabel": "Disable admin",
+      "confirmingLabel": "Disabling…",
+      "cancelLabel": "Cancel"
+    },
+    "detail": {
+      "backLabel": "Back to admins",
+      "profileTitle": "Profile",
+      "totpEnabled": "Two-factor authentication on",
+      "totpPending": "Two-factor authentication not set up",
+      "notFound": "Admin not found."
+    },
+    "editLabel": "Edit",
+    "rolesLabel": "Edit roles"
+  },
+  "roles": {
+    "title": "Roles",
+    "description": "Bundles of platform permissions granted to admins.",
+    "createLabel": "Create role",
+    "empty": "No roles yet.",
+    "columns": {
+      "name": "Name",
+      "key": "Key",
+      "permissions": "Permissions",
+      "admins": "Admins",
+      "createdAt": "Created",
+      "actions": "Actions",
+      "type": "Type"
+    },
+    "builtinBadge": "Built-in",
+    "customBadge": "Custom",
+    "builtinLock": "Built-in roles can be viewed and cloned, not edited or deleted.",
+    "create": {
+      "title": "Create a role",
+      "description": "A role bundles platform permissions.",
+      "submitLabel": "Create role",
+      "submittingLabel": "Creating…"
+    },
+    "edit": {
+      "title": "Edit role",
+      "description": "Change the name, description or permissions.",
+      "submitLabel": "Save",
+      "submittingLabel": "Saving…"
+    },
+    "clone": {
+      "label": "Clone",
+      "title": "Clone role",
+      "description": "Copy this role's permissions into a new role.",
+      "submitLabel": "Clone role",
+      "submittingLabel": "Cloning…"
+    },
+    "delete": {
+      "label": "Delete",
+      "title": "Delete this role?",
+      "description": "Admins holding it lose its permissions. This cannot be undone.",
+      "confirmLabel": "Delete role",
+      "confirmingLabel": "Deleting…",
+      "cancelLabel": "Cancel"
+    },
+    "form": {
+      "key": {
+        "label": "Key",
+        "placeholder": "billing_reviewer"
+      },
+      "keyHelp": "Lowercase letters, digits and underscores. Cannot be changed later.",
+      "name": {
+        "label": "Name",
+        "placeholder": "Billing reviewer"
+      },
+      "description": {
+        "label": "Description",
+        "placeholder": "What this role is for"
+      },
+      "permissionsLabel": "Permissions",
+      "permissionsHelp": "You can only grant permissions you hold yourself.",
+      "selectAll": "Select all",
+      "clearAll": "Clear"
+    },
+    "detail": {
+      "backLabel": "Back to roles",
+      "notFound": "Role not found."
+    },
+    "permissions": {
+      "resources": {
+        "platform-admin": "Admins",
+        "platform-role": "Roles",
+        "platform-plan": "Plans",
+        "platform-catalog": "Catalog",
+        "platform-addon": "Add-ons",
+        "platform-organization": "Organizations",
+        "platform-user": "Users",
+        "platform-subscription": "Subscriptions",
+        "platform-payment": "Payments",
+        "platform-provider-event": "Provider events",
+        "platform-job": "Jobs",
+        "platform-template": "Templates",
+        "platform-sidebar": "Sidebar",
+        "platform-permission-catalog": "Permission catalog",
+        "platform-audit": "Audit log",
+        "platform-site": "Landing site",
+        "platform-media": "Media",
+        "platform-plan-marketing": "Plan marketing",
+        "platform-dashboard": "Dashboard"
+      },
+      "actions": {
+        "read": "Read",
+        "create": "Create",
+        "update": "Update",
+        "delete": "Delete",
+        "disable": "Disable",
+        "reset": "Reset",
+        "publish": "Publish",
+        "publish_now": "Apply now",
+        "retire": "Retire",
+        "assign_plan": "Assign plan",
+        "override": "Override",
+        "extend_trial": "Extend trial",
+        "suspend": "Suspend",
+        "revoke_sessions": "Revoke sessions",
+        "cancel": "Cancel",
+        "resume": "Resume",
+        "change": "Change",
+        "refund": "Refund",
+        "confirm_manual": "Confirm manual",
+        "void_invoice": "Void invoice",
+        "replay": "Replay",
+        "run": "Run now",
+        "export": "Export",
+        "rollback": "Rollback"
+      }
+    },
+    "editLabel": "Edit"
+  }
+}

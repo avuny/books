@@ -10,33 +10,107 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthedRouteImport } from './routes/_authed'
+import { Route as AcceptInviteRouteImport } from './routes/accept-invite'
+import { Route as SignInRouteImport } from './routes/sign-in'
+import { Route as AuthedAdminsIndexRouteImport } from './routes/_authed/admins/index'
+import { Route as AuthedAdminsAdminIdRouteImport } from './routes/_authed/admins/$adminId'
+import { Route as AuthedRolesIndexRouteImport } from './routes/_authed/roles/index'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthedRoute = AuthedRouteImport.update({
+  id: '/_authed',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AcceptInviteRoute = AcceptInviteRouteImport.update({
+  id: '/accept-invite',
+  path: '/accept-invite',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SignInRoute = SignInRouteImport.update({
+  id: '/sign-in',
+  path: '/sign-in',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthedAdminsIndexRoute = AuthedAdminsIndexRouteImport.update({
+  id: '/admins/',
+  path: '/admins/',
+  getParentRoute: () => AuthedRoute,
+} as any)
+const AuthedAdminsAdminIdRoute = AuthedAdminsAdminIdRouteImport.update({
+  id: '/admins/$adminId',
+  path: '/admins/$adminId',
+  getParentRoute: () => AuthedRoute,
+} as any)
+const AuthedRolesIndexRoute = AuthedRolesIndexRouteImport.update({
+  id: '/roles/',
+  path: '/roles/',
+  getParentRoute: () => AuthedRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/accept-invite': typeof AcceptInviteRoute
+  '/sign-in': typeof SignInRoute
+  '/admins/$adminId': typeof AuthedAdminsAdminIdRoute
+  '/admins/': typeof AuthedAdminsIndexRoute
+  '/roles/': typeof AuthedRolesIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/accept-invite': typeof AcceptInviteRoute
+  '/sign-in': typeof SignInRoute
+  '/admins/$adminId': typeof AuthedAdminsAdminIdRoute
+  '/admins': typeof AuthedAdminsIndexRoute
+  '/roles': typeof AuthedRolesIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_authed': typeof AuthedRouteWithChildren
+  '/accept-invite': typeof AcceptInviteRoute
+  '/sign-in': typeof SignInRoute
+  '/_authed/admins/$adminId': typeof AuthedAdminsAdminIdRoute
+  '/_authed/admins/': typeof AuthedAdminsIndexRoute
+  '/_authed/roles/': typeof AuthedRolesIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/accept-invite'
+    | '/sign-in'
+    | '/admins/$adminId'
+    | '/admins/'
+    | '/roles/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/accept-invite'
+    | '/sign-in'
+    | '/admins/$adminId'
+    | '/admins'
+    | '/roles'
+  id:
+    | '__root__'
+    | '/'
+    | '/_authed'
+    | '/accept-invite'
+    | '/sign-in'
+    | '/_authed/admins/$adminId'
+    | '/_authed/admins/'
+    | '/_authed/roles/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthedRoute: typeof AuthedRouteWithChildren
+  AcceptInviteRoute: typeof AcceptInviteRoute
+  SignInRoute: typeof SignInRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +122,71 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authed': {
+      id: '/_authed'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/accept-invite': {
+      id: '/accept-invite'
+      path: '/accept-invite'
+      fullPath: '/accept-invite'
+      preLoaderRoute: typeof AcceptInviteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sign-in': {
+      id: '/sign-in'
+      path: '/sign-in'
+      fullPath: '/sign-in'
+      preLoaderRoute: typeof SignInRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authed/admins/': {
+      id: '/_authed/admins/'
+      path: '/admins'
+      fullPath: '/admins/'
+      preLoaderRoute: typeof AuthedAdminsIndexRouteImport
+      parentRoute: typeof AuthedRoute
+    }
+    '/_authed/admins/$adminId': {
+      id: '/_authed/admins/$adminId'
+      path: '/admins/$adminId'
+      fullPath: '/admins/$adminId'
+      preLoaderRoute: typeof AuthedAdminsAdminIdRouteImport
+      parentRoute: typeof AuthedRoute
+    }
+    '/_authed/roles/': {
+      id: '/_authed/roles/'
+      path: '/roles'
+      fullPath: '/roles/'
+      preLoaderRoute: typeof AuthedRolesIndexRouteImport
+      parentRoute: typeof AuthedRoute
+    }
   }
 }
 
+interface AuthedRouteChildren {
+  AuthedAdminsAdminIdRoute: typeof AuthedAdminsAdminIdRoute
+  AuthedAdminsIndexRoute: typeof AuthedAdminsIndexRoute
+  AuthedRolesIndexRoute: typeof AuthedRolesIndexRoute
+}
+
+const AuthedRouteChildren: AuthedRouteChildren = {
+  AuthedAdminsAdminIdRoute: AuthedAdminsAdminIdRoute,
+  AuthedAdminsIndexRoute: AuthedAdminsIndexRoute,
+  AuthedRolesIndexRoute: AuthedRolesIndexRoute,
+}
+
+const AuthedRouteWithChildren =
+  AuthedRoute._addFileChildren(AuthedRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthedRoute: AuthedRouteWithChildren,
+  AcceptInviteRoute: AcceptInviteRoute,
+  SignInRoute: SignInRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
