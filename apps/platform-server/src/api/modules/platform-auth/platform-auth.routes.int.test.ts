@@ -229,8 +229,15 @@ describe("invite acceptance and enrollment (A1-04)", () => {
     })
     expect(loginAttempt.status, JSON.stringify(loginAttempt.body)).toBe(401)
 
+    // Flip a middle character: replacing the last char with a fixed letter is
+    // a no-op when the ticket happens to end with it (flakes ~1/64 of runs).
+    const mid = Math.floor(enrollmentTicket.length / 2)
+    const tamperedTicket =
+      enrollmentTicket.slice(0, mid) +
+      (enrollmentTicket[mid] === "A" ? "B" : "A") +
+      enrollmentTicket.slice(mid + 1)
     const tampered = await post("/platform-auth/invites/enroll-totp", {
-      enrollmentTicket: enrollmentTicket.replace(/.$/, "A"),
+      enrollmentTicket: tamperedTicket,
       code: totpCode(totpSecret),
     })
     expect(tampered.status).toBe(401)
