@@ -1,11 +1,13 @@
 import { sql } from "drizzle-orm"
 import {
+    bigint,
     boolean,
     check,
     date,
     foreignKey,
     index,
     integer,
+    numeric,
     pgEnum,
     pgTable,
     text,
@@ -28,6 +30,7 @@ import { lengthBetween, matchesRegex, pk, quantity, timestamps, timestamptz } fr
 import { organizations, orgRef } from "../organization/organizations.js"
 import { users } from "../user/users.js"
 import { warehouses, warehouseLocations } from "../warehouse/warehouse.js"
+import { inventoryCostSourceEnum } from "./inventory-costing.js"
 import { items } from "../item/item.js"
 import { units } from "../item/unit.js"
 import { batches } from "./batch.js"
@@ -184,9 +187,21 @@ export const inventoryAdjustmentLines = pgTable(
         quantityDeltaBase: quantity("quantity_delta_base").notNull(),
         snapshotToken: text("snapshot_token"),
         notes: text("notes"),
+        /**
+         * Cost of a gain line (positive delta), SPEC R9. Required for gains by the engine, not by
+         * the schema, because existing rows have none. cost_value_minor is the source of truth in
+         * minor units; unit_cost and proposed_unit_cost are display values.
+         */
+        costValueMinor: bigint("cost_value_minor", { mode: "number" }),
+        unitCost: numeric("unit_cost", { precision: 30, scale: 10 }),
+        costSource: inventoryCostSourceEnum("cost_source"),
+        isZeroCost: boolean("is_zero_cost").notNull().default(false),
+        zeroCostReason: text("zero_cost_reason"),
+        proposedUnitCost: numeric("proposed_unit_cost", { precision: 30, scale: 10 }),
         ...timestamps(),
     },
     (t) => [
+        check("ck_inventory_adjustment_line_cost_non_negative", sql`${t.costValueMinor} is null or ${t.costValueMinor} >= 0`),
         foreignKey({
             name: "fk_inventory_adjustment_line_adjustment",
             columns: [t.orgId, t.adjustmentId],

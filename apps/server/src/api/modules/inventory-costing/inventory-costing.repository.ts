@@ -1,7 +1,8 @@
-import { and, asc, eq, gt, sql } from "drizzle-orm"
+import { and, asc, desc, eq, gt, sql } from "drizzle-orm"
 import {
   inventoryCostAllocations,
   inventoryCostLayers,
+  inventoryItems,
   type DB,
   type InventoryCostAllocation,
   type InventoryCostLayer,
@@ -91,6 +92,39 @@ export function createInventoryCostingRepository({ db }: { db: DB }) {
     /**
      * Find the cost layers created by one source movement line.
      */
+    /**
+     * Newest receipt layer with a real value for an item, at one location first and then anywhere.
+     * Only a proposal source (SPEC R5): the result is shown to the user, never applied silently.
+     */
+    async findLatestCostedLayer(
+      orgId: string,
+      itemId: string,
+      locationId: string,
+      tx?: Tx
+    ): Promise<InventoryCostLayer | null> {
+      const base = [
+        eq(inventoryCostLayers.orgId, orgId),
+        eq(inventoryCostLayers.itemId, itemId),
+        gt(inventoryCostLayers.receivedQty, "0"),
+        gt(inventoryCostLayers.receivedValue, 0),
+      ]
+      const here = await exec(tx)
+        .select({ layer: inventoryCostLayers })
+        .from(inventoryCostLayers)
+        .innerJoin(inventoryItems, eq(inventoryItems.id, inventoryCostLayers.inventoryItemId))
+        .where(and(...base, eq(inventoryItems.locationId, locationId)))
+        .orderBy(desc(inventoryCostLayers.receivedAt), desc(inventoryCostLayers.id))
+        .limit(1)
+      if (here[0]) return here[0].layer
+      const [any] = await exec(tx)
+        .select()
+        .from(inventoryCostLayers)
+        .where(and(...base))
+        .orderBy(desc(inventoryCostLayers.receivedAt), desc(inventoryCostLayers.id))
+        .limit(1)
+      return any ?? null
+    },
+
     async findLayersBySourceLine(
       orgId: string,
       sourceMovementLineId: string,

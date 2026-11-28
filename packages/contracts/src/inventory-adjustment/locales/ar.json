@@ -14,6 +14,7 @@
     "INVENTORY_ADJUSTMENT_TOO_MANY_LINES": "تجاوزت التسوية الحد الأقصى المسموح به للبنود",
     "INVENTORY_ADJUSTMENT_DUPLICATE_LINES": "توجد بنود مكررة لنفس الصنف والموقع ورقم التشغيلة",
     "INVENTORY_ADJUSTMENT_NO_DIFFERENCE": "لا توجد فروق كميات لترحيلها في هذه التسوية",
+    "INVENTORY_ADJUSTMENT_COST_REQUIRED": "السطر الذي يزيد المخزون يحتاج إلى تكلفة وحدة (أدخل 0 مع سبب للصنف المجاني)",
     "INVENTORY_ADJUSTMENT_DIRECTION_MISMATCH": "فروق الكميات لا تتطابق مع اتجاه سبب التسوية المحدد",
     "INVENTORY_ADJUSTMENT_LOCATION_NOT_FOUND": "موقع المستودع المحدد غير موجود",
     "INVENTORY_ADJUSTMENT_LOCATION_NOT_IN_WAREHOUSE": "الموقع لا يتبع المستودع المحدد",

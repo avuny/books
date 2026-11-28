@@ -10,6 +10,7 @@ import {
   negateDecimal,
   resolveSides,
   stockMovementTranslationsEn,
+  type CostInput,
   type ItemBatchStockDto,
   type ItemStockDto,
   type OnHandQuery,
@@ -49,6 +50,8 @@ type ResolvedLine = {
   toLocationId: string
   fromIntent: WarehouseLocationPostingIntent | null
   toIntent: WarehouseLocationPostingIntent | null
+  /** Cost input for a value-in line (stock arriving from outside the warehouses). */
+  cost?: CostInput
 }
 type Header = Omit<NewStockMovement, "orgId" | "createdBy">
 
@@ -82,7 +85,8 @@ export function createStockMovementService(deps: StockMovementServiceDeps) {
     header: Header,
     inputLines: ResolvedLine[],
     system: SystemLocationIds,
-    forwardChecks: boolean
+    forwardChecks: boolean,
+    currency?: string
   ): Promise<Failure | StockMovementDto> => {
     let lines = inputLines
     // 1. items exist, are active and keep stock
@@ -251,6 +255,49 @@ export function createStockMovementService(deps: StockMovementServiceDeps) {
       tx
     )
 
+    // 6b. cost: a value-in line (no stock side it comes from, a stock side it goes to) with a cost input
+    // is costed and gets its layer, in the same transaction. Nothing before this point wrote a layer.
+    if (deps.costing) {
+      for (const [i, l] of lines.entries()) {
+        const lineId = rows.find((r) => r.lineNo === i + 1)!.id
+        if (l.fromIntent && l.toIntent) {
+          // Internal move: the layers follow the stock. A forward move of stock without layers fails (R6).
+          if (!deps.costing.moveLine || l.fromLocationId === l.toLocationId) continue
+          const res = await deps.costing.moveLine(
+            {
+              orgId,
+              movementLineId: lineId,
+              itemId: l.itemId,
+              batchId: l.batchId,
+              fromLocationId: l.fromLocationId,
+              toLocationId: l.toLocationId,
+              quantity: l.quantity,
+              strict: forwardChecks,
+            },
+            tx
+          )
+          if (!res.ok) return failure(res.error, `${res.msg} (line ${i + 1})`)
+          continue
+        }
+        if (!forwardChecks || !l.cost || l.fromIntent || !l.toIntent) continue
+        const res = await deps.costing.receiveLine(
+          {
+            orgId,
+            movementLineId: lineId,
+            itemId: l.itemId,
+            batchId: l.batchId,
+            toLocationId: l.toLocationId,
+            quantity: l.quantity,
+            receivedAt: header.postedAt ?? new Date(),
+            cost: l.cost,
+            currency,
+          },
+          tx
+        )
+        if (!res.ok) return failure(res.error, `${res.msg} (line ${i + 1})`)
+      }
+    }
+
     const deltas = new Map<string, BalanceDelta>()
     const add = (locationId: string, itemId: string, batchId: string | null, delta: string) => {
       const key = balanceKey(locationId, itemId, batchId)
@@ -321,6 +368,7 @@ export function createStockMovementService(deps: StockMovementServiceDeps) {
             batchId: line.batchId ?? null,
             quantity: line.quantity,
             ...sides.value,
+            cost: line.cost,
           })
         }
         return commit(
@@ -337,7 +385,8 @@ export function createStockMovementService(deps: StockMovementServiceDeps) {
           },
           lines,
           system,
-          true
+          true,
+          input.currency
         )
       }
       const outcome = await (tx ? run(tx) : repo.transaction(run))

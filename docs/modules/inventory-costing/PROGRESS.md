@@ -6,7 +6,7 @@
 | Analysis | [`ANALYSIS.md`](./ANALYSIS.md) |
 | Last updated | 2026-11-27 |
 | Current phase | Phase 1 |
-| Tasks done | 0 / 22 |
+| Tasks done | 4 / 22 |
 | Gates passed | 0 / 9 |
 
 ## How to use this file
@@ -16,7 +16,7 @@ Each phase ships as its own PR. Manufacturing (assembly) waits for gate 6.
 Legend: `[ ]` todo · `[~]` in progress · `[x]` done · `[!]` blocked · `[-]` not applicable (say why)
 
 ## Next action
-> **P1-01**: W1, W2, W3, W5, W6 are decided. Start phase 1 (pure math, contracts, schema). Prod data check for items below zero is needed before negative stock is enforced (phase 2/3), owner to supply counts.
+> **P1-04**: run the migration `0035_inventory_costing_foundation` on a real Postgres (CI integration job) and confirm gate 1. Re-check the journal against origin/dev before every push.
 
 ## Status board
 | Phase | Title | Tasks | Gate | Status |
@@ -35,15 +35,15 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done · `[!]` blocked · `[-]` 
 | ID | Task | Done when | Status |
 |---|---|---|---|
 | P0-01 | Close open decisions | Decision log filled | [x] |
-| P0-02 | Run SPEC section 14.2 checks | Results in the verification log | [ ] |
-| P1-01 | Pure arithmetic and rules in contracts (issue value, receipt value, millions helpers, cost input schemas) | Property tests for AC5 | [ ] |
-| P1-02 | Error codes and locales en and ar | Locale parity test | [ ] |
-| P1-03 | Schema: pools, entries, layer, allocation and adjustment line columns | Section 5 matches code | [ ] |
-| P1-04 | Migration with backfill flags, tested on a copy of data | AC17 | [ ] |
-| P2-01 | Valuation engine port and FIFO strategy | Existing FIFO tests pass unchanged | [ ] |
-| P2-02 | Stock movement post and reverse call the engine, cost input required for value-in | AC1 | [ ] |
-| P2-03 | Opening stock and purchase receipt pass cost inputs, opening cost required | AC1, AC2 | [ ] |
-| P2-04 | Transfer uses the engine, uncovered quantity fails | AC6, AC7 | [ ] |
+| P0-02 | Run SPEC section 14.2 checks | Results in the verification log | [x] |
+| P1-01 | Pure arithmetic and rules in contracts (issue value, receipt value, millions helpers, cost input schemas) | Property tests for AC5 | [x] |
+| P1-02 | Error codes and locales en and ar | Locale parity test | [x] |
+| P1-03 | Schema: pools, entries, layer, allocation and adjustment line columns | Section 5 matches code | [x] |
+| P1-04 | Migration with backfill flags, tested on a copy of data | AC17 | [~] |
+| P2-01 | Valuation engine port and FIFO strategy | Existing FIFO tests pass unchanged | [~] 2a done: engine and FIFO strategy behind the costing service, no caller uses it yet. 2b to 2d move callers over. Sales delivery keeps its own FIFO adapter until a later phase. |
+| P2-02 | Stock movement post and reverse call the engine, cost input required for value-in | AC1 | [~] 2b: post costs value-in lines that carry a cost, through a costing port. Requirement (reject lines without cost) is switched on in 2c, once callers stop writing their own layers, so nothing double-counts. Reverse inherits cost in 2c. |
+| P2-03 | Opening stock and purchase receipt pass cost inputs, opening cost required | AC1, AC2 | [~] 2c part 1: purchase receipt passes the document value as cost (layer now written by the stock movement, currency and receipt date carried); opening stock requires a cost per line (explicit 0 is stored as zero-cost, reason OTHER, to confirm). 2c part 2: adjustment gain lines carry unitCost (and a reason for zero), confirm fails with INVENTORY_ADJUSTMENT_COST_REQUIRED without it, and the layer is now written (it was missing, ANALYSIS F3). Adjustment form: gain lines show a unit cost pre-filled with a proposal (last receipt layer, here first, then any location); kept as is it is stored as CONFIRMED_PROPOSAL, any other typed cost as USER; no proposal means a typed cost or a free reason. Still to do: require cost on all value-in lines, sale return and reversal inheriting cost, missing inventory row error. |
+| P2-04 | Transfer uses the engine, uncovered quantity fails | AC6, AC7 | [~] 2d: internal moves (transfer, transit, return) move FIFO layers with the stock through the engine: source layers are consumed, inherited layers are written at the destination keeping date and origin. A forward move of uncosted stock fails with COST_UNDETERMINED (R6, R34). A reversal moves what is covered and never fails on old uncosted stock. No migration, the derived-source unique index already allows one layer per consumed layer. |
 | P3-01 | WAC receipt and issue with locks and seq | AC4, AC5 | [ ] |
 | P3-02 | WAC reversals and sale return inheritance | AC8, AC9 | [ ] |
 | P3-03 | Negative stock block, currency, zero cost rules | AC2, AC6 | [ ] |
@@ -73,8 +73,15 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done · `[!]` blocked · `[-]` 
 Owner decisions already given (2026-11-27, WhatsApp): block stock-in with no valid cost across the whole inventory system; never fall back to the item default cost; distinguish missing from zero; enforce in the backend; implement Weighted Average Costing before manufacturing and do not use FIFO as a fallback for weighted average items; manufacturing reuses the central costing engine.
 
 ## Deviations
-None yet.
+- D1 (phase 1): `unitCost` in the cost input is a decimal string in **minor units per base unit** (up to 10 decimals), not major units. The saved value is the integer total (SPEC R18). The web form converts from major units using the currency exponent. Reason: keeps all costing code in integer minor units and avoids a currency-exponent lookup in the engine.
+- D2 (phase 1): adjustment lines get `cost_value_minor` (bigint, the source of truth) next to the display `unit_cost`. SPEC 5.2 listed only `unit_cost`. Reason: owner rule, money is bigint minor units and the unit cost is only a display value.
+- D3 (phase 1): `inventory_cost_allocations.outgoing_movement_line_id` becomes nullable, with `conversion_entry_id`, so a CONVERSION allocation (SPEC R36) is tied to a conversion entry instead of a movement line. A check keeps the two shapes exclusive (ISSUE needs a line, CONVERSION needs an entry).
+- D4 (phase 1): `inheritedShareMinor` uses a cumulative round-half-up target minus the value already inherited. The last part lands exactly on the source total and no part can be negative. Same result as "last takes the remainder".
 
 ## Verification log
 | Date | Task | Command | Result |
 |---|---|---|---|
+| 2026-11-27 | P0-02 | read-only SELECTs on production (6 orgs, 15 items) | 0 items below zero, 0 weighted average items, 0 zero value layers, account 5600 unused in all orgs. 3 FIFO items in one org have stock that does not match layers (156 vs 11, 14 vs 40, 40 vs 0). |
+| 2026-11-27 | P1-01, P1-02 | `pnpm --filter @avuny/contracts exec vitest run` | 318 tests pass, including 12 new (300 seeded random sequences, no drift) and en/ar parity |
+| 2026-11-27 | P1-03 | `pnpm --filter @avuny/db typecheck` | clean |
+| 2026-11-27 | P1-04 | `drizzle-kit generate` | `0035_inventory_costing_foundation` generated after `0034_sales_credit_note` (renumbered twice, from 0032 then 0034, as dev took numbers and later renumbered its own sales migrations). Not yet run on a real database (none in this sandbox). |
