@@ -16,7 +16,7 @@ Each phase ships as its own PR. Manufacturing (assembly) waits for gate 6.
 Legend: `[ ]` todo · `[~]` in progress · `[x]` done · `[!]` blocked · `[-]` not applicable (say why)
 
 ## Next action
-> **P1-04**: run the migration `0034_inventory_costing_foundation` on a real Postgres (CI integration job) and confirm gate 1. Re-check the journal against origin/dev before every push.
+> **P1-04**: run the migration `0035_inventory_costing_foundation` on a real Postgres (CI integration job) and confirm gate 1. Re-check the journal against origin/dev before every push.
 
 ## Status board
 | Phase | Title | Tasks | Gate | Status |
@@ -84,4 +84,4 @@ Owner decisions already given (2026-11-27, WhatsApp): block stock-in with no val
 | 2026-11-27 | P0-02 | read-only SELECTs on production (6 orgs, 15 items) | 0 items below zero, 0 weighted average items, 0 zero value layers, account 5600 unused in all orgs. 3 FIFO items in one org have stock that does not match layers (156 vs 11, 14 vs 40, 40 vs 0). |
 | 2026-11-27 | P1-01, P1-02 | `pnpm --filter @avuny/contracts exec vitest run` | 318 tests pass, including 12 new (300 seeded random sequences, no drift) and en/ar parity |
 | 2026-11-27 | P1-03 | `pnpm --filter @avuny/db typecheck` | clean |
-| 2026-11-27 | P1-04 | `drizzle-kit generate` | `0034_inventory_costing_foundation` generated after `0033_sales_credit_note` (renumbered from 0032 after dev took 0032 and 0033). Not yet run on a real database (none in this sandbox). |
+| 2026-11-27 | P1-04 | `drizzle-kit generate` | `0035_inventory_costing_foundation` generated after `0034_sales_credit_note` (renumbered twice, from 0032 then 0034, as dev took numbers and later renumbered its own sales migrations). Not yet run on a real database (none in this sandbox). |
