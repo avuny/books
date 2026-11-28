@@ -13,7 +13,9 @@ The release agent runs a recurring wake every 15 minutes. It reports to the main
 - ALERT when: health fails twice in a row; 2 of the last 4 sign-in/read probes returned 5xx; latency is above max(3s, 3x the recent median) on two probes in a row.
 - The script never prints tokens or sign-in bodies.
 
-## 2. Error-log pull (needs a Cloudflare API token in the vault)
+## 2. Error-log pull (live: `scripts/ops/prod-logpull.py`, needs the Cloudflare token in the vault)
+The script queries the Workers Observability telemetry API (`POST /accounts/{id}/workers/observability/telemetry/query`, filter `$workers.outcome != ok`). Each event carries outcome, cpuTimeMs, wallTimeMs, path, status and script version. `canceled` (client hung up) is ignored unless the status is 5xx. Alerts on a new (method, route, outcome, status) group or a higher count.
+
 Every hour: query Workers Observability for `hono-worker-api` outcomes other than ok (5xx, `exceededCpu`, `exceededMemory`, exceptions) for the last hour, count them by route and status, and compare with the probe history. A new route or a new outcome type is an alert. Token: vault login "Cloudflare API token (Workers logs read)", read-only, account scope. Never write the token to the repo or logs.
 
 ## 3. Alerting
