@@ -18,6 +18,9 @@ env:
   # Turborepo package names: the "name" field in each app's package.json. EDIT THESE.
   API_PACKAGE: "@avuny/books-server"
   WEB_PACKAGE: "@avuny/books-web"
+  # Platform admin apps (worker names avuny-platform-api and avuny-platform-web). See docs/ops/platform-deploy.md.
+  PLATFORM_API_PACKAGE: "@avuny/platform-server"
+  PLATFORM_WEB_PACKAGE: "@avuny/platform-web"
   TURBO_TELEMETRY_DISABLED: "1"
   # Optional Turborepo remote cache (speeds up the second install/build):
   # TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
@@ -44,7 +47,10 @@ jobs:
 
       # Add lint / test here once they are defined as tasks in turbo.json.
       - name: Check wrangler vars
-        run: node scripts/check-wrangler-vars.mjs
+        run: |
+          node scripts/check-wrangler-vars.mjs
+          # dev may not carry the platform apps until it is synced from main.
+          if [ -f apps/platform-server/wrangler.jsonc ]; then node scripts/check-wrangler-vars.mjs apps/platform-server/wrangler.jsonc; fi
 
       - run: pnpm turbo run typecheck build
 
@@ -118,6 +124,23 @@ jobs:
           # Baked into the frontend build. Use "/api" if both Workers share one domain.
           VITE_API_URL: ${{ vars.VITE_API_URL }}
 
+      # Platform admin API. The two Workers must exist first (docs/ops/platform-deploy.md). Skipped until the
+      # repository variable PLATFORM_DEPLOY_ENABLED is "true", so the Books deploy is not affected before then.
+      - name: Deploy platform API (Worker)
+        if: ${{ vars.PLATFORM_DEPLOY_ENABLED == 'true' }}
+        run: pnpm turbo run deploy --filter="${{ env.PLATFORM_API_PACKAGE }}"
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
+      - name: Deploy platform web app (Worker + static assets)
+        if: ${{ vars.PLATFORM_DEPLOY_ENABLED == 'true' }}
+        run: pnpm turbo run deploy --filter="${{ env.PLATFORM_WEB_PACKAGE }}"
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          VITE_PLATFORM_API_URL: ${{ vars.VITE_PLATFORM_API_URL }}
+
   # Post-deploy smoke test (docs/TESTING-PLAN.md section 6, the checks that need no login).
   # It marks the run red when production is broken after a deploy. It cannot undo the deploy.
   smoke:
@@ -129,6 +152,9 @@ jobs:
     env:
       API_URL: ${{ vars.SMOKE_API_URL || 'https://hono-worker-api.khaledeveloper.workers.dev' }}
       WEB_URL: ${{ vars.SMOKE_WEB_URL || 'https://avuny-books-web.khaledeveloper.workers.dev' }}
+      PLATFORM_API_URL: ${{ vars.SMOKE_PLATFORM_API_URL || 'https://avuny-platform-api.khaledeveloper.workers.dev' }}
+      PLATFORM_WEB_URL: ${{ vars.SMOKE_PLATFORM_WEB_URL || 'https://avuny-platform-web.khaledeveloper.workers.dev' }}
+      PLATFORM_DEPLOY_ENABLED: ${{ vars.PLATFORM_DEPLOY_ENABLED }}
     steps:
       - name: API health, web shell and CORS preflight
         run: |
@@ -146,4 +172,10 @@ jobs:
             -H "Access-Control-Request-Headers: content-type" | tr -d '\r')
           echo "$hdrs" | grep -qi "^access-control-allow-origin: $WEB_URL\$" || { echo "::error::CORS preflight does not allow the web origin"; fail=1; }
           echo "$hdrs" | grep -qi '^access-control-allow-credentials: true' || { echo "::error::CORS preflight does not allow credentials"; fail=1; }
+          if [ "$PLATFORM_DEPLOY_ENABLED" = "true" ]; then
+            pcode=$(curl -s -o /dev/null -w '%{http_code}' "$PLATFORM_API_URL/api/health" || true)
+            echo "Platform API health: $pcode"; [ "$pcode" = 200 ] || { echo "::error::Platform API /api/health is not 200"; fail=1; }
+            pweb=$(curl -s -o /dev/null -w '%{http_code}' "$PLATFORM_WEB_URL/" || true)
+            echo "Platform web: $pweb"; [ "$pweb" = 200 ] || { echo "::error::Platform web origin is not 200"; fail=1; }
+          fi
           exit $fail
