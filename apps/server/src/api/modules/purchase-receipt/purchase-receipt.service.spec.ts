@@ -106,6 +106,10 @@ describe("PurchaseReceiptService", () => {
         async post(_a, _o, input) {
           if (failMovement) return { success: false, error: "STOCK_MOVEMENT_X", msg: "x" } as any
           movements.push(input)
+          // The real stock movement writes the layer from the line cost; mirror that here.
+          for (const l of input.lines as any[]) {
+            layers.push({ qty: l.quantity, valueMinor: l.cost?.totalValueMinor, batchId: l.batchId ?? null, currency: input.currency })
+          }
           return { success: true, data: { id: `mv-${movements.length}`, lines: input.lines.map((_l, i) => ({ id: `mvl-${i}`, lineNo: i + 1 })) } } as any
         },
         async reverse(_a, _o, id) {
