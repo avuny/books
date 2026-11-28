@@ -35,7 +35,7 @@ export function getStockMovementService(): StockMovementService {
     // Costs value-in lines through the valuation engine. The engine is built lazily, like the others.
     costing: {
       async isWeightedAverage(orgId, itemId, tx) {
-        return (await getInventoryCostingRepository().findValuationMethod(orgId, itemId, tx)) === "WAC"
+        return (await getInventoryCostingRepository().findValuationMethod(orgId, itemId, tx)) === "weighted_average"
       },
       async issueLine(line, tx) {
         let currency = line.currency
@@ -126,7 +126,7 @@ export function getStockMovementService(): StockMovementService {
         const engine = getValuationEngine()
         const res = await engine.move(
           {
-            method: (await getInventoryCostingRepository().findValuationMethod(line.orgId, line.itemId, tx)) === "WAC" ? "WAC" : "FIFO",
+            method: toEngineMethod(await getInventoryCostingRepository().findValuationMethod(line.orgId, line.itemId, tx)),
             orgId: line.orgId,
             fromInventoryItemId: from.inventoryItemId,
             fromBatchId: from.batchRowId,
@@ -181,7 +181,7 @@ export function getStockMovementService(): StockMovementService {
         const engine = getValuationEngine()
         const res = await engine.receive(
           {
-            method: (await getInventoryCostingRepository().findValuationMethod(line.orgId, line.itemId, tx)) === "WAC" ? "WAC" : "FIFO",
+            method: toEngineMethod(await getInventoryCostingRepository().findValuationMethod(line.orgId, line.itemId, tx)),
             orgId: line.orgId,
             inventoryItemId: inv.id,
             itemId: line.itemId,
