@@ -25,7 +25,10 @@ export default defineConfig({
           include: ["src/**/*.int.test.ts"],
           globalSetup: ["./src/api/test-support/global-setup.ts"],
           setupFiles: ["./src/api/test-support/setup-env.ts"],
-          testTimeout: 30_000,
+          // Multi-flow tests (invite -> accept -> enroll -> login) against the
+          // remote test database vary widely with Neon latency; 30s timed out
+          // three previously-green tests on a slow CI run.
+          testTimeout: 60_000,
           hookTimeout: 60_000,
         },
       },
