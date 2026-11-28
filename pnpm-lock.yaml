@@ -84,6 +84,9 @@ importers:
       '@avuny/contracts':
         specifier: workspace:*
         version: link:../../packages/contracts
+      '@avuny/db':
+        specifier: workspace:*
+        version: link:../../packages/db
       '@avuny/hono':
         specifier: workspace:*
         version: link:../../packages/hono
@@ -102,6 +105,9 @@ importers:
       '@hono/zod-openapi':
         specifier: ^1.1.5
         version: 1.6.3(hono@4.13.13)(zod@4.6.5)
+      dotenv:
+        specifier: ^17.4.2
+        version: 17.4.2
       hono:
         specifier: ^4.10.7
         version: 4.13.13
