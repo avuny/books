@@ -40,6 +40,11 @@
       "import": "./dist/customer-payment/index.js",
       "default": "./dist/customer-payment/index.js"
     },
+    "./entitlement": {
+      "types": "./dist/entitlement/index.d.ts",
+      "import": "./dist/entitlement/index.js",
+      "default": "./dist/entitlement/index.js"
+    },
     "./errors": {
       "types": "./dist/errors/index.d.ts",
       "import": "./dist/errors/index.js",
@@ -104,6 +109,11 @@
       "types": "./dist/payment-term/index.d.ts",
       "import": "./dist/payment-term/index.js",
       "default": "./dist/payment-term/index.js"
+    },
+    "./platform-admin": {
+      "types": "./dist/platform-admin/index.d.ts",
+      "import": "./dist/platform-admin/index.js",
+      "default": "./dist/platform-admin/index.js"
     },
     "./purchase-order": {
       "types": "./dist/purchase-order/index.d.ts",

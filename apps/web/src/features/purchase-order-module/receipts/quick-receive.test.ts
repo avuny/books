@@ -33,13 +33,14 @@ beforeEach(() => {
 
 describe("quickReceive", () => {
   it("runs every step and returns the ids", async () => {
-    await expect(quickReceive("o", "po", receipt, "cash")).resolves.toEqual({ receiptId: "rc", billId: "b", paymentId: "vp" })
+    await expect(quickReceive("o", "po", receipt, "cash", "INV-9")).resolves.toEqual({ receiptId: "rc", billId: "b", paymentId: "vp" })
     expect(api.postVendorPayment).toHaveBeenCalledWith("o", "vp")
+    expect(api.createVendorBillFromReceipt).toHaveBeenCalledWith("o", expect.objectContaining({ supplierInvoiceNumber: "INV-9" }))
   })
 
   it("undoes earlier steps when the server rejects a step", async () => {
     api.postVendorPayment.mockRejectedValue({ isAxiosError: true, response: { status: 400 } })
-    const err = await quickReceive("o", "po", receipt, "cash").catch((e) => e)
+    const err = await quickReceive("o", "po", receipt, "cash", "INV-9").catch((e) => e)
     expect(err).toBeInstanceOf(QuickReceiveError)
     expect(err.ambiguous).toBe(false)
     expect(err.leftover).toBe(false)
@@ -50,7 +51,7 @@ describe("quickReceive", () => {
 
   it("does not undo blind when a response is lost, and flags the state as unknown", async () => {
     api.postVendorBill.mockRejectedValue({ isAxiosError: true, code: "ERR_NETWORK" })
-    const err = await quickReceive("o", "po", receipt, "cash").catch((e) => e)
+    const err = await quickReceive("o", "po", receipt, "cash", "INV-9").catch((e) => e)
     expect(err.ambiguous).toBe(true)
     expect(err.leftover).toBe(true)
     expect(api.reversePurchaseReceipt).not.toHaveBeenCalled()

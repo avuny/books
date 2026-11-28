@@ -246,6 +246,20 @@
       "when": 1795800048401,
       "tag": "0034_sales_credit_note",
       "breakpoints": true
+    },
+    {
+      "idx": 35,
+      "version": "7",
+      "when": 1795847385153,
+      "tag": "0035_platform_identity",
+      "breakpoints": true
+    },
+    {
+      "idx": 36,
+      "version": "7",
+      "when": 1795815858060,
+      "tag": "0036_platform_audit_truncate_guard",
+      "breakpoints": true
     }
   ]
 }

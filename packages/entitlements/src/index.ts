@@ -8,6 +8,5 @@
  * (contracts first); this package imports them, it does not redefine them.
  */
 
-/** Kinds of entitlement, see docs/modules/saas-architecture/SPEC.md section 2.1. */
-export const ENTITLEMENT_KINDS = ["module", "feature", "limit"] as const
-export type EntitlementKind = (typeof ENTITLEMENT_KINDS)[number]
+// Contracts own the vocabulary (S2-01); re-exported so existing imports keep working.
+export { ENTITLEMENT_KINDS, type EntitlementKind } from "@avuny/contracts/entitlement"
