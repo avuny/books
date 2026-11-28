@@ -189,6 +189,7 @@ export const MODULES = {
     },
   },
   sales_order: {
+    product: "sales",
     sidebar: {
       group: "sales",
       icon: "clipboard-check",
@@ -219,6 +220,7 @@ export const MODULES = {
     },
   },
   sales_delivery: {
+    product: "sales",
     actions: {
       ...CRUD,
       post: { permission: true, event: "posted" },
@@ -226,6 +228,7 @@ export const MODULES = {
     },
   },
   sales_invoice: {
+    product: "sales",
     sidebar: {
       group: "sales",
       icon: "file-text",
@@ -239,6 +242,7 @@ export const MODULES = {
     },
   },
   sales_credit_note: {
+    product: "sales",
     sidebar: {
       group: "sales",
       icon: "file-text",
@@ -252,6 +256,7 @@ export const MODULES = {
     },
   },
   customer_payment: {
+    product: "sales",
     sidebar: {
       group: "sales",
       icon: "badge-dollar-sign",
