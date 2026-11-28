@@ -1,6 +1,8 @@
 # Changelog
 
 ## [Unreleased]
+### Fixed
+- Sign-in uses less CPU: default bcrypt cost is 10 (was 12), and a successful sign-in moves an older higher-cost hash to the current cost. Existing hashes still verify. Prod showed intermittent Cloudflare error 1102 (Worker CPU limit) on sign-in.
 
 ## [0.6.1] - 2026-11-28
 
