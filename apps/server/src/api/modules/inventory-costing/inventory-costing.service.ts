@@ -1,5 +1,4 @@
 import type { InventoryCostLayer, NewInventoryCostAllocation, NewInventoryCostLayer, Tx } from "@avuny/db"
-import { toMicro } from "@avuny/contracts"
 import type { InventoryCostingServiceDeps } from "./inventory-costing.types.js"
 
 /**
