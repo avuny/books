@@ -54,6 +54,9 @@ const DIR_PRODUCT_OVERRIDES: Record<string, readonly ProductModuleKey[]> = {
   // Server code exists ahead of its registry module (plannedModules in
   // PRODUCT_MODULES, SPEC 2.4).
   "inventory-costing": ["inventory_costing"],
+  // Same story: contracts and schema exist, and the server module landed
+  // ahead of its registry entry. Planned home is inventory_advanced.
+  "inventory-reservation": ["inventory_advanced"],
   // Projected-stock helper used by purchasing documents; no registry
   // module yet. Conceptually inventory: projected on-hand is stock state.
   "inventory-projection": ["inventory"],
