@@ -64,6 +64,24 @@ export type IssueResult = {
   slices: { layerId: string; quantity: string; valueMinor: bigint }[]
 }
 
+export type MoveInput = {
+  orgId: string
+  fromInventoryItemId: string
+  fromBatchId: string | null
+  toInventoryItemId: string
+  toBatchId: string | null
+  itemId: string
+  /** The transfer line. It is the consuming line of the source layers and the source of the new ones. */
+  movementLineId: string
+  quantity: string
+  /**
+   * true: the whole quantity must be covered by source layers (R6, R34).
+   * false (reversals): moves what is covered and leaves the rest, so a correction never fails on
+   * stock that was already uncosted before this change.
+   */
+  strict: boolean
+}
+
 export function createValuationEngine(deps: { costing: InventoryCostingService }) {
   const costing = deps.costing
 
@@ -145,6 +163,70 @@ export function createValuationEngine(deps: { costing: InventoryCostingService }
           valueMinor: s.valueMinor,
         })),
       }
+    },
+
+    /**
+     * Internal move (transfer, transit, return to source): no value change. Takes FIFO layers at the
+     * source and writes inherited layers at the destination, one per consumed layer, keeping each
+     * layer's received date and origin so later FIFO order and value are exact.
+     */
+    async move(
+      input: MoveInput,
+      tx?: Tx
+    ): Promise<{ ok: true; movedQuantity: string; totalValueMinor: bigint } | EngineFailure> {
+      const layers = await costing.getFifoLayers(
+        input.orgId,
+        input.fromInventoryItemId,
+        input.fromBatchId,
+        { forUpdate: true },
+        tx
+      )
+      const wanted = toMicro(input.quantity)
+      const available = layers.reduce((n, l) => n + toMicro(l.remainingQty), 0n)
+      if (available < wanted && input.strict) return code(ErrCode.COST_UNDETERMINED)
+      const take = available < wanted ? available : wanted
+      if (take <= 0n) return { ok: true, movedQuantity: "0", totalValueMinor: 0n }
+      const plan = allocateFifo(
+        layers.map((l) => ({
+          id: l.id,
+          remainingQtyMicro: toMicro(l.remainingQty),
+          remainingValueMinor: BigInt(l.remainingValue),
+        })),
+        take
+      )
+      if (!plan) return code(ErrCode.COST_UNDETERMINED)
+      const byId = new Map(layers.map((l) => [l.id, l]))
+      for (const sl of plan.slices) {
+        const origin = byId.get(sl.layerId)!
+        await costing.recordAllocation(
+          {
+            orgId: input.orgId,
+            outgoingMovementLineId: input.movementLineId,
+            costLayerId: sl.layerId,
+            allocatedQty: fromMicro(sl.qtyMicro),
+            allocatedValue: Number(sl.valueMinor),
+          },
+          tx
+        )
+        await costing.createCostLayer(
+          {
+            orgId: input.orgId,
+            inventoryItemId: input.toInventoryItemId,
+            itemId: input.itemId,
+            inventoryItemBatchId: input.toBatchId,
+            sourceMovementLineId: input.movementLineId,
+            originCostLayerId: origin.id,
+            receivedQty: fromMicro(sl.qtyMicro),
+            receivedValue: Number(sl.valueMinor),
+            currency: origin.currency,
+            receivedAt: origin.receivedAt,
+            costSource: "INHERITED",
+            isZeroCost: origin.isZeroCost,
+          },
+          tx
+        )
+      }
+      return { ok: true, movedQuantity: fromMicro(take), totalValueMinor: plan.totalValueMinor }
     },
   }
 }

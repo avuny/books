@@ -79,4 +79,29 @@ describe("stock movement costing (phase 2b)", () => {
     })
     expect(res).toMatchObject({ success: true })
   })
+
+  it("moves layers with an internal move (strict going forward)", async () => {
+    const moveLine = vi.fn(async () => ({ ok: true as const }))
+    const t = setup({ receiveLine: async () => ({ ok: true as const }), moveLine })
+    await t.service.post("u1", ORG, {
+      type: "transfer",
+      lines: [{ itemId: "i1", fromLocationId: BIN, toLocationId: "bin-2", quantity: "5" }],
+    })
+    expect(moveLine).toHaveBeenCalledWith(
+      expect.objectContaining({ fromLocationId: BIN, toLocationId: "bin-2", quantity: "5", strict: true }),
+      expect.anything()
+    )
+  })
+
+  it("fails a transfer the layers cannot cover and keeps the failure as a value", async () => {
+    const t = setup({
+      receiveLine: async () => ({ ok: true as const }),
+      moveLine: async () => ({ ok: false as const, error: "COST_UNDETERMINED" as never, msg: "Cost undetermined" }),
+    })
+    const res = await t.service.post("u1", ORG, {
+      type: "transfer",
+      lines: [{ itemId: "i1", fromLocationId: BIN, toLocationId: "bin-2", quantity: "5" }],
+    })
+    expect(res).toMatchObject({ success: false, error: "COST_UNDETERMINED" })
+  })
 })

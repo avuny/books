@@ -84,8 +84,26 @@ export interface StockCostingReceiveLine {
   currency?: string
 }
 
+/** One internal move line (both sides are stock locations, transit included). */
+export interface StockCostingMoveLine {
+  orgId: string
+  movementLineId: string
+  itemId: string
+  batchId: string | null
+  fromLocationId: string
+  toLocationId: string
+  quantity: string
+  /** True for a forward posting: the whole quantity must be covered by cost layers. */
+  strict: boolean
+}
+
 /** Port to the valuation engine (inventory-costing). Failures come back as values. */
 export interface StockCostingPort {
+  /** Moves cost layers with the stock. Optional until the adapter is wired everywhere. */
+  moveLine?(
+    line: StockCostingMoveLine,
+    tx: Tx
+  ): Promise<{ ok: true } | { ok: false; error: InventoryCostingErrorCode; msg: string }>
   receiveLine(
     line: StockCostingReceiveLine,
     tx: Tx

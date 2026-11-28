@@ -33,6 +33,56 @@ export function getStockMovementService(): StockMovementService {
     },
     // Costs value-in lines through the valuation engine. The engine is built lazily, like the others.
     costing: {
+      async moveLine(line, tx) {
+        const find = async (locationId: string) => {
+          const [inv] = await tx
+            .select({ id: inventoryItems.id })
+            .from(inventoryItems)
+            .where(
+              and(
+                eq(inventoryItems.orgId, line.orgId),
+                eq(inventoryItems.itemId, line.itemId),
+                eq(inventoryItems.locationId, locationId)
+              )
+            )
+            .limit(1)
+          if (!inv) throw new Error("Inventory item row missing after stock lock")
+          let batchRowId: string | null = null
+          if (line.batchId) {
+            const [b] = await tx
+              .select({ id: inventoryItemBatches.id })
+              .from(inventoryItemBatches)
+              .where(
+                and(
+                  eq(inventoryItemBatches.orgId, line.orgId),
+                  eq(inventoryItemBatches.inventoryItemId, inv.id),
+                  eq(inventoryItemBatches.batchId, line.batchId)
+                )
+              )
+              .limit(1)
+            batchRowId = b?.id ?? null
+          }
+          return { inventoryItemId: inv.id, batchRowId }
+        }
+        const from = await find(line.fromLocationId)
+        const to = await find(line.toLocationId)
+        const engine = createValuationEngine({ costing: getInventoryCostingService() })
+        const res = await engine.move(
+          {
+            orgId: line.orgId,
+            fromInventoryItemId: from.inventoryItemId,
+            fromBatchId: from.batchRowId,
+            toInventoryItemId: to.inventoryItemId,
+            toBatchId: to.batchRowId,
+            itemId: line.itemId,
+            movementLineId: line.movementLineId,
+            quantity: line.quantity,
+            strict: line.strict,
+          },
+          tx
+        )
+        return res.ok ? { ok: true } : { ok: false, error: res.error, msg: res.msg }
+      },
       async receiveLine(line, tx) {
         const [inv] = await tx
           .select({ id: inventoryItems.id })

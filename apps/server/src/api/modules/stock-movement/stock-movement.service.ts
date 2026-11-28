@@ -257,13 +257,33 @@ export function createStockMovementService(deps: StockMovementServiceDeps) {
 
     // 6b. cost: a value-in line (no stock side it comes from, a stock side it goes to) with a cost input
     // is costed and gets its layer, in the same transaction. Nothing before this point wrote a layer.
-    if (deps.costing && forwardChecks) {
+    if (deps.costing) {
       for (const [i, l] of lines.entries()) {
-        if (!l.cost || l.fromIntent || !l.toIntent) continue
+        const lineId = rows.find((r) => r.lineNo === i + 1)!.id
+        if (l.fromIntent && l.toIntent) {
+          // Internal move: the layers follow the stock. A forward move of stock without layers fails (R6).
+          if (!deps.costing.moveLine || l.fromLocationId === l.toLocationId) continue
+          const res = await deps.costing.moveLine(
+            {
+              orgId,
+              movementLineId: lineId,
+              itemId: l.itemId,
+              batchId: l.batchId,
+              fromLocationId: l.fromLocationId,
+              toLocationId: l.toLocationId,
+              quantity: l.quantity,
+              strict: forwardChecks,
+            },
+            tx
+          )
+          if (!res.ok) return failure(res.error, `${res.msg} (line ${i + 1})`)
+          continue
+        }
+        if (!forwardChecks || !l.cost || l.fromIntent || !l.toIntent) continue
         const res = await deps.costing.receiveLine(
           {
             orgId,
-            movementLineId: rows.find((r) => r.lineNo === i + 1)!.id,
+            movementLineId: lineId,
             itemId: l.itemId,
             batchId: l.batchId,
             toLocationId: l.toLocationId,
