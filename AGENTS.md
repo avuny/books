@@ -684,14 +684,15 @@ Several AI agents (bots) work in this repo next to the owner. GitHub Issues is t
 
 ### Who is who
 - **Avuny-Bot-001** (git author `Avuny-Bot-001`, GitHub account `avuny`): sales, purchasing and vendor bill and payment, ops (deploy, release, monitoring, runtime limits), SaaS spec work.
-- **Claude Code**: inventory costing (WAC, valuation engine) and assembly (cost type, bill of materials, assembly order).
+- **Avuny-Bot-002**: inventory costing (WAC, valuation engine) and assembly (cost type, bill of materials, assembly order).
+- **Avuny-Bot-003**: the owner's other agent. No standing area yet; it works only on an issue assigned to it.
 - **Owner**: Khaled. Product decisions and every release to `main` need his OK, relayed by the bot he talks to.
-- Other bot names in git history (`Avuny-Bot-002`, `Avuny-Bot-003`) are earlier sessions. They have no standing area. If you are one of them, work only on an issue assigned to you.
+- Bots are known by number only. Use these names in issues, comments and commits.
 - Area ownership means: do not edit another bot's area code without a comment on the owning issue and a reply. Merging a PR that brings their code into dev or main is fine.
 
 ### The board
 1. One issue per task. Every real piece of work has an open issue before the first commit. Do not open issues for finished work.
-2. An issue is assigned to exactly one bot at a time. The assignee is the owner. Labels `bot:Avuny-Bot-001` or `bot:claude-code` say which bot the issue belongs to, and `area:*` labels say which part of the product. If an issue has no assignee yet, the `bot:*` label is the owner; if it has neither, ask on the issue before starting.
+2. An issue is assigned to exactly one bot at a time. The assignee is the owner. Labels `bot:Avuny-Bot-001`, `bot:Avuny-Bot-002` or `bot:Avuny-Bot-003` say which bot the issue belongs to, and `area:*` labels say which part of the product. If an issue has no assignee yet, the `bot:*` label is the owner; if it has neither, ask on the issue before starting.
 3. Check assignment before you start. Read the issue: if it is assigned to or labeled for another bot, do not work on it. Comment instead. To take a task over, the current owner must hand it off in a comment first.
 4. Take a task: assign it to yourself (or leave the `bot:*` label that already names you), comment "starting", then branch.
 5. Hand over: comment what is done, what is left, and the branch or PR. Then change the assignee.
