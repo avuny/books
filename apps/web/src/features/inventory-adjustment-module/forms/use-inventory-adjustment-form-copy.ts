@@ -61,6 +61,20 @@ export function useInventoryAdjustmentFormCopy(
         label: t("fields.countedQuantity"),
         placeholder: "0.0000",
       },
+      unitCost: {
+        label: t("fields.unitCost", { defaultValue: "Unit cost per base unit (minor units)" }),
+        placeholder: t("fields.unitCostPlaceholder", { defaultValue: "Suggested from the last receipt" }),
+      },
+      zeroCostReason: {
+        label: t("fields.zeroCostReason", { defaultValue: "Why is it free?" }),
+        placeholder: t("fields.zeroCostReasonPlaceholder", { defaultValue: "Select reason..." }),
+      },
+      zeroCostReasons: [
+        { value: "SAMPLE", label: t("zeroCost.sample", { defaultValue: "Sample" }) },
+        { value: "PROMOTION", label: t("zeroCost.promotion", { defaultValue: "Promotion" }) },
+        { value: "FREE_ISSUE", label: t("zeroCost.freeIssue", { defaultValue: "Free issue" }) },
+        { value: "OTHER", label: t("zeroCost.other", { defaultValue: "Other" }) },
+      ],
       systemQuantity: t("fields.systemQuantity"),
       difference: t("fields.difference"),
       notes: {

@@ -1,8 +1,9 @@
 import {
+  InventoryCostingErrorCode,
+  inventoryCostingTranslationsEn,
   ITEM_OPENING_STOCK_SOURCE_TYPE,
   STOCK_MOVEMENT_SOURCE_REF_MAX_LENGTH,
   batchNumberKey,
-  minorToStorage,
   type AccountingErrorCode,
   type BatchSpec,
   type PostInventoryOpeningBalanceInput,
@@ -97,6 +98,18 @@ export async function postOpeningStock(
     else groups.set(line.postedAt, [index])
   }
 
+  // Cost is required on every opening line (inventory-costing R1). A missing cost never turns into
+  // zero. An explicit zero is accepted and recorded as a zero-cost layer with reason OTHER.
+  for (const line of opening.lines) {
+    if (line.cost === null || line.cost === undefined || String(line.cost).trim() === "") {
+      return {
+        ok: false,
+        error: InventoryCostingErrorCode.STOCK_MOVEMENT_COST_REQUIRED,
+        msg: inventoryCostingTranslationsEn.errors.STOCK_MOVEMENT_COST_REQUIRED,
+      }
+    }
+  }
+
   // Resolve organization currency (needed for cost layers and accounting)
   const currency = (deps.findOrgCurrency ? await deps.findOrgCurrency(orgId, tx) : null) ?? "USD"
 
@@ -117,6 +130,12 @@ export async function postOpeningStock(
         batchId: isBatchTracked ? (batchIdByKey.get(batchNumberKey(lineBatchNumbers[i]!)) ?? null) : null,
         toLocationId: opening.lines[i]!.locationId,
         quantity: opening.lines[i]!.quantity,
+        // The exact line value, the same number the journal uses (no base-unit rounding).
+        cost: {
+          source: "DOCUMENT" as const,
+          totalValueMinor: opening.lines[i]!.valueMinor.toString(),
+          ...(opening.lines[i]!.valueMinor === 0n ? { zeroCost: { reason: "OTHER" as const } } : {}),
+        },
       })),
     }
 
@@ -131,47 +150,7 @@ export async function postOpeningStock(
     }
     if (!posted.success) return { ok: false, error: posted.error, msg: posted.msg }
 
-    // Create FIFO cost layers for each inbound line (opening stock is always inbound)
-    if (deps.inventoryCosting && posted.data?.lines) {
-      for (const [position, postedLine] of posted.data.lines.entries()) {
-        const openingLine = groupLines[position]
-        if (!openingLine) continue
-
-        const inventoryItemId = await deps.inventoryCosting.findInventoryItemId(
-          orgId,
-          itemId,
-          postedLine.toLocationId,
-          tx
-        )
-        if (!inventoryItemId) continue
-
-        let inventoryItemBatchId: string | null = null
-        if (postedLine.batchId) {
-          inventoryItemBatchId = await deps.inventoryCosting.findInventoryItemBatchId(
-            orgId,
-            inventoryItemId,
-            postedLine.batchId,
-            tx
-          )
-        }
-
-        await deps.inventoryCosting.service.createCostLayer(
-          {
-            orgId,
-            inventoryItemId,
-            itemId,
-            inventoryItemBatchId,
-            sourceMovementLineId: postedLine.id,
-            originCostLayerId: null,
-            receivedQty: postedLine.quantity,
-            receivedValue: minorToStorage(openingLine.valueMinor),
-            currency,
-            receivedAt: new Date(postedAt),
-          },
-          tx
-        )
-      }
-    }
+    // The cost layers are written by the stock movement, from the line costs (inventory-costing 2c).
 
     // Post opening inventory to accounting: Dr Inventory Asset, Cr Opening Balance Equity
     if (deps.accounting) {

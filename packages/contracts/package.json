@@ -55,6 +55,11 @@
       "import": "./dist/inventory-adjustment/index.js",
       "default": "./dist/inventory-adjustment/index.js"
     },
+    "./inventory-costing": {
+      "types": "./dist/inventory-costing/index.d.ts",
+      "import": "./dist/inventory-costing/index.js",
+      "default": "./dist/inventory-costing/index.js"
+    },
     "./inventory-reservation": {
       "types": "./dist/inventory-reservation/index.d.ts",
       "import": "./dist/inventory-reservation/index.js",

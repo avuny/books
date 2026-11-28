@@ -54,6 +54,10 @@ export const inventoryAdjustmentErrorsHttpMap = {
     statusCode: 422,
     responseMessage: "Duplicate lines found for the same item, location, and batch",
   },
+  INVENTORY_ADJUSTMENT_COST_REQUIRED: {
+    statusCode: 422,
+    responseMessage: "A line that adds stock needs a unit cost",
+  },
   INVENTORY_ADJUSTMENT_NO_DIFFERENCE: {
     statusCode: 422,
     responseMessage: "The adjustment has no quantity differences to post",

@@ -33,6 +33,7 @@ const { failure, fromViolation, isFailure, toFail, failWith, abort, abortable } 
   createFailureKit<Code>()
 
 const MSG = {
+  valuationMethodNotReady: "Weighted average costing is not available yet. Use FIFO",
   notFound: "Item not found",
   forbidden: "You do not have access to this item",
   nameTaken: "An item with this name already exists",
@@ -194,6 +195,9 @@ export function createItemService(deps: ItemServiceDeps) {
       if (!(await can(actorId, "create:item", orgId))) return forbidden()
       const trackingViolation = rules.checkTracking(input)
       if (trackingViolation) return failWith(trackingViolation)
+      if (input.inventoryValuationMethod === "weighted_average") {
+        return fail({ error: Err.ITEM_VALUATION_METHOD_NOT_READY, msg: MSG.valuationMethodNotReady })
+      }
       const openingStockViolation = checkOpeningStock(input)
       if (openingStockViolation)
         return fail({ error: openingStockViolation.error, msg: openingStockViolation.msg })
@@ -354,6 +358,11 @@ export function createItemService(deps: ItemServiceDeps) {
           await repo.lockOrgItems(orgId, tx)
           const current = await repo.findById(orgId, itemId, tx)
           if (!current) return failure(Err.ITEM_NOT_FOUND, MSG.notFound)
+          // Weighted average is built in the stock engine but the sales, adjustment loss and purchase
+          // return callers still cost from FIFO layers. Remove this check in the phase that moves them.
+          if (input.inventoryValuationMethod === "weighted_average" && current.inventoryValuationMethod !== "weighted_average") {
+            return failure(Err.ITEM_VALUATION_METHOD_NOT_READY, MSG.valuationMethodNotReady)
+          }
 
           // checks first (reads only) ...
           if (input.categoryId !== undefined && input.categoryId !== current.categoryId) {

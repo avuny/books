@@ -24,6 +24,9 @@ function mockLayer(overrides: Partial<InventoryCostLayer> = {}): InventoryCostLa
     remainingValue: 10000,
     currency: "USD",
     receivedAt: NOW,
+    costSource: null,
+    isZeroCost: false,
+    needsReview: false,
     createdAt: NOW,
     updatedAt: NOW,
     ...overrides,
@@ -38,6 +41,8 @@ function mockAllocation(overrides: Partial<InventoryCostAllocation> = {}): Inven
     costLayerId: "layer-1",
     allocatedQty: "5",
     allocatedValue: 5000,
+    kind: "ISSUE",
+    conversionEntryId: null,
     createdAt: NOW,
     updatedAt: NOW,
     ...overrides,
@@ -51,12 +56,13 @@ function createRepoMock(): InventoryCostingRepository {
     insertCostAllocation: vi.fn(async (v) => mockAllocation(v)),
     findFifoLayers: vi.fn(async () => [mockLayer()]),
     findLayersBySourceLine: vi.fn(async () => [mockLayer()]),
+    findLatestCostedLayer: vi.fn(async () => null),
     findAllocationsByLayer: vi.fn(async () => [mockAllocation()]),
     findOpenLayersBySourceLine: vi.fn(async () => [mockLayer()]),
     findAllocationsByOutgoingLine: vi.fn(async () => [mockAllocation()]),
     restoreCostLayer: vi.fn(async () => {}),
     deleteAllocation: vi.fn(async () => {}),
-  }
+  } as unknown as InventoryCostingRepository
 }
 
 describe("InventoryCostingService", () => {
@@ -143,5 +149,14 @@ describe("InventoryCostingService", () => {
     expect(repo.findLayersBySourceLine).toHaveBeenCalledWith(ORG, LINE, undefined)
     expect(layers).toHaveLength(1)
   })
-})
 
+  it("proposes the last receipt cost per base unit, exact to 10 decimals, null when never costed", async () => {
+    const repo = createRepoMock()
+    const service = createInventoryCostingService({ repository: repo })
+    expect(await service.proposeUnitCost(ORG, "i", "l")).toBeNull()
+    ;(repo.findLatestCostedLayer as any).mockResolvedValueOnce(mockLayer({ receivedQty: "3", receivedValue: 100 }))
+    expect(await service.proposeUnitCost(ORG, "i", "l")).toBe("33.3333333333")
+    ;(repo.findLatestCostedLayer as any).mockResolvedValueOnce(mockLayer({ receivedQty: "4", receivedValue: 1000 }))
+    expect(await service.proposeUnitCost(ORG, "i", "l")).toBe("250")
+  })
+})
