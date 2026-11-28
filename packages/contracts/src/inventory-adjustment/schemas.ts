@@ -1,5 +1,6 @@
 import { z } from "@avuny/zod"
 import { UNIT_QUANTITY_PATTERN } from "../unit/constants.js"
+import { UnitCostMinorSchema, ZeroCostReasonSchema } from "../inventory-costing/schemas.js"
 import {
   INVENTORY_ADJUSTMENT_DESCRIPTION_MAX_LENGTH,
   INVENTORY_ADJUSTMENT_DIRECTIONS,
@@ -74,6 +75,13 @@ export const InventoryAdjustmentLineInputSchema = z.object({
   countedQuantity: quantity,
   snapshotToken: z.string().trim().nullish(),
   notes: lineNotes,
+  /**
+   * Cost per base unit, in minor units (inventory-costing SPEC section 7). Required on a line that
+   * adds stock (counted above the system quantity). Ignored on lines that remove stock.
+   */
+  unitCost: UnitCostMinorSchema.nullish(),
+  /** Needed when unitCost is zero (SPEC R3). */
+  zeroCostReason: ZeroCostReasonSchema.nullish(),
 })
 export type InventoryAdjustmentLineInput = z.infer<
   typeof InventoryAdjustmentLineInputSchema
@@ -103,6 +111,8 @@ export const InventoryAdjustmentLineDtoSchema = z.object({
   quantityDeltaBase: z.string(),
   snapshotToken: z.string().nullable(),
   notes: z.string().nullable(),
+  unitCost: z.string().nullable().optional(),
+  zeroCostReason: z.string().nullable().optional(),
   createdAt: timestamp,
   updatedAt: timestamp,
 })
