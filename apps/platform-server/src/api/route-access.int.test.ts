@@ -321,6 +321,25 @@ describe("audit coverage (PAC11)", () => {
     expect(invited).toHaveLength(1)
     expect(invited[0]!.after).toMatchObject({ email: "target@avuny.dev" })
 
+    // The admin row is created at acceptance, not at invite time.
+    const accept = await post<PlatformAcceptInviteResponse>(
+      "/platform-auth/invites/accept",
+      {
+        token: invite.body.data!.inviteUrl.split("token=")[1]!,
+        name: "Target Admin",
+        password: PASSWORD,
+      }
+    )
+    expect(accept.status, JSON.stringify(accept.body)).toBe(200)
+    const enroll = await post<PlatformAuthSuccess>(
+      "/platform-auth/invites/enroll-totp",
+      {
+        enrollmentTicket: accept.body.data!.enrollmentTicket,
+        code: totpCode(accept.body.data!.totpSecret),
+      }
+    )
+    expect(enroll.status, JSON.stringify(enroll.body)).toBe(200)
+
     const targetId = await adminIdByEmail("target@avuny.dev")
 
     // Rename -> audited with before/after names
