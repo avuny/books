@@ -91,3 +91,10 @@ Owner decisions already given (2026-11-27, WhatsApp): block stock-in with no val
 - Owner decisions applied: one pool per item for the whole organization, one average per item, negative stock blocked, price differences to the variance account (price variance is not built in 3a, it belongs to the supplier invoice work), single inventory account kept.
 - Found and fixed while wiring: a standalone stock movement `post` or `reverse` committed the header and lines when costing failed after they were written, so a failed posting could leave a movement row without balances and block the source. The posting now rolls back on any failure. Callers that pass their own transaction already had to roll back, as before.
 - Open risk, not changed: sales delivery, adjustment loss and purchase return still cost value-out from FIFO layers themselves. A WAC item would be costed from the pool by the stock movement but read zero from layers by those callers. Until they take the engine value, an item should not be set to WAC in production. Production has no WAC items today.
+
+### Phase 3b (price variance), 2026-11-28
+
+- Supplier invoice price differences already go to Purchase Price Variance (account 5500) and never enter the pool. Nothing to change there, owner decision 4 holds.
+- The `supplier_return` posting template now takes an optional `inventoryCostMinor`: the value the stock engine took out. Inventory is credited at that value, accounts payable is debited at the credit note value, and the gap goes to Purchase Price Variance (credit when the credit note is higher, debit when lower). Without the field the template behaves as before. No server code posts this event yet, so nothing changes at runtime. The purchase return caller will pass the engine value when it moves onto the engine.
+- The single inventory account (1140) is kept. The template stays account agnostic.
+
