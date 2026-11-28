@@ -84,7 +84,8 @@
       "cash": "Cash",
       "bank": "Bank",
       "stepFailed": "A step failed and the earlier steps were undone: {message}",
-      "stepFailedUndo": "A step failed and some earlier steps could not be undone. Check the receipt and bill: {message}"
+      "stepFailedUndo": "A step failed and some earlier steps could not be undone. Check the receipt and bill: {message}",
+      "stepUnknown": "The connection dropped, so we cannot tell if the last step went through. Nothing was undone. Check the receipt, bill and payment before trying again."
     }
   }
 }

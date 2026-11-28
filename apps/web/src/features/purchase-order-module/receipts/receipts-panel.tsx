@@ -94,7 +94,14 @@ export function ReceiptsPanel({ orgId, order }: Props) {
     } catch (e) {
       const cause = e instanceof QuickReceiveError ? e.cause : e
       const message = parseApiError(cause).message || ""
-      setError(t(e instanceof QuickReceiveError && e.leftover ? "ui.quick.stepFailedUndo" : "ui.quick.stepFailed", { message }))
+      setError(t(
+          e instanceof QuickReceiveError && e.ambiguous
+            ? "ui.quick.stepUnknown"
+            : e instanceof QuickReceiveError && e.leftover
+              ? "ui.quick.stepFailedUndo"
+              : "ui.quick.stepFailed",
+          { message }
+        ))
     } finally {
       setQuickBusy(false)
       await queryClient.invalidateQueries()

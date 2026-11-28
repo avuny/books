@@ -18,12 +18,19 @@ export class QuickReceiveError extends Error {
   cause: unknown
   /** True when an earlier step could not be undone, so something is left half done. */
   leftover: boolean
-  constructor(cause: unknown, leftover: boolean) {
+  /** True when the last request got no answer, so it may or may not have been applied. Nothing was undone. */
+  ambiguous: boolean
+  constructor(cause: unknown, leftover: boolean, ambiguous = false) {
     super("quick receive failed")
     this.cause = cause
     this.leftover = leftover
+    this.ambiguous = ambiguous
   }
 }
+
+/** An axios error with no response: timeout, dropped connection or lost response. */
+const noAnswer = (e: unknown) =>
+  typeof e === "object" && e !== null && "isAxiosError" in e && (e as { response?: unknown }).response === undefined
 
 type Idd = { data?: { id?: string; partyId?: string; total?: string; number?: string } }
 const pick = (r: unknown) => (r as Idd).data ?? {}
@@ -68,6 +75,9 @@ export async function quickReceive(
     await postVendorPayment(orgId, pay.id)
     return { receiptId: rc.id, billId: bill.id, paymentId: pay.id }
   } catch (e) {
+    // The last request may have been applied without us seeing it. Undoing blind could hit the wrong
+    // state, so stop and tell the user to check before any retry. Closing the tab mid-way has the same limit.
+    if (noAnswer(e)) throw new QuickReceiveError(e, true, true)
     let leftover = false
     for (const step of undo.reverse()) {
       try {
