@@ -16,6 +16,7 @@ export const ItemErrorCode = {
   ITEM_EXPIRY_DATE_REQUIRED: "ITEM_EXPIRY_DATE_REQUIRED",
   ITEM_LOCKED_FIELD: "ITEM_LOCKED_FIELD",
   ITEM_HAS_HISTORY: "ITEM_HAS_HISTORY",
+  ITEM_VALUATION_METHOD_NOT_READY: "ITEM_VALUATION_METHOD_NOT_READY",
 } as const
 
 export type ItemErrorCode = (typeof ItemErrorCode)[keyof typeof ItemErrorCode]

@@ -139,6 +139,12 @@ describe("itemService", () => {
   })
 
   describe("create", () => {
+    it("refuses weighted average until the callers use the engine value", async () => {
+      const res = await t.service.create("u1", "org-1", { ...createInput, inventoryValuationMethod: "weighted_average" })
+      expect(res).toMatchObject({ success: false, error: "ITEM_VALUATION_METHOD_NOT_READY" })
+      expect(t.repository.insertItem).not.toHaveBeenCalled()
+    })
+
     it("rejects caller without permission", async () => {
       t.permissions.check.mockResolvedValueOnce(false)
       const res = await t.service.create("u1", "org-1", createInput)
@@ -311,9 +317,9 @@ describe("itemService", () => {
           ...createInput,
           openingStock: {
             lines: [
-              { locationId: "loc-1", quantity: "1", postedAt: "2026-01-01T00:00:00.000Z" },
-              { locationId: "loc-2", quantity: "2", postedAt: "2026-02-01T00:00:00.000Z" },
-              { locationId: "loc-3", quantity: "3", postedAt: "2026-01-01T00:00:00.000Z" },
+              { locationId: "loc-1", quantity: "1", cost: "1", postedAt: "2026-01-01T00:00:00.000Z" },
+              { locationId: "loc-2", quantity: "2", cost: "1", postedAt: "2026-02-01T00:00:00.000Z" },
+              { locationId: "loc-3", quantity: "3", cost: "1", postedAt: "2026-01-01T00:00:00.000Z" },
             ],
           },
         })
@@ -346,7 +352,7 @@ describe("itemService", () => {
       const res = await t.service.create("u1", "org-1", {
         ...createInput,
         openingStock: {
-          lines: [{ locationId: "loc-1", quantity: "10" }],
+          lines: [{ locationId: "loc-1", quantity: "10", cost: "5" }],
         },
       })
       expect(res).toMatchObject({ success: true })
@@ -368,6 +374,30 @@ describe("itemService", () => {
           sourceRef: "Royal Cement",
           currency: "USD",
         }),
+        expect.anything()
+      )
+    })
+
+    it("rejects opening stock without a cost and rolls the item back", async () => {
+      t.openingStock.stockMovements.post.mockClear()
+      const res = await t.service.create("u1", "org-1", {
+        ...createInput,
+        openingStock: { lines: [{ locationId: "loc-1", quantity: "10" }] },
+      })
+      expect(res).toMatchObject({ success: false })
+      expect(t.openingStock.stockMovements.post).not.toHaveBeenCalled()
+      expect(t.repository.deleteCreatedItemOnFailure).toHaveBeenCalledWith("org-1", "item-1", expect.anything())
+    })
+
+    it("sends the line cost to the stock movement", async () => {
+      await t.service.create("u1", "org-1", {
+        ...createInput,
+        openingStock: { lines: [{ locationId: "loc-1", quantity: "10", cost: "5" }] },
+      })
+      expect(t.openingStock.stockMovements.post).toHaveBeenCalledWith(
+        "u1",
+        "org-1",
+        expect.objectContaining({ lines: [expect.objectContaining({ cost: { source: "DOCUMENT", totalValueMinor: "50" } })] }),
         expect.anything()
       )
     })
@@ -422,7 +452,7 @@ describe("itemService", () => {
       const res = await t.service.create("u1", "org-1", {
         ...createInput,
         openingStock: {
-          lines: [{ locationId: "loc-1", quantity: "10" }],
+          lines: [{ locationId: "loc-1", quantity: "10", cost: "5" }],
         },
       })
       expect(res).toMatchObject({
@@ -437,6 +467,17 @@ describe("itemService", () => {
   describe("update", () => {
     beforeEach(() => {
       t.repository.findById.mockResolvedValue(item())
+    })
+
+    it("weighted average cannot be chosen yet, and nothing is written", async () => {
+      const res = await t.service.update("u1", "org-1", "item-1", { inventoryValuationMethod: "weighted_average" })
+      expect(res).toMatchObject({ success: false, error: "ITEM_VALUATION_METHOD_NOT_READY" })
+      expect(t.repository.updateItem).not.toHaveBeenCalled()
+    })
+
+    it("an item keeps its FIFO method on a plain edit", async () => {
+      const res = await t.service.update("u1", "org-1", "item-1", { inventoryValuationMethod: "fifo" })
+      expect(res).toMatchObject({ success: true })
     })
 
     it("unit and tracking changes are refused once the item has stock movements", async () => {

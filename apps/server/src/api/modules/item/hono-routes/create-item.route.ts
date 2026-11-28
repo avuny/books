@@ -28,6 +28,7 @@ const rawErrorMap = {
   ITEM_UNIT_INVALID: errors.ITEM_UNIT_INVALID,
   ITEM_UNIT_PRICE_UNIT_INVALID: errors.ITEM_UNIT_PRICE_UNIT_INVALID,
   ITEM_OPENING_STOCK_UNIT_INVALID: errors.ITEM_OPENING_STOCK_UNIT_INVALID,
+  ITEM_VALUATION_METHOD_NOT_READY: errors.ITEM_VALUATION_METHOD_NOT_READY,
 } as const
 
 const errorMap = rawErrorMap as Record<Code, (typeof rawErrorMap)[keyof typeof rawErrorMap]>
@@ -67,6 +68,7 @@ export const createItemRoute = ({
         Code.ITEM_UNIT_PRICE_UNIT_INVALID,
         Code.ITEM_OPENING_STOCK_UNIT_INVALID,
         Code.ITEM_EXPIRY_DATE_REQUIRED,
+        Code.ITEM_VALUATION_METHOD_NOT_READY,
       ]),
       ...globalErrorResponses,
     },

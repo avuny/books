@@ -1,4 +1,5 @@
 import { z } from "@avuny/zod"
+import { CostInputSchema } from "../inventory-costing/schemas.js"
 import {
   STOCK_MOVEMENT_LIST_DEFAULT_PAGE_SIZE,
   STOCK_MOVEMENT_LIST_MAX_PAGE_SIZE,
@@ -42,6 +43,11 @@ export const StockMovementLineInputSchema = z.object({
   toLocationId: z.string().uuid().nullish(),
   /** In the item's base unit; the posting module converts other units first. */
   quantity: quantitySchema,
+  /**
+   * Cost of stock coming in (inventory-costing SPEC R1 to R4). Optional in the schema for now; the
+   * stock engine requires it on value-in lines in a later phase. Rejected values never default to 0.
+   */
+  cost: CostInputSchema.optional(),
 })
 export type StockMovementLineInput = z.infer<typeof StockMovementLineInputSchema>
 
@@ -56,6 +62,8 @@ export const PostStockMovementSchema = z
     /** Human readable document number, for display only. */
     sourceRef: sourceRefSchema.optional(),
     note: noteSchema.optional(),
+    /** Currency of the line costs. Defaults to the organization currency. */
+    currency: z.string().regex(/^[A-Z]{3}$/).optional(),
     lines: z.array(StockMovementLineInputSchema).min(1).max(STOCK_MOVEMENT_MAX_LINES),
   })
   .refine((v) => v.sourceId === undefined || v.sourceType !== undefined, {

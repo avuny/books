@@ -359,11 +359,16 @@ export const PostBusinessEventSchema = z.discriminatedUnion("event", [
     goodsMinor: positiveAmount,
     taxMinor: amount.default("0"),
   }),
-  /** Dr Accounts Payable, Cr Inventory, Cr Input Tax. */
+  /**
+   * Dr Accounts Payable, Cr Inventory, Cr Input Tax. `inventoryCostMinor` is what the stock engine
+   * took out of inventory. When it differs from the credit note goods value, the difference goes to
+   * Purchase Price Variance. Left out, inventory is credited at the goods value (the old behavior).
+   */
   z.object({
     event: z.literal("supplier_return"),
     ...eventBase,
     goodsMinor: positiveAmount,
+    inventoryCostMinor: amount.optional(),
     taxMinor: amount.default("0"),
   }),
   /** Freight and similar: capitalized into inventory only when directly attributable, else expensed. */

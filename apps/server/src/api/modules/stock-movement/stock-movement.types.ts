@@ -1,5 +1,7 @@
 import type {
   AllocatableBatch,
+  CostInput,
+  InventoryCostingErrorCode,
   BatchStatus,
   StockMovementErrorCode,
   WarehouseLocationErrorCode,
@@ -14,7 +16,7 @@ export type StockMovementRepository = ReturnType<typeof createStockMovementRepos
 export type StockMovementService = ReturnType<typeof createStockMovementService>
 
 /** Own codes plus the codes the location module answers with when a location cannot take a posting. */
-export type Code = StockMovementErrorCode | WarehouseLocationErrorCode
+export type Code = StockMovementErrorCode | WarehouseLocationErrorCode | InventoryCostingErrorCode
 
 /** What the stock rules need to know about an item (answered by the item module). */
 export interface StockItemPolicy {
@@ -66,9 +68,89 @@ export interface StockLocationsPort {
   >
 }
 
+/** One value-in line the costing port has to cost and turn into a layer. */
+export interface StockCostingReceiveLine {
+  orgId: string
+  movementLineId: string
+  itemId: string
+  batchId: string | null
+  /** Warehouse location that receives the stock. */
+  toLocationId: string
+  /** Base unit quantity, positive numeric string. */
+  quantity: string
+  receivedAt: Date
+  cost: CostInput
+  /** Currency of the cost; the adapter falls back to the organization currency. */
+  currency?: string
+}
+
+/** One internal move line (both sides are stock locations, transit included). */
+export interface StockCostingMoveLine {
+  orgId: string
+  movementLineId: string
+  itemId: string
+  batchId: string | null
+  fromLocationId: string
+  toLocationId: string
+  quantity: string
+  /** True for a forward posting: the whole quantity must be covered by cost layers. */
+  strict: boolean
+}
+
+type CostingResult = { ok: true } | { ok: false; error: InventoryCostingErrorCode; msg: string }
+
+/** One value-out line (stock leaves the company: sale, purchase return, adjustment loss). */
+export interface StockCostingIssueLine {
+  orgId: string
+  movementLineId: string
+  itemId: string
+  quantity: string
+  postedAt: Date
+  currency?: string
+}
+
+/** One reversing line, with the line it reverses. */
+export interface StockCostingReverseLine {
+  orgId: string
+  movementLineId: string
+  reversesMovementLineId: string
+  itemId: string
+  quantity: string
+  postedAt: Date
+  currency?: string
+}
+
+/** Port to the valuation engine (inventory-costing). Failures come back as values. */
+export interface StockCostingPort {
+  /**
+   * True when the item is costed by weighted average. Those items are costed completely by the
+   * stock movement (value-in, value-out, reversals). FIFO items keep their callers' own costing
+   * for value-out until the later phase that moves them over.
+   */
+  isWeightedAverage?(orgId: string, itemId: string, tx: Tx): Promise<boolean>
+  /** Costs a value-out line of a weighted average item. */
+  issueLine?(line: StockCostingIssueLine, tx: Tx): Promise<CostingResult>
+  /** Reverses the cost entry of the original line (weighted average items). */
+  reverseLine?(line: StockCostingReverseLine, tx: Tx): Promise<CostingResult>
+  /** Moves cost layers with the stock. Optional until the adapter is wired everywhere. */
+  moveLine?(
+    line: StockCostingMoveLine,
+    tx: Tx
+  ): Promise<{ ok: true } | { ok: false; error: InventoryCostingErrorCode; msg: string }>
+  receiveLine(
+    line: StockCostingReceiveLine,
+    tx: Tx
+  ): Promise<{ ok: true } | { ok: false; error: InventoryCostingErrorCode; msg: string }>
+}
+
 export interface StockMovementServiceDeps {
   repository: StockMovementRepository
   locations: StockLocationsPort
   batches: StockBatchesPort
   items?: StockItemsPort // optional port; defaults to a strict placeholder
+  /**
+   * Optional until phase 2c. When set, a value-in line that carries a `cost` is costed and gets its
+   * layer here. Lines without a cost are not rejected yet, because callers still write their own layer.
+   */
+  costing?: StockCostingPort
 }

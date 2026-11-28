@@ -20,7 +20,7 @@ const layer = (id: string, qty: string, value: number, at: string, extra: Partia
   createdAt: NOW,
   updatedAt: NOW,
   ...extra,
-})
+}) as InventoryCostLayer
 
 function fake(layers: InventoryCostLayer[]) {
   const allocations: any[] = []
