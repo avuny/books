@@ -103,6 +103,16 @@ export const PlatformAuthSuccessSchema = z.object({
 })
 export type PlatformAuthSuccess = z.infer<typeof PlatformAuthSuccessSchema>
 
+/**
+ * GET /platform-auth/me response: the admin plus their effective permission
+ * keys (union over their roles, spec 3.1). The admin web hides actions the
+ * signed-in admin lacks (the server remains the authority, PA-R7).
+ */
+export const PlatformMeResponseSchema = PlatformAdminDtoSchema.extend({
+  permissions: z.array(z.string()),
+})
+export type PlatformMeResponse = z.infer<typeof PlatformMeResponseSchema>
+
 /* ---- Invite acceptance + TOTP enrollment ---- */
 export const PlatformAcceptInviteSchema = z.object({
   token: z.string().min(1),
