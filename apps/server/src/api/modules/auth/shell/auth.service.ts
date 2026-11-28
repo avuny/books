@@ -22,6 +22,7 @@ import {
   hashPassword,
   verifyPassword,
   verifyDummyPassword,
+  needsRehash,
   validatePassword,
 } from "../../users/index.js"
 import {
@@ -268,6 +269,15 @@ export async function signIn(
       error: AuthErrorCode.ACCOUNT_SUSPENDED,
       msg: "Account is suspended",
     })
+  }
+
+  // 4b. Move an old high-cost hash to the current cost (best effort, never blocks sign-in)
+  if (needsRehash(found.user.passwordHash)) {
+    try {
+      await updateUserPassword(db, found.user.id, await hashPassword(input.password))
+    } catch {
+      // keep the old hash; try again on the next sign-in
+    }
   }
 
   // 5. Update last sign-in

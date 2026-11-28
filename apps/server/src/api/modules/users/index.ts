@@ -14,6 +14,7 @@ export {
   hashPassword,
   verifyPassword,
   verifyDummyPassword,
+  needsRehash,
 } from "./shell/users.crypto.js"
 export {
   createUser,

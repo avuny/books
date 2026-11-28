@@ -66,7 +66,7 @@ export const envSchema = z
     VERIFICATION_TOKEN_TTL: duration("15m"),
 
     // Passwords and OTP
-    BCRYPT_ROUNDS: z.coerce.number().int().min(4).max(31).default(12),
+    BCRYPT_ROUNDS: z.coerce.number().int().min(4).max(31).default(10),
     OTP_SECRET: z.string().min(32),
     OTP_TTL: duration("10m"),
     OTP_MAX_ATTEMPTS: z.coerce.number().int().min(1).default(5),

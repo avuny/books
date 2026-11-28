@@ -28,3 +28,12 @@ export async function verifyPassword(
 export async function verifyDummyPassword(password: string): Promise<boolean> {
   return bcrypt.compare(password, DUMMY_HASH)
 }
+
+/**
+ * True when a stored bcrypt hash was made with more rounds than the current setting.
+ * Such hashes still verify, but cost more CPU than a Worker request should spend (D7).
+ */
+export function needsRehash(hash: string, rounds: number = config.BCRYPT_ROUNDS): boolean {
+  const m = /^\$2[abxy]\$(\d{2})\$/.exec(hash)
+  return m ? Number(m[1]) > rounds : false
+}
