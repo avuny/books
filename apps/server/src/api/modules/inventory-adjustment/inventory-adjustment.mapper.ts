@@ -66,6 +66,8 @@ export function toInventoryAdjustmentLineDto(
     quantityDeltaBase: row.quantityDeltaBase,
     snapshotToken: row.snapshotToken ?? null,
     notes: row.notes ?? null,
+    unitCost: row.unitCost ?? null,
+    zeroCostReason: row.zeroCostReason ?? null,
     createdAt: formatTimestamp(row.createdAt),
     updatedAt: formatTimestamp(row.updatedAt),
   }

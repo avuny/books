@@ -194,7 +194,7 @@ describe("InventoryAdjustmentService", () => {
         date: "2026-11-20",
         warehouseId,
         reasonId: reasonSurplusId,
-        lines: [{ itemId, locationId, unitId, countedQuantity: "115.000000" }],
+        lines: [{ itemId, locationId, unitId, countedQuantity: "115.000000", unitCost: "250" }],
       })
       expect(createRes.success).toBe(true)
       if (!createRes.success) return
@@ -208,6 +208,34 @@ describe("InventoryAdjustmentService", () => {
       expect(confirmRes.data.confirmedAt).toBeTruthy()
       expect(confirmRes.data.stockMovementId).toBe("movement-1")
       expect(confirmRes.data.journalEntryId).toBe("je-1")
+    })
+
+    it("refuses to confirm a gain without a unit cost", async () => {
+      repo.stock.set(`${locationId}:${itemId}:`, "100.000000")
+      const createRes = await service.create(actorId, orgId, {
+        date: "2026-11-20",
+        warehouseId,
+        reasonId: reasonSurplusId,
+        lines: [{ itemId, locationId, unitId, countedQuantity: "115.000000" }],
+      })
+      expect(createRes.success).toBe(true)
+      if (!createRes.success) return
+      const confirmRes = await service.confirm(actorId, orgId, createRes.data.id)
+      expect(confirmRes).toMatchObject({ success: false, error: "INVENTORY_ADJUSTMENT_COST_REQUIRED" })
+    })
+
+    it("refuses a zero cost gain without a reason", async () => {
+      repo.stock.set(`${locationId}:${itemId}:`, "100.000000")
+      const createRes = await service.create(actorId, orgId, {
+        date: "2026-11-20",
+        warehouseId,
+        reasonId: reasonSurplusId,
+        lines: [{ itemId, locationId, unitId, countedQuantity: "115.000000", unitCost: "0" }],
+      })
+      expect(createRes.success).toBe(true)
+      if (!createRes.success) return
+      const confirmRes = await service.confirm(actorId, orgId, createRes.data.id)
+      expect(confirmRes).toMatchObject({ success: false, error: "INVENTORY_ADJUSTMENT_COST_REQUIRED" })
     })
 
     it("rejects confirmation if count is stale", async () => {

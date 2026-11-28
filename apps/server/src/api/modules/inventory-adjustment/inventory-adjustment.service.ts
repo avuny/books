@@ -230,6 +230,10 @@ export function createInventoryAdjustmentService(deps: InventoryAdjustmentServic
             quantityDeltaBase,
             snapshotToken: line.snapshotToken || makeSnapshotToken(systemQuantityBase),
             notes: line.notes ?? null,
+            unitCost: line.unitCost ?? null,
+            costSource: line.unitCost ? ("USER" as const) : null,
+            isZeroCost: !!line.unitCost && Number(line.unitCost) === 0,
+            zeroCostReason: line.unitCost && Number(line.unitCost) === 0 ? (line.zeroCostReason ?? null) : null,
           })
         }
 
@@ -377,6 +381,10 @@ export function createInventoryAdjustmentService(deps: InventoryAdjustmentServic
               quantityDeltaBase,
               snapshotToken: line.snapshotToken || makeSnapshotToken(systemQuantityBase),
               notes: line.notes ?? null,
+              unitCost: line.unitCost ?? null,
+              costSource: line.unitCost ? ("USER" as const) : null,
+              isZeroCost: !!line.unitCost && Number(line.unitCost) === 0,
+              zeroCostReason: line.unitCost && Number(line.unitCost) === 0 ? (line.zeroCostReason ?? null) : null,
             })
           }
 
@@ -552,11 +560,20 @@ export function createInventoryAdjustmentService(deps: InventoryAdjustmentServic
 
             if (comp > 0) {
               // Gain: toLocation is the warehouse location, from is null (resolved to adjustment system location)
+              // A gain needs a cost (SPEC R9). Zero needs a reason (R3). The engine decides the value.
+              if (!line.unitCost || (Number(line.unitCost) === 0 && !line.zeroCostReason)) {
+                return { ok: false as const, error: Err.INVENTORY_ADJUSTMENT_COST_REQUIRED }
+              }
               movementLines.push({
                 itemId: line.itemId,
                 batchId: line.batchId,
                 toLocationId: line.locationId,
                 quantity,
+                cost: {
+                  source: "USER" as const,
+                  unitCost: line.unitCost,
+                  ...(Number(line.unitCost) === 0 ? { zeroCost: { reason: line.zeroCostReason as any } } : {}),
+                },
               })
             } else {
               // Loss: fromLocation is the warehouse location, to is null (resolved to adjustment system location)
