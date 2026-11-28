@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 import type { InventoryCostLayer } from "@avuny/db"
-import { createValuationEngine, type ReceiveInput } from "./valuation-engine.js"
+import { createValuationEngine, toEngineMethod, type ReceiveInput } from "./valuation-engine.js"
 import type { InventoryCostingService } from "./inventory-costing.types.js"
 
 const NOW = new Date("2026-01-01T00:00:00Z")
@@ -198,5 +198,14 @@ describe("valuation engine, WAC dispatch", () => {
     expect(r).toMatchObject({ ok: true, totalValueMinor: 0n })
     expect(layers).toHaveLength(0)
     expect(allocations).toHaveLength(0)
+  })
+})
+
+describe("toEngineMethod", () => {
+  it("maps the stored item method to the strategy", () => {
+    expect(toEngineMethod("weighted_average")).toBe("WAC")
+    expect(toEngineMethod("fifo")).toBe("FIFO")
+    expect(toEngineMethod(null)).toBe("FIFO")
+    expect(toEngineMethod(undefined)).toBe("FIFO")
   })
 })

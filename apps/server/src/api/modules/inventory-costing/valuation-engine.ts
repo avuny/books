@@ -15,6 +15,10 @@ import type { WacEntryResult, WacStrategy } from "./wac-strategy.js"
 /** The item's valuation method. Callers read it from the item. FIFO is the default. */
 export type ValuationMethod = "FIFO" | "WAC"
 
+/** Maps the item's stored method (`fifo` or `weighted_average`) to the engine strategy. Unknown or missing means FIFO. */
+export const toEngineMethod = (itemMethod: string | null | undefined): ValuationMethod =>
+  itemMethod === "weighted_average" ? "WAC" : "FIFO"
+
 /**
  * Valuation engine, FIFO strategy (inventory-costing SPEC section 6). One place that decides the
  * cost of stock coming in and the cost of stock going out. Callers hand it the movement line they

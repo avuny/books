@@ -3,6 +3,7 @@ import { inventoryItemBatches, inventoryItems, organizations } from "@avuny/db"
 import { db } from "../../db.js"
 import { getInventoryCostingService } from "../inventory-costing/index.js"
 import { getInventoryCostingRepository, getValuationEngine } from "../inventory-costing/deps.js"
+import { toEngineMethod } from "../inventory-costing/valuation-engine.js"
 import { getBatchService } from "../batch/index.js"
 // Adjust to the names the item and warehouse-location barrels export.
 import { getItemRepository } from "../item/index.js"

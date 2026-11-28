@@ -12,7 +12,7 @@ export type {
   InventoryCostingServiceDeps,
 } from "./inventory-costing.types.js"
 export type { CreateCostLayerInput, RecordAllocationInput } from "./inventory-costing.service.js"
-export { createValuationEngine } from "./valuation-engine.js"
+export { createValuationEngine, toEngineMethod } from "./valuation-engine.js"
 export type { ValuationEngine, ReceiveInput, IssueInput, IssueResult, EngineFailure } from "./valuation-engine.js"
 export { createWacStrategy } from "./wac-strategy.js"
 export type { WacStrategy, WacFailure, WacEntryResult } from "./wac-strategy.js"
