@@ -18,6 +18,9 @@ export interface CreateCostLayerInput {
   receivedValue: number
   currency: string
   receivedAt: Date
+  /** How the cost was determined (SPEC R2). Omitted by legacy callers until phase 2c. */
+  costSource?: "DOCUMENT" | "USER" | "INHERITED" | "CONFIRMED_PROPOSAL" | undefined
+  isZeroCost?: boolean | undefined
 }
 
 /**
@@ -92,6 +95,8 @@ export function createInventoryCostingService(deps: InventoryCostingServiceDeps)
         remainingValue: input.receivedValue,
         currency: input.currency,
         receivedAt: input.receivedAt,
+        costSource: input.costSource ?? null,
+        isZeroCost: input.isZeroCost ?? false,
       }
       return repo.insertCostLayer(values, tx)
     },
