@@ -692,6 +692,9 @@ The objective is to make development resumable and resilient to lost AI conversa
 3. Open a PR `dev` -> `main`, wait for green CI, merge it (merge commit). The push to `main` runs the deploy job. Push the tag (`git push origin vX.Y.Z`).
 4. Smoke test production after the deploy (API + web URLs are in the module PROGRESS notes). Prod sign-in: `POST /api/auth/sign-in` with `{identifier,password}`, send a browser-like User-Agent (the default Python one is blocked by Cloudflare).
 
+### Prod monitoring
+A probe and an error-log pull watch prod. Setup, cadence and alert rules: `docs/ops/prod-monitoring.md`. After every deploy, check the probe history and fix any new failure mode before the next release.
+
 ### Pre-release migration check (required before merging to main)
 
 1. Compare the candidate `packages/db/drizzle/meta/_journal.json` with fresh `main`: main's entries must be an exact prefix, every new tag unique, `when` timestamps strictly increasing, and no applied SQL file rewritten.
