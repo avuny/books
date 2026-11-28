@@ -1,4 +1,6 @@
 import {
+  InventoryCostingErrorCode,
+  inventoryCostingTranslationsEn,
   StockMovementErrorCode as Err,
   STOCK_MOVEMENT_MAX_LINES,
   addDecimal,
@@ -38,6 +40,33 @@ const failure = (error: Code, msg: string): Failure => ({ failed: true, error, m
 const isFailure = (v: unknown): v is Failure =>
   typeof v === "object" && v !== null && (v as Failure).failed === true
 const toFail = (f: Failure) => fail({ error: f.error, msg: f.msg })
+
+/** Thrown inside the transaction so a failure value rolls back everything written so far. */
+class AbortPosting extends Error {
+  constructor(readonly failure: Failure) {
+    super(failure.msg)
+  }
+}
+
+/**
+ * Runs a posting in its own transaction. A failure value (for example a cost that cannot be
+ * determined after the header and lines were written) must undo those writes, not commit them.
+ */
+async function atomic<T>(
+  repo: { transaction<R>(fn: (tx: Tx) => Promise<R>): Promise<R> },
+  run: (tx: Tx) => Promise<Failure | T>
+): Promise<Failure | T> {
+  try {
+    return await repo.transaction(async (t) => {
+      const result = await run(t)
+      if (isFailure(result)) throw new AbortPosting(result)
+      return result
+    })
+  } catch (err) {
+    if (err instanceof AbortPosting) return err.failure
+    throw err
+  }
+}
 
 const message = (code: Err) => stockMovementTranslationsEn.errors[code]
 
@@ -258,6 +287,7 @@ export function createStockMovementService(deps: StockMovementServiceDeps) {
     // 6b. cost: a value-in line (no stock side it comes from, a stock side it goes to) with a cost input
     // is costed and gets its layer, in the same transaction. Nothing before this point wrote a layer.
     if (deps.costing) {
+      let reversedLines: Awaited<ReturnType<typeof repo.findLines>> | undefined
       for (const [i, l] of lines.entries()) {
         const lineId = rows.find((r) => r.lineNo === i + 1)!.id
         if (l.fromIntent && l.toIntent) {
@@ -278,6 +308,61 @@ export function createStockMovementService(deps: StockMovementServiceDeps) {
           )
           if (!res.ok) return failure(res.error, `${res.msg} (line ${i + 1})`)
           continue
+        }
+        // Weighted average items are costed completely here. Reversals first.
+        if (header.reversalOfId && deps.costing.isWeightedAverage && deps.costing.reverseLine) {
+          if (await deps.costing.isWeightedAverage(orgId, l.itemId, tx)) {
+            const original = (reversedLines ??= await repo.findLines(orgId, header.reversalOfId, tx)).find(
+              (r) => r.lineNo === i + 1
+            )
+            if (!original) return failure(Err.STOCK_MOVEMENT_NOT_FOUND, message(Err.STOCK_MOVEMENT_NOT_FOUND))
+            const res = await deps.costing.reverseLine(
+              {
+                orgId,
+                movementLineId: lineId,
+                reversesMovementLineId: original.id,
+                itemId: l.itemId,
+                quantity: l.quantity,
+                postedAt: header.postedAt ?? new Date(),
+                currency,
+              },
+              tx
+            )
+            if (!res.ok) return failure(res.error, `${res.msg} (line ${i + 1})`)
+          }
+          continue
+        }
+        if (forwardChecks && l.fromIntent && !l.toIntent && deps.costing.isWeightedAverage && deps.costing.issueLine) {
+          if (await deps.costing.isWeightedAverage(orgId, l.itemId, tx)) {
+            const res = await deps.costing.issueLine(
+              {
+                orgId,
+                movementLineId: lineId,
+                itemId: l.itemId,
+                quantity: l.quantity,
+                postedAt: header.postedAt ?? new Date(),
+                currency,
+              },
+              tx
+            )
+            if (!res.ok) return failure(res.error, `${res.msg} (line ${i + 1})`)
+          }
+          continue
+        }
+        // A value-in line of a weighted average item without a cost fails (R1, R4). FIFO items keep
+        // their callers' own costing until cost is required for them too.
+        if (
+          forwardChecks &&
+          !l.cost &&
+          !l.fromIntent &&
+          l.toIntent &&
+          deps.costing.isWeightedAverage &&
+          (await deps.costing.isWeightedAverage(orgId, l.itemId, tx))
+        ) {
+          return failure(
+            InventoryCostingErrorCode.STOCK_MOVEMENT_COST_REQUIRED,
+            `${inventoryCostingTranslationsEn.errors.STOCK_MOVEMENT_COST_REQUIRED} (line ${i + 1})`
+          )
         }
         if (!forwardChecks || !l.cost || l.fromIntent || !l.toIntent) continue
         const res = await deps.costing.receiveLine(
@@ -389,7 +474,7 @@ export function createStockMovementService(deps: StockMovementServiceDeps) {
           input.currency
         )
       }
-      const outcome = await (tx ? run(tx) : repo.transaction(run))
+      const outcome = await (tx ? run(tx) : atomic(repo, run))
       if (isFailure(outcome)) return toFail(outcome)
       return ok({ data: outcome, msg: "Stock movement posted successfully" })
     },
@@ -454,7 +539,7 @@ export function createStockMovementService(deps: StockMovementServiceDeps) {
           false
         )
       }
-      const outcome = await (tx ? run(tx) : repo.transaction(run))
+      const outcome = await (tx ? run(tx) : atomic(repo, run))
       if (isFailure(outcome)) return toFail(outcome)
       return ok({ data: outcome, msg: "Stock movement reversed successfully" })
     },

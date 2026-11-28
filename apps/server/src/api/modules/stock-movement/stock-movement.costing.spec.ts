@@ -104,4 +104,78 @@ describe("stock movement costing (phase 2b)", () => {
     })
     expect(res).toMatchObject({ success: false, error: "COST_UNDETERMINED" })
   })
+
+  it("rolls the whole posting back when costing fails after the lines were written", async () => {
+    const t = setup({
+      receiveLine: async () => ({ ok: false as const, error: "COST_INVALID" as never, msg: "Invalid" }),
+    })
+    let committed = true
+    t.repository.transaction.mockImplementation(async (fn: (tx: unknown) => unknown) => {
+      try {
+        return await fn({})
+      } catch (err) {
+        committed = false
+        throw err
+      }
+    })
+    const res = await t.service.post("u1", ORG, {
+      type: "purchase",
+      lines: [{ itemId: "i1", toLocationId: BIN, quantity: "10", cost }],
+    })
+    expect(res).toMatchObject({ success: false, error: "COST_INVALID" })
+    expect(committed).toBe(false)
+  })
+
+  describe("weighted average items (phase 3)", () => {
+    const wac = (extra: Partial<StockCostingPort> = {}): StockCostingPort => ({
+      isWeightedAverage: async () => true,
+      receiveLine: async () => ({ ok: true as const }),
+      ...extra,
+    })
+
+    it("costs a value-out line through the port", async () => {
+      const issueLine = vi.fn(async () => ({ ok: true as const }))
+      const t = setup(wac({ issueLine }))
+      const res = await t.service.post("u1", ORG, {
+        type: "sale",
+        lines: [{ itemId: "i1", fromLocationId: BIN, quantity: "4" }],
+      })
+      expect(res).toMatchObject({ success: true })
+      expect(issueLine).toHaveBeenCalledWith(
+        expect.objectContaining({ movementLineId: "l1", itemId: "i1", quantity: "4" }),
+        expect.anything()
+      )
+    })
+
+    it("does not cost a value-out line of a FIFO item (the caller does)", async () => {
+      const issueLine = vi.fn(async () => ({ ok: true as const }))
+      const t = setup(wac({ isWeightedAverage: async () => false, issueLine }))
+      await t.service.post("u1", ORG, { type: "sale", lines: [{ itemId: "i1", fromLocationId: BIN, quantity: "4" }] })
+      expect(issueLine).not.toHaveBeenCalled()
+    })
+
+    it("fails a value-out above the pool as a value", async () => {
+      const t = setup(
+        wac({
+          issueLine: async () => ({ ok: false as const, error: "COST_NEGATIVE_STOCK_NOT_SUPPORTED" as never, msg: "No" }),
+        })
+      )
+      const res = await t.service.post("u1", ORG, {
+        type: "sale",
+        lines: [{ itemId: "i1", fromLocationId: BIN, quantity: "4" }],
+      })
+      expect(res).toMatchObject({ success: false, error: "COST_NEGATIVE_STOCK_NOT_SUPPORTED" })
+    })
+
+    it("rejects a value-in line without a cost, and writes nothing costed", async () => {
+      const receiveLine = vi.fn(async () => ({ ok: true as const }))
+      const t = setup(wac({ receiveLine }))
+      const res = await t.service.post("u1", ORG, {
+        type: "purchase",
+        lines: [{ itemId: "i1", toLocationId: BIN, quantity: "10" }],
+      })
+      expect(res).toMatchObject({ success: false, error: "STOCK_MOVEMENT_COST_REQUIRED" })
+      expect(receiveLine).not.toHaveBeenCalled()
+    })
+  })
 })

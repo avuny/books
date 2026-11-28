@@ -1,5 +1,11 @@
-import { and, asc, desc, eq, gt, sql } from "drizzle-orm"
+import { and, asc, desc, eq, gt, inArray, isNull, sql } from "drizzle-orm"
 import {
+  inventoryCostEntries,
+  inventoryCostPools,
+  items,
+  type InventoryCostEntry,
+  type InventoryCostPool,
+  type NewInventoryCostEntry,
   inventoryCostAllocations,
   inventoryCostLayers,
   inventoryItems,
@@ -204,6 +210,131 @@ export function createInventoryCostingRepository({ db }: { db: DB }) {
             eq(inventoryCostAllocations.costLayerId, costLayerId)
           )
         )
+    },
+    // ---- weighted average pools and entries (SPEC section 5.1) ----
+
+    /** The item's valuation method, or null when the item does not exist in this organization. */
+    async findValuationMethod(orgId: string, itemId: string, tx?: Tx): Promise<string | null> {
+      const [row] = await exec(tx)
+        .select({ method: items.inventoryValuationMethod })
+        .from(items)
+        .where(and(eq(items.orgId, orgId), eq(items.id, itemId)))
+        .limit(1)
+      return row?.method ?? null
+    },
+
+    /**
+     * Returns the organization wide pool of an item with its row locked, creating an empty one on
+     * first use. Every WAC write starts here, so two postings on one item serialize on this row (R41).
+     */
+    async lockPool(orgId: string, itemId: string, currency: string, tx: Tx): Promise<InventoryCostPool> {
+      const find = () =>
+        tx
+          .select()
+          .from(inventoryCostPools)
+          .where(
+            and(
+              eq(inventoryCostPools.orgId, orgId),
+              eq(inventoryCostPools.itemId, itemId),
+              isNull(inventoryCostPools.scopeWarehouseId)
+            )
+          )
+          .for("update")
+          .limit(1)
+      const [existing] = await find()
+      if (existing) return existing
+      await tx
+        .insert(inventoryCostPools)
+        .values({ orgId, itemId, currency })
+        .onConflictDoNothing()
+      const [row] = await find()
+      if (!row) throw new Error("Failed to create cost pool")
+      return row
+    },
+
+    async insertCostEntry(values: NewInventoryCostEntry, tx: Tx): Promise<InventoryCostEntry> {
+      const [row] = await tx.insert(inventoryCostEntries).values(values).returning()
+      if (!row) throw new Error("Failed to insert cost entry")
+      return row
+    },
+
+    async updatePool(
+      orgId: string,
+      poolId: string,
+      values: { onHandQty: string; totalValue: number; avgUnitCost: string; lastUnitCost: string; seq: number },
+      tx: Tx
+    ): Promise<void> {
+      await tx
+        .update(inventoryCostPools)
+        .set({ ...values, updatedAt: sql`now()` })
+        .where(and(eq(inventoryCostPools.orgId, orgId), eq(inventoryCostPools.id, poolId)))
+    },
+
+    async findEntryByMovementLine(orgId: string, movementLineId: string, tx: Tx): Promise<InventoryCostEntry | null> {
+      const [row] = await tx
+        .select()
+        .from(inventoryCostEntries)
+        .where(and(eq(inventoryCostEntries.orgId, orgId), eq(inventoryCostEntries.movementLineId, movementLineId)))
+        .limit(1)
+      return row ?? null
+    },
+
+    async findEntryById(orgId: string, entryId: string, tx: Tx): Promise<InventoryCostEntry | null> {
+      const [row] = await tx
+        .select()
+        .from(inventoryCostEntries)
+        .where(and(eq(inventoryCostEntries.orgId, orgId), eq(inventoryCostEntries.id, entryId)))
+        .limit(1)
+      return row ?? null
+    },
+
+    async findReversalOfEntry(orgId: string, entryId: string, tx: Tx): Promise<InventoryCostEntry | null> {
+      const [row] = await tx
+        .select()
+        .from(inventoryCostEntries)
+        .where(and(eq(inventoryCostEntries.orgId, orgId), eq(inventoryCostEntries.reversesEntryId, entryId)))
+        .limit(1)
+      return row ?? null
+    },
+
+    /** True when a value-out entry exists on the pool after the given seq (R27 rule 1). */
+    async hasValueOutAfter(orgId: string, poolId: string, seq: number, tx: Tx): Promise<boolean> {
+      const rows = await tx
+        .select({ id: inventoryCostEntries.id })
+        .from(inventoryCostEntries)
+        .where(
+          and(
+            eq(inventoryCostEntries.orgId, orgId),
+            eq(inventoryCostEntries.poolId, poolId),
+            gt(inventoryCostEntries.seq, seq),
+            inArray(inventoryCostEntries.kind, ["ISSUE", "REVERSAL_OUT"])
+          )
+        )
+        .limit(1)
+      return rows.length > 0
+    },
+
+    /** Entries that inherited from a source entry (sale returns): the quantity and value taken so far (R31). */
+    async sumInheritedFrom(
+      orgId: string,
+      sourceEntryId: string,
+      tx: Tx
+    ): Promise<{ qty: string; value: string }> {
+      const [row] = await tx
+        .select({
+          qty: sql<string>`coalesce(sum(${inventoryCostEntries.qtyDelta}), 0)::text`,
+          value: sql<string>`coalesce(sum(${inventoryCostEntries.valueDelta}), 0)::text`,
+        })
+        .from(inventoryCostEntries)
+        .where(
+          and(
+            eq(inventoryCostEntries.orgId, orgId),
+            eq(inventoryCostEntries.sourceEntryId, sourceEntryId),
+            // A return that was reversed frees its quantity again.
+            sql`not exists (select 1 from inventory_cost_entries r where r.org_id = ${orgId} and r.reverses_entry_id = ${inventoryCostEntries.id})`
+          )
+        )
+      return { qty: row?.qty ?? "0", value: row?.value ?? "0" }
     },
   }
 }

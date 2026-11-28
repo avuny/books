@@ -10,6 +10,10 @@ import {
 } from "@avuny/contracts"
 import type { Tx } from "@avuny/db"
 import type { InventoryCostingService } from "./inventory-costing.types.js"
+import type { WacEntryResult, WacStrategy } from "./wac-strategy.js"
+
+/** The item's valuation method. Callers read it from the item. FIFO is the default. */
+export type ValuationMethod = "FIFO" | "WAC"
 
 /**
  * Valuation engine, FIFO strategy (inventory-costing SPEC section 6). One place that decides the
@@ -32,6 +36,8 @@ const code = (error: Err): EngineFailure => ({
 type Err = (typeof ErrCode)[keyof typeof ErrCode]
 
 export type ReceiveInput = {
+  /** Default FIFO. WAC writes a pool entry instead of a layer. */
+  method?: ValuationMethod
   orgId: string
   inventoryItemId: string
   itemId: string
@@ -51,20 +57,28 @@ export type ReceiveInput = {
 }
 
 export type IssueInput = {
+  method?: ValuationMethod
   orgId: string
   inventoryItemId: string
   inventoryItemBatchId: string | null
   outgoingMovementLineId: string
   quantity: string
+  /** Needed by the WAC strategy (the pool is per item, not per location). */
+  itemId?: string
+  currency?: string
+  effectiveAt?: Date
 }
 
 export type IssueResult = {
   ok: true
   totalValueMinor: bigint
   slices: { layerId: string; quantity: string; valueMinor: bigint }[]
+  /** WAC: the pool entry that holds this issue. */
+  entryId?: string
 }
 
 export type MoveInput = {
+  method?: ValuationMethod
   orgId: string
   fromInventoryItemId: string
   fromBatchId: string | null
@@ -82,8 +96,25 @@ export type MoveInput = {
   strict: boolean
 }
 
-export function createValuationEngine(deps: { costing: InventoryCostingService }) {
+export type ReverseInput = {
+  orgId: string
+  itemId: string
+  /** The reversing movement line. */
+  movementLineId: string
+  /** The cost entry of the original line (WAC). */
+  reversesEntryId: string
+  quantity: string
+  currency: string
+  effectiveAt: Date
+  actorId?: string | null
+}
+
+export function createValuationEngine(deps: { costing: InventoryCostingService; wac?: WacStrategy }) {
   const costing = deps.costing
+  const wacOf = (): WacStrategy => {
+    if (!deps.wac) throw new Error("The weighted average strategy is not wired")
+    return deps.wac
+  }
 
   return {
     /** Decides the cost of one value-in line without writing anything. */
@@ -98,7 +129,35 @@ export function createValuationEngine(deps: { costing: InventoryCostingService }
     async receive(
       input: ReceiveInput,
       tx?: Tx
-    ): Promise<{ ok: true; layerId: string; cost: DeterminedCost } | EngineFailure> {
+    ): Promise<{ ok: true; layerId: string; cost: DeterminedCost; entryId?: string } | EngineFailure> {
+      if (input.method === "WAC") {
+        if (!tx) throw new Error("A weighted average receipt needs the posting transaction")
+        let inheritedFrom = input.inherited?.valueMinor
+        let sourceEntryId: string | null = null
+        if (input.cost?.source === "INHERITED" && input.cost.sourceEntryId) {
+          const lookup = await wacOf().inheritedValueFor(input.orgId, input.itemId, input.cost.sourceEntryId, input.quantity, tx)
+          if (!lookup.ok) return lookup
+          inheritedFrom = lookup.valueMinor
+          sourceEntryId = input.cost.sourceEntryId
+        }
+        const res = determineCost(input.cost, input.quantity, inheritedFrom)
+        if (!res.ok) return code(res.error)
+        const done = await wacOf().receive(
+          {
+            orgId: input.orgId,
+            itemId: input.itemId,
+            movementLineId: input.sourceMovementLineId,
+            quantity: input.quantity,
+            currency: input.currency,
+            effectiveAt: input.receivedAt,
+            cost: res.cost,
+            sourceEntryId,
+          },
+          tx
+        )
+        if (!done.ok) return done
+        return { ok: true, layerId: "", cost: res.cost, entryId: done.entry.id }
+      }
       const determined = this.determine(input)
       if (!determined.ok) return determined
       const layer = await costing.createCostLayer(
@@ -126,6 +185,24 @@ export function createValuationEngine(deps: { costing: InventoryCostingService }
      * be covered (R6): otherwise nothing is written and the call fails with COST_UNDETERMINED.
      */
     async issue(input: IssueInput, tx?: Tx): Promise<IssueResult | EngineFailure> {
+      if (input.method === "WAC") {
+        if (!tx || !input.itemId || !input.currency) {
+          throw new Error("A weighted average issue needs the transaction, the item and the currency")
+        }
+        const done = await wacOf().issue(
+          {
+            orgId: input.orgId,
+            itemId: input.itemId,
+            movementLineId: input.outgoingMovementLineId,
+            quantity: input.quantity,
+            currency: input.currency,
+            effectiveAt: input.effectiveAt ?? new Date(),
+          },
+          tx
+        )
+        if (!done.ok) return done
+        return { ok: true, totalValueMinor: done.valueMinor, slices: [], entryId: done.entry.id }
+      }
       const layers = await costing.getFifoLayers(
         input.orgId,
         input.inventoryItemId,
@@ -166,6 +243,26 @@ export function createValuationEngine(deps: { costing: InventoryCostingService }
     },
 
     /**
+     * Reverses a WAC cost entry (R27, R28). Blocked when stock of a receipt was already used.
+     * FIFO reversals keep their current path in the stock movement (phase 2).
+     */
+    async reverseWac(input: ReverseInput, tx: Tx): Promise<WacEntryResult | EngineFailure> {
+      return wacOf().reverse(
+        {
+          orgId: input.orgId,
+          itemId: input.itemId,
+          movementLineId: input.movementLineId,
+          quantity: input.quantity,
+          currency: input.currency,
+          effectiveAt: input.effectiveAt,
+          reversesEntryId: input.reversesEntryId,
+          actorId: input.actorId ?? null,
+        },
+        tx
+      )
+    },
+
+    /**
      * Internal move (transfer, transit, return to source): no value change. Takes FIFO layers at the
      * source and writes inherited layers at the destination, one per consumed layer, keeping each
      * layer's received date and origin so later FIFO order and value are exact.
@@ -174,6 +271,8 @@ export function createValuationEngine(deps: { costing: InventoryCostingService }
       input: MoveInput,
       tx?: Tx
     ): Promise<{ ok: true; movedQuantity: string; totalValueMinor: bigint } | EngineFailure> {
+      // WAC: an internal move changes no value and no entry (R33). The pool covers every location.
+      if (input.method === "WAC") return { ok: true, movedQuantity: input.quantity, totalValueMinor: 0n }
       const layers = await costing.getFifoLayers(
         input.orgId,
         input.fromInventoryItemId,

@@ -137,3 +137,66 @@ describe("valuation engine, FIFO", () => {
     expect(await e.move(mv({ fromInventoryItemId: "nothing", strict: false }))).toMatchObject({ ok: true, movedQuantity: "0" })
   })
 })
+
+describe("valuation engine, WAC dispatch", () => {
+  const tx = {} as never
+  const wacFake = () => {
+    const calls: string[] = []
+    const wac = {
+      async receive(i: any) { calls.push(`receive ${i.quantity} ${i.cost.valueMinor}`); return { ok: true, entry: { id: "E1" }, valueMinor: i.cost.valueMinor } },
+      async issue(i: any) { calls.push(`issue ${i.quantity}`); return { ok: true, entry: { id: "E2" }, valueMinor: 440n } },
+      async reverse(i: any) { calls.push(`reverse ${i.reversesEntryId}`); return { ok: true, entry: { id: "E3" }, valueMinor: 440n } },
+      async inheritedValueFor(_o: string, _i: string, src: string, q: string) { calls.push(`inherit ${src} ${q}`); return { ok: true, valueMinor: 110n } },
+    } as any
+    return { wac, calls }
+  }
+
+  it("writes a pool entry and no layer for a WAC receipt", async () => {
+    const { service, layers } = fakeCosting()
+    const { wac, calls } = wacFake()
+    const r = await createValuationEngine({ costing: service, wac }).receive(recv({ method: "WAC" }), tx)
+    expect(r).toMatchObject({ ok: true, entryId: "E1" })
+    expect(layers).toHaveLength(0)
+    expect(calls).toEqual(["receive 10 1000"])
+  })
+
+  it("still requires a cost for WAC", async () => {
+    const { service } = fakeCosting()
+    const { wac, calls } = wacFake()
+    const r = await createValuationEngine({ costing: service, wac }).receive(recv({ method: "WAC", cost: undefined }), tx)
+    expect(r).toMatchObject({ ok: false, error: "STOCK_MOVEMENT_COST_REQUIRED" })
+    expect(calls).toEqual([])
+  })
+
+  it("a WAC sale return inherits the value of the sale entry, the caller cannot set it", async () => {
+    const { service } = fakeCosting()
+    const { wac, calls } = wacFake()
+    const r = await createValuationEngine({ costing: service, wac }).receive(
+      recv({ method: "WAC", quantity: "1", cost: { source: "INHERITED", sourceEntryId: "00000000-0000-4000-8000-000000000001" } }),
+      tx
+    )
+    expect(r).toMatchObject({ ok: true })
+    expect(calls).toEqual(["inherit 00000000-0000-4000-8000-000000000001 1", "receive 1 110"])
+  })
+
+  it("issues from the pool and returns the exact value and entry id", async () => {
+    const { service } = fakeCosting()
+    const { wac } = wacFake()
+    const r = await createValuationEngine({ costing: service, wac }).issue(
+      { method: "WAC", orgId: "o", inventoryItemId: "", inventoryItemBatchId: null, outgoingMovementLineId: "l", quantity: "4", itemId: "it", currency: "EGP" },
+      tx
+    )
+    expect(r).toMatchObject({ ok: true, totalValueMinor: 440n, entryId: "E2" })
+  })
+
+  it("an internal move of a WAC item changes nothing", async () => {
+    const { service, layers, allocations } = fakeCosting()
+    const r = await createValuationEngine({ costing: service, wac: wacFake().wac }).move(
+      { method: "WAC", orgId: "o", fromInventoryItemId: "a", fromBatchId: null, toInventoryItemId: "b", toBatchId: null, itemId: "it", movementLineId: "l", quantity: "5", strict: true },
+      tx
+    )
+    expect(r).toMatchObject({ ok: true, totalValueMinor: 0n })
+    expect(layers).toHaveLength(0)
+    expect(allocations).toHaveLength(0)
+  })
+})

@@ -2,7 +2,7 @@ import { and, eq } from "drizzle-orm"
 import { inventoryItemBatches, inventoryItems, organizations } from "@avuny/db"
 import { db } from "../../db.js"
 import { getInventoryCostingService } from "../inventory-costing/index.js"
-import { createValuationEngine } from "../inventory-costing/valuation-engine.js"
+import { getInventoryCostingRepository, getValuationEngine } from "../inventory-costing/deps.js"
 import { getBatchService } from "../batch/index.js"
 // Adjust to the names the item and warehouse-location barrels export.
 import { getItemRepository } from "../item/index.js"
@@ -33,6 +33,62 @@ export function getStockMovementService(): StockMovementService {
     },
     // Costs value-in lines through the valuation engine. The engine is built lazily, like the others.
     costing: {
+      async isWeightedAverage(orgId, itemId, tx) {
+        return (await getInventoryCostingRepository().findValuationMethod(orgId, itemId, tx)) === "WAC"
+      },
+      async issueLine(line, tx) {
+        let currency = line.currency
+        if (!currency) {
+          const [org] = await tx
+            .select({ currency: organizations.defaultCurrency })
+            .from(organizations)
+            .where(eq(organizations.id, line.orgId))
+            .limit(1)
+          currency = org?.currency ?? "USD"
+        }
+        const res = await getValuationEngine().issue(
+          {
+            method: "WAC",
+            orgId: line.orgId,
+            inventoryItemId: "",
+            inventoryItemBatchId: null,
+            outgoingMovementLineId: line.movementLineId,
+            quantity: line.quantity,
+            itemId: line.itemId,
+            currency,
+            effectiveAt: line.postedAt,
+          },
+          tx
+        )
+        return res.ok ? { ok: true } : { ok: false, error: res.error, msg: res.msg }
+      },
+      async reverseLine(line, tx) {
+        const original = await getInventoryCostingRepository().findEntryByMovementLine(
+          line.orgId,
+          line.reversesMovementLineId,
+          tx
+        )
+        if (!original) {
+          return {
+            ok: false,
+            error: "COST_SOURCE_NOT_FOUND" as const,
+            msg: "The cost entry of the movement line being reversed was not found",
+          }
+        }
+        const res = await getValuationEngine().reverseWac(
+          {
+            orgId: line.orgId,
+            itemId: line.itemId,
+            movementLineId: line.movementLineId,
+            reversesEntryId: original.id,
+            quantity: line.quantity,
+            currency: original.currency,
+            effectiveAt: line.postedAt,
+          },
+          tx
+        )
+        return res.ok ? { ok: true } : { ok: false, error: res.error, msg: res.msg }
+      },
       async moveLine(line, tx) {
         const find = async (locationId: string) => {
           const [inv] = await tx
@@ -66,9 +122,10 @@ export function getStockMovementService(): StockMovementService {
         }
         const from = await find(line.fromLocationId)
         const to = await find(line.toLocationId)
-        const engine = createValuationEngine({ costing: getInventoryCostingService() })
+        const engine = getValuationEngine()
         const res = await engine.move(
           {
+            method: (await getInventoryCostingRepository().findValuationMethod(line.orgId, line.itemId, tx)) === "WAC" ? "WAC" : "FIFO",
             orgId: line.orgId,
             fromInventoryItemId: from.inventoryItemId,
             fromBatchId: from.batchRowId,
@@ -120,9 +177,10 @@ export function getStockMovementService(): StockMovementService {
             .limit(1)
           currency = org?.currency ?? "USD"
         }
-        const engine = createValuationEngine({ costing: getInventoryCostingService() })
+        const engine = getValuationEngine()
         const res = await engine.receive(
           {
+            method: (await getInventoryCostingRepository().findValuationMethod(line.orgId, line.itemId, tx)) === "WAC" ? "WAC" : "FIFO",
             orgId: line.orgId,
             inventoryItemId: inv.id,
             itemId: line.itemId,

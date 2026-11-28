@@ -62,7 +62,7 @@ function createRepoMock(): InventoryCostingRepository {
     findAllocationsByOutgoingLine: vi.fn(async () => [mockAllocation()]),
     restoreCostLayer: vi.fn(async () => {}),
     deleteAllocation: vi.fn(async () => {}),
-  }
+  } as unknown as InventoryCostingRepository
 }
 
 describe("InventoryCostingService", () => {

@@ -97,8 +97,41 @@ export interface StockCostingMoveLine {
   strict: boolean
 }
 
+type CostingResult = { ok: true } | { ok: false; error: InventoryCostingErrorCode; msg: string }
+
+/** One value-out line (stock leaves the company: sale, purchase return, adjustment loss). */
+export interface StockCostingIssueLine {
+  orgId: string
+  movementLineId: string
+  itemId: string
+  quantity: string
+  postedAt: Date
+  currency?: string
+}
+
+/** One reversing line, with the line it reverses. */
+export interface StockCostingReverseLine {
+  orgId: string
+  movementLineId: string
+  reversesMovementLineId: string
+  itemId: string
+  quantity: string
+  postedAt: Date
+  currency?: string
+}
+
 /** Port to the valuation engine (inventory-costing). Failures come back as values. */
 export interface StockCostingPort {
+  /**
+   * True when the item is costed by weighted average. Those items are costed completely by the
+   * stock movement (value-in, value-out, reversals). FIFO items keep their callers' own costing
+   * for value-out until the later phase that moves them over.
+   */
+  isWeightedAverage?(orgId: string, itemId: string, tx: Tx): Promise<boolean>
+  /** Costs a value-out line of a weighted average item. */
+  issueLine?(line: StockCostingIssueLine, tx: Tx): Promise<CostingResult>
+  /** Reverses the cost entry of the original line (weighted average items). */
+  reverseLine?(line: StockCostingReverseLine, tx: Tx): Promise<CostingResult>
   /** Moves cost layers with the stock. Optional until the adapter is wired everywhere. */
   moveLine?(
     line: StockCostingMoveLine,
