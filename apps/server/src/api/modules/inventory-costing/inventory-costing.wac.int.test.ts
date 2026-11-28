@@ -75,7 +75,11 @@ describe("weighted average costing (integration)", () => {
       }),
       201
     )
-    await db.update(items).set({ inventoryValuationMethod: "weighted_average" }).where(eq(items.id, item.id))
+    // The item API makes every inventory tracked item batch tracked. These tests post without batches.
+    await db
+      .update(items)
+      .set({ inventoryValuationMethod: "weighted_average", isBatchTracked: false })
+      .where(eq(items.id, item.id))
     const receive = async (quantity: string, valueMinor: string) => {
       const res = await stock.post(owner.id, org.id, {
         type: "purchase",
