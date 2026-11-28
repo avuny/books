@@ -43,6 +43,7 @@ export function ReceiptsPanel({ orgId, order }: Props) {
   const createMutation = useCreateReceiptMutation(orgId, order.id)
   const [quickBusy, setQuickBusy] = useState(false)
   const queryClient = useQueryClient()
+  const [quickInvoiceNo, setQuickInvoiceNo] = useState("")
   const [quickMethod, setQuickMethod] = useState<"cash" | "bank">("bank")
   const postMutation = usePostReceiptMutation(orgId, order.id)
   const reverseMutation = useReverseReceiptMutation(orgId, order.id)
@@ -88,7 +89,7 @@ export function ReceiptsPanel({ orgId, order }: Props) {
     }
     setQuickBusy(true)
     try {
-      await quickReceive(orgId, order.id, built.data, quickMethod)
+      await quickReceive(orgId, order.id, built.data, quickMethod, quickInvoiceNo.trim())
       setCreating(false)
       setRows({})
     } catch (e) {
@@ -242,11 +243,12 @@ export function ReceiptsPanel({ orgId, order }: Props) {
             </Button>
             {abilities.canPostReceipt && billAbilities.canCreateBill && billAbilities.canPostBill ? (
               <>
+                <input className="h-9 w-40 rounded-md border bg-background px-2 text-sm" value={quickInvoiceNo} onChange={(e) => setQuickInvoiceNo(e.target.value)} placeholder={t("ui.quick.supplierInvoice")} aria-label={t("ui.quick.supplierInvoice")} />
                 <select className="h-9 rounded-md border bg-background px-2 text-sm" value={quickMethod} onChange={(e) => setQuickMethod(e.target.value as "cash" | "bank")} aria-label={t("ui.quick.method")}>
                   <option value="bank">{t("ui.quick.bank")}</option>
                   <option value="cash">{t("ui.quick.cash")}</option>
                 </select>
-                <Button variant="outline" onClick={submitQuick} disabled={quickBusy || createMutation.isPending}>
+                <Button variant="outline" onClick={submitQuick} disabled={quickBusy || createMutation.isPending || !quickInvoiceNo.trim()}>
                   {quickBusy ? t("ui.quick.creating") : t("ui.quick.confirm")}
                 </Button>
               </>

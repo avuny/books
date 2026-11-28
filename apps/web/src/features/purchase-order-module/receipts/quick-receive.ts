@@ -44,7 +44,8 @@ export async function quickReceive(
   orgId: string,
   orderId: string,
   receipt: Receipt,
-  method: "cash" | "bank"
+  method: "cash" | "bank",
+  supplierInvoiceNumber: string
 ) {
   const undo: Array<() => Promise<unknown>> = []
   const date = receipt.receiptDate
@@ -55,7 +56,7 @@ export async function quickReceive(
     await postPurchaseReceipt(orgId, rc.id)
     undo[0] = () => reversePurchaseReceipt(orgId, rc.id!, { reason: "Quick receipt failed" })
 
-    const bill = pick(await createVendorBillFromReceipt(orgId, { purchaseReceiptId: rc.id, invoiceDate: date, dueDate: date }))
+    const bill = pick(await createVendorBillFromReceipt(orgId, { purchaseReceiptId: rc.id, supplierInvoiceNumber, invoiceDate: date, dueDate: date }))
     if (!bill.id) throw new Error("no bill")
     undo.push(() => deleteVendorBill(orgId, bill.id!))
     const posted = pick(await postVendorBill(orgId, bill.id))
