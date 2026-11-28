@@ -4,8 +4,8 @@
 |---|---|
 | Spec | [`SPEC.md`](./SPEC.md) v1.0 · 2026-11-27 |
 | Last updated | 2026-11-28 |
-| Current phase | A1 (admin track, running ahead of S0 spikes) |
-| Tasks done | 5 / 75 |
+| Current phase | S1 (module catalog); A1 code-complete, in review |
+| Tasks done | 7 / 75 |
 | Gates passed | 0 / 22 |
 
 ## How to use this file
@@ -14,7 +14,7 @@ Tick a task only when its "done when" is true and evidence is in the Verificatio
 Legend: `[ ]` todo · `[~]` in progress · `[x]` done · `[!]` blocked · `[-]` not applicable (say why)
 
 ## Next action
-> **A1-06** is in review (generated access + audit tests); A1-02 to A1-05 and S0-02 are done. Next: S0-03 provider spike, the open fixes-plan decisions D1 to D8 (owner), and Gate A1 (owner logs into the admin web and invites a second admin; needs the stacked PRs merged).
+> **S1 gate check, then S2-01**: S1-01, S1-02 and S1-03 are done; gate S1 asks for no behavior change and a green full suite, which the stacked PRs prove in CI. Next code is S2-01 (entitlement contracts). Still open: owner merge policy for the stacked PRs (#68, #69, #73, #77, #78, #81, #82, #83, #84), fixes-plan decisions D1 to D8 (D1 blocks S0-04), and the A1 gate hands-on login after merges.
 
 ## Status board
 | Phase | Title | Tasks | Gate | Status |
@@ -122,8 +122,8 @@ Every task: "done when" is checkable. Every phase ends with a gate. Run `pnpm ty
 
 ### Phase S1: Module catalog in code
 - [x] **S1-01** Add product metadata to the registry (`product`, `dependsOn`, `switchable`, `defaultOn`, `showLocked`) and a derived `MODULE_CATALOG` in `packages/contracts`. Done 2026-11-28: every registry module names its product module via `ModuleSpec.product`; `PRODUCT_MODULES` holds the product-level metadata (8 product modules per SPEC 2.4, `platform` left out as feature-only-until-enforceable); `MODULE_CATALOG` derives the grouping by scanning the registry, so the two can never drift. `catalog.test.ts` proves coverage (every registry module under exactly one product), real acyclic dependencies, core always-on, inventory default-on (Q7).
-- [ ] **S1-02** Dependency graph from the real import scan (S0-02) with a test that the graph is acyclic and that every dependency is a real product module. Done when: test passes.
-- [ ] **S1-03** CI guard: a registry module without catalog mapping fails (AC3). Done when: removing a mapping makes CI fail locally.
+- [x] **S1-02** Dependency graph from the real import scan (S0-02) with a test that the graph is acyclic and that every dependency is a real product module. Done 2026-11-28: `apps/server/src/api/modules/module-deps.test.ts` walks the 533 runtime files under `api/modules`, resolves 136 cross-dir import edges, maps dirs to product modules via the contracts registry (documented overrides: `inventory-costing` -> inventory_costing, `inventory-projection` -> inventory, `party` -> sales+purchasing, identity/pipeline dirs excluded) and asserts every cross-product edge is declared. The scan confirmed the draft directions and added `softDependsOn` with reasons to `PRODUCT_MODULES` (SPEC 2.4 soft deps): core -> inventory (org creation seeds warehouse defaults), inventory -> accounting / inventory_advanced (batches woven through items and stock movements) / inventory_costing, inventory_advanced -> inventory_costing, purchasing -> accounting (SPEC 2.4 confirmed) / inventory_advanced / inventory_costing. Edges into core need no declaration (always on). The hard graph is also asserted acyclic at catalog load time, so typecheck/build fail on a cycle.
+- [x] **S1-03** CI guard: a registry module without catalog mapping fails (AC3). Done 2026-11-28: new `unit` job in `tests.yml` runs the contracts suite and the S1-02 scan test on every PR; removing or misspelling a registry module's `product` fails `tsc` (type-level) and the catalog load-time guard (runtime), and an unmapped server module dir fails the scan test's classification check. Verified locally by breaking the `organization` mapping: `vitest run src/modules/catalog.test.ts` throws "names unknown product module" and `tsc` errors.
 - **Gate S1**: no behavior change anywhere; full test suite green.
 
 ### Phase S2: Entitlement core
@@ -297,3 +297,5 @@ Spec: `PLATFORM-ADMIN-SPEC.md`. A1 needs Q15, Q16, Q18, Q23. Docs only so far.
 | 2026-11-28 | S0-02 check 5: Neon roles and migrations | repo inspection + neon.com docs | Repo: one DATABASE_URL per Worker, `db:migrate` = drizzle-kit migrate, deploy.yml verifies journal vs applied timestamps before deploying. Neon (docs, 2026-11-28): roles creatable via Console/API/CLI on all plans, limit 500/branch; console/API roles get neon_superuser, SQL-created roles get default public privileges only (https://neon.com/docs/manage/roles, https://neon.com/docs/introduction/plans). A least-privilege app role is therefore SQL-managed and must be granted per object; migrations per role = run drizzle as the owner role, grant to the app role in the same migration (custom SQL). |
 | 2026-11-28 | S0-02 check 6: apps/web build + orval | `apps/web/orval.config.ts`, `apps/platform-web/orval.config.ts` | platform-web was scaffolded as a copy of apps/web's setup (orval config, vite build, i18n resources); A1-05 regenerated the platform orval client from the platform OpenAPI doc without touching apps/web. |
 | 2026-11-28 | S0-02 check 7: Resend wiring | `apps/server/src/api/modules/messaging/shell/messaging.service.ts` inspection | `resend` SDK behind MessagingService (apiKey from config, `resend.emails.send`); used by auth OTP/forgot-password routes and inventory-transfer. Platform reminders (A6) can reuse the same service pattern with a platform-scoped config. |
+| 2026-11-28 | S1-02 | server `vitest run --project unit src/api/modules/module-deps.test.ts`; contracts `build`+`test`; server `tsc --noEmit` | 4/4 pass: every module dir classified; all 136 scanned import edges between product modules declared as dependsOn or softDependsOn; soft edges carry reasons; hard graph acyclic (also enforced at catalog load) |
+| 2026-11-28 | S1-03 | broke `organization.product` to an unknown key, ran contracts `vitest` + `tsc`, reverted | catalog load-time guard throws "names unknown product module"; tsc errors on the unknown key; unmapped server dirs fail the scan test; CI unit job runs both on every PR |

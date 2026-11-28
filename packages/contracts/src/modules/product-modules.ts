@@ -28,10 +28,23 @@ export const PRODUCT_MODULE_KEYS = [
 
 export type ProductModuleKey = (typeof PRODUCT_MODULE_KEYS)[number]
 
+export interface SoftDependency {
+  module: ProductModuleKey
+  /** Why the coupling exists and what degrades when the module is off. */
+  reason: string
+}
+
 export interface ProductModuleSpec {
   label: Localized
   /** Product modules that must be entitled for this one to work (SPEC 2.4). */
   dependsOn: readonly ProductModuleKey[]
+  /**
+   * Soft dependencies (SPEC 2.4, confirmed against the import scan in S1-02):
+   * the code calls into these modules but works without them - journal
+   * posting is skipped with JOURNAL_NOT_POSTED_MODULE_OFF, batch fields stay
+   * inactive, and so on. May point back up the dependsOn chain (soft edges
+   * never create hard cycles). */
+  softDependsOn?: readonly SoftDependency[]
   /** Can the organization owner switch it off while entitled (SPEC 2.1)? */
   switchable: boolean
   /** On for a new organization unless onboarding says otherwise (Q7). */
@@ -50,6 +63,13 @@ export const PRODUCT_MODULES = {
   core: {
     label: { en: "Core", ar: "الأساس" },
     dependsOn: [],
+    softDependsOn: [
+      {
+        module: "inventory",
+        reason:
+          "Creating an organization seeds its default warehouse and inventory settings (organization.service -> warehouse.defaults).",
+      },
+    ],
     switchable: false,
     defaultOn: true,
     showLocked: false,
@@ -57,6 +77,23 @@ export const PRODUCT_MODULES = {
   inventory: {
     label: { en: "Inventory", ar: "المخزون" },
     dependsOn: ["core"],
+    softDependsOn: [
+      {
+        module: "accounting",
+        reason:
+          "Item opening stock and inventory adjustments post journal entries when Accounting is on (JOURNAL_NOT_POSTED_MODULE_OFF when off).",
+      },
+      {
+        module: "inventory_advanced",
+        reason:
+          "Batch tracking is woven through items and stock movements; batch fields activate for batch-tracked items (feature.batch_tracking).",
+      },
+      {
+        module: "inventory_costing",
+        reason:
+          "Opening stock and adjustments consult the costing service; full costing unlocks with the module.",
+      },
+    ],
     switchable: true,
     defaultOn: true, // Q7: Inventory is on by default.
     showLocked: true,
@@ -64,6 +101,12 @@ export const PRODUCT_MODULES = {
   inventory_advanced: {
     label: { en: "Advanced inventory", ar: "المخزون المتقدم" },
     dependsOn: ["inventory"],
+    softDependsOn: [
+      {
+        module: "inventory_costing",
+        reason: "Inventory transfers consult the costing service for valuation.",
+      },
+    ],
     switchable: true,
     defaultOn: false,
     showLocked: true,
@@ -82,6 +125,21 @@ export const PRODUCT_MODULES = {
   purchasing: {
     label: { en: "Purchasing", ar: "المشتريات" },
     dependsOn: ["inventory"],
+    softDependsOn: [
+      {
+        module: "accounting",
+        reason:
+          "Vendor bills, vendor payments and purchase receipts post journal entries when Accounting is on (SPEC 2.4).",
+      },
+      {
+        module: "inventory_advanced",
+        reason: "Purchase receipts create batches for batch-tracked items.",
+      },
+      {
+        module: "inventory_costing",
+        reason: "Purchase receipts feed landed cost into the costing service.",
+      },
+    ],
     switchable: true,
     defaultOn: false,
     showLocked: true,

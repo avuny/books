@@ -19,6 +19,30 @@ env:
   TEST_DATABASE_URL: postgres://postgres:postgres@db.localtest.me:5432/avuny_test
 
 jobs:
+  unit:
+    name: Unit tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+
+      # The contracts build feeds the server imports below.
+      - run: pnpm --filter "@avuny/books-server^..." build
+
+      # Catalog derivation and product-module graph (S1-01, S1-02).
+      - run: pnpm --filter @avuny/contracts test
+
+      # The module dependency scan test (S1-02). It is run by path on
+      # purpose: the wider server unit suite needs service env this job
+      # does not provide, while this test is pure filesystem + contracts.
+      - run: pnpm --filter @avuny/books-server exec vitest run --project unit src/api/modules/module-deps.test.ts
+
   integration:
     name: API integration tests
     runs-on: ubuntu-latest
