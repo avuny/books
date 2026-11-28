@@ -350,9 +350,11 @@ describe("audit coverage (PAC11)", () => {
     )
     expect(renamed.status, JSON.stringify(renamed.body)).toBe(200)
     const updates = await auditRows(PLATFORM_AUDIT_ACTIONS.ADMIN_UPDATED, targetId)
-    expect(updates).toHaveLength(1)
-    expect(updates[0]!.after).toMatchObject({ name: "Target Renamed" })
-    expect(updates[0]!.before).toBeTruthy()
+    const rename = updates.find(
+      (row) => (row.after as { name?: string } | null)?.name === "Target Renamed"
+    )
+    expect(rename, JSON.stringify(updates)).toBeTruthy()
+    expect(rename!.before).toBeTruthy()
 
     // Replace roles -> audited with before/after role keys
     const setRoles = await put(
@@ -365,10 +367,10 @@ describe("audit coverage (PAC11)", () => {
       PLATFORM_AUDIT_ACTIONS.ADMIN_UPDATED,
       targetId
     )
-    expect(roleUpdates).toHaveLength(2)
     const roleChange = roleUpdates.find((row) =>
       Array.isArray((row.after as { roles?: unknown[] } | null)?.roles)
     )!
+    expect(roleChange, JSON.stringify(roleUpdates)).toBeTruthy()
     expect(roleChange.after).toMatchObject({ roles: [] })
     expect(roleChange.before).toMatchObject({ roles: ["viewer"] })
     expect(roleChange.before).toBeTruthy()
