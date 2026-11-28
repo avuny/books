@@ -174,17 +174,30 @@ describe("admin management (A1-05)", () => {
     )
     expect(activeOnly.body.data!.admins).toHaveLength(2)
 
-    // The viewer holds read:platform-admin and may list...
-    const asViewer = await get<PlatformAdminListResponse>("/platform-admins", second.cookie)
-    expect(asViewer.status).toBe(200)
-
-    // ...but billing_admin holds no platform-admin permissions at all (PA-R7).
-    const billing = await inviteAndJoin(cookie, "billing@avuny.dev", "Bill Ing", [
-      "billing_admin",
+    // A role holding read:platform-admin may list...
+    const readerRole = await post<PlatformRoleDto>("/platform-roles", {
+      key: "admin_reader",
+      name: "Admin reader",
+      permissions: ["read:platform-admin"],
+    }, cookie)
+    expect(readerRole.status, JSON.stringify(readerRole.body)).toBe(201)
+    const reader = await inviteAndJoin(cookie, "reader@avuny.dev", "Read Er", [
+      "admin_reader",
     ])
-    const denied = await get<PlatformAdminListResponse>("/platform-admins", billing.cookie)
+    const asReader = await get<PlatformAdminListResponse>("/platform-admins", reader.cookie)
+    expect(asReader.status).toBe(200)
+
+    // ...but the built-in viewer deliberately excludes admin management (PA-R7).
+    const denied = await get<PlatformAdminListResponse>("/platform-admins", second.cookie)
     expect(denied.status).toBe(403)
     expect(denied.body.code).toBe(Code.PERMISSION_DENIED)
+
+    const inviteDenied = await post("/platform-admins/invite", {
+      email: "nope@avuny.dev",
+      roleIds: [await roleIdByKey("viewer")],
+    }, reader.cookie)
+    expect(inviteDenied.status).toBe(403)
+    expect(inviteDenied.body.code).toBe(Code.PERMISSION_DENIED)
 
     const anonymous = await get<PlatformAdminListResponse>("/platform-admins")
     expect(anonymous.status).toBe(401)
@@ -209,9 +222,10 @@ describe("admin management (A1-05)", () => {
     const patchDenied = await patch(
       `/platform-admins/${second.admin.id}`,
       { name: "Nope" },
-      billing.cookie
+      reader.cookie
     )
     expect(patchDenied.status).toBe(403)
+    expect(patchDenied.body.code).toBe(Code.PERMISSION_DENIED)
   })
 
   it("invites, refuses duplicates, and audits (spec 3.2, PA-R6)", async () => {
@@ -288,17 +302,24 @@ describe("admin management (A1-05)", () => {
       "admin_manager",
     ])
 
-    // The manager assigns a role whose permissions they hold: fine.
-    const viewerRoleId = await roleIdByKey("viewer")
+    // The manager assigns the role whose permissions they hold: fine.
     const reassigned = await put<PlatformAdminDto>(
       `/platform-admins/${viewer.admin.id}/roles`,
-      { roleIds: [viewerRoleId, managerRole.body.data!.id] },
+      { roleIds: [managerRole.body.data!.id] },
       manager.cookie
     )
     expect(reassigned.status, JSON.stringify(reassigned.body)).toBe(200)
-    expect(reassigned.body.data!.roles.sort()).toEqual(
-      ["admin_manager", "viewer"].sort()
+    expect(reassigned.body.data!.roles).toEqual(["admin_manager"])
+
+    // The built-in viewer grants reads the manager does not hold: denied.
+    const viewerRoleId = await roleIdByKey("viewer")
+    const grantViewer = await put(
+      `/platform-admins/${viewer.admin.id}/roles`,
+      { roleIds: [viewerRoleId] },
+      manager.cookie
     )
+    expect(grantViewer.status).toBe(403)
+    expect(grantViewer.body.code).toBe(Code.ESCALATION_DENIED)
 
     // Granting billing_admin (permissions the manager does not hold) is PA-R2.
     const billingRoleId = await roleIdByKey("billing_admin")
@@ -342,27 +363,17 @@ describe("admin management (A1-05)", () => {
     expect(selfDisable.status).toBe(409)
     expect(selfDisable.body.code).toBe(Code.SELF_EDIT_DENIED)
 
-    // PAC3: two super admins, each disabling the other while both requests are
-    // in flight. Exactly one succeeds; the other hits the guarded statement's
-    // LAST_SUPER_ADMIN. The stagger keeps the two guarded UPDATEs apart: with
-    // autocommit single statements (no multi-statement transactions over the
-    // Neon HTTP driver) the guard serializes sequentially-visible conflicts,
-    // which is the operational case.
+    // PAC3: two super admins, each disabling the other concurrently. The
+    // guarded statements lock every active super's rows in id order, so the
+    // second statement re-evaluates after the first commits: exactly one
+    // succeeds, the other gets LAST_SUPER_ADMIN.
     const secondSuper = await inviteAndJoin(cookie, "second@avuny.dev", "Sec Ond", [
       "super_admin",
     ])
-    const firstPromise = post(
-      `/platform-admins/${secondSuper.admin.id}/disable`,
-      undefined,
-      cookie
-    )
-    await new Promise((resolve) => setTimeout(resolve, 150))
-    const secondPromise = post(
-      `/platform-admins/${superAdmin.id}/disable`,
-      undefined,
-      secondSuper.cookie
-    )
-    const [first, second] = await Promise.all([firstPromise, secondPromise])
+    const [first, second] = await Promise.all([
+      post(`/platform-admins/${secondSuper.admin.id}/disable`, undefined, cookie),
+      post(`/platform-admins/${superAdmin.id}/disable`, undefined, secondSuper.cookie),
+    ])
     const outcomes = [
       { status: first.status, code: first.body.code },
       { status: second.status, code: second.body.code },
@@ -535,17 +546,32 @@ describe("role management (A1-05)", () => {
     expect(denied.status).toBe(403)
     expect(denied.body.code).toBe(Code.PERMISSION_DENIED)
 
-    const viewer = await inviteAndJoin(cookie, "viewer@avuny.dev", "View Er", ["viewer"])
-    const listed = await get<PlatformRoleDto[]>("/platform-roles", viewer.cookie)
+    const readerRole = await post<PlatformRoleDto>("/platform-roles", {
+      key: "role_reader",
+      name: "Role reader",
+      permissions: ["read:platform-role"],
+    }, cookie)
+    expect(readerRole.status, JSON.stringify(readerRole.body)).toBe(201)
+    const reader = await inviteAndJoin(cookie, "reader@avuny.dev", "Read Er", [
+      "role_reader",
+    ])
+    const listed = await get<PlatformRoleDto[]>("/platform-roles", reader.cookie)
     expect(listed.status, JSON.stringify(listed.body)).toBe(200)
     expect(listed.body.data!.map((role) => role.key)).toContain("super_admin")
 
+    // Reading without create still cannot create (PA-R7).
     const createDenied = await post("/platform-roles", {
       key: "nope",
       name: "Nope",
       permissions: [],
-    }, viewer.cookie)
+    }, reader.cookie)
     expect(createDenied.status).toBe(403)
     expect(createDenied.body.code).toBe(Code.PERMISSION_DENIED)
+
+    // The built-in viewer excludes role management entirely.
+    const viewer = await inviteAndJoin(cookie, "viewer@avuny.dev", "View Er", ["viewer"])
+    const viewerDenied = await get("/platform-roles", viewer.cookie)
+    expect(viewerDenied.status).toBe(403)
+    expect(viewerDenied.body.code).toBe(Code.PERMISSION_DENIED)
   })
 })

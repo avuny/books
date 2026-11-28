@@ -313,7 +313,7 @@ export async function deleteRole(
       )
     returning id
   `)
-  if (removed.length === 0) {
+  if (removed.rows.length === 0) {
     return fail({
       error: Code.ROLE_IN_USE,
       msg: "Role is still assigned to at least one admin",

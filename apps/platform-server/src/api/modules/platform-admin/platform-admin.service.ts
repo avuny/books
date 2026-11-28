@@ -316,8 +316,11 @@ export async function setAdminRoles(
   const toAdd = [...next].filter((id) => !current.has(id))
   const toRemove = [...current].filter((id) => !next.has(id))
 
-  // PA-R3, race-safe: removing the super_admin role goes through a guarded
-  // DELETE that only applies while another ACTIVE super_admin exists (PAC3).
+  // PA-R3, race-safe (PAC3): removing the super_admin role only applies while
+  // another ACTIVE super_admin exists. The CTE locks every active super's
+  // membership+admin rows in id order, so concurrent removals/disables
+  // serialize on the row locks and re-evaluate under EvalPlanQual instead of
+  // acting on a stale snapshot (no multi-statement transactions on Neon HTTP).
   const [superRole] = await db
     .select({ id: platformRoles.id })
     .from(platformRoles)
@@ -325,19 +328,22 @@ export async function setAdminRoles(
     .limit(1)
   if (superRole && current.has(superRole.id) && !next.has(superRole.id)) {
     const removed = await db.execute<{ role_id: string }>(sql`
+      with locked as (
+        select ar.admin_id
+        from platform_admin_roles ar
+        join platform_admins a on a.id = ar.admin_id
+        where ar.role_id = ${superRole.id} and a.status = 'active'
+        order by ar.admin_id
+        for update of ar, a
+      )
       delete from platform_admin_roles
       where admin_id = ${adminId} and role_id = ${superRole.id}
         and exists (
-          select 1
-          from platform_admin_roles ar
-          join platform_admins a on a.id = ar.admin_id
-          where ar.role_id = ${superRole.id}
-            and a.status = 'active'
-            and ar.admin_id <> ${adminId}
+          select 1 from locked where admin_id <> ${adminId}
         )
       returning role_id
     `)
-    if (removed.length === 0) {
+    if (removed.rows.length === 0) {
       return fail({
         error: Code.LAST_SUPER_ADMIN,
         msg: "The last active super_admin cannot lose the role",
@@ -427,21 +433,26 @@ export async function disableAdmin(
       .then((rows) => rows.length > 0))
 
   const updated = targetIsSuper
-    ? await db.execute<{ id: string }>(sql`
-        update platform_admins
-        set status = 'disabled', updated_at = now()
-        where id = ${adminId}
-          and status <> 'disabled'
-          and exists (
-            select 1
+    ? (
+        await db.execute<{ id: string }>(sql`
+          with locked as (
+            select ar.admin_id
             from platform_admin_roles ar
             join platform_admins a on a.id = ar.admin_id
-            where ar.role_id = ${superRole!.id}
-              and a.status = 'active'
-              and ar.admin_id <> ${adminId}
+            where ar.role_id = ${superRole!.id} and a.status = 'active'
+            order by ar.admin_id
+            for update of ar, a
           )
-        returning id
-      `)
+          update platform_admins
+          set status = 'disabled', updated_at = now()
+          where id = ${adminId}
+            and status <> 'disabled'
+            and exists (
+              select 1 from locked where admin_id <> ${adminId}
+            )
+          returning id
+        `)
+      ).rows
     : await db
         .update(platformAdmins)
         .set({ status: "disabled", updatedAt: new Date() })
