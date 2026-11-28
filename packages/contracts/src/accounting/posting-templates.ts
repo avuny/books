@@ -105,10 +105,15 @@ export function buildPostingTemplate(event: PostBusinessEventInput): PostingTemp
     case "supplier_return": {
       const goods = amt(event.goodsMinor)
       const tax = amt(event.taxMinor)
-      if (goods === null || tax === null) return invalid("Invalid return amount")
+      const stock = event.inventoryCostMinor === undefined ? goods : amt(event.inventoryCostMinor)
+      if (goods === null || tax === null || stock === null) return invalid("Invalid return amount")
+      // Credit note above the stock cost: the extra is a gain (Cr PPV). Below: a loss (Dr PPV).
+      const variance = goods - stock
       return done(ACCOUNTING_SOURCE_TYPES.SUPPLIER_RETURN, "Supplier return", [
         dr("ACCOUNTS_PAYABLE", goods + tax),
-        cr("INVENTORY_ASSET", goods),
+        dr("PURCHASE_PRICE_VARIANCE", variance < 0n ? -variance : 0n),
+        cr("INVENTORY_ASSET", stock),
+        cr("PURCHASE_PRICE_VARIANCE", variance > 0n ? variance : 0n),
         cr("INPUT_TAX", tax),
       ])
     }

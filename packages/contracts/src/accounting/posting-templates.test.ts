@@ -102,6 +102,25 @@ describe("purchasing", () => {
     ])
   })
 
+  it("supplier return books the difference between the credit note and the stock cost to price variance", () => {
+    const gain = template({ event: "supplier_return", goodsMinor: "50000", taxMinor: "7000", inventoryCostMinor: "46000" })
+    expect(shape(gain.lines)).toEqual([
+      "Dr ACCOUNTS_PAYABLE 57000",
+      "Cr INVENTORY_ASSET 46000",
+      "Cr PURCHASE_PRICE_VARIANCE 4000",
+      "Cr INPUT_TAX 7000",
+    ])
+    const loss = template({ event: "supplier_return", goodsMinor: "50000", taxMinor: "7000", inventoryCostMinor: "53000" })
+    expect(shape(loss.lines)).toEqual([
+      "Dr ACCOUNTS_PAYABLE 57000",
+      "Dr PURCHASE_PRICE_VARIANCE 3000",
+      "Cr INVENTORY_ASSET 53000",
+      "Cr INPUT_TAX 7000",
+    ])
+    const same = template({ event: "supplier_return", goodsMinor: "50000", taxMinor: "7000", inventoryCostMinor: "50000" })
+    expect(shape(same.lines)).toEqual(["Dr ACCOUNTS_PAYABLE 57000", "Cr INVENTORY_ASSET 50000", "Cr INPUT_TAX 7000"])
+  })
+
   it("landed cost is capitalized or expensed", () => {
     expect(shape(template({ event: "landed_cost", amountMinor: "9000", capitalize: true }).lines)).toEqual([
       "Dr INVENTORY_ASSET 9000",
