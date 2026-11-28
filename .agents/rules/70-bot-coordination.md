@@ -7,3 +7,11 @@ Full rules: the "Multi-bot coordination" section of `AGENTS.md`. The short versi
 - Cross-bot notes go in issue comments. Every PR links its issue and targets `dev`.
 - Merge or rebase the latest `dev` before finalizing a PR. Migration numbers must come after the latest on `dev` at that moment.
 - Releases to `main` need the owner's OK each time.
+
+## Sync ritual (every session)
+
+1. Start: read the pinned "Bot sync - status and handoffs" issue and the open issues before coding.
+2. Claim: assign the issue and check its `bot:*` label before you start. Not yours: comment, do not work on it.
+3. Handoffs: put notes for another bot in an issue comment addressed by bot number (Bot-001/002/003).
+4. End: post a comment on the Sync issue with three lines: Done / Next / Needs from other bots.
+5. Every PR links its issue (`Closes #N` or `Refs #N`) and targets `dev`.
