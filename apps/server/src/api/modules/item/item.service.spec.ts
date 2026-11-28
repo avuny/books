@@ -311,9 +311,9 @@ describe("itemService", () => {
           ...createInput,
           openingStock: {
             lines: [
-              { locationId: "loc-1", quantity: "1", postedAt: "2026-01-01T00:00:00.000Z" },
-              { locationId: "loc-2", quantity: "2", postedAt: "2026-02-01T00:00:00.000Z" },
-              { locationId: "loc-3", quantity: "3", postedAt: "2026-01-01T00:00:00.000Z" },
+              { locationId: "loc-1", quantity: "1", cost: "1", postedAt: "2026-01-01T00:00:00.000Z" },
+              { locationId: "loc-2", quantity: "2", cost: "1", postedAt: "2026-02-01T00:00:00.000Z" },
+              { locationId: "loc-3", quantity: "3", cost: "1", postedAt: "2026-01-01T00:00:00.000Z" },
             ],
           },
         })
@@ -391,7 +391,7 @@ describe("itemService", () => {
       expect(t.openingStock.stockMovements.post).toHaveBeenCalledWith(
         "u1",
         "org-1",
-        expect.objectContaining({ lines: [expect.objectContaining({ cost: { source: "USER", unitCost: "5" } })] }),
+        expect.objectContaining({ lines: [expect.objectContaining({ cost: { source: "DOCUMENT", totalValueMinor: "50" } })] }),
         expect.anything()
       )
     })
