@@ -32,6 +32,9 @@ export type InventoryAdjustmentFormCopy = {
     batch: FieldCopy
     newBatch?: string
     countedQuantity: FieldCopy
+    unitCost: FieldCopy
+    zeroCostReason: FieldCopy
+    zeroCostReasons: { value: string; label: string }[]
     systemQuantity: string
     difference: string
     notes: FieldCopy
