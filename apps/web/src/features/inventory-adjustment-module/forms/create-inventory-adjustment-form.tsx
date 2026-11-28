@@ -48,7 +48,7 @@ type CreateInventoryAdjustmentFormProps = {
   unitOptionsMap?: Record<string, OptionItem[]> // itemId -> unit options
   batchOptionsMap?: Record<string, OptionItem[]> // itemId -> batch options
   itemBatchTrackedMap?: Record<string, boolean> // itemId -> isBatchTracked
-  stockSnapshots?: Record<string, { systemQuantity: string; snapshotToken: string }>
+  stockSnapshots?: Record<string, { systemQuantity: string; snapshotToken: string; proposedUnitCost?: string | null }>
   direction?: "DECREASE" | "INCREASE"
   onDirectionChange?: (dir: "DECREASE" | "INCREASE") => void
   onLineDimensionChange?: (params: {
@@ -185,6 +185,21 @@ export function CreateInventoryAdjustmentForm({
       }
     })
   }, [unitOptionsMap, form])
+
+  // Pre-fill the cost of a gain line with the suggestion, once. The user sees it and confirms it by
+  // saving; the server records it as a confirmed proposal only if it is kept as is (never silent).
+  useEffect(() => {
+    if (currentDirection !== "INCREASE" || !watchedLines) return
+    watchedLines.forEach((line, index) => {
+      if (!line?.itemId || !line.locationId || !line.unitId) return
+      if (line.unitCost || line.proposedUnitCost) return
+      const key = `${line.itemId}:${line.locationId}:${line.unitId}:${line.batchId || ""}`
+      const proposal = stockSnapshots[key]?.proposedUnitCost
+      if (!proposal) return
+      form.setValue(`lines.${index}.unitCost` as const, proposal)
+      form.setValue(`lines.${index}.proposedUnitCost` as const, proposal)
+    })
+  }, [watchedLines, stockSnapshots, currentDirection, form])
 
   // Notify parent of dimension changes to load stock snapshots
   useEffect(() => {
@@ -398,6 +413,32 @@ export function CreateInventoryAdjustmentForm({
                     disabled={disabled}
                   />
                 </div>
+
+                {currentDirection === "INCREASE" && (
+                  <>
+                    <div className="sm:col-span-3">
+                      <InputField
+                        control={form.control}
+                        name={`lines.${index}.unitCost` as const}
+                        copy={copy.fields.unitCost}
+                        type="text"
+                        disabled={disabled}
+                      />
+                    </div>
+                    {String(lineData?.unitCost ?? "").trim() !== "" &&
+                      Number(lineData?.unitCost) === 0 && (
+                        <div className="sm:col-span-3">
+                          <SelectField
+                            control={form.control}
+                            name={`lines.${index}.zeroCostReason` as const}
+                            copy={copy.fields.zeroCostReason}
+                            options={copy.fields.zeroCostReasons}
+                            disabled={disabled}
+                          />
+                        </div>
+                      )}
+                  </>
+                )}
 
                 <div className="sm:col-span-6">
                   <InputField

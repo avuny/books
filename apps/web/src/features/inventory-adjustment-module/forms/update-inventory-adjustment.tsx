@@ -165,6 +165,10 @@ export function UpdateInventoryAdjustment({
               : null,
             countedQuantity: String(l.countedQuantity),
             notes: l.notes?.trim() || null,
+            unitCost: l.unitCost?.trim() || null,
+            zeroCostReason:
+              l.unitCost?.trim() && Number(l.unitCost) === 0 ? l.zeroCostReason || null : null,
+            proposedUnitCost: l.proposedUnitCost || null,
           })),
         },
       })

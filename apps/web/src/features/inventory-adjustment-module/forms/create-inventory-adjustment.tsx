@@ -39,7 +39,7 @@ export function CreateInventoryAdjustment({
   const [selectedWarehouseId, setSelectedWarehouseId] = useState<string>("")
   const [direction, setDirection] = useState<"DECREASE" | "INCREASE">("DECREASE")
   const [stockSnapshots, setStockSnapshots] = useState<
-    Record<string, { systemQuantity: string; snapshotToken: string }>
+    Record<string, { systemQuantity: string; snapshotToken: string; proposedUnitCost?: string | null }>
   >({})
   const [unitOptionsMap, setUnitOptionsMap] = useState<
     Record<string, OptionItem[]>
@@ -107,6 +107,7 @@ export function CreateInventoryAdjustment({
         [key]: {
           systemQuantity: snap.systemQuantitySelectedUnit,
           snapshotToken: snap.snapshotToken,
+          proposedUnitCost: snap.proposedUnitCost ?? null,
         },
       }))
     }
@@ -199,6 +200,13 @@ export function CreateInventoryAdjustment({
           countedQuantity: finalCounted.toFixed(4),
           snapshotToken: snap?.snapshotToken || null,
           notes: l.notes?.trim() || null,
+          // Cost only goes with a gain. A typed zero needs its reason (the server checks).
+          unitCost: dir === "INCREASE" ? l.unitCost?.trim() || null : null,
+          zeroCostReason:
+            dir === "INCREASE" && Number(l.unitCost) === 0 && l.unitCost?.trim()
+              ? l.zeroCostReason || null
+              : null,
+          proposedUnitCost: dir === "INCREASE" ? l.proposedUnitCost || null : null,
         }
       })
     )

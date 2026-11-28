@@ -82,6 +82,12 @@ export class InMemoryInventoryAdjustmentRepository implements InventoryAdjustmen
       quantityDeltaBase: l.quantityDeltaBase,
       snapshotToken: l.snapshotToken ?? null,
       notes: l.notes ?? null,
+      unitCost: l.unitCost ?? null,
+      costSource: l.costSource ?? null,
+      isZeroCost: l.isZeroCost ?? false,
+      zeroCostReason: l.zeroCostReason ?? null,
+      costValueMinor: null,
+      proposedUnitCost: l.proposedUnitCost ?? null,
       createdAt: now,
       updatedAt: now,
     }))
@@ -139,6 +145,12 @@ export class InMemoryInventoryAdjustmentRepository implements InventoryAdjustmen
       quantityDeltaBase: l.quantityDeltaBase,
       snapshotToken: l.snapshotToken ?? null,
       notes: l.notes ?? null,
+      unitCost: l.unitCost ?? null,
+      costSource: l.costSource ?? null,
+      isZeroCost: l.isZeroCost ?? false,
+      zeroCostReason: l.zeroCostReason ?? null,
+      costValueMinor: null,
+      proposedUnitCost: l.proposedUnitCost ?? null,
       createdAt: now,
       updatedAt: now,
     }))
@@ -263,6 +275,9 @@ export const dummyStockMovement: StockMovementPort = {
 }
 
 export const dummyInventoryCosting: InventoryCostingPort = {
+  async proposeUnitCost() {
+    return null
+  },
   async createCostLayer(input) {
     return {
       id: "cost-layer-1",
@@ -278,6 +293,9 @@ export const dummyInventoryCosting: InventoryCostingPort = {
       remainingValue: input.receivedValue,
       currency: input.currency,
       receivedAt: input.receivedAt,
+      costSource: null,
+      isZeroCost: false,
+      needsReview: false,
       createdAt: new Date(),
       updatedAt: new Date(),
     }

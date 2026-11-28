@@ -336,11 +336,20 @@ export function createPurchaseReceiptService(deps: PurchaseReceiptServiceDeps) {
                 sourceType: PURCHASE_RECEIPT_SOURCE_TYPE,
                 sourceId: current.row.id,
                 sourceRef: current.row.number,
+                postedAt: new Date(`${current.row.receiptDate}T00:00:00.000Z`).toISOString(),
+                currency: current.row.currency,
                 lines: accepted.map((l) => ({
                   itemId: l.itemId,
                   batchId: l.batchId ?? batchByLine.get(l.id) ?? undefined,
                   toLocationId: l.locationId,
                   quantity: l.acceptedBaseQty,
+                  // The document value is the cost. A zero value needs a reason (SPEC R3); the
+                  // receipt does not carry one yet, so it is recorded as OTHER.
+                  cost: {
+                    source: "DOCUMENT" as const,
+                    totalValueMinor: String(l.receiptValue),
+                    ...(Number(l.receiptValue) === 0 ? { zeroCost: { reason: "OTHER" as const } } : {}),
+                  },
                 })),
               },
               tx
@@ -352,20 +361,6 @@ export function createPurchaseReceiptService(deps: PurchaseReceiptServiceDeps) {
               const posted = postedLines[i]
               if (!posted) throw new PostingAbort(Err.PURCHASE_RECEIPT_POSTING_FAILED)
               totalValue += Number(l.receiptValue)
-              await deps.costing.createLayer(
-                orgId,
-                {
-                  itemId: l.itemId,
-                  locationId: l.locationId,
-                  batchId: l.batchId ?? batchByLine.get(l.id) ?? null,
-                  movementLineId: posted.id,
-                  qty: l.acceptedBaseQty,
-                  valueMinor: String(l.receiptValue),
-                  currency: current.row.currency,
-                  receivedAt: new Date(`${current.row.receiptDate}T00:00:00.000Z`),
-                },
-                tx
-              )
             }
             if (totalValue > 0) {
               const journal = await deps.accounting.postBusinessEvent(

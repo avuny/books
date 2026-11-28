@@ -194,7 +194,7 @@ describe("InventoryAdjustmentService", () => {
         date: "2026-11-20",
         warehouseId,
         reasonId: reasonSurplusId,
-        lines: [{ itemId, locationId, unitId, countedQuantity: "115.000000" }],
+        lines: [{ itemId, locationId, unitId, countedQuantity: "115.000000", unitCost: "250" }],
       })
       expect(createRes.success).toBe(true)
       if (!createRes.success) return
@@ -208,6 +208,80 @@ describe("InventoryAdjustmentService", () => {
       expect(confirmRes.data.confirmedAt).toBeTruthy()
       expect(confirmRes.data.stockMovementId).toBe("movement-1")
       expect(confirmRes.data.journalEntryId).toBe("je-1")
+    })
+
+    it("refuses to confirm a gain without a unit cost", async () => {
+      repo.stock.set(`${locationId}:${itemId}:`, "100.000000")
+      const createRes = await service.create(actorId, orgId, {
+        date: "2026-11-20",
+        warehouseId,
+        reasonId: reasonSurplusId,
+        lines: [{ itemId, locationId, unitId, countedQuantity: "115.000000" }],
+      })
+      expect(createRes.success).toBe(true)
+      if (!createRes.success) return
+      const confirmRes = await service.confirm(actorId, orgId, createRes.data.id)
+      expect(confirmRes).toMatchObject({ success: false, error: "INVENTORY_ADJUSTMENT_COST_REQUIRED" })
+    })
+
+    it("records a kept proposal as CONFIRMED_PROPOSAL and a changed cost as USER", async () => {
+      repo.stock.set(`${locationId}:${itemId}:`, "100.000000")
+      const withProposal = (inv: any) =>
+        createInventoryAdjustmentService({
+          repository: repo,
+          itemConversion: dummyItemConversion,
+          warehouseLocation: dummyWarehouseLocation,
+          batch: dummyBatch,
+          stockMovement: dummyStockMovement,
+          inventoryCosting: inv,
+          accounting: dummyAccounting,
+          permissions: dummyPermissions,
+          activityLog: dummyActivityLog,
+        })
+      const svc = withProposal({ ...dummyInventoryCosting, proposeUnitCost: async () => "250" })
+      const mk = (unitCost: string) =>
+        svc.create(actorId, orgId, {
+          date: "2026-11-20",
+          warehouseId,
+          reasonId: reasonSurplusId,
+          lines: [{ itemId, locationId, unitId, countedQuantity: "115.000000", unitCost, proposedUnitCost: "250" }],
+        })
+      const kept = await mk("250")
+      const changed = await mk("300")
+      expect(kept.success && changed.success).toBe(true)
+      if (!kept.success || !changed.success) return
+      expect(kept.data.lines[0]).toMatchObject({ proposedUnitCost: "250" })
+      expect(changed.data.lines[0]).toMatchObject({ proposedUnitCost: null })
+    })
+
+    it("snapshot carries the proposal for the form", async () => {
+      const svc = createInventoryAdjustmentService({
+        repository: repo,
+        itemConversion: dummyItemConversion,
+        warehouseLocation: dummyWarehouseLocation,
+        batch: dummyBatch,
+        stockMovement: dummyStockMovement,
+        inventoryCosting: { ...dummyInventoryCosting, proposeUnitCost: async () => "250" },
+        accounting: dummyAccounting,
+        permissions: dummyPermissions,
+        activityLog: dummyActivityLog,
+      })
+      const snap = await svc.getSnapshot(actorId, orgId, { warehouseId, itemId, locationId, unitId })
+      expect(snap).toMatchObject({ success: true, data: { proposedUnitCost: "250" } })
+    })
+
+    it("refuses a zero cost gain without a reason", async () => {
+      repo.stock.set(`${locationId}:${itemId}:`, "100.000000")
+      const createRes = await service.create(actorId, orgId, {
+        date: "2026-11-20",
+        warehouseId,
+        reasonId: reasonSurplusId,
+        lines: [{ itemId, locationId, unitId, countedQuantity: "115.000000", unitCost: "0" }],
+      })
+      expect(createRes.success).toBe(true)
+      if (!createRes.success) return
+      const confirmRes = await service.confirm(actorId, orgId, createRes.data.id)
+      expect(confirmRes).toMatchObject({ success: false, error: "INVENTORY_ADJUSTMENT_COST_REQUIRED" })
     })
 
     it("rejects confirmation if count is stale", async () => {

@@ -191,6 +191,7 @@ export interface StockMovementPort {
 }
 
 export interface InventoryCostingPort {
+  proposeUnitCost(orgId: string, itemId: string, locationId: string, tx?: Tx): Promise<string | null>
   createCostLayer(input: CreateCostLayerInput, tx?: Tx): Promise<InventoryCostLayer>
   recordAllocation(input: RecordAllocationInput, tx?: Tx): Promise<void>
   getFifoLayers(

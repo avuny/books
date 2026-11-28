@@ -64,6 +64,9 @@ type UpdateInventoryAdjustmentFormProps = {
 }
 
 // UI + validation only. No i18n, API, auth or navigation knowledge.
+const trimZeros = (v?: string | null) =>
+  v ? (v.includes(".") ? v.replace(/0+$/, "").replace(/\.$/, "") : v) : null
+
 export function UpdateInventoryAdjustmentForm({
   copy,
   adjustment,
@@ -118,6 +121,10 @@ export function UpdateInventoryAdjustmentForm({
         batchId: l.batchId ?? null,
         countedQuantity: l.countedQuantity,
         notes: l.notes ?? "",
+        // stored as numeric(30,10): show it without trailing zeros
+        unitCost: trimZeros(l.unitCost),
+        zeroCostReason: (l.zeroCostReason ?? null) as "SAMPLE" | "PROMOTION" | "FREE_ISSUE" | "OTHER" | null,
+        proposedUnitCost: trimZeros(l.proposedUnitCost),
       })),
     },
   })
@@ -335,6 +342,32 @@ export function UpdateInventoryAdjustmentForm({
                     disabled={disabled}
                   />
                 </div>
+
+                {direction === "INCREASE" && (
+                  <>
+                    <div className="sm:col-span-3">
+                      <InputField
+                        control={form.control}
+                        name={`lines.${index}.unitCost` as const}
+                        copy={copy.fields.unitCost}
+                        type="text"
+                        disabled={disabled}
+                      />
+                    </div>
+                    {String(lineData?.unitCost ?? "").trim() !== "" &&
+                      Number(lineData?.unitCost) === 0 && (
+                        <div className="sm:col-span-3">
+                          <SelectField
+                            control={form.control}
+                            name={`lines.${index}.zeroCostReason` as const}
+                            copy={copy.fields.zeroCostReason}
+                            options={copy.fields.zeroCostReasons}
+                            disabled={disabled}
+                          />
+                        </div>
+                      )}
+                  </>
+                )}
 
                 <div className="sm:col-span-6">
                   <InputField

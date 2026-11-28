@@ -1,0 +1,17 @@
+{
+  "errors": {
+    "STOCK_MOVEMENT_COST_REQUIRED": "Stock coming in needs a cost. Enter the cost or choose where it comes from.",
+    "COST_INVALID": "The cost is not valid",
+    "COST_ZERO_REASON_REQUIRED": "A zero cost needs a reason",
+    "COST_UNDETERMINED": "The cost of this stock cannot be determined, so the posting is blocked",
+    "COST_NEGATIVE_STOCK_NOT_SUPPORTED": "This item does not have enough stock. Negative stock is not allowed for costed items",
+    "COST_CURRENCY_MISMATCH": "The currency does not match the organization currency",
+    "COST_REVERSAL_BLOCKED_STOCK_USED": "This cannot be undone because some of the stock was already used. Use a return or an adjustment instead",
+    "COST_SOURCE_NOT_FOUND": "The source transaction for this cost was not found",
+    "COST_SOURCE_EXCEEDED": "The quantity is more than the source transaction allows",
+    "COST_METHOD_NOT_READY": "This item must be converted to its costing method before it can be used",
+    "COST_METHOD_LOCKED": "The costing method cannot be changed while the item has stock or cost records",
+    "COST_CONVERSION_DRIFT": "Stock quantities and cost records do not match for this item. Fix the difference before converting",
+    "COST_POOL_INCONSISTENT": "The cost records of this item are inconsistent. The posting was stopped"
+  }
+}
