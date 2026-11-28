@@ -90,7 +90,12 @@ describe("signed tickets", () => {
     const { token } = crypto.signTicket({ pur: "login", sub: "admin-1" })
     expect(crypto.verifyTicket(token, "enroll")).toBeNull()
     expect(crypto.verifyTicket(`${token}x`, "login")).toBeNull()
-    expect(crypto.verifyTicket(token.replace(/.$/, "A"), "login")).toBeNull()
+    // Flip a middle character: the last base64url char can share decoded
+    // bits, and replacing with a fixed letter is a no-op when it matches.
+    const mid = Math.floor(token.length / 2)
+    const tampered =
+      token.slice(0, mid) + (token[mid] === "A" ? "B" : "A") + token.slice(mid + 1)
+    expect(crypto.verifyTicket(tampered, "login")).toBeNull()
 
     const { token: expired } = crypto.signTicket(
       { pur: "login", sub: "admin-1" },
