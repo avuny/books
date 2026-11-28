@@ -23,7 +23,9 @@ import {
  * Everything else goes through the real stock movement service, so the pool row lock, the entries,
  * the balances and the rollback are the production code paths.
  */
-describe("weighted average costing (integration)", () => {
+// Each test registers a user and an org through the API first. On the CI runner that alone takes 10 to 20 seconds,
+// so the default 30 second limit is too tight for tests that then post several movements.
+describe("weighted average costing (integration)", { timeout: 120_000 }, () => {
   let t: TestApp
   let db: typeof import("../../db.js").db
   let stock: typeof import("../stock-movement/index.js").stockMovementService
