@@ -47,7 +47,7 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done · `[!]` blocked · `[-]` 
 | P3-01 | WAC receipt and issue with locks and seq | AC4, AC5 | [~] 3a: `wac-strategy.ts` (pool row lock first, append only entries with seq, exact integer math, last unit takes the remainder), engine dispatch by item method, stock movement costs WAC value-in, value-out and reversals through the port. Unit tests cover worked examples 1 to 6 and a random no drift run. Not yet run on a real database. |
 | P3-02 | WAC reversals and sale return inheritance | AC8, AC9 | [~] 3a: reversal rules R27, R28, R30 and inheritance R31 are in the strategy and tested. The sales return caller does not use it yet (it moves with sales delivery). |
 | P3-03 | Negative stock block, currency, zero cost rules | AC2, AC6 | [~] 3a: a WAC issue above the pool fails with COST_NEGATIVE_STOCK_NOT_SUPPORTED even when the item allows negative stock. Other currency fails. Zero cost needs a reason. A WAC value-in line without cost fails. |
-| P3-04 | Concurrency and idempotency tests on a real database | AC11 | [ ] |
+| P3-04 | Concurrency and idempotency tests on a real database | AC11 | [~] 3d: `inventory-costing.wac.int.test.ts` written against the real stock movement path (worked example, 25 concurrent receipts and issues with no drift, negative block, reversal block with clean rollback, missing cost). Written without a local database, so CI is its first run. |
 | P4-01 | Adjustment lines with cost, gain requires cost, loss uses engine | AC12 | [ ] |
 | P4-02 | Adjustment journal with real amount, failure aborts | AC12 | [ ] |
 | P5-01 | Conversion operation with drift check | AC13 | [ ] |
