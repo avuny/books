@@ -1,3 +1,5 @@
+import type { ProductModuleKey } from "./product-modules.js"
+
 /**
  * THE registry of modules and actions. Add, rename or remove a module or action HERE;
  * every other list is derived from this file:
@@ -53,6 +55,8 @@ export interface SidebarSpec {
 }
 
 export interface ModuleSpec {
+  /** The product module this registry module belongs to (SPEC 2.4, S1-01). */
+  product: ProductModuleKey
   actions: Readonly<Record<string, ActionSpec>>
   /** Having one puts the module in the sidebar (order: group order, then order in MODULES). */
   sidebar?: SidebarSpec
@@ -71,6 +75,7 @@ const CRUD = {
 
 export const MODULES = {
   organization: {
+    product: "core",
     actions: {
       // Logged, not grantable: there is no organization yet to scope a role to.
       create: { event: "created" },
@@ -83,6 +88,7 @@ export const MODULES = {
 
   // -- users ---------------------------------------------------------------
   role: {
+    product: "core",
     sidebar: {
       group: "users",
       icon: "shield-check",
@@ -97,6 +103,7 @@ export const MODULES = {
     },
   },
   organization_user: {
+    product: "core",
     sidebar: {
       group: "users",
       icon: "users-round",
@@ -114,6 +121,7 @@ export const MODULES = {
     },
   },
   organization_invitation: {
+    product: "core",
     sidebar: {
       group: "users",
       icon: "mail",
@@ -130,10 +138,11 @@ export const MODULES = {
       decline: { event: "declined" },
     },
   },
-  activity_log: { actions: READ },
+  activity_log: { product: "core", actions: READ },
 
   // -- sales ---------------------------------------------------------------
   customer: {
+    product: "sales",
     sidebar: {
       group: "sales",
       icon: "contact",
@@ -150,6 +159,7 @@ export const MODULES = {
 
   // -- purchases -----------------------------------------------------------
   vendor: {
+    product: "purchasing",
     sidebar: {
       group: "purchases",
       icon: "truck",
@@ -164,6 +174,7 @@ export const MODULES = {
     scopable: false,
   },
   purchase_order: {
+    product: "purchasing",
     sidebar: {
       group: "purchases",
       icon: "clipboard-list",
@@ -178,6 +189,7 @@ export const MODULES = {
     },
   },
   sales_order: {
+    product: "sales",
     sidebar: {
       group: "sales",
       icon: "clipboard-check",
@@ -192,6 +204,7 @@ export const MODULES = {
     },
   },
   purchase_shipment: {
+    product: "purchasing",
     actions: {
       ...CRUD,
       post: { permission: true, event: "posted" },
@@ -199,6 +212,7 @@ export const MODULES = {
     },
   },
   purchase_receipt: {
+    product: "purchasing",
     actions: {
       ...CRUD,
       post: { permission: true, event: "posted" },
@@ -206,6 +220,7 @@ export const MODULES = {
     },
   },
   sales_delivery: {
+    product: "sales",
     actions: {
       ...CRUD,
       post: { permission: true, event: "posted" },
@@ -213,6 +228,7 @@ export const MODULES = {
     },
   },
   sales_invoice: {
+    product: "sales",
     sidebar: {
       group: "sales",
       icon: "file-text",
@@ -226,6 +242,7 @@ export const MODULES = {
     },
   },
   sales_credit_note: {
+    product: "sales",
     sidebar: {
       group: "sales",
       icon: "file-text",
@@ -239,6 +256,7 @@ export const MODULES = {
     },
   },
   customer_payment: {
+    product: "sales",
     sidebar: {
       group: "sales",
       icon: "badge-dollar-sign",
@@ -252,6 +270,7 @@ export const MODULES = {
     },
   },
   vendor_bill: {
+    product: "purchasing",
     sidebar: {
       group: "purchases",
       icon: "file-text",
@@ -265,6 +284,7 @@ export const MODULES = {
     },
   },
   vendor_payment: {
+    product: "purchasing",
     sidebar: {
       group: "purchases",
       icon: "badge-dollar-sign",
@@ -278,6 +298,7 @@ export const MODULES = {
     },
   },
   payment_term: {
+    product: "purchasing",
     actions: { ...CRUD },
   },
   // sales_order: {
@@ -319,6 +340,7 @@ export const MODULES = {
 
   // -- inventory (events: mirror your item/unit/item-category constants) ---
   item: {
+    product: "inventory",
     sidebar: {
       group: "inventory",
       icon: "package",
@@ -328,6 +350,7 @@ export const MODULES = {
     actions: CRUD,
   },
   item_category: {
+    product: "inventory",
     sidebar: {
       group: "inventory",
       icon: "tags",
@@ -337,6 +360,7 @@ export const MODULES = {
     actions: CRUD,
   },
   unit: {
+    product: "inventory",
     sidebar: {
       group: "inventory",
       icon: "ruler",
@@ -346,6 +370,7 @@ export const MODULES = {
     actions: { ...CRUD, deactivate: { permission: true, event: "deactivated" } },
   },
   unit_collection: {
+    product: "inventory",
     sidebar: {
       group: "inventory",
       icon: "layers",
@@ -355,6 +380,7 @@ export const MODULES = {
     actions: CRUD,
   },
   warehouse: {
+    product: "inventory",
     sidebar: {
       group: "inventory",
       icon: "warehouse",
@@ -369,6 +395,7 @@ export const MODULES = {
     },
   },
   warehouse_location: {
+    product: "inventory",
     actions: {
       ...CRUD,
       bulk_create: { event: "bulk_created" },
@@ -381,12 +408,14 @@ export const MODULES = {
     },
   },
   batch: {
+    product: "inventory_advanced",
     actions: {
       ...CRUD,
       change_status: { permission: true, event: "status_changed" },
     },
   },
   stock_movement: {
+    product: "inventory",
     sidebar: {
       group: "inventory",
       icon: "arrow-left-right",
@@ -400,6 +429,7 @@ export const MODULES = {
     },
   },
   inventory_adjustment: {
+    product: "inventory",
     sidebar: {
       group: "inventory",
       icon: "sliders",
@@ -413,6 +443,7 @@ export const MODULES = {
     },
   },
   inventory_transfer: {
+    product: "inventory_advanced",
     sidebar: {
       group: "inventory",
       icon: "truck",
@@ -442,6 +473,7 @@ export const MODULES = {
   //   delete  accounts that were never used, draft journals
   // The other actions are logged only; they are not separate permissions.
   accounting: {
+    product: "accounting",
     sidebar: {
       group: "accounting",
       icon: "book-open",

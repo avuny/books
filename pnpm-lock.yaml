@@ -84,6 +84,9 @@ importers:
       '@avuny/contracts':
         specifier: workspace:*
         version: link:../../packages/contracts
+      '@avuny/db':
+        specifier: workspace:*
+        version: link:../../packages/db
       '@avuny/hono':
         specifier: workspace:*
         version: link:../../packages/hono
@@ -102,6 +105,12 @@ importers:
       '@hono/zod-openapi':
         specifier: ^1.1.5
         version: 1.6.3(hono@4.13.13)(zod@4.6.5)
+      bcryptjs:
+        specifier: ^3.0.3
+        version: 3.0.3
+      dotenv:
+        specifier: ^17.4.2
+        version: 17.4.2
       hono:
         specifier: ^4.10.7
         version: 4.13.13
@@ -136,6 +145,9 @@ importers:
       '@avuny/zod':
         specifier: workspace:*
         version: link:../../packages/zod
+      '@hookform/resolvers':
+        specifier: ^6.0.0
+        version: 6.0.0(@standard-schema/spec@1.1.0)(ajv-errors@3.0.0(ajv@8.20.0))(ajv-formats@2.1.1(ajv@8.20.0))(ajv@8.20.0)(react-hook-form@7.90.0(@types/react@19.3.0)(react@19.3.0))(zod@apps+platform-web+@hookform+resolvers+zod)
       '@tanstack/react-query':
         specifier: ^5.67.1
         version: 5.104.4(@types/react@19.3.0)(react@19.3.0)
@@ -160,9 +172,15 @@ importers:
       react-dom:
         specifier: ^19.3.0
         version: 19.3.0(react@19.3.0)
+      react-hook-form:
+        specifier: ^7.90.0
+        version: 7.90.0(@types/react@19.3.0)(react@19.3.0)
       react-i18next:
         specifier: ^17.0.12
         version: 17.0.16(i18next@26.4.4(typescript@6.0.3))(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@6.0.3)
+      zod:
+        specifier: link:@hookform/resolvers/zod
+        version: link:@hookform/resolvers/zod
     devDependencies:
       '@eslint/js':
         specifier: ^10
@@ -546,6 +564,9 @@ importers:
 
   packages/entitlements:
     dependencies:
+      '@avuny/contracts':
+        specifier: workspace:*
+        version: link:../contracts
       '@avuny/zod':
         specifier: workspace:*
         version: link:../zod
@@ -9079,6 +9100,17 @@ snapshots:
       ajv-errors: 3.0.0(ajv@8.20.0)
       ajv-formats: 2.1.1(ajv@8.20.0)
       zod: 4.6.5
+
+  '@hookform/resolvers@6.0.0(@standard-schema/spec@1.1.0)(ajv-errors@3.0.0(ajv@8.20.0))(ajv-formats@2.1.1(ajv@8.20.0))(ajv@8.20.0)(react-hook-form@7.90.0(@types/react@19.3.0)(react@19.3.0))(zod@apps+platform-web+@hookform+resolvers+zod)':
+    dependencies:
+      '@standard-schema/utils': 0.3.0
+      react-hook-form: 7.90.0(@types/react@19.3.0)(react@19.3.0)
+    optionalDependencies:
+      '@standard-schema/spec': 1.1.0
+      ajv: 8.20.0
+      ajv-errors: 3.0.0(ajv@8.20.0)
+      ajv-formats: 2.1.1(ajv@8.20.0)
+      zod: link:apps/platform-web/@hookform/resolvers/zod
 
   '@humanfs/core@0.19.2':
     dependencies:

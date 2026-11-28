@@ -3,9 +3,9 @@
 | | |
 |---|---|
 | Spec | [`SPEC.md`](./SPEC.md) v1.0 · 2026-11-27 |
-| Last updated | 2026-11-27 |
-| Current phase | S0 |
-| Tasks done | 0 / 75 |
+| Last updated | 2026-11-28 |
+| Current phase | S1 (module catalog); A1 code-complete, in review |
+| Tasks done | 8 / 75 |
 | Gates passed | 0 / 22 |
 
 ## How to use this file
@@ -14,7 +14,7 @@ Tick a task only when its "done when" is true and evidence is in the Verificatio
 Legend: `[ ]` todo · `[~]` in progress · `[x]` done · `[!]` blocked · `[-]` not applicable (say why)
 
 ## Next action
-> **S0-01**: get the owner's answers on the open decisions below (Q1 to Q14 for the SaaS core, Q15 to Q24 for the admin panel, see `PLATFORM-ADMIN-SPEC.md`). Blocking ones: Q1, Q2, Q4, Q5, Q10, and for the admin panel Q15 and Q20. The rest have defaults that may be used if the owner says "use defaults". Landing decisions Q25 to Q30 are proposed with defaults and still need his answer. Also record fixes-plan decisions D1 to D8 (`../SAAS-SPEC-FIXES-PLAN.md`), which are still open.
+> **S2-02** (DB schema + migration for plans, prices, entitlements, add-ons, switches, overrides, snapshot) once the stacked PRs merge. Paused on owner merge policy for the stack (#68, #69, #73, #77, #78, #81, #82, #83, #84, #85, #86). Still open: fixes-plan decisions D1 to D8 (D1 blocks S0-04) and the A1 gate hands-on login after merges.
 
 ## Status board
 | Phase | Title | Tasks | Gate | Status |
@@ -28,7 +28,7 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done · `[!]` blocked · `[-]` 
 | S6 | Payments | 4 | gate S6 | [ ] |
 | S7 | Billing UI, pricing page, jobs | 3 | gate S7 | [ ] |
 | S8 | Hardening and launch | 1 | gate S8 | [ ] |
-| A1 | Platform apps, admin identity, roles | 6 | gate A1 | [ ] |
+| A1 | Platform apps, admin identity, roles | 6 | gate A1 | [~] |
 | A2 | Plan and catalog configurator | 5 | gate A2 | [ ] |
 | A3 | Sidebar, permissions, catalog viewer and overrides | 3 | gate A3 | [ ] |
 | A4 | Organizations, users, subscriptions | 4 | gate A4 | [ ] |
@@ -115,19 +115,19 @@ Every task: "done when" is checkable. Every phase ends with a gate. Run `pnpm ty
 
 ### Phase S0: Decisions and spikes
 - [~] **S0-01** Owner answers Q1 to Q14 and fixes-plan D1 to D8. Q1 to Q24 answered 2026-11-27 (all defaults); fixes-plan D1 to D8 still open. Done when: answers recorded in the Decisions log below.
-- [ ] **S0-02** Repository checks from SPEC section 13, output pasted in the Verification log. Done when: all 7 checks have a recorded result.
-- [ ] **S0-03** Provider spike: for each candidate in Q5, verify with current official sources: can the business onboard from Egypt, supported currencies and payment methods, subscription support, webhook model, Workers compatibility, fees, tax invoice requirements. Done when: a one-page comparison with source links is added to this folder as `PROVIDER-SPIKE.md`.
+- [x] **S0-02** Repository checks from SPEC section 13, output pasted in the Verification log. Done 2026-11-28: all 7 results recorded below (2026-11-28 rows).
+- [x] **S0-03** Provider spike: for each candidate in Q5, verify with current official sources: can the business onboard from Egypt, supported currencies and payment methods, subscription support, webhook model, Workers compatibility, fees, tax invoice requirements. Done 2026-11-28: [`PROVIDER-SPIKE.md`](./PROVIDER-SPIKE.md). Material finding: Stripe cannot onboard an Egypt-registered business (needs a US entity), so Paymob is the recommended launch processor; Stripe stays the international adapter; Fawry is the local fallback.
 - [ ] **S0-04** Transaction-capable database driver decided and merged (fixes plan Phase 2) or scheduled before S5. Done when: a rollback test passes.
 - **Gate S0**: S0-01 to S0-04 ticked; no open "blocks S1" decision.
 
 ### Phase S1: Module catalog in code
-- [ ] **S1-01** Add product metadata to the registry (`product`, `dependsOn`, `switchable`, `defaultOn`, `showLocked`) and a derived `MODULE_CATALOG` in `packages/contracts`. Done when: the catalog type-checks and lists every registry module under exactly one product module.
-- [ ] **S1-02** Dependency graph from the real import scan (S0-02) with a test that the graph is acyclic and that every dependency is a real product module. Done when: test passes.
-- [ ] **S1-03** CI guard: a registry module without catalog mapping fails (AC3). Done when: removing a mapping makes CI fail locally.
+- [x] **S1-01** Add product metadata to the registry (`product`, `dependsOn`, `switchable`, `defaultOn`, `showLocked`) and a derived `MODULE_CATALOG` in `packages/contracts`. Done 2026-11-28: every registry module names its product module via `ModuleSpec.product`; `PRODUCT_MODULES` holds the product-level metadata (8 product modules per SPEC 2.4, `platform` left out as feature-only-until-enforceable); `MODULE_CATALOG` derives the grouping by scanning the registry, so the two can never drift. `catalog.test.ts` proves coverage (every registry module under exactly one product), real acyclic dependencies, core always-on, inventory default-on (Q7).
+- [x] **S1-02** Dependency graph from the real import scan (S0-02) with a test that the graph is acyclic and that every dependency is a real product module. Done 2026-11-28: `apps/server/src/api/modules/module-deps.test.ts` walks the 533 runtime files under `api/modules`, resolves 136 cross-dir import edges, maps dirs to product modules via the contracts registry (documented overrides: `inventory-costing` -> inventory_costing, `inventory-projection` -> inventory, `party` -> sales+purchasing, identity/pipeline dirs excluded) and asserts every cross-product edge is declared. The scan confirmed the draft directions and added `softDependsOn` with reasons to `PRODUCT_MODULES` (SPEC 2.4 soft deps): core -> inventory (org creation seeds warehouse defaults), inventory -> accounting / inventory_advanced (batches woven through items and stock movements) / inventory_costing, inventory_advanced -> inventory_costing, purchasing -> accounting (SPEC 2.4 confirmed) / inventory_advanced / inventory_costing. Edges into core need no declaration (always on). The hard graph is also asserted acyclic at catalog load time, so typecheck/build fail on a cycle.
+- [x] **S1-03** CI guard: a registry module without catalog mapping fails (AC3). Done 2026-11-28: new `unit` job in `tests.yml` runs the contracts suite and the S1-02 scan test on every PR; removing or misspelling a registry module's `product` fails `tsc` (type-level) and the catalog load-time guard (runtime), and an unmapped server module dir fails the scan test's classification check. Verified locally by breaking the `organization` mapping: `vitest run src/modules/catalog.test.ts` throws "names unknown product module" and `tsc` errors.
 - **Gate S1**: no behavior change anywhere; full test suite green.
 
 ### Phase S2: Entitlement core
-- [ ] **S2-01** Contracts: plan, entitlement, snapshot, module-state schemas, error codes (contracts first, `z` from `@avuny/zod`). Done when: contracts build and export.
+- [x] **S2-01** Contracts: plan, entitlement, snapshot, module-state schemas, error codes (contracts first, `z` from `@avuny/zod`). Done 2026-11-28: `packages/contracts/src/entitlement/` holds the shared vocabulary (entitlement kinds, module states per SPEC 3.3, access states per SPEC 3.2, subscription statuses per SPEC 3.1, billing intervals, `LIMIT_UNLIMITED`), the schemas (key format `module./feature./limit.` with kind-from-prefix, value-shape-by-kind plan entitlements, plans/prices/add-ons, owner switches, admin overrides, and the versioned snapshot with per-module resolution), and the eight SPEC 6.2 error codes. `@avuny/entitlements` now re-exports the kinds from contracts instead of redefining them.
 - [ ] **S2-02** DB schema and one migration: plans, plan_prices, plan_entitlements, addons, subscriptions tables (from the existing specs), organization_modules, overrides, organization_entitlements, `organizations.trial_used_at`, `limits_grace_until`. Money in minor units. Done when: migration applies on a clean database and on a copy of production data.
 - [ ] **S2-03** Resolver as a pure function with unit tests for R1 to R8 (AC1). Done when: tests pass.
 - [ ] **S2-04** Seed: catalog-validated plans per Q1 to Q3, plus `legacy` plan; assign `legacy` to every existing organization, and Free or Legacy by Q10 to new ones. Done when: seed is idempotent, unknown keys rejected (R6), AC6 suite passes.
@@ -178,11 +178,11 @@ Spec: `PLATFORM-ADMIN-SPEC.md`. A1 needs Q15, Q16, Q18, Q23. Docs only so far.
 
 #### Phase A1: Platform apps, admin identity, roles
 - [ ] **A1-01** Extract shared code into `packages/entitlements` and shared Hono middleware; scaffold `apps/platform-server` and `apps/platform-web` with their own wrangler configs and CI deploy jobs (extend the vars check). Done when: both deploy a health page to staging.
-- [ ] **A1-02** Schema and migration: platform_admins, sessions, roles, role_permissions, admin_roles, invites, platform_audit_events (append-only enforced in the database). Done when: migration applies; update and delete on audit table are rejected.
-- [ ] **A1-03** `PLATFORM_MODULES` registry, permission catalog, seed of built-in roles, bootstrap CLI that issues the first invite. Done when: running it twice creates one invite.
-- [ ] **A1-04** Login, TOTP enrollment, lockout, sessions, logout, invite acceptance; no register route (PAC1, PAC2).
-- [ ] **A1-05** Admin users and roles screens and routes: list, invite, disable, role editor with anti-escalation, last super admin, self-edit rules (PA-R2 to PA-R5, PAC3).
-- [ ] **A1-06** Route permission guard and generated 403 test (PA-R7, PAC4); audit writes on every mutation (PAC11).
+- [x] **A1-02** Schema and migration: platform_admins, sessions, roles, role_permissions, admin_roles, invites, platform_audit_events (append-only enforced in the database). Done when: migration applies; update and delete on audit table are rejected. Done 2026-11-27: migration `0030_platform_identity` (7 tables, `platform_admin_status` enum, append-only trigger on `platform_audit_events`), platform-server integration suite verifies application and UPDATE/DELETE rejection in CI.
+- [x] **A1-03** `PLATFORM_MODULES` registry, permission catalog, seed of built-in roles, bootstrap CLI that issues the first invite. Done when: running it twice creates one invite. Done 2026-11-27: registry + 19 resources in `@avuny/contracts/platform-admin`, 5 built-in roles (super_admin holds every key, publish_now stays super-admin-only), idempotent `syncPlatformRoles` seed, `bootstrap:admin` CLI (24h single-use invite, hashed token, no password printed, no-op once an admin exists). Also closed the TRUNCATE hole in the audit append-only rule (migration 0031).
+- [x] **A1-04** Login, TOTP enrollment, lockout, sessions, logout, invite acceptance; no register route (PAC1, PAC2). Done 2026-11-28: `platform-auth` module (8 routes: login, login/totp, invites/accept, invites/enroll-totp, logout, me, sessions, sessions/{id} DELETE). Two-step login with signed single-purpose tickets, mandatory TOTP (RFC 6238, AES-256-GCM at rest), 5-attempt/15-minute lockout with byte-identical generic errors, server-side sessions (8h sliding idle, 7d absolute cap, `__Host-platform_session` cookie), invite acceptance as the only admin-creating route. Route inventory test from the OpenAPI doc proves no register route and access declarations for every route (PAC1, PA-R7); integration tests cover lockout, cross-identity rejection, expiry and revocation (PAC2).
+- [x] **A1-05** Admin users and roles screens and routes: list, invite, disable, role editor with anti-escalation, last super admin, self-edit rules (PA-R2 to PA-R5, PAC3). Routes half done 2026-11-28: 6 admin routes (`/api/platform-admins*`) and 6 role routes (`/api/platform-roles*`) with the permission middleware (PA-R7), anti-escalation (PA-R2), guarded last-super-admin statements (PA-R3), self-edit lock (PA-R4), built-in role lock with clone (PA-R5) and audit writes on every mutation (PA-R6); integration tests cover the rules incl. the PAC3 concurrent-disable case. Web half done 2026-11-28: platform-web sign-in (password + TOTP), invite acceptance with TOTP enrollment, authed shell with permission-gated nav, admins list (filter + keyset pages) with invite dialog, admin detail (rename, replace roles, disable) and roles list (create, edit, clone, delete) with a permission matrix built from the contracts registry. Copy lives in the contracts `platform-admin` locale namespace (English-only v1, Q22); `/platform-auth/me` now returns effective permissions for the shell.
+- [~] **A1-06** Route permission guard and generated 403 test (PA-R7, PAC4); audit writes on every mutation (PAC11). In review 2026-11-28 (PR pending CI): `route-access.int.test.ts` generates one 403 (PERMISSION_DENIED) and one 401 (UNAUTHENTICATED) test per permission-gated route from the access declarations, guards the self-service routes against over-gating, and runs a happy-path pass over every mutating route asserting its audit row (action, resource, resourceId, before/after). Also fixed two flaky ticket-tampering assertions and raised the integration testTimeout to 60s for Neon latency variance.
 - **Gate A1**: the owner logs into the admin web, invites a second admin, who enrolls and logs in; every denial case tested.
 
 #### Phase A2: Plan and catalog configurator (needs S2 and Q20)
@@ -280,6 +280,23 @@ Spec: `PLATFORM-ADMIN-SPEC.md`. A1 needs Q15, Q16, Q18, Q23. Docs only so far.
 - Not decided: fixes-plan D1 to D8 (still open; D1 database driver matters before S5), prices, the real domain name.
 
 ## Deviations
+- 2026-11-27: the admin track (A1) starts before the S0 spikes finish, per the owner's "start implementing the admin server and web apps". S0-02 to S0-04 stay open and still gate S1/S5.
+- 2026-11-28: A1-05 is split in two: the routes half (admin and role management APIs with PA-R2..PA-R5 and PAC3) ships first; the admin web screens follow as their own PR. A1-05 stays open until both halves land.
+
 ## Verification log
 | Date | Task | Command | Result |
 |---|---|---|---|
+| 2026-11-27 | A1-02 | `pnpm --filter @avuny/platform-server test:int` (CI job "Platform API integration tests") | migration applies on a fresh database; UPDATE and DELETE on platform_audit_events raise "append-only"; status/TOTP, permission-key, email and invite check constraints hold |
+| 2026-11-27 | A1-03 | contracts `vitest run src/platform-admin`; platform-server `test:int` | registry keys unique and spec-complete; built-in roles valid (PA-R1); super_admin = all keys; seed idempotent, stale grants removed, custom roles kept; bootstrap twice = one invite; TRUNCATE rejected |
+| 2026-11-28 | A1-05 (routes) | platform-server `test:int` (CI job "Platform API integration tests") | admin invite/list/update/roles/disable flows; ESCALATION_DENIED on out-of-reach grants and super_admin grants by non-supers; SELF_EDIT_DENIED; LAST_SUPER_ADMIN incl. concurrent disable of the last two supers (one wins); BUILTIN_ROLE_LOCKED; ROLE_IN_USE; PERMISSION_DENIED per route |
+| 2026-11-28 | A1-05 (web) | platform-web `tsc -b`, `eslint`, `vitest run`, `vite build`; contracts `build`+`test`; platform-server `typecheck`/`lint`/`test` | all green locally; CI run on the PR is the recorded gate |
+| 2026-11-28 | S0-02 check 1: existing admin module | `apps/server/src/api/modules/admin/` inspection | Routes: list-users, get-user, user-actions (suspend/reactivate/revoke sessions), activity, metrics; guard = `requireRole("support","admin")` on `users.platform_role`. `metrics/overview` computes totalUsers, newUsers, activeUsers over 7/30/90d (AD-5). `users.platform_role` enum (user/support/admin) set in auth/users services; no seed script assigns it (scripts/ has none). Rebuild under A4 per spec 12/Q19. |
+| 2026-11-28 | S0-02 check 2: packages/hono | `packages/hono/src` inspection | Reusable for the second Worker, and already reused by platform-server: createOpenAPIRouter (@hono/zod-openapi), handleResult, createApi, get-context, request-logger, request-language, create-log. No tenant coupling found. |
+| 2026-11-28 | S0-02 check 3: auth module | `apps/server/src/api/modules/auth|users|otp|messaging` inspection | bcryptjs ^3.0.3, BCRYPT_ROUNDS default 12 (config.ts), dummy-hash compare against timing attacks; cookie helper + require-auth middleware mirrored by platform-auth (`__Host-platform_session`); otp module + messaging OTP routes exist; TOTP was NOT present in tenant auth (added fresh for platform admins in A1-04, RFC 6238 + AES-256-GCM at rest). |
+| 2026-11-28 | S0-02 check 4: CI + wrangler vars check | `.github/workflows/`, `scripts/check-wrangler-vars.mjs` inspection | deploy.yml runs the vars check against apps/server/wrangler.jsonc (REQUIRED plain vars, FORBIDDEN secrets, NODE_ENV=production, CORS includes WEB_APP_URL), then applies migrations by comparing drizzle journal vs `drizzle.__drizzle_migrations`. Second Worker = same pattern per app (script takes the path as argv[2]); deploy jobs for platform apps stay owner-side per the no-deploy rule. |
+| 2026-11-28 | S0-02 check 5: Neon roles and migrations | repo inspection + neon.com docs | Repo: one DATABASE_URL per Worker, `db:migrate` = drizzle-kit migrate, deploy.yml verifies journal vs applied timestamps before deploying. Neon (docs, 2026-11-28): roles creatable via Console/API/CLI on all plans, limit 500/branch; console/API roles get neon_superuser, SQL-created roles get default public privileges only (https://neon.com/docs/manage/roles, https://neon.com/docs/introduction/plans). A least-privilege app role is therefore SQL-managed and must be granted per object; migrations per role = run drizzle as the owner role, grant to the app role in the same migration (custom SQL). |
+| 2026-11-28 | S0-02 check 6: apps/web build + orval | `apps/web/orval.config.ts`, `apps/platform-web/orval.config.ts` | platform-web was scaffolded as a copy of apps/web's setup (orval config, vite build, i18n resources); A1-05 regenerated the platform orval client from the platform OpenAPI doc without touching apps/web. |
+| 2026-11-28 | S0-02 check 7: Resend wiring | `apps/server/src/api/modules/messaging/shell/messaging.service.ts` inspection | `resend` SDK behind MessagingService (apiKey from config, `resend.emails.send`); used by auth OTP/forgot-password routes and inventory-transfer. Platform reminders (A6) can reuse the same service pattern with a platform-scoped config. |
+| 2026-11-28 | S1-02 | server `vitest run --project unit src/api/modules/module-deps.test.ts`; contracts `build`+`test`; server `tsc --noEmit` | 4/4 pass: every module dir classified; all 136 scanned import edges between product modules declared as dependsOn or softDependsOn; soft edges carry reasons; hard graph acyclic (also enforced at catalog load) |
+| 2026-11-28 | S1-03 | broke `organization.product` to an unknown key, ran contracts `vitest` + `tsc`, reverted | catalog load-time guard throws "names unknown product module"; tsc errors on the unknown key; unmapped server dirs fail the scan test; CI unit job runs both on every PR |
+| 2026-11-28 | S2-01 | contracts `build` + `vitest run`; entitlements `build` + `test`; server and platform-server `tsc --noEmit` | contracts build and export (`@avuny/contracts/entitlement`); 307 contract tests pass incl. key format, value-shape-by-kind, exhaustive snapshot modules and the 8 error codes; both servers typecheck |
