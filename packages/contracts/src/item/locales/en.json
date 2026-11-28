@@ -16,6 +16,7 @@
     "ITEM_OPENING_STOCK_FAILED": "Failed to record opening stock.",
     "ITEM_EXPIRY_DATE_REQUIRED": "Expiry date is required for expiry-tracked items.",
     "ITEM_LOCKED_FIELD": "These settings cannot change after the item has stock movements.",
+    "ITEM_VALUATION_METHOD_NOT_READY": "Weighted average costing is not available yet. Use FIFO.",
     "ITEM_HAS_HISTORY": "This item has stock history. Deactivate it instead of deleting it."
   },
   "labels": {

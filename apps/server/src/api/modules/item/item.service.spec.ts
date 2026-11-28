@@ -139,6 +139,12 @@ describe("itemService", () => {
   })
 
   describe("create", () => {
+    it("refuses weighted average until the callers use the engine value", async () => {
+      const res = await t.service.create("u1", "org-1", { ...createInput, inventoryValuationMethod: "weighted_average" })
+      expect(res).toMatchObject({ success: false, error: "ITEM_VALUATION_METHOD_NOT_READY" })
+      expect(t.repository.insertItem).not.toHaveBeenCalled()
+    })
+
     it("rejects caller without permission", async () => {
       t.permissions.check.mockResolvedValueOnce(false)
       const res = await t.service.create("u1", "org-1", createInput)
@@ -461,6 +467,17 @@ describe("itemService", () => {
   describe("update", () => {
     beforeEach(() => {
       t.repository.findById.mockResolvedValue(item())
+    })
+
+    it("weighted average cannot be chosen yet, and nothing is written", async () => {
+      const res = await t.service.update("u1", "org-1", "item-1", { inventoryValuationMethod: "weighted_average" })
+      expect(res).toMatchObject({ success: false, error: "ITEM_VALUATION_METHOD_NOT_READY" })
+      expect(t.repository.updateItem).not.toHaveBeenCalled()
+    })
+
+    it("an item keeps its FIFO method on a plain edit", async () => {
+      const res = await t.service.update("u1", "org-1", "item-1", { inventoryValuationMethod: "fifo" })
+      expect(res).toMatchObject({ success: true })
     })
 
     it("unit and tracking changes are refused once the item has stock movements", async () => {

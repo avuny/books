@@ -98,3 +98,9 @@ Owner decisions already given (2026-11-27, WhatsApp): block stock-in with no val
 - The `supplier_return` posting template now takes an optional `inventoryCostMinor`: the value the stock engine took out. Inventory is credited at that value, accounts payable is debited at the credit note value, and the gap goes to Purchase Price Variance (credit when the credit note is higher, debit when lower). Without the field the template behaves as before. No server code posts this event yet, so nothing changes at runtime. The purchase return caller will pass the engine value when it moves onto the engine.
 - The single inventory account (1140) is kept. The template stays account agnostic.
 
+### Phase 3c (WAC guard), 2026-11-28
+
+- Owner approved (2026-11-28, via the main agent): block choosing weighted average until the callers that still cost from FIFO layers take the engine value.
+- Item create and update now fail with ITEM_VALUATION_METHOD_NOT_READY (422, en and ar) when the method is set to weighted average. An item that already is weighted average is not affected. Remove the check in the phase that moves sales delivery, adjustment loss and purchase return onto the engine.
+- Fix in 3a: the engine now reads the item method as stored (`fifo`, `weighted_average`) through `toEngineMethod`. It first compared with the wrong string.
+

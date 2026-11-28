@@ -19,4 +19,5 @@ export const itemErrorMap = {
   ITEM_EXPIRY_DATE_REQUIRED: errors.ITEM_EXPIRY_DATE_REQUIRED,
   ITEM_LOCKED_FIELD: errors.ITEM_LOCKED_FIELD,
   ITEM_HAS_HISTORY: errors.ITEM_HAS_HISTORY,
+  ITEM_VALUATION_METHOD_NOT_READY: errors.ITEM_VALUATION_METHOD_NOT_READY,
 } as const satisfies Record<Code, (typeof errors)[keyof typeof errors]>

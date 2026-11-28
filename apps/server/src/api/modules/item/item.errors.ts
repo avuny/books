@@ -55,6 +55,10 @@ export const itemErrorsHttpMap = {
     statusCode: 422,
     responseMessage: "Expiry date is required for expiry-tracked items",
   },
+  ITEM_VALUATION_METHOD_NOT_READY: {
+    statusCode: 422,
+    responseMessage: "Weighted average costing is not available yet. Use FIFO.",
+  },
   ITEM_LOCKED_FIELD: {
     statusCode: 409,
     responseMessage: "These settings cannot change after the item has stock movements",
