@@ -121,7 +121,7 @@ Every task: "done when" is checkable. Every phase ends with a gate. Run `pnpm ty
 - **Gate S0**: S0-01 to S0-04 ticked; no open "blocks S1" decision.
 
 ### Phase S1: Module catalog in code
-- [ ] **S1-01** Add product metadata to the registry (`product`, `dependsOn`, `switchable`, `defaultOn`, `showLocked`) and a derived `MODULE_CATALOG` in `packages/contracts`. Done when: the catalog type-checks and lists every registry module under exactly one product module.
+- [x] **S1-01** Add product metadata to the registry (`product`, `dependsOn`, `switchable`, `defaultOn`, `showLocked`) and a derived `MODULE_CATALOG` in `packages/contracts`. Done 2026-11-28: every registry module names its product module via `ModuleSpec.product`; `PRODUCT_MODULES` holds the product-level metadata (8 product modules per SPEC 2.4, `platform` left out as feature-only-until-enforceable); `MODULE_CATALOG` derives the grouping by scanning the registry, so the two can never drift. `catalog.test.ts` proves coverage (every registry module under exactly one product), real acyclic dependencies, core always-on, inventory default-on (Q7).
 - [ ] **S1-02** Dependency graph from the real import scan (S0-02) with a test that the graph is acyclic and that every dependency is a real product module. Done when: test passes.
 - [ ] **S1-03** CI guard: a registry module without catalog mapping fails (AC3). Done when: removing a mapping makes CI fail locally.
 - **Gate S1**: no behavior change anywhere; full test suite green.
