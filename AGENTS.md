@@ -678,6 +678,45 @@ Clearly identify the immediate next actions for the next working session or agen
 
 The objective is to make development resumable and resilient to lost AI conversation context, session interruptions, and agent handoffs.
 
+## Multi-bot coordination
+
+Several AI agents (bots) work in this repo next to the owner. GitHub Issues is the shared board. Follow this section before you start any work. It applies to every bot, whatever tool it runs in.
+
+### Who is who
+- **Avuny-Bot-001** (git author `Avuny-Bot-001`, GitHub account `avuny`): sales, purchasing and vendor bill and payment, ops (deploy, release, monitoring, runtime limits), SaaS spec work.
+- **Claude Code**: inventory costing (WAC, valuation engine) and assembly (cost type, bill of materials, assembly order).
+- **Owner**: Khaled. Product decisions and every release to `main` need his OK, relayed by the bot he talks to.
+- Other bot names in git history (`Avuny-Bot-002`, `Avuny-Bot-003`) are earlier sessions. They have no standing area. If you are one of them, work only on an issue assigned to you.
+- Area ownership means: do not edit another bot's area code without a comment on the owning issue and a reply. Merging a PR that brings their code into dev or main is fine.
+
+### The board
+1. One issue per task. Every real piece of work has an open issue before the first commit. Do not open issues for finished work.
+2. An issue is assigned to exactly one bot at a time. The assignee is the owner. Labels `bot:Avuny-Bot-001` or `bot:claude-code` say which bot the issue belongs to, and `area:*` labels say which part of the product. If an issue has no assignee yet, the `bot:*` label is the owner; if it has neither, ask on the issue before starting.
+3. Check assignment before you start. Read the issue: if it is assigned to or labeled for another bot, do not work on it. Comment instead. To take a task over, the current owner must hand it off in a comment first.
+4. Take a task: assign it to yourself (or leave the `bot:*` label that already names you), comment "starting", then branch.
+5. Hand over: comment what is done, what is left, and the branch or PR. Then change the assignee.
+6. Cross-bot notes go in issue comments, not in PR descriptions, commit messages or chat. Write them so a reader with no context can act on them.
+7. Label `needs-owner-decision` means stop and ask the owner. Do not guess the answer.
+8. A bot token may lack the right to set assignees or labels. Then put `Owner: <bot>` as the first line of the issue body or a comment, and tell the owner.
+
+### Pull requests
+- Every PR links its issue (`Closes #N` or `Refs #N`) and is opened against `dev`. Only the release flow opens a PR to `main` (see Releases).
+- Before you finalize a PR: fetch, then merge or rebase the latest `dev` into your branch, rerun the checks, and only then ask for merge. Another bot may have shipped since you branched.
+- Migration numbers must come after the latest migration on `dev` at the moment you finalize, not at the time you branched. If two PRs collide, the one that merges later renumbers. Never renumber a migration that is already on `main`.
+- Do not change code in another bot's area in your PR. If a change is needed there, comment on that bot's issue.
+- Small commits, tests alongside, agent-doc fixes in separate commits, as in the rest of this file.
+- Update PROGRESS and REGISTRY for the module you touched.
+
+### Releases and prod
+- Only the release flow merges to `main` (see Releases and the pre-release migration check). It needs the owner's OK each time.
+- After every deploy, check the prod probe history (see Prod monitoring).
+- Test data on prod: use only documents you create. Never touch the owner's real records.
+
+### When in doubt
+Comment on the issue and wait for the owner or the owning bot. A comment is cheaper than a merge conflict or a wrong release.
+
+---
+
 ## Releases
 
 - One version for the whole monorepo, in the root package.json. Never version packages individually.
