@@ -5,7 +5,7 @@
 | Spec | [`SPEC.md`](./SPEC.md) v1.0 · 2026-11-27 |
 | Last updated | 2026-11-28 |
 | Current phase | S1 (module catalog); A1 code-complete, in review |
-| Tasks done | 7 / 75 |
+| Tasks done | 8 / 75 |
 | Gates passed | 0 / 22 |
 
 ## How to use this file
@@ -14,7 +14,7 @@ Tick a task only when its "done when" is true and evidence is in the Verificatio
 Legend: `[ ]` todo · `[~]` in progress · `[x]` done · `[!]` blocked · `[-]` not applicable (say why)
 
 ## Next action
-> **S1 gate check, then S2-01**: S1-01, S1-02 and S1-03 are done; gate S1 asks for no behavior change and a green full suite, which the stacked PRs prove in CI. Next code is S2-01 (entitlement contracts). Still open: owner merge policy for the stacked PRs (#68, #69, #73, #77, #78, #81, #82, #83, #84), fixes-plan decisions D1 to D8 (D1 blocks S0-04), and the A1 gate hands-on login after merges.
+> **S2-02** (DB schema + migration for plans, prices, entitlements, add-ons, switches, overrides, snapshot) once the stacked PRs merge. Paused on owner merge policy for the stack (#68, #69, #73, #77, #78, #81, #82, #83, #84, #85, #86). Still open: fixes-plan decisions D1 to D8 (D1 blocks S0-04) and the A1 gate hands-on login after merges.
 
 ## Status board
 | Phase | Title | Tasks | Gate | Status |
@@ -127,7 +127,7 @@ Every task: "done when" is checkable. Every phase ends with a gate. Run `pnpm ty
 - **Gate S1**: no behavior change anywhere; full test suite green.
 
 ### Phase S2: Entitlement core
-- [ ] **S2-01** Contracts: plan, entitlement, snapshot, module-state schemas, error codes (contracts first, `z` from `@avuny/zod`). Done when: contracts build and export.
+- [x] **S2-01** Contracts: plan, entitlement, snapshot, module-state schemas, error codes (contracts first, `z` from `@avuny/zod`). Done 2026-11-28: `packages/contracts/src/entitlement/` holds the shared vocabulary (entitlement kinds, module states per SPEC 3.3, access states per SPEC 3.2, subscription statuses per SPEC 3.1, billing intervals, `LIMIT_UNLIMITED`), the schemas (key format `module./feature./limit.` with kind-from-prefix, value-shape-by-kind plan entitlements, plans/prices/add-ons, owner switches, admin overrides, and the versioned snapshot with per-module resolution), and the eight SPEC 6.2 error codes. `@avuny/entitlements` now re-exports the kinds from contracts instead of redefining them.
 - [ ] **S2-02** DB schema and one migration: plans, plan_prices, plan_entitlements, addons, subscriptions tables (from the existing specs), organization_modules, overrides, organization_entitlements, `organizations.trial_used_at`, `limits_grace_until`. Money in minor units. Done when: migration applies on a clean database and on a copy of production data.
 - [ ] **S2-03** Resolver as a pure function with unit tests for R1 to R8 (AC1). Done when: tests pass.
 - [ ] **S2-04** Seed: catalog-validated plans per Q1 to Q3, plus `legacy` plan; assign `legacy` to every existing organization, and Free or Legacy by Q10 to new ones. Done when: seed is idempotent, unknown keys rejected (R6), AC6 suite passes.
@@ -299,3 +299,4 @@ Spec: `PLATFORM-ADMIN-SPEC.md`. A1 needs Q15, Q16, Q18, Q23. Docs only so far.
 | 2026-11-28 | S0-02 check 7: Resend wiring | `apps/server/src/api/modules/messaging/shell/messaging.service.ts` inspection | `resend` SDK behind MessagingService (apiKey from config, `resend.emails.send`); used by auth OTP/forgot-password routes and inventory-transfer. Platform reminders (A6) can reuse the same service pattern with a platform-scoped config. |
 | 2026-11-28 | S1-02 | server `vitest run --project unit src/api/modules/module-deps.test.ts`; contracts `build`+`test`; server `tsc --noEmit` | 4/4 pass: every module dir classified; all 136 scanned import edges between product modules declared as dependsOn or softDependsOn; soft edges carry reasons; hard graph acyclic (also enforced at catalog load) |
 | 2026-11-28 | S1-03 | broke `organization.product` to an unknown key, ran contracts `vitest` + `tsc`, reverted | catalog load-time guard throws "names unknown product module"; tsc errors on the unknown key; unmapped server dirs fail the scan test; CI unit job runs both on every PR |
+| 2026-11-28 | S2-01 | contracts `build` + `vitest run`; entitlements `build` + `test`; server and platform-server `tsc --noEmit` | contracts build and export (`@avuny/contracts/entitlement`); 307 contract tests pass incl. key format, value-shape-by-kind, exhaustive snapshot modules and the 8 error codes; both servers typecheck |

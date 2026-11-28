@@ -564,6 +564,9 @@ importers:
 
   packages/entitlements:
     dependencies:
+      '@avuny/contracts':
+        specifier: workspace:*
+        version: link:../contracts
       '@avuny/zod':
         specifier: workspace:*
         version: link:../zod

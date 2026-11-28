@@ -40,6 +40,11 @@
       "import": "./dist/customer-payment/index.js",
       "default": "./dist/customer-payment/index.js"
     },
+    "./entitlement": {
+      "types": "./dist/entitlement/index.d.ts",
+      "import": "./dist/entitlement/index.js",
+      "default": "./dist/entitlement/index.js"
+    },
     "./errors": {
       "types": "./dist/errors/index.d.ts",
       "import": "./dist/errors/index.js",

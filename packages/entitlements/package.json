@@ -41,6 +41,7 @@
     "vitest": "^3.2.3"
   },
   "dependencies": {
+    "@avuny/contracts": "workspace:*",
     "@avuny/zod": "workspace:*"
   }
 }
