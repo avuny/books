@@ -14,11 +14,12 @@ import {
 } from "@workspace/ui/components/dialog"
 
 import { useNavigate } from "@tanstack/react-router"
+import { useQueryClient } from "@tanstack/react-query"
+import { QuickReceiveError, quickReceive } from "./quick-receive"
 import { CreateBillFromReceiptDialog, useVendorBillAbilities } from "../../vendor-bill-module"
 import type { PurchaseOrderDto } from "../types"
 import {
   useCreateReceiptMutation,
-  useQuickReceiveMutation,
   usePostReceiptMutation,
   usePurchaseOrderAbilities,
   usePurchaseReceipts,
@@ -40,7 +41,8 @@ export function ReceiptsPanel({ orgId, order }: Props) {
   const [billing, setBilling] = useState<ReceiptDto | null>(null)
   const { receipts } = usePurchaseReceipts(orgId, order.id)
   const createMutation = useCreateReceiptMutation(orgId, order.id)
-  const quickMutation = useQuickReceiveMutation(orgId, order.id)
+  const [quickBusy, setQuickBusy] = useState(false)
+  const queryClient = useQueryClient()
   const [quickMethod, setQuickMethod] = useState<"cash" | "bank">("bank")
   const postMutation = usePostReceiptMutation(orgId, order.id)
   const reverseMutation = useReverseReceiptMutation(orgId, order.id)
@@ -84,12 +86,25 @@ export function ReceiptsPanel({ orgId, order }: Props) {
     if (!built.ok) {
       return setError(built.reason === "rejectionReason" ? t("ui.reasonRequired") : t("ui.invalidQty"))
     }
+    setQuickBusy(true)
     try {
-      await quickMutation.mutateAsync({ orgId, id: order.id, data: { receipt: built.data, method: quickMethod } })
+      await quickReceive(orgId, order.id, built.data, quickMethod)
       setCreating(false)
       setRows({})
     } catch (e) {
-      fail(e)
+      const cause = e instanceof QuickReceiveError ? e.cause : e
+      const message = parseApiError(cause).message || ""
+      setError(t(
+          e instanceof QuickReceiveError && e.ambiguous
+            ? "ui.quick.stepUnknown"
+            : e instanceof QuickReceiveError && e.leftover
+              ? "ui.quick.stepFailedUndo"
+              : "ui.quick.stepFailed",
+          { message }
+        ))
+    } finally {
+      setQuickBusy(false)
+      await queryClient.invalidateQueries()
     }
   }
 
@@ -231,8 +246,8 @@ export function ReceiptsPanel({ orgId, order }: Props) {
                   <option value="bank">{t("ui.quick.bank")}</option>
                   <option value="cash">{t("ui.quick.cash")}</option>
                 </select>
-                <Button variant="outline" onClick={submitQuick} disabled={quickMutation.isPending || createMutation.isPending}>
-                  {quickMutation.isPending ? t("ui.quick.creating") : t("ui.quick.confirm")}
+                <Button variant="outline" onClick={submitQuick} disabled={quickBusy || createMutation.isPending}>
+                  {quickBusy ? t("ui.quick.creating") : t("ui.quick.confirm")}
                 </Button>
               </>
             ) : null}

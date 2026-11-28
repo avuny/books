@@ -1,0 +1,50 @@
+{
+  "name": "@avuny/platform-web",
+  "version": "0.0.1",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "dev": "vite --port 5174",
+    "build": "tsc -b && vite build",
+    "deploy": "wrangler deploy",
+    "lint": "eslint",
+    "format": "prettier --write \"**/*.{ts,tsx}\"",
+    "typecheck": "tsc -b --noEmit",
+    "preview": "vite preview",
+    "test": "vitest run --passWithNoTests",
+    "api:generate": "orval --config orval.config.ts"
+  },
+  "dependencies": {
+    "@avuny/contracts": "workspace:*",
+    "@avuny/i18n": "workspace:*",
+    "@avuny/zod": "workspace:*",
+    "@tanstack/react-query": "^5.67.1",
+    "@tanstack/react-router": "^1.170.44",
+    "@workspace/ui": "workspace:*",
+    "axios": "^1.12.2",
+    "i18next": "^26.4.0",
+    "lucide-react": "^1.57.0",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "react-i18next": "^17.0.12"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10",
+    "@tailwindcss/vite": "^4",
+    "@tanstack/router-plugin": "^1.168.47",
+    "@types/node": "^24.19.1",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "@vitejs/plugin-react": "^6",
+    "eslint": "^10",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "eslint-plugin-react-refresh": "^0.5.7",
+    "globals": "^17",
+    "orval": "^7.17.0",
+    "typescript": "~6.0.2",
+    "typescript-eslint": "^8",
+    "vite": "^8",
+    "vitest": "^4.1.11",
+    "wrangler": "^4.151.0"
+  }
+}

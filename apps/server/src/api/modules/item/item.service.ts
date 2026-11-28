@@ -16,7 +16,11 @@ import { decodeCursor, fail, ok, toCursorPage, type Result } from "@avuny/utils"
 import { createFailureKit, type Failure } from "../shared/service-helpers.js"
 import { ItemErrorCode, type ItemErrorCode as Code } from "./item.errors.js"
 import { toItemDto, toItemListItemDto } from "./item.mapper.js"
-import { checkOpeningStock } from "./item-opening-stock.rules.js"
+import {
+  checkOpeningStock,
+  normalizeOpeningStock,
+  type NormalizedOpeningLine,
+} from "./item-opening-stock.rules.js"
 import { postOpeningStock } from "./item-opening-stock.js"
 import { itemRules, type UnitSource } from "./item.rules.js"
 import { DummyItemActivityLog, DummyPermissionChecker, DummyStockHistory } from "./testing.js"
@@ -34,6 +38,7 @@ const MSG = {
   nameTaken: "An item with this name already exists",
   unitRequired: "Provide a base unit or a unit collection",
   collectionInvalid: "The selected unit collection does not exist",
+  unitPriceInvalid: "Unit prices can only be set for other units of the item's unit collection",
 } as const
 
 type ResolvedUnit = { baseUnitId: string; unitCollectionId: string }
@@ -92,6 +97,32 @@ export function createItemService(deps: ItemServiceDeps) {
     )
     return { baseUnitId: checked.value.id, unitCollectionId: collection.id }
   }
+
+  /** Conversion factors (unit id -> factor to the base unit) of a unit collection. */
+  async function loadFactors(collectionId: string, tx: Tx): Promise<Map<string, string>> {
+    const rows = await unitRepo.listCollectionUnits(collectionId, tx)
+    return new Map(rows.map((r) => [r.link.unitId, r.link.conversionFactor]))
+  }
+
+  /** Per-unit prices may only name OTHER units of the item's collection (never the base unit). */
+  function checkUnitPrices(
+    prices: NonNullable<CreateItemInput["unitPrices"]>,
+    baseUnitId: string,
+    factors: ReadonlyMap<string, string>
+  ): Failure<Code> | null {
+    for (const row of prices) {
+      if (row.unitId === baseUnitId || !factors.has(row.unitId))
+        return failure(Err.ITEM_UNIT_PRICE_UNIT_INVALID, MSG.unitPriceInvalid)
+    }
+    return null
+  }
+
+  const toUnitPriceRows = (prices: NonNullable<CreateItemInput["unitPrices"]>) =>
+    prices.map((p) => ({
+      unitId: p.unitId,
+      costPrice: p.costPrice ?? null,
+      sellingPrice: p.sellingPrice ?? null,
+    }))
 
   const loadDetail = async (orgId: string, id: string) => {
     const row = await repo.findDetail(orgId, id)
@@ -181,6 +212,36 @@ export function createItemService(deps: ItemServiceDeps) {
           if (!category.ok) return fromViolation(category.violation)
           if (await repo.nameTaken(orgId, input.name, undefined, tx))
             return failure(Err.ITEM_NAME_TAKEN, MSG.nameTaken)
+
+          // Units other than the base unit exist only in an existing collection (a new single-unit
+          // collection holds just its base unit). Read them before anything is written.
+          let baseUnitId: string | null = source.kind === "base" ? source.baseUnitId : null
+          let factors = new Map<string, string>()
+          const needsFactors =
+            (input.unitPrices?.length ?? 0) > 0 ||
+            (input.openingStock?.lines.some((l) => l.unitId) ?? false)
+          if (source.kind === "collection") {
+            const collection = await unitRepo.findCollection(orgId, source.collectionId, tx)
+            if (collection) {
+              baseUnitId = collection.baseUnitId
+              if (needsFactors) factors = await loadFactors(collection.id, tx)
+            }
+          }
+          if (baseUnitId && input.unitPrices?.length) {
+            const bad = checkUnitPrices(input.unitPrices, baseUnitId, factors)
+            if (bad) return bad
+          }
+          let openingLines: NormalizedOpeningLine[] | null = null
+          if (input.openingStock) {
+            const normalized = normalizeOpeningStock(
+              input.openingStock,
+              { baseUnitId: baseUnitId ?? "", factors },
+              new Date().toISOString()
+            )
+            if (!normalized.ok) return failure(normalized.violation.error, normalized.violation.msg)
+            openingLines = normalized.lines
+          }
+
           const unit = await resolveUnit(orgId, source, tx)
           if (isFailure(unit)) return unit
 
@@ -211,6 +272,8 @@ export function createItemService(deps: ItemServiceDeps) {
             { allowNegativeStock: input.allowNegativeStock, reorderPoint: input.reorderPoint ?? null },
             tx
           )
+          if (input.unitPrices?.length)
+            await repo.replaceUnitPrices(orgId, res.row.id, toUnitPriceRows(input.unitPrices), tx)
           if (input.expirySettings) {
             await repo.upsertExpirySettings(
               orgId,
@@ -223,7 +286,7 @@ export function createItemService(deps: ItemServiceDeps) {
             )
           }
 
-          if (input.openingStock && deps.openingStock) {
+          if (input.openingStock && openingLines && deps.openingStock) {
             const posted = await postOpeningStock(deps.openingStock, {
               tx,
               actorId,
@@ -231,7 +294,7 @@ export function createItemService(deps: ItemServiceDeps) {
               itemId: res.row.id,
               itemName: res.row.name,
               isBatchTracked: input.isInventoryTracked === true,
-              opening: input.openingStock,
+              opening: { lines: openingLines },
             })
             if (!posted.ok) {
               // Rollback compensation for stateless DB drivers (neon-http) where tx rollback is a no-op
@@ -314,6 +377,25 @@ export function createItemService(deps: ItemServiceDeps) {
             if (lock) return fromViolation(lock)
           }
 
+          if (input.unitPrices !== undefined && input.unitPrices.length > 0) {
+            // Prices are checked against the collection the item will have after this update.
+            let baseUnitId = current.baseUnitId
+            let factors = new Map<string, string>()
+            if (!unitChange) {
+              factors = await loadFactors(current.unitCollectionId, tx)
+            } else if (unitChange.kind === "collection") {
+              const collection = await unitRepo.findCollection(orgId, unitChange.collectionId, tx)
+              if (collection) {
+                baseUnitId = collection.baseUnitId
+                factors = await loadFactors(collection.id, tx)
+              }
+            } else {
+              baseUnitId = unitChange.baseUnitId
+            }
+            const bad = checkUnitPrices(input.unitPrices, baseUnitId, factors)
+            if (bad) return bad
+          }
+
           let unit: ResolvedUnit | null = null
           if (unitChange) {
             const resolved = await resolveUnit(orgId, unitChange, tx)
@@ -352,6 +434,12 @@ export function createItemService(deps: ItemServiceDeps) {
                 ? failure(Err.ITEM_NAME_TAKEN, MSG.nameTaken)
                 : failure(Err.ITEM_NOT_FOUND, MSG.notFound)
             )
+
+          if (input.unitPrices !== undefined)
+            await repo.replaceUnitPrices(orgId, itemId, toUnitPriceRows(input.unitPrices), tx)
+          else if (unit)
+            // A different unit collection invalidates the old per-unit prices.
+            await repo.replaceUnitPrices(orgId, itemId, [], tx)
 
           if (input.allowNegativeStock !== undefined || input.reorderPoint !== undefined)
             await repo.upsertSettings(

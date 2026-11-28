@@ -39,6 +39,14 @@ export const itemErrorsHttpMap = {
     statusCode: 422,
     responseMessage: "Opening stock cannot have a batch for non-batch-tracked items",
   },
+  ITEM_UNIT_PRICE_UNIT_INVALID: {
+    statusCode: 422,
+    responseMessage: "Unit prices can only be set for other units of the item's unit collection",
+  },
+  ITEM_OPENING_STOCK_UNIT_INVALID: {
+    statusCode: 422,
+    responseMessage: "The opening stock unit must belong to the item's unit collection",
+  },
   ITEM_OPENING_STOCK_FAILED: {
     statusCode: 422,
     responseMessage: "Failed to record opening stock",

@@ -101,11 +101,26 @@ class FakeRepo implements InventoryTransferRepository {
   async deleteLine(_o: string, lineId: string) {
     for (const [k, ls] of this.lines) this.lines.set(k, ls.filter((l) => l.id !== lineId))
   }
+  eventStatus = new Map<string, "POSTED" | "REVERSED">()
+  async findEvent(_o: string, _t: string, eventId: string) {
+    const ev = this.events.find((e) => e.id === eventId)
+    if (!ev) return null
+    return {
+      id: ev.id,
+      kind: ev.kind,
+      status: this.eventStatus.get(ev.id) ?? "POSTED",
+      stockMovementId: ev.stockMovementId,
+      lines: (ev.lines ?? []).map((l: any) => ({ ...l, stockMovementLineId: l.stockMovementLineId ?? null })),
+    }
+  }
+  async setEventStatus(_o: string, eventId: string, status: "POSTED" | "REVERSED") {
+    this.eventStatus.set(eventId, status)
+  }
   async nextEventNo() {
     return this.events.length + 1
   }
-  async insertEvent(_o: string, event: any) {
-    this.events.push(event)
+  async insertEvent(_o: string, event: any, lines: any[]) {
+    this.events.push({ ...event, lines })
   }
 }
 
@@ -120,6 +135,7 @@ describe("InventoryTransferService drafts", () => {
   let postFails = false
   let posts: any[] = []
   let reversed = 0
+  let costCalls: string[] = []
   let service: ReturnType<typeof createInventoryTransferService>
 
   const line = { itemId, sourceLocationId: srcLoc, destinationLocationId: dstLoc, unitId, quantity: "5" }
@@ -136,8 +152,23 @@ describe("InventoryTransferService drafts", () => {
     postFails = false
     posts = []
     reversed = 0
+    costCalls = []
     service = createInventoryTransferService({
       repository: repo,
+      costing: {
+        async dispatch(_o: string, p: any) {
+          costCalls.push(`dispatch:${p.qty}`)
+        },
+        async settle(_o: string, p: any) {
+          costCalls.push(`settle:${p.toLocationId ? "to" : "loss"}:${p.qty}`)
+        },
+        async undoDispatch(_o: string, p: any) {
+          costCalls.push(`undoDispatch:${p.qty}`)
+        },
+        async undoSettle(_o: string, p: any) {
+          costCalls.push(`undoSettle:${p.qty}`)
+        },
+      },
       stock: {
         async post(_a: string, _o: string, input: any) {
           if (postFails) return { success: false, error: "STOCK_MOVEMENT_INSUFFICIENT_STOCK" } as any
@@ -340,6 +371,110 @@ describe("InventoryTransferService drafts", () => {
       const res = await service.reverseDispatch(actorId, orgId, id, {})
       expect(res.success && res.data.status).toBe("CANCELLED")
       expect(reversed).toBe(1)
+    })
+  })
+
+  describe("receive, close short and reverse receipt", () => {
+    const dispatched = async () => {
+      const c = await service.create(actorId, orgId, input)
+      if (!c.success) throw new Error("create failed")
+      await service.dispatch(actorId, orgId, c.data.id)
+      return c.data.id
+    }
+
+    it("receives partially twice, then fully", async () => {
+      const id = await dispatched()
+      const allocationId = repo.allocs[0].id
+      const a = await service.receive(actorId, orgId, id, { lines: [{ allocationId, baseQuantity: "2" }] })
+      expect(a.success && a.data.status).toBe("PARTIALLY_RECEIVED")
+      const b = await service.receive(actorId, orgId, id, { lines: [{ allocationId, baseQuantity: "1" }] })
+      expect(b.success && b.data.status).toBe("PARTIALLY_RECEIVED")
+      const c = await service.receive(actorId, orgId, id, { lines: [{ allocationId, baseQuantity: "2" }] })
+      expect(c.success && c.data.status).toBe("RECEIVED")
+      expect(repo.allocs[0].receivedBaseQty).toBe("5")
+      expect(posts.at(-1).lines[0].toLocationId).toBe(dstLoc)
+    })
+
+    it("rejects over-receipt, zero, duplicates, unknown allocation and wrong state", async () => {
+      const id = await dispatched()
+      const allocationId = repo.allocs[0].id
+      const over = await service.receive(actorId, orgId, id, { lines: [{ allocationId, baseQuantity: "6" }] })
+      expect(!over.success && over.error).toBe(Err.INVENTORY_TRANSFER_EXCEEDS_PENDING)
+      const zero = await service.receive(actorId, orgId, id, { lines: [{ allocationId, baseQuantity: "0" }] })
+      expect(!zero.success && zero.error).toBe(Err.INVENTORY_TRANSFER_INVALID_QUANTITY)
+      const dup = await service.receive(actorId, orgId, id, {
+        lines: [{ allocationId, baseQuantity: "1" }, { allocationId, baseQuantity: "1" }],
+      })
+      expect(!dup.success && dup.error).toBe(Err.INVENTORY_TRANSFER_DUPLICATE_LINES)
+      const unk = await service.receive(actorId, orgId, id, { lines: [{ allocationId: srcWh, baseQuantity: "1" }] })
+      expect(!unk.success && unk.error).toBe(Err.INVENTORY_TRANSFER_ALLOCATION_NOT_FOUND)
+      const draft = await service.create(actorId, orgId, input)
+      if (!draft.success) throw new Error("x")
+      const wrong = await service.receive(actorId, orgId, draft.data.id, { lines: [{ allocationId, baseQuantity: "1" }] })
+      expect(!wrong.success && wrong.error).toBe(Err.INVENTORY_TRANSFER_NOT_IN_TRANSIT)
+    })
+
+    it("denies receive without permission", async () => {
+      const id = await dispatched()
+      allowed = false
+      const res = await service.receive(actorId, orgId, id, { lines: [{ allocationId: repo.allocs[0].id, baseQuantity: "1" }] })
+      expect(!res.success && res.error).toBe(RoleErrorCode.ROLE_PERMISSION_DENIED)
+    })
+
+    it("closes the rest short as an adjustment loss", async () => {
+      const id = await dispatched()
+      const allocationId = repo.allocs[0].id
+      await service.receive(actorId, orgId, id, { lines: [{ allocationId, baseQuantity: "3" }] })
+      const res = await service.closeShort(actorId, orgId, id)
+      expect(res.success && res.data.status).toBe("RECEIVED")
+      expect(repo.allocs[0].lostBaseQty).toBe("2")
+      expect(posts.at(-1).type).toBe("adjustment")
+      expect(posts.at(-1).lines[0].toLocationId).toBeUndefined()
+      const again = await service.closeShort(actorId, orgId, id)
+      expect(!again.success && again.error).toBe(Err.INVENTORY_TRANSFER_NOT_IN_TRANSIT)
+    })
+
+    it("reverses a receipt once and restores counters and status", async () => {
+      const id = await dispatched()
+      const allocationId = repo.allocs[0].id
+      await service.receive(actorId, orgId, id, { lines: [{ allocationId, baseQuantity: "5" }] })
+      const eventId = repo.events[0].id
+      const res = await service.reverseReceipt(actorId, orgId, id, eventId)
+      expect(res.success && res.data.status).toBe("IN_TRANSIT")
+      expect(repo.allocs[0].receivedBaseQty).toBe("0")
+      const twice = await service.reverseReceipt(actorId, orgId, id, eventId)
+      expect(!twice.success && twice.error).toBe(Err.INVENTORY_TRANSFER_CANNOT_REVERSE)
+      const missing = await service.reverseReceipt(actorId, orgId, id, srcWh)
+      expect(!missing.success && missing.error).toBe(Err.INVENTORY_TRANSFER_EVENT_NOT_FOUND)
+    })
+
+    it("does not reverse a return or loss event", async () => {
+      const id = await dispatched()
+      await service.closeShort(actorId, orgId, id)
+      const res = await service.reverseReceipt(actorId, orgId, id, repo.events[0].id)
+      expect(!res.success && res.error).toBe(Err.INVENTORY_TRANSFER_CANNOT_REVERSE)
+    })
+  })
+
+  describe("costing follows the stock", () => {
+    it("moves cost layers on dispatch, receive, loss and the reversals", async () => {
+      const c = await service.create(actorId, orgId, input)
+      if (!c.success) throw new Error("create failed")
+      await service.dispatch(actorId, orgId, c.data.id)
+      const allocationId = repo.allocs[0].id
+      await service.receive(actorId, orgId, c.data.id, { lines: [{ allocationId, baseQuantity: "3" }] })
+      await service.closeShort(actorId, orgId, c.data.id)
+      expect(costCalls).toEqual(["dispatch:5", "settle:to:3", "settle:loss:2"])
+      await service.reverseReceipt(actorId, orgId, c.data.id, repo.events[0].id)
+      expect(costCalls.at(-1)).toBe("undoSettle:3")
+    })
+
+    it("undoes the cost of an untouched dispatch when it is reversed", async () => {
+      const c = await service.create(actorId, orgId, input)
+      if (!c.success) throw new Error("create failed")
+      await service.dispatch(actorId, orgId, c.data.id)
+      await service.reverseDispatch(actorId, orgId, c.data.id, {})
+      expect(costCalls).toEqual(["dispatch:5", "undoDispatch:5"])
     })
   })
 })

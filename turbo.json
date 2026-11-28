@@ -5,6 +5,8 @@
     "CLOUDFLARE_API_TOKEN",
     "CLOUDFLARE_ACCOUNT_ID",
     "VITE_API_URL",
+    "VITE_PLATFORM_API_URL",
+    "PLATFORM_API_URL",
     "NODE_ENV",
     "DATABASE_URL",
     "ACCESS_TOKEN_SECRET",
@@ -56,12 +58,25 @@
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
       "outputs": ["dist/**"]
     },
+    "@avuny/platform-web#build": {
+      "dependsOn": ["^build", "@avuny/platform-web#api:generate"],
+      "inputs": ["$TURBO_DEFAULT$", ".env*"],
+      "outputs": ["dist/**"]
+    },
+    "@avuny/landing#build": {
+      "dependsOn": ["^build"],
+      "inputs": ["$TURBO_DEFAULT$", ".env*"],
+      "outputs": ["out/**", ".next/**"]
+    },
     "deploy": {
       "dependsOn": ["^build"],
       "cache": false
     },
     "lint": {
       "dependsOn": ["^build"]
+    },
+    "@avuny/platform-web#lint": {
+      "dependsOn": ["^build", "@avuny/platform-web#api:generate"]
     },
     "@avuny/books-web#lint": {
       "dependsOn": ["^build", "api:generate"]
@@ -72,11 +87,19 @@
     "typecheck": {
       "dependsOn": ["^build"]
     },
+    "@avuny/platform-web#typecheck": {
+      "dependsOn": ["^build", "@avuny/platform-web#api:generate"]
+    },
     "@avuny/books-web#typecheck": {
       "dependsOn": ["^build", "api:generate"]
     },
     "dev": {
       "dependsOn": ["^build"],
+      "cache": false,
+      "persistent": true
+    },
+    "@avuny/platform-web#dev": {
+      "dependsOn": ["^build", "@avuny/platform-web#api:generate"],
       "cache": false,
       "persistent": true
     },
@@ -92,6 +115,11 @@
       "dependsOn": ["^build"],
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
       "outputs": ["openapi/**"]
+    },
+    "@avuny/platform-web#api:generate": {
+      "dependsOn": ["@avuny/platform-server#openapi:generate", "^build"],
+      "inputs": ["$TURBO_DEFAULT$", "../platform-server/openapi/openapi.json", "orval.config.ts"],
+      "outputs": ["src/api/**"]
     },
     "api:generate": {
       "dependsOn": ["@avuny/books-server#openapi:generate", "^build"],

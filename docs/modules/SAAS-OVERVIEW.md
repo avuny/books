@@ -144,6 +144,9 @@ The codebase already has **port interfaces** for plan features that are currentl
 | [Billing Module SPEC](./billing/SPEC.md) | Invoice generation, billing history, credits, proration |
 | [Feature Gate Module SPEC](./feature-gate/SPEC.md) | Runtime feature/limit enforcement, frontend plan gating |
 | [Implementation Plan](./IMPLEMENTATION-PLAN.md) | Phased rollout, dependencies, task breakdown |
+| [SaaS Architecture (modules and entitlements)](./saas-architecture/SPEC.md) | Module catalog, entitlement resolver, plan bundles, tenant module switches, provider port, phased plan S0 to S8. Proposed; adds to and in places supersedes the documents above (see its section 2.3). Decisions and progress: [PROGRESS](./saas-architecture/PROGRESS.md) |
+| [Platform Admin (back office)](./saas-architecture/PLATFORM-ADMIN-SPEC.md) | Separate admin web app and API: admin login and roles, plan and feature configurator, organizations, subscriptions, payments, sidebar and permission catalog, scheduled jobs and reminders. Proposed. |
+| [Marketing Landing Site](./saas-architecture/LANDING-SPEC.md) | Next.js static landing site whose text, images and plan matrix are edited in the admin and published as a snapshot. Proposed. |
 
 ---
 

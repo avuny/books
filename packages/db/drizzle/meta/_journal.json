@@ -208,36 +208,43 @@
     {
       "idx": 29,
       "version": "7",
-      "when": 1795731129517,
-      "tag": "0029_sales_order",
+      "when": 1795782048401,
+      "tag": "0029_item_unit_prices",
       "breakpoints": true
     },
     {
       "idx": 30,
       "version": "7",
-      "when": 1795776506860,
-      "tag": "0030_sales_delivery",
+      "when": 1795785648401,
+      "tag": "0030_sales_order",
       "breakpoints": true
     },
     {
       "idx": 31,
       "version": "7",
-      "when": 1795780101082,
-      "tag": "0031_sales_invoice",
+      "when": 1795789248401,
+      "tag": "0031_sales_delivery",
       "breakpoints": true
     },
     {
       "idx": 32,
       "version": "7",
-      "when": 1795815124911,
-      "tag": "0032_customer_payment",
+      "when": 1795792848401,
+      "tag": "0032_sales_invoice",
       "breakpoints": true
     },
     {
       "idx": 33,
       "version": "7",
-      "when": 1795817119227,
-      "tag": "0033_sales_credit_note",
+      "when": 1795796448401,
+      "tag": "0033_customer_payment",
+      "breakpoints": true
+    },
+    {
+      "idx": 34,
+      "version": "7",
+      "when": 1795800048401,
+      "tag": "0034_sales_credit_note",
       "breakpoints": true
     }
   ]

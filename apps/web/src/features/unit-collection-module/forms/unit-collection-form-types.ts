@@ -6,6 +6,25 @@ import type {
   ComboboxEditAction,
 } from "@workspace/ui/blocks/form"
 
+/** Values interpolated into the conversion templates ("1 {unit} = {amount} {base}"). */
+export type ConversionLabels = { unit: string; base: string; amount: string }
+
+/** Strings for the conversion input on each extra-unit row. */
+export type UnitCollectionConversionCopy = {
+  amount: FieldCopy
+  /** aria-label of the direction select. */
+  directionLabel: string
+  /** "1 {unit} = {amount} {base}": one of the extra unit equals {amount} base units. */
+  formatPerUnit: (labels: ConversionLabels) => string
+  /** "1 {base} = {amount} {unit}": one base unit equals {amount} of the extra unit. */
+  formatPerBase: (labels: ConversionLabels) => string
+  /** Used for {unit} / {base} until the picker value resolves to a unit. */
+  unitFallback: string
+  baseFallback: string
+  /** Shown for {amount} while the amount is empty, so the template still reads. */
+  amountFallback: string
+}
+
 export type UnitCollectionExtraUnitsCopy = {
   label: string
   description: string
@@ -16,7 +35,7 @@ export type UnitCollectionExtraUnitsCopy = {
   /** Shown instead of the "add" button until the base unit is chosen. */
   pickBaseFirst: string
   unit: FieldCopy
-  conversionFactor: FieldCopy
+  conversion: UnitCollectionConversionCopy
 }
 
 /** Localized strings shared by the create and update forms. */

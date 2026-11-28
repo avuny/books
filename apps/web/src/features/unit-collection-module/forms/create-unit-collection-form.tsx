@@ -87,6 +87,7 @@ export function CreateUnitCollectionForm({
 
         <UnitCollectionExtraUnitsField
           control={form.control}
+          setValue={form.setValue}
           copy={copy.extraUnits}
           pickerConfig={extraUnitPickerConfig}
           canAdd={Boolean(baseUnitId)}

@@ -37,10 +37,17 @@ export function useUnitCollectionFormCopy(
         label: t("fields.unit.label"),
         placeholder: t("fields.unit.placeholder"),
       },
-      conversionFactor: {
-        label: t("fields.conversionFactor.label"),
-        placeholder: t("fields.conversionFactor.placeholder"),
-        description: t("fields.conversionFactor.description"),
+      conversion: {
+        amount: {
+          label: t("fields.conversion.amount.label"),
+          placeholder: t("fields.conversion.amount.placeholder"),
+        },
+        directionLabel: t("fields.conversion.directionLabel"),
+        formatPerUnit: (labels) => t("fields.conversion.perUnit", labels),
+        formatPerBase: (labels) => t("fields.conversion.perBase", labels),
+        unitFallback: t("fields.conversion.unitFallback"),
+        baseFallback: t("fields.conversion.baseFallback"),
+        amountFallback: t("fields.conversion.amountFallback"),
       },
     },
     submitLabel: t(`${mode}.submitLabel`),

@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "contentHash": "sample",
+  "locale": "ar",
+  "isSample": true,
+  "settings": { "siteName": "SAMPLE AR Site", "description": "Sample content used in dev and CI only. Real content is published from the platform admin." },
+  "blocks": [
+    {
+      "type": "hero",
+      "headline": "SAMPLE AR headline",
+      "subheadline": "Sample sub headline from the fixture. Replace by publishing content in the admin.",
+      "primaryCta": { "label": "Sample action", "href": "#" },
+      "badges": ["Sample badge"]
+    },
+    {
+      "type": "feature_grid",
+      "heading": "Sample features",
+      "items": [
+        { "icon": "box", "title": "Sample one", "text": "Sample text." },
+        { "icon": "chart", "title": "Sample two", "text": "Sample text." }
+      ]
+    },
+    { "type": "cta_banner", "headline": "Sample banner", "text": "Sample text.", "cta": { "label": "Sample action", "href": "#" } }
+  ],
+  "plans": []
+}

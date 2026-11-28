@@ -11,6 +11,12 @@ import {
 
 import type { CreateItemInput, ItemDto, UpdateItemInput } from "../types"
 
+const optionalPrice = z
+  .string()
+  .trim()
+  .refine((v) => v === "" || UNIT_QUANTITY_PATTERN.test(v), "Invalid number")
+  .optional()
+
 /** A cleared combobox gives "" (or undefined): both mean "nothing picked". */
 const blankToUndefined = (value: unknown) =>
   typeof value === "string" && value.trim() === "" ? undefined : value
@@ -55,11 +61,24 @@ const ItemFormShape = z.object({
     .trim()
     .refine((v) => v === "" || UNIT_QUANTITY_PATTERN.test(v), "Invalid number"),
   isActive: z.boolean(),
-  openingStockPostedAt: z.string().trim().optional(),
+  /** Prices of the non-base units of the collection (per 1 of that unit); blank = not set. */
+  unitPrices: z
+    .array(
+      z.object({
+        unitId: z.string().uuid(),
+        costPrice: optionalPrice,
+        sellingPrice: optionalPrice,
+      })
+    )
+    .optional(),
   openingStockLines: z
     .array(
       z.object({
         locationId: optionalId,
+        /** Unit the quantity and cost are entered in; blank = the base unit. */
+        unitId: optionalId,
+        /** Posting date (YYYY-MM-DD) of this line; blank = today. */
+        postedAt: z.string().trim().optional(),
         quantity: z
           .string()
           .trim()
@@ -179,6 +198,15 @@ function trimQuantity(value: string): string {
   return trimmed ? `${int}.${trimmed}` : int
 }
 
+export const BLANK_OPENING_LINE = {
+  locationId: "",
+  unitId: "",
+  quantity: "",
+  cost: "",
+  postedAt: "",
+  manufacturedOn: "",
+}
+
 export function getCreateItemDefaults(
   defaultName?: string
 ): CreateItemFormInput {
@@ -201,8 +229,9 @@ export function getCreateItemDefaults(
     costPrice: "",
     sellingPrice: "",
     isActive: true,
-    openingStockPostedAt: "",
-    openingStockLines: [],
+    unitPrices: [],
+    // One empty line is always there; a line with no location and no quantity is ignored on submit.
+    openingStockLines: [{ ...BLANK_OPENING_LINE }],
   }
 }
 
@@ -227,29 +256,57 @@ export function getUpdateItemDefaults(item: ItemDto): UpdateItemFormInput {
     reorderPoint: item.reorderPoint ? trimQuantity(item.reorderPoint) : "",
     costPrice: item.costPrice ? trimQuantity(item.costPrice) : "",
     sellingPrice: item.sellingPrice ? trimQuantity(item.sellingPrice) : "",
+    unitPrices: item.unitPrices.map((p) => ({
+      unitId: p.unit.id,
+      costPrice: p.costPrice ? trimQuantity(p.costPrice) : "",
+      sellingPrice: p.sellingPrice ? trimQuantity(p.sellingPrice) : "",
+    })),
     isActive: item.isActive,
   }
 }
 
+type UnitPriceValue = NonNullable<CreateItemFormValues["unitPrices"]>[number]
+
+/** Rows with at least one price, in the API shape. Blank prices become null. */
+export function toUnitPricesInput(rows: UnitPriceValue[] | undefined) {
+  return (rows ?? [])
+    .filter((r) => r.costPrice?.trim() || r.sellingPrice?.trim())
+    .map((r) => ({
+      unitId: r.unitId,
+      costPrice: r.costPrice?.trim() || null,
+      sellingPrice: r.sellingPrice?.trim() || null,
+    }))
+}
+
+/**
+ * `baseUnitId` (the base unit of the picked collection) lets a line entered in the base unit be sent
+ * without a unitId. A line with no cost of its own defaults to the cost price set for its unit.
+ */
 export function toCreateItemInput(
-  values: CreateItemFormValues
+  values: CreateItemFormValues,
+  context: { baseUnitId?: string } = {}
 ): CreateItemInput {
+  const unitCost = (unitId: string | undefined) =>
+    !unitId || unitId === context.baseUnitId
+      ? values.costPrice?.trim() || null
+      : values.unitPrices?.find((p) => p.unitId === unitId)?.costPrice?.trim() ||
+        null
+
   const validLines = (values.openingStockLines ?? [])
     .filter((l) => l.locationId && l.quantity)
-    .map((l) => ({
-      locationId: l.locationId!,
-      quantity: l.quantity,
-      cost: l.cost?.trim() ? l.cost.trim() : null,
-      manufacturedOn: l.manufacturedOn || null,
-    }))
-
-  let postedAt: string | undefined = undefined
-  if (values.openingStockPostedAt?.trim()) {
-    const d = new Date(values.openingStockPostedAt.trim())
-    if (!isNaN(d.getTime())) {
-      postedAt = d.toISOString()
-    }
-  }
+    .map((l) => {
+      const unitId =
+        l.unitId && l.unitId !== context.baseUnitId ? l.unitId : undefined
+      const postedAt = l.postedAt?.trim()
+      return {
+        locationId: l.locationId!,
+        quantity: l.quantity,
+        cost: l.cost?.trim() ? l.cost.trim() : unitCost(unitId),
+        manufacturedOn: l.manufacturedOn || null,
+        ...(unitId ? { unitId } : {}),
+        ...(postedAt ? { postedAt } : {}),
+      }
+    })
 
   return {
     name: values.name,
@@ -281,13 +338,8 @@ export function toCreateItemInput(
     reorderPoint: values.reorderPoint || null,
     costPrice: values.costPrice || null,
     sellingPrice: values.sellingPrice || null,
-    openingStock:
-      validLines.length > 0
-        ? {
-            postedAt,
-            lines: validLines,
-          }
-        : undefined,
+    unitPrices: toUnitPricesInput(values.unitPrices),
+    openingStock: validLines.length > 0 ? { lines: validLines } : undefined,
   }
 }
 
@@ -327,5 +379,7 @@ export function toUpdateItemInput(
     reorderPoint: values.reorderPoint || null,
     costPrice: values.costPrice || null,
     sellingPrice: values.sellingPrice || null,
+    // The whole set: prices that were cleared are removed.
+    unitPrices: toUnitPricesInput(values.unitPrices),
   }
 }

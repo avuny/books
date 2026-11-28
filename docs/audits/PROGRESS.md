@@ -52,3 +52,7 @@ Push to `main` at 13:29 (Cairo) deployed the Worker. The deploy replaced the das
 | C0-02 | PR #13: real transactions through a Neon WebSocket pool. Not verified against real Postgres yet. |
 | C0-03 to C0-06 | Not started. Next: C0-05 (smoke test and wrangler vars check in deploy.yml). |
 | Stage 1 to 3 | Not started. |
+
+## Inventory Transfer module, 2026-11-27
+
+Phases 1 to 5 and 7 merged (PR #33, #35, #37, #39, #40, #41), each deploy green. Phase 6 (shortage journal on close-short) skipped: close-short is a stock adjustment from the transit location with no journal entry. Production UI test passed for draft, dispatch, partial receive, return, close short, cancel, delete, reverse dispatch and receipt, validation errors and history. Not covered: permission-restricted roles, concurrency test, stock-movement From/To columns. Test data left in org softhyper: TRF-000001 to 4, location ZZ-TEST-BIN, and 3 bags of item 7aswa written off by the close-short test. Details and decisions: docs/modules/inventory-transfer/PROGRESS.md.

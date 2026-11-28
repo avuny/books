@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useMemo, useState } from "react"
 
 import { Skeleton } from "@workspace/ui/components/skeleton"
 import { parseApiError } from "@workspace/ui/lib/api-error"
@@ -8,6 +8,7 @@ import { unitLabel } from "../../unit-module"
 import { normalizeItem, useItem, useUpdateItemMutation } from "../item-api"
 import type { ItemDto } from "../types"
 import { toUpdateItemInput } from "./item-form-schema"
+import { toCollectionUnitOptions } from "./collection-units"
 import { UpdateItemForm, type UpdateItemFormValues } from "./update-item-form"
 import {
   useItemFormCopy,
@@ -29,6 +30,10 @@ export function UpdateItem({ orgId, itemId, onSuccess }: UpdateItemProps) {
 
   const { item, isLoading, error } = useItem(orgId, itemId)
   const { collection } = useUnitCollection(orgId, item?.unitCollectionId ?? "")
+  const collectionUnits = useMemo(
+    () => toCollectionUnitOptions(collection),
+    [collection]
+  )
   const updateMutation = useUpdateItemMutation(orgId)
   const copy = useItemFormCopy("update")
   const valuationOptions = useValuationOptions()
@@ -89,6 +94,7 @@ export function UpdateItem({ orgId, itemId, onSuccess }: UpdateItemProps) {
         valuationOptions={valuationOptions}
         shelfLifeUnitOptions={shelfLifeUnitOptions}
         item={item}
+        collectionUnits={collectionUnits}
         onSubmit={handleSubmit}
         isPending={updateMutation.isPending}
         errorMessage={serverError}

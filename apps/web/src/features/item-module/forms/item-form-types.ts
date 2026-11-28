@@ -32,18 +32,42 @@ export type ItemFormCopy = {
   isActive: FieldCopy
   submitLabel: string
   submittingLabel: string
+  steps: {
+    /** "Step {current} of {total}" */
+    stepLabel: string
+    details: string
+    prices: string
+    stock: string
+    next: string
+    back: string
+    descriptionDetails: string
+    descriptionPrices: string
+    descriptionStock: string
+  }
+  unitPrices: {
+    sectionTitle: string
+    sectionDescription: string
+    /** "{unit} (base unit)" */
+    baseUnitTitle: string
+    /** "{unit}" */
+    unitTitle: string
+    noOtherUnits: string
+    costPrice: FieldCopy
+    sellingPrice: FieldCopy
+  }
   openingStock: {
     sectionTitle: string
     sectionDescription: string
-    postedAt: FieldCopy
     addLine: string
     removeLine: string
     empty: string
     linesHeader: string
     line: {
       location: FieldCopy
+      unit: FieldCopy
       quantity: FieldCopy
       cost: FieldCopy
+      postedAt: FieldCopy
     }
     batch: {
       toggle: string
@@ -75,3 +99,13 @@ export type ItemPickers = {
 
 export type ValuationOption = { value: string; label: string }
 export type ShelfLifeUnitOption = { value: string; label: string }
+
+/** One unit of the selected unit collection, as the price and opening stock fields need it. */
+export type CollectionUnitOption = {
+  id: string
+  name: string
+  symbol: string
+  /** Base units that one of this unit equals ("1" for the base unit). */
+  factor: string
+  isBase: boolean
+}

@@ -35,6 +35,8 @@ import { Route as OrganizationOrgIdCustomersIndexRouteImport } from './routes/or
 import { Route as OrganizationOrgIdCustomersPartyIdRouteImport } from './routes/organization/$orgId/customers/$partyId'
 import { Route as OrganizationOrgIdInventoryAdjustmentsIndexRouteImport } from './routes/organization/$orgId/inventory-adjustments/index'
 import { Route as OrganizationOrgIdInventoryAdjustmentsAdjustmentIdRouteImport } from './routes/organization/$orgId/inventory-adjustments/$adjustmentId'
+import { Route as OrganizationOrgIdInventoryTransfersIndexRouteImport } from './routes/organization/$orgId/inventory-transfers/index'
+import { Route as OrganizationOrgIdInventoryTransfersTransferIdRouteImport } from './routes/organization/$orgId/inventory-transfers/$transferId'
 import { Route as OrganizationOrgIdInvitationsIndexRouteImport } from './routes/organization/$orgId/invitations/index'
 import { Route as OrganizationOrgIdItemCategoriesIndexRouteImport } from './routes/organization/$orgId/item-categories/index'
 import { Route as OrganizationOrgIdItemCategoriesCategoryIdRouteImport } from './routes/organization/$orgId/item-categories/$categoryId'
@@ -208,6 +210,18 @@ const OrganizationOrgIdInventoryAdjustmentsAdjustmentIdRoute =
   OrganizationOrgIdInventoryAdjustmentsAdjustmentIdRouteImport.update({
     id: '/inventory-adjustments/$adjustmentId',
     path: '/inventory-adjustments/$adjustmentId',
+    getParentRoute: () => OrganizationOrgIdRouteRoute,
+  } as any)
+const OrganizationOrgIdInventoryTransfersIndexRoute =
+  OrganizationOrgIdInventoryTransfersIndexRouteImport.update({
+    id: '/inventory-transfers/',
+    path: '/inventory-transfers/',
+    getParentRoute: () => OrganizationOrgIdRouteRoute,
+  } as any)
+const OrganizationOrgIdInventoryTransfersTransferIdRoute =
+  OrganizationOrgIdInventoryTransfersTransferIdRouteImport.update({
+    id: '/inventory-transfers/$transferId',
+    path: '/inventory-transfers/$transferId',
     getParentRoute: () => OrganizationOrgIdRouteRoute,
   } as any)
 const OrganizationOrgIdInvitationsIndexRoute =
@@ -451,6 +465,7 @@ export interface FileRoutesByFullPath {
   '/organization/$orgId/': typeof OrganizationOrgIdIndexRoute
   '/organization/$orgId/customers/$partyId': typeof OrganizationOrgIdCustomersPartyIdRoute
   '/organization/$orgId/inventory-adjustments/$adjustmentId': typeof OrganizationOrgIdInventoryAdjustmentsAdjustmentIdRoute
+  '/organization/$orgId/inventory-transfers/$transferId': typeof OrganizationOrgIdInventoryTransfersTransferIdRoute
   '/organization/$orgId/item-categories/$categoryId': typeof OrganizationOrgIdItemCategoriesCategoryIdRoute
   '/organization/$orgId/items/$itemId': typeof OrganizationOrgIdItemsItemIdRoute
   '/organization/$orgId/purchase-orders/$orderId': typeof OrganizationOrgIdPurchaseOrdersOrderIdRoute
@@ -468,6 +483,7 @@ export interface FileRoutesByFullPath {
   '/organization/$orgId/customer-payments/': typeof OrganizationOrgIdCustomerPaymentsIndexRoute
   '/organization/$orgId/customers/': typeof OrganizationOrgIdCustomersIndexRoute
   '/organization/$orgId/inventory-adjustments/': typeof OrganizationOrgIdInventoryAdjustmentsIndexRoute
+  '/organization/$orgId/inventory-transfers/': typeof OrganizationOrgIdInventoryTransfersIndexRoute
   '/organization/$orgId/invitations/': typeof OrganizationOrgIdInvitationsIndexRoute
   '/organization/$orgId/item-categories/': typeof OrganizationOrgIdItemCategoriesIndexRoute
   '/organization/$orgId/items/': typeof OrganizationOrgIdItemsIndexRoute
@@ -509,6 +525,7 @@ export interface FileRoutesByTo {
   '/organization/$orgId': typeof OrganizationOrgIdIndexRoute
   '/organization/$orgId/customers/$partyId': typeof OrganizationOrgIdCustomersPartyIdRoute
   '/organization/$orgId/inventory-adjustments/$adjustmentId': typeof OrganizationOrgIdInventoryAdjustmentsAdjustmentIdRoute
+  '/organization/$orgId/inventory-transfers/$transferId': typeof OrganizationOrgIdInventoryTransfersTransferIdRoute
   '/organization/$orgId/item-categories/$categoryId': typeof OrganizationOrgIdItemCategoriesCategoryIdRoute
   '/organization/$orgId/items/$itemId': typeof OrganizationOrgIdItemsItemIdRoute
   '/organization/$orgId/purchase-orders/$orderId': typeof OrganizationOrgIdPurchaseOrdersOrderIdRoute
@@ -526,6 +543,7 @@ export interface FileRoutesByTo {
   '/organization/$orgId/customer-payments': typeof OrganizationOrgIdCustomerPaymentsIndexRoute
   '/organization/$orgId/customers': typeof OrganizationOrgIdCustomersIndexRoute
   '/organization/$orgId/inventory-adjustments': typeof OrganizationOrgIdInventoryAdjustmentsIndexRoute
+  '/organization/$orgId/inventory-transfers': typeof OrganizationOrgIdInventoryTransfersIndexRoute
   '/organization/$orgId/invitations': typeof OrganizationOrgIdInvitationsIndexRoute
   '/organization/$orgId/item-categories': typeof OrganizationOrgIdItemCategoriesIndexRoute
   '/organization/$orgId/items': typeof OrganizationOrgIdItemsIndexRoute
@@ -574,6 +592,7 @@ export interface FileRoutesById {
   '/organization/$orgId/': typeof OrganizationOrgIdIndexRoute
   '/organization/$orgId/customers/$partyId': typeof OrganizationOrgIdCustomersPartyIdRoute
   '/organization/$orgId/inventory-adjustments/$adjustmentId': typeof OrganizationOrgIdInventoryAdjustmentsAdjustmentIdRoute
+  '/organization/$orgId/inventory-transfers/$transferId': typeof OrganizationOrgIdInventoryTransfersTransferIdRoute
   '/organization/$orgId/item-categories/$categoryId': typeof OrganizationOrgIdItemCategoriesCategoryIdRoute
   '/organization/$orgId/items/$itemId': typeof OrganizationOrgIdItemsItemIdRoute
   '/organization/$orgId/purchase-orders/$orderId': typeof OrganizationOrgIdPurchaseOrdersOrderIdRoute
@@ -591,6 +610,7 @@ export interface FileRoutesById {
   '/organization/$orgId/customer-payments/': typeof OrganizationOrgIdCustomerPaymentsIndexRoute
   '/organization/$orgId/customers/': typeof OrganizationOrgIdCustomersIndexRoute
   '/organization/$orgId/inventory-adjustments/': typeof OrganizationOrgIdInventoryAdjustmentsIndexRoute
+  '/organization/$orgId/inventory-transfers/': typeof OrganizationOrgIdInventoryTransfersIndexRoute
   '/organization/$orgId/invitations/': typeof OrganizationOrgIdInvitationsIndexRoute
   '/organization/$orgId/item-categories/': typeof OrganizationOrgIdItemCategoriesIndexRoute
   '/organization/$orgId/items/': typeof OrganizationOrgIdItemsIndexRoute
@@ -640,6 +660,7 @@ export interface FileRouteTypes {
     | '/organization/$orgId/'
     | '/organization/$orgId/customers/$partyId'
     | '/organization/$orgId/inventory-adjustments/$adjustmentId'
+    | '/organization/$orgId/inventory-transfers/$transferId'
     | '/organization/$orgId/item-categories/$categoryId'
     | '/organization/$orgId/items/$itemId'
     | '/organization/$orgId/purchase-orders/$orderId'
@@ -657,6 +678,7 @@ export interface FileRouteTypes {
     | '/organization/$orgId/customer-payments/'
     | '/organization/$orgId/customers/'
     | '/organization/$orgId/inventory-adjustments/'
+    | '/organization/$orgId/inventory-transfers/'
     | '/organization/$orgId/invitations/'
     | '/organization/$orgId/item-categories/'
     | '/organization/$orgId/items/'
@@ -698,6 +720,7 @@ export interface FileRouteTypes {
     | '/organization/$orgId'
     | '/organization/$orgId/customers/$partyId'
     | '/organization/$orgId/inventory-adjustments/$adjustmentId'
+    | '/organization/$orgId/inventory-transfers/$transferId'
     | '/organization/$orgId/item-categories/$categoryId'
     | '/organization/$orgId/items/$itemId'
     | '/organization/$orgId/purchase-orders/$orderId'
@@ -715,6 +738,7 @@ export interface FileRouteTypes {
     | '/organization/$orgId/customer-payments'
     | '/organization/$orgId/customers'
     | '/organization/$orgId/inventory-adjustments'
+    | '/organization/$orgId/inventory-transfers'
     | '/organization/$orgId/invitations'
     | '/organization/$orgId/item-categories'
     | '/organization/$orgId/items'
@@ -762,6 +786,7 @@ export interface FileRouteTypes {
     | '/organization/$orgId/'
     | '/organization/$orgId/customers/$partyId'
     | '/organization/$orgId/inventory-adjustments/$adjustmentId'
+    | '/organization/$orgId/inventory-transfers/$transferId'
     | '/organization/$orgId/item-categories/$categoryId'
     | '/organization/$orgId/items/$itemId'
     | '/organization/$orgId/purchase-orders/$orderId'
@@ -779,6 +804,7 @@ export interface FileRouteTypes {
     | '/organization/$orgId/customer-payments/'
     | '/organization/$orgId/customers/'
     | '/organization/$orgId/inventory-adjustments/'
+    | '/organization/$orgId/inventory-transfers/'
     | '/organization/$orgId/invitations/'
     | '/organization/$orgId/item-categories/'
     | '/organization/$orgId/items/'
@@ -993,6 +1019,20 @@ declare module '@tanstack/react-router' {
       path: '/inventory-adjustments/$adjustmentId'
       fullPath: '/organization/$orgId/inventory-adjustments/$adjustmentId'
       preLoaderRoute: typeof OrganizationOrgIdInventoryAdjustmentsAdjustmentIdRouteImport
+      parentRoute: typeof OrganizationOrgIdRouteRoute
+    }
+    '/organization/$orgId/inventory-transfers/': {
+      id: '/organization/$orgId/inventory-transfers/'
+      path: '/inventory-transfers'
+      fullPath: '/organization/$orgId/inventory-transfers/'
+      preLoaderRoute: typeof OrganizationOrgIdInventoryTransfersIndexRouteImport
+      parentRoute: typeof OrganizationOrgIdRouteRoute
+    }
+    '/organization/$orgId/inventory-transfers/$transferId': {
+      id: '/organization/$orgId/inventory-transfers/$transferId'
+      path: '/inventory-transfers/$transferId'
+      fullPath: '/organization/$orgId/inventory-transfers/$transferId'
+      preLoaderRoute: typeof OrganizationOrgIdInventoryTransfersTransferIdRouteImport
       parentRoute: typeof OrganizationOrgIdRouteRoute
     }
     '/organization/$orgId/invitations/': {
@@ -1303,6 +1343,7 @@ interface OrganizationOrgIdRouteRouteChildren {
   OrganizationOrgIdIndexRoute: typeof OrganizationOrgIdIndexRoute
   OrganizationOrgIdCustomersPartyIdRoute: typeof OrganizationOrgIdCustomersPartyIdRoute
   OrganizationOrgIdInventoryAdjustmentsAdjustmentIdRoute: typeof OrganizationOrgIdInventoryAdjustmentsAdjustmentIdRoute
+  OrganizationOrgIdInventoryTransfersTransferIdRoute: typeof OrganizationOrgIdInventoryTransfersTransferIdRoute
   OrganizationOrgIdItemCategoriesCategoryIdRoute: typeof OrganizationOrgIdItemCategoriesCategoryIdRoute
   OrganizationOrgIdItemsItemIdRoute: typeof OrganizationOrgIdItemsItemIdRoute
   OrganizationOrgIdPurchaseOrdersOrderIdRoute: typeof OrganizationOrgIdPurchaseOrdersOrderIdRoute
@@ -1320,6 +1361,7 @@ interface OrganizationOrgIdRouteRouteChildren {
   OrganizationOrgIdCustomerPaymentsIndexRoute: typeof OrganizationOrgIdCustomerPaymentsIndexRoute
   OrganizationOrgIdCustomersIndexRoute: typeof OrganizationOrgIdCustomersIndexRoute
   OrganizationOrgIdInventoryAdjustmentsIndexRoute: typeof OrganizationOrgIdInventoryAdjustmentsIndexRoute
+  OrganizationOrgIdInventoryTransfersIndexRoute: typeof OrganizationOrgIdInventoryTransfersIndexRoute
   OrganizationOrgIdInvitationsIndexRoute: typeof OrganizationOrgIdInvitationsIndexRoute
   OrganizationOrgIdItemCategoriesIndexRoute: typeof OrganizationOrgIdItemCategoriesIndexRoute
   OrganizationOrgIdItemsIndexRoute: typeof OrganizationOrgIdItemsIndexRoute
@@ -1355,6 +1397,8 @@ const OrganizationOrgIdRouteRouteChildren: OrganizationOrgIdRouteRouteChildren =
       OrganizationOrgIdCustomersPartyIdRoute,
     OrganizationOrgIdInventoryAdjustmentsAdjustmentIdRoute:
       OrganizationOrgIdInventoryAdjustmentsAdjustmentIdRoute,
+    OrganizationOrgIdInventoryTransfersTransferIdRoute:
+      OrganizationOrgIdInventoryTransfersTransferIdRoute,
     OrganizationOrgIdItemCategoriesCategoryIdRoute:
       OrganizationOrgIdItemCategoriesCategoryIdRoute,
     OrganizationOrgIdItemsItemIdRoute: OrganizationOrgIdItemsItemIdRoute,
@@ -1383,6 +1427,8 @@ const OrganizationOrgIdRouteRouteChildren: OrganizationOrgIdRouteRouteChildren =
     OrganizationOrgIdCustomersIndexRoute: OrganizationOrgIdCustomersIndexRoute,
     OrganizationOrgIdInventoryAdjustmentsIndexRoute:
       OrganizationOrgIdInventoryAdjustmentsIndexRoute,
+    OrganizationOrgIdInventoryTransfersIndexRoute:
+      OrganizationOrgIdInventoryTransfersIndexRoute,
     OrganizationOrgIdInvitationsIndexRoute:
       OrganizationOrgIdInvitationsIndexRoute,
     OrganizationOrgIdItemCategoriesIndexRoute:

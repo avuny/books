@@ -324,6 +324,44 @@ export function createInventoryTransferRepository({ db }: { db: DB }): Inventory
       return (row?.max ?? 0) + 1
     },
 
+    async findEvent(orgId, transferId, eventId, tx) {
+      const [ev] = await tx
+        .select()
+        .from(inventoryTransferEvents)
+        .where(
+          and(
+            eq(inventoryTransferEvents.orgId, orgId),
+            eq(inventoryTransferEvents.transferId, transferId),
+            eq(inventoryTransferEvents.id, eventId)
+          )
+        )
+        .limit(1)
+        .for("update")
+      if (!ev) return null
+      const lines = await tx
+        .select({
+          allocationId: inventoryTransferEventLines.allocationId,
+          baseQuantity: inventoryTransferEventLines.baseQuantity,
+          stockMovementLineId: inventoryTransferEventLines.stockMovementLineId,
+        })
+        .from(inventoryTransferEventLines)
+        .where(and(eq(inventoryTransferEventLines.orgId, orgId), eq(inventoryTransferEventLines.eventId, eventId)))
+      return {
+        id: ev.id,
+        kind: ev.kind as "RECEIPT" | "RETURN" | "LOSS",
+        status: ev.status as "POSTED" | "REVERSED",
+        stockMovementId: ev.stockMovementId,
+        lines,
+      }
+    },
+
+    async setEventStatus(orgId, eventId, status, tx) {
+      await tx
+        .update(inventoryTransferEvents)
+        .set({ status, updatedAt: new Date() })
+        .where(and(eq(inventoryTransferEvents.orgId, orgId), eq(inventoryTransferEvents.id, eventId)))
+    },
+
     async insertEvent(orgId, event, lines, tx) {
       await tx.insert(inventoryTransferEvents).values({ ...event, orgId })
       if (lines.length) {
